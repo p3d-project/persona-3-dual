@@ -20,11 +20,6 @@ IwatodaiStreetsView::~IwatodaiStreetsView()
 
 void IwatodaiStreetsView::startBattle()
 {
-    // set the sub text video buffer
-    Event::SetTextVideoBufferSub vbMsg;
-    vbMsg.textVideoBufferSub = textVideoBufferSub;
-    ae::BroadcastEvent(vbMsg);
-
     // start battle
     Event::ExecuteBattle msg(CharacterProfileDb::player, characterProfiles, enemyProfiles, battleStartCondition);
     ae::BroadcastEvent(msg);
@@ -86,7 +81,7 @@ ViewState IwatodaiStreetsView::onTileCheck(TileType tile, u32 pressed)
     {
         if (!promptDrawn)
         {
-            textCtrl->drawText("Battle Zone", cosmeticaFont, textVideoBufferSub, 0, 0, TextColor::White);
+            textSub->drawText("Battle Zone", 0, 0, TextColor::White);
             promptDrawn = true;
         }
         if (pressed & KEY_A)
@@ -101,7 +96,7 @@ ViewState IwatodaiStreetsView::onTileCheck(TileType tile, u32 pressed)
     default:
         if (promptDrawn)
         {
-            textCtrl->clearScreen(textVideoBufferSub);
+            textSub->clearScreen();
             promptDrawn = false;
         }
         break;
@@ -110,7 +105,24 @@ ViewState IwatodaiStreetsView::onTileCheck(TileType tile, u32 pressed)
     return ViewState::KEEP_CURRENT;
 }
 
-void IwatodaiStreetsView::setDialogueConfig()
+void IwatodaiStreetsView::setTextConfig()
 {
-    // No dialogue currently
+    text->configureText(TextConfig(textVideoBuffer, &FONT_NAME, FONT_SIZE));
+    textSub->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
+}
+
+void IwatodaiStreetsView::setupUI()
+{
+    textMenu->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
+
+    battleMenuCmpt = BattleMenuComponent::getInstance();
+    pauseMenuCmpt = PauseMenuComponent::getInstance();
+
+    menuHUDScreen = MenuHUDScreen::getInstance();
+
+    std::array<UIScreen*, 7> screens = {menuHUDScreen};
+    std::array<UIMenu*, 10> menus = {pauseMenuCmpt, battleMenuCmpt};
+
+    ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, screens});
+    ae::BroadcastEvent(Event::ConfigureUIMenu{textMenu, menus});
 }

@@ -5,6 +5,13 @@
 
 void DisclaimerView::init()
 {
+    if (disclaimer == nullptr)
+    {
+        disclaimer = engine.CreateEntity();
+        graphics = engine.CreateComponent<GraphicsComponent>();
+        disclaimer->AddComponent(graphics);
+    }
+
     // set video mode for 3 text layers and 1 extended rotation layer
     videoSetMode(MODE_3_2D);
     // set sub video mode for 4 text layers
@@ -39,9 +46,9 @@ void DisclaimerView::init()
     dmaFillHalfWords(0, bgGetMapPtr(bg[1]), 2048);
 
     // copy graphics to vram
-    std::string bgPath = fatBasePath + "graphics/DisclaimerView/backgrounds/";
-    GraphicAsset bgCaution = graphicsCtrl->loadGrit(bgPath + "cautionBackground/cautionBackground");
-    GraphicAsset bgCautionSub = graphicsCtrl->loadGrit(bgPath + "cautionBackgroundSub/cautionBackgroundSub");
+    std::string bgPath = "graphics/DisclaimerView/backgrounds/";
+    GraphicAsset bgCaution = graphics->loadGraphic(bgPath + "cautionBackground/cautionBackground");
+    GraphicAsset bgCautionSub = graphics->loadGraphic(bgPath + "cautionBackgroundSub/cautionBackgroundSub");
 
     dmaCopy(bgCaution.tiles, bgGetGfxPtr(bg[0]), bgCaution.tilesLen);
     dmaCopy(bgCautionSub.tiles, bgGetGfxPtr(bg[1]), bgCautionSub.tilesLen);
@@ -64,8 +71,8 @@ void DisclaimerView::init()
 
     bgUpdate();
 
-    graphicsCtrl->unloadGrit(bgCaution);
-    graphicsCtrl->unloadGrit(bgCautionSub);
+    graphics->unloadGraphic(bgCaution);
+    graphics->unloadGraphic(bgCautionSub);
 
     // fade caution screens in
     for (int i = 0; i <= 16; i++)
@@ -99,5 +106,18 @@ ViewState DisclaimerView::update()
 
 void DisclaimerView::cleanup()
 {
+    if (graphics != nullptr)
+    {
+        graphics->unloadAll();
+    }
+
+    if (disclaimer != nullptr)
+    {
+        disclaimer->RemoveComponent<GraphicsComponent>();
+        engine.DestroyEntity(disclaimer);
+
+        disclaimer = nullptr;
+        graphics = nullptr;
+    }
     BaseView::cleanup();
 }

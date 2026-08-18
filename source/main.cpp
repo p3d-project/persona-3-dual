@@ -43,6 +43,8 @@
 // game engine
 GameEngine engine;
 ae::Entity* player;
+ae::Entity* generic;
+GraphicsComponent* genericGraphics;
 
 // variables
 volatile int frame = 0;
@@ -52,6 +54,10 @@ int fps = 0;
 int fpsTimer = 0;
 std::string fatBasePath = "";
 Save saveData;
+ViewState nextView = ViewState::DEFAULT;
+
+BaseView* currentView = nullptr;
+bool prevFemcMode;
 
 // models
 unsigned int** bitmapsCharacter = nullptr;
@@ -63,14 +69,10 @@ static unsigned int* bitmapsMakoto[MODEL_MAKOTO_TEX_COUNT] = {nullptr};
 static unsigned int* loadCharacterTexture(const std::string& name, bool isFemc)
 {
     std::string basePath = fatBasePath + "models/" + (isFemc ? "kotone/" : "makoto/");
-    GraphicAsset asset = GraphicsController::getInstance()->loadGrit(basePath + name);
+    GraphicAsset asset = genericGraphics->loadGraphic(basePath + name);
     unsigned int* tiles = reinterpret_cast<unsigned int*>(asset.tiles);
-    // GraphicsController::getInstance()->unloadGrit(asset);
     return tiles;
 }
-
-BaseView* currentView = nullptr;
-bool prevFemcMode;
 
 void SwitchView(BaseView* newView)
 {
@@ -123,7 +125,7 @@ void loadModels(bool isFemc)
     }
 }
 
-// TODO: add javadoc
+// TODO: add doxyen docs
 void NDSPollInputCallback()
 {
     scanKeys();
@@ -131,7 +133,7 @@ void NDSPollInputCallback()
     systemKeysHeld = keysHeld();
 }
 
-// TODO: add javadoc
+// TODO: add doxyen docs
 void NDSComputeCallback()
 {
     //...
@@ -201,21 +203,30 @@ int main(int argc, char* argv[])
     engine.RegisterSystem(&BattleSystem::GetInstance());
     engine.RegisterSystem(&CameraSystem::GetInstance());
     engine.RegisterSystem(&SaveSystem::GetInstance());
+    engine.RegisterSystem(&TextSystem::GetInstance());
+    engine.RegisterSystem(&UISystem::GetInstance());
 
     engine.RegisterManager(&MathManager::GetInstance());
     engine.RegisterManager(&IOManager::GetInstance());
+    engine.RegisterManager(&TextManager::GetInstance());
+    engine.RegisterManager(&RenderManager::GetInstance());
 
     // initialize engine
     engine.InitAll();
 
     // set up initial game state
+    // create entity
+    player = engine.CreateEntity();
+
+    // TODO: replace this temporary workaround for graphics
+    generic = engine.CreateEntity();
+    genericGraphics = engine.CreateComponent<GraphicsComponent>();
+    generic->AddComponent(genericGraphics);
+
     // load save data
     ae::BroadcastEvent(Event::ReadSave{});
     prevFemcMode = saveData.femcMode;
     loadModels(saveData.femcMode);
-
-    // create player entity
-    player = engine.CreateEntity();
 
     // Default is DisclaimerView
     SwitchView(new DisclaimerView());
@@ -239,7 +250,17 @@ int main(int argc, char* argv[])
         // check state of currentView
         if (currentView != nullptr)
         {
-            ViewState nextState = currentView->update();
+            ViewState nextState;
+            if (nextView != ViewState::DEFAULT)
+            {
+                nextState = nextView;
+                nextView = ViewState::DEFAULT;
+            }
+            else
+            {
+                nextState = currentView->update();
+            }
+
             switch (nextState)
             {
             case ViewState::INTRO:

@@ -15,9 +15,8 @@ void DialogueComponent::Update(ae::fixed_t)
     }
 
     // animation
-    if (!textCtrl->appearTextDone())
+    if (!text->appearTextDone())
     {
-        textCtrl->update();
         /// swap the background exactly once per dialogue line, on the first
         /// frame, and only if the image has actually changed
         if (bgLoader && current->imageId != loadedImageId)
@@ -54,7 +53,7 @@ void DialogueComponent::Update(ae::fixed_t)
 
     if (optionCount > 0)
     {
-        if (textCtrl->appearTextDone())
+        if (text->appearTextDone())
         {
             // selection dialogue
             if (pressed & KEY_DOWN)
@@ -70,9 +69,9 @@ void DialogueComponent::Update(ae::fixed_t)
         }
         if (pressed & KEY_A)
         {
-            if (!textCtrl->appearTextDone())
+            if (!text->appearTextDone())
             {
-                textCtrl->appearTextSkip();
+                text->appearTextSkip();
                 return;
             }
             Dialogue* next = current->selections[selectedOption].next;
@@ -89,9 +88,9 @@ void DialogueComponent::Update(ae::fixed_t)
         // linear dialogue
         if (pressed & KEY_A)
         {
-            if (!textCtrl->appearTextDone())
+            if (!text->appearTextDone())
             {
-                textCtrl->appearTextSkip();
+                text->appearTextSkip();
                 return;
             }
             Dialogue* next = current->next;
@@ -104,9 +103,9 @@ void DialogueComponent::Update(ae::fixed_t)
         }
         else if (pressed & KEY_B)
         {
-            if (!textCtrl->appearTextDone())
+            if (!text->appearTextDone())
             {
-                textCtrl->appearTextSkip();
+                text->appearTextSkip();
                 return;
             }
             Dialogue* next = current->prev;
@@ -128,8 +127,7 @@ void DialogueComponent::Destroy()
 void DialogueComponent::configureDialogue(const DialogueConfig& config)
 {
     bgLoader = config.loader;
-    textVideoBufferSub = config.textVideoBufferSub;
-    font = config.font;
+    text = config.text;
     loadedImageId = -1; // force a bg load for the very first line
     prevKeys = 0;
     advanceTo(config.firstLine);
@@ -137,12 +135,13 @@ void DialogueComponent::configureDialogue(const DialogueConfig& config)
 
 void DialogueComponent::start()
 {
+    prevKeys = systemKeysHeld;
     isActive = true;
 }
 
 void DialogueComponent::end()
 {
-    textCtrl->clearScreen(textVideoBufferSub);
+    text->clearScreen();
     isActive = false;
 }
 
@@ -152,29 +151,28 @@ void DialogueComponent::advanceTo(Dialogue* next)
     doRenderOptions = false;
     optionCount = 0;
     selectedOption = 0;
-    textCtrl->clearScreen(textVideoBufferSub);
+    text->clearScreen();
     renderAnimFrame();
 }
 
 void DialogueComponent::renderAnimFrame()
 {
-    textCtrl->drawText(current->characterName, font, textVideoBufferSub, 32, 115, TextColor::White);
-    textCtrl->appearText(current->text, font, textVideoBufferSub, 0, 130, TextColor::White);
+    text->drawText(current->characterName, 32, 115, TextColor::White);
+    text->appearText(current->text, 0, 130, TextColor::White);
 }
 
 void DialogueComponent::renderOptions()
 {
     /// reprint the complete line then list choices below it
-    textCtrl->clearScreen(textVideoBufferSub);
-    textCtrl->drawText(current->characterName, font, textVideoBufferSub, 32, 115, TextColor::White);
-    textCtrl->drawText(current->text, font, textVideoBufferSub, 0, 130, TextColor::White);
+    text->clearScreen();
+    text->drawText(current->characterName, 32, 115, TextColor::White);
+    text->drawText(current->text, 0, 130, TextColor::White);
     //TODO: The options are currently drawn outside the textbox, do we want to add an extra overlay for them similar to the actual game?
     for (int i = 0; i < optionCount; i++)
     {
         if (i == selectedOption)
-            textCtrl->drawText(current->selections[i].text, font, textVideoBufferSub, 128, 50 + i * 8, TextColor::Blue);
+            text->drawText(current->selections[i].text, 128, 50 + i * 8, TextColor::Blue);
         else
-            textCtrl->drawText(
-                current->selections[i].text, font, textVideoBufferSub, 128, 50 + i * 8, TextColor::White);
+            text->drawText(current->selections[i].text, 128, 50 + i * 8, TextColor::White);
     }
 }

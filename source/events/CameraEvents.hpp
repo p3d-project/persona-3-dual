@@ -66,4 +66,18 @@ struct SetCameraPath : public etl::message<EventID::SetCameraPath>
     {
     }
 };
+
+/**
+ * @brief Activates the CameraSystem update loop
+ */
+struct StartCamera : public etl::message<EventID::StartCamera>
+{
+};
+
+/**
+ * @brief Deactivates the CameraSystem update loop
+ */
+struct StopCamera : public etl::message<EventID::StopCamera>
+{
+};
 } // namespace Event

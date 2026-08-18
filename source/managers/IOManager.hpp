@@ -1,7 +1,9 @@
 /**
  * @file IOManager.hpp
  * @brief Manager for IO functions
+ *
  * @author Taha Rashid (TheBossT910 / thebosst)
+ * @author Gregory Munroo (ggmini)
  */
 
 #pragma once
@@ -81,7 +83,7 @@ class IOManager : public ae::Manager, public ae::Singleton<IOManager>
 
     /**
      * @brief Loads an entire file into a buffer.
-     * @param filePath Full path.
+     * @param filePath Path relative to the base path.
      * @param outSize Optional. Receives the loaded size in bytes (0 on failure).
      * @return Pointer to the loaded data, or nullptr on failure.
      */
@@ -92,6 +94,41 @@ class IOManager : public ae::Manager, public ae::Singleton<IOManager>
      * @param buffer Pointer to release. Safe to call with nullptr.
      */
     void unloadFromRAM(void* buffer);
+
+    /**
+     * @brief Open a file and return a pointer to its contents.
+     * @param path The path to the file to open.
+     * @return Pointer to the contents of the file, or nullptr if opening failed.
+     */
+    void* openFile(const std::string& path);
+
+    /**
+     * @brief Open a file and return a pointer to its contents, along with the size of the file.
+     * @param path The path to the file to open.
+     * @param size Reference to a variable to store the size of the file.
+     * @return Pointer to the contents of the file, or nullptr if opening failed.
+     * @note This function is useful when you need to know the size of the file being opened.
+     */
+    void* openFile(const std::string& path, u32& size);
+
+    /**
+     * @brief Resolves the on-disk path for an asset, allowing it to be stored either
+     * as a flat file or grouped in its own subdirectory.
+     *
+     * Tries `basePath + path + suffix` first. If that file doesn't exist, falls back
+     * to treating @p path as a directory and looking for `<path>/<leaf>` + suffix,
+     * where `<leaf>` is the last path component (e.g. "textures/rock" ->
+     * "textures/rock/rock" + suffix). This lets related asset files (e.g. multiple
+     * suffixes for one logical asset) be grouped in a subfolder when needed.
+     *
+     * @note The fallback path is returned unconditionally, without checking it
+     * actually exists.
+     *
+     * @param path   Relative asset path, e.g. "textures/rock".
+     * @param suffix Suffix/extension to append, e.g. ".img.bin".
+     * @return std::string Resolved file path.
+     */
+    std::string getAssetFilePath(const std::string& path, const char* suffix);
 
   private:
     friend class Singleton<IOManager>;

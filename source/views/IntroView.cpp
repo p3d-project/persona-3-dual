@@ -10,6 +10,16 @@
 
 void IntroView::init()
 {
+    if (intro == nullptr)
+    {
+        intro = engine.CreateEntity();
+        graphics = engine.CreateComponent<GraphicsComponent>();
+        text = engine.CreateComponent<TextComponent>();
+
+        intro->AddComponent(graphics);
+        intro->AddComponent(text);
+    }
+
     // set video mode for 3 text layers and 1 extended rotation layer
     videoSetMode(MODE_3_2D);
     videoSetModeSub(MODE_3_2D);
@@ -64,21 +74,20 @@ void IntroView::init()
     dmaFillHalfWords(0, bgGetMapPtr(bgSubSky), 2048);
 
     bool femc = saveData.femcMode;
-    std::string bgPath = fatBasePath + "graphics/IntroView/backgrounds/";
-    std::string spritePath = fatBasePath + "graphics/IntroView/sprites/";
+    std::string bgPath = "graphics/IntroView/backgrounds/";
+    std::string spritePath = "graphics/IntroView/sprites/";
     std::string suffix = femc ? "FEMC" : "";
 
     GraphicAsset silhouette =
-        graphicsCtrl->loadGrit(bgPath + "silhouetteBackground" + suffix + "/silhouetteBackground" + suffix);
-    GraphicAsset room = graphicsCtrl->loadGrit(bgPath + "roomBackground" + suffix + "/roomBackground" + suffix);
-    GraphicAsset sky = graphicsCtrl->loadGrit(bgPath + "skyBackground" + suffix + "/skyBackground" + suffix);
-    GraphicAsset overlay =
-        graphicsCtrl->loadGrit(bgPath + "overlayBackground" + suffix + "/overlayBackground" + suffix);
-    GraphicAsset skySub = graphicsCtrl->loadGrit(bgPath + "skyBackgroundSub" + suffix + "/skyBackgroundSub" + suffix);
+        graphics->loadGraphic(bgPath + "silhouetteBackground" + suffix + "/silhouetteBackground" + suffix);
+    GraphicAsset room = graphics->loadGraphic(bgPath + "roomBackground" + suffix + "/roomBackground" + suffix);
+    GraphicAsset sky = graphics->loadGraphic(bgPath + "skyBackground" + suffix + "/skyBackground" + suffix);
+    GraphicAsset overlay = graphics->loadGraphic(bgPath + "overlayBackground" + suffix + "/overlayBackground" + suffix);
+    GraphicAsset skySub = graphics->loadGraphic(bgPath + "skyBackgroundSub" + suffix + "/skyBackgroundSub" + suffix);
 
-    GraphicAsset attribution = graphicsCtrl->loadGrit(bgPath + "attributionBackground/attributionBackground");
-    GraphicAsset logoLeft = graphicsCtrl->loadGrit(spritePath + "logoSpriteLeft/logoSpriteLeft");
-    GraphicAsset logoRight = graphicsCtrl->loadGrit(spritePath + "logoSpriteRight/logoSpriteRight");
+    GraphicAsset attribution = graphics->loadGraphic(bgPath + "attributionBackground/attributionBackground");
+    GraphicAsset logoLeft = graphics->loadGraphic(spritePath + "logoSpriteLeft/logoSpriteLeft");
+    GraphicAsset logoRight = graphics->loadGraphic(spritePath + "logoSpriteRight/logoSpriteRight");
 
     // copy graphics to vram
     dmaCopy(silhouette.tiles, bgGetGfxPtr(bg[0]), silhouette.tilesLen);
@@ -108,13 +117,14 @@ void IntroView::init()
     dmaCopy(attribution.pal, &VRAM_H_EXT_PALETTE[0][0], attribution.palLen);
     dmaCopy(skySub.pal, &VRAM_H_EXT_PALETTE[1][0], skySub.palLen);
 
-    textCtrl->loadDefaultPalette();
+    // configure text component
+    text->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
 
     // map vram to extended palette
     vramSetBankE(VRAM_E_BG_EXT_PALETTE);
     vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE);
 
-    bgHide(bg[3]);                // hide overlay
+    render.hideBg(bg[3]);         // hide overlay
     bgSetCenter(bg[3], 128, 96);  // pivot point on the screen (at the screen's center)
     bgSetScroll(bg[3], 256, 256); // pivot point on the image (at the image's center)
 
@@ -145,14 +155,14 @@ void IntroView::init()
     bgUpdate();
 
     // unload all graphics now that it's copied to vram
-    graphicsCtrl->unloadGrit(silhouette);
-    graphicsCtrl->unloadGrit(room);
-    graphicsCtrl->unloadGrit(sky);
-    graphicsCtrl->unloadGrit(overlay);
-    graphicsCtrl->unloadGrit(attribution);
-    graphicsCtrl->unloadGrit(skySub);
-    graphicsCtrl->unloadGrit(logoLeft);
-    graphicsCtrl->unloadGrit(logoRight);
+    graphics->unloadGraphic(silhouette);
+    graphics->unloadGraphic(room);
+    graphics->unloadGraphic(sky);
+    graphics->unloadGraphic(overlay);
+    graphics->unloadGraphic(attribution);
+    graphics->unloadGraphic(skySub);
+    graphics->unloadGraphic(logoLeft);
+    graphics->unloadGraphic(logoRight);
 
     // point to music
     musicCtrl->loadSFX(SFX_SELECT);
@@ -265,7 +275,7 @@ ViewState IntroView::update()
 
     if (animateText)
     {
-        textCtrl->drawText("Press Any Button", font, textVideoBufferSub, 80, 88, TextColor::White);
+        text->drawText("Press Any Button", 80, 88, TextColor::White);
 
         durationCounter++;
 
@@ -356,7 +366,7 @@ ViewState IntroView::update()
         displayOverlay = true;
         REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_DST_BG2;
         REG_BLDALPHA = 0 | (16 << 8);
-        bgShow(bg[3]);
+        render.showBg(bg[3]);
     }
 
     // fade in overlay
@@ -383,6 +393,22 @@ ViewState IntroView::update()
 
 void IntroView::cleanup()
 {
+    if (graphics != nullptr)
+    {
+        graphics->unloadAll();
+    }
+
+    if (intro != nullptr)
+    {
+        intro->RemoveComponent<GraphicsComponent>();
+        intro->RemoveComponent<TextComponent>();
+        engine.DestroyEntity(intro);
+
+        intro = nullptr;
+        graphics = nullptr;
+        text = nullptr;
+    }
+
     musicCtrl->cleanup();
     BaseView::cleanup();
 

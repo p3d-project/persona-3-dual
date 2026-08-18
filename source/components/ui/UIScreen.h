@@ -1,5 +1,4 @@
 #pragma once
-#include "controllers/SpriteController.h"
 #include "core/structs.h"
 #include <nds.h>
 #include <vector>
@@ -9,25 +8,63 @@ class UIScreen
   public:
     // TODO: ensure bgId, oam is set before calling load()
     int bgId = -1;
+    bool isMain = false;
     OamState* oam = nullptr;
     bool isLoaded = false;
 
-    // load + draw?
+    /**
+     * @brief Loads graphics data into memory & pushes to VRAM
+     */
     virtual void load() = 0;
-    // cleanup?
+
+    /**
+     * @brief Unloads graphics data from memory
+     */
     virtual void unload() = 0;
-    // optional
-    virtual void renderSprites(); // TODO: make protected
-    virtual void removeSprites(); // TODO: make protected
+
+    /**
+     * @brief Applys sprite colour palette & draws sprites to screen
+     */
+    virtual void renderSprites();
+
+    /**
+     * @brief Clears the displayed sprites from the screen
+     */
+    virtual void removeSprites();
+
+    /**
+     * @brief Hook to allow touch response
+     *
+     * @param touch touch input
+     * @return int a value that acts as an id, used by calling code to understand which area has been touched
+     */
     virtual int onTouch(touchPosition* touch);
     virtual ~UIScreen() = default;
+    UIScreen(bool iIsMain) : isMain(iIsMain)
+    {
+    }
 
   protected:
-    // void loadSprite();
-    // void unloadSprite();
+    /**
+   * @brief Moves the specified sprite to the specified position on the screen
+   *
+   * @param spriteId the sprite to move
+   * @param x the x position on the screen
+   * @param y the y position on the screen
+   */
     void moveSprite(int spriteId, int x, int y);
-    void showSprite(int spriteId);
-    void hideSprite(int spriteId);
 
-    SpriteController* spriteCtrl = SpriteController::getInstance();
+    /**
+     * @brief Shows the specified sprite on the screen
+     *
+     * @param spriteId the sprite to show
+     */
+    void showSprite(int spriteId);
+
+    /**
+     * @brief Hides the specified sprite on the screen
+     *
+     * @param spriteId the sprite to hide
+     */
+    void hideSprite(int spriteId);
 };

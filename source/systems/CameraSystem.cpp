@@ -42,6 +42,16 @@ void CameraSystem::on_receive(const Event::SetCharacterPosition& msg)
     charPos = msg.charPos;
 }
 
+void CameraSystem::on_receive(const Event::StartCamera& msg)
+{
+    isActive = true;
+}
+
+void CameraSystem::on_receive(const Event::StopCamera& msg)
+{
+    isActive = false;
+}
+
 float CameraSystem::getMovementAngle() const
 {
     switch (mode)

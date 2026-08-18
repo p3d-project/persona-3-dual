@@ -1,10 +1,11 @@
 #pragma once
 #include "components/ui/UIScreen.h"
-#include "controllers/GraphicsController.h"
 #include "core/enums.h"
 #include "core/globals.h"
 #include "core/structs.h"
 #include <nds.h>
+
+#include "components/GraphicsComponent.hpp"
 
 class MenuHUDScreen : public UIScreen
 {
@@ -21,7 +22,7 @@ class MenuHUDScreen : public UIScreen
     void tick();
 
   private:
-    MenuHUDScreen() {};
+    MenuHUDScreen() : UIScreen(false) {};
     ~MenuHUDScreen() {};
     static MenuHUDScreen* instance;
 
@@ -50,8 +51,15 @@ class MenuHUDScreen : public UIScreen
     int animY = 80;
     bool animReady = false;
 
+    GraphicAsset moonSprite;
+    GraphicAsset dayOfWeekSprite;
+    GraphicAsset numberSprites[4];
+    GraphicAsset timeSprites[4];
+    GraphicAsset skillSprites[18];
+    GraphicAsset slashSprite;
     bool bgLoaded;
-    void renderBackground();
+    void loadBackground();
 
-    GraphicsController* graphicsCtrl = GraphicsController::getInstance();
+    ae::Entity* menuHUD = nullptr;
+    GraphicsComponent* graphics = nullptr;
 };

@@ -36,44 +36,56 @@ PauseMenuComponent* PauseMenuComponent::getInstance()
     return instance;
 }
 
-void PauseMenuComponent::reset()
+void PauseMenuComponent::resetHook()
 {
-    BaseMenu::reset();
+    pauseMessage = "Pause";
     options = menuOptions;
     optionCount = MENU_OPTIONS;
-}
+    isClosed = false;
 
-void PauseMenuComponent::init(int iBgSlot,
-                              bool* isActive,
-                              uint16_t* iTextVideoBuffer,
-                              uint16_t* iTextVideoBufferSub,
-                              const std::string& iPauseMessage)
-{
-    BaseMenu::init(iBgSlot, isActive, iTextVideoBuffer, iTextVideoBufferSub, iPauseMessage);
-    options = menuOptions;
-    optionCount = MENU_OPTIONS;
+    if (demo_dialogue_bg_slot != -1)
+    {
+        rm.hideBg(demo_dialogue_bg_slot);
+    }
 
     if (pauseMenu == nullptr)
     {
         pauseMenu = engine.CreateEntity();
-    }
-
-    if (pauseMenu != nullptr)
-    {
         dialogue = engine.CreateComponent<DialogueComponent>();
         pauseMenu->AddComponent(dialogue);
     }
 }
 
-ViewState PauseMenuComponent::update(int keys)
+ViewState PauseMenuComponent::updateHook()
 {
+    // dialogue should be started, but has not
+    if (isDialogueStarted && !dialogue->IsActive())
+    {
+        text->clearScreen();
+        dialogue->start();
+        isDialogueStarted = false;
+    }
+
     // dialogue controller takes full control when active
     if (dialogue->IsActive())
     {
         return ViewState::KEEP_CURRENT;
     }
 
-    return BaseMenu::update(keys);
+    if (demo_dialogue_bg_slot != -1)
+    {
+        rm.hideBg(demo_dialogue_bg_slot);
+    }
+
+    return ViewState::DEFAULT;
+}
+
+void PauseMenuComponent::closeHook()
+{
+    resetMenu();
+
+    // set flag
+    isClosed = true;
 }
 
 // menu navigation handlers
@@ -187,7 +199,6 @@ ViewState PauseMenuComponent::debugOptionSelected()
     switch (static_cast<DebugOption>(selectedOption))
     {
     case DebugOption::DISCLAIMER_VIEW:
-        musicCtrl->pause();
         selectedView = ViewState::DISCLAIMER;
         break;
     case DebugOption::INTRO_VIEW:
@@ -221,21 +232,20 @@ ViewState PauseMenuComponent::debugOptionSelected()
         selectedView = ViewState::CUTSCENE_2;
         break;
     case DebugOption::DEBUG_DIALOGUE:
-        textCtrl->clearScreen(textVideoBufferSub);
         demo_yukari_kenji_argument_load();
-        dialogue->configureDialogue(DialogueConfig(
-            demo_yukari_kenji_argument_first(), font, textVideoBufferSub, demo_yukari_kenji_argument_load_bg));
-        dialogue->start();
+        dialogue->configureDialogue(
+            DialogueConfig(demo_yukari_kenji_argument_first(), demo_yukari_kenji_argument_load_bg, text));
+        isDialogueStarted = true;
         selectedView = ViewState::KEEP_CURRENT;
         break;
     case DebugOption::TOGGLE_BILLBOARDS:
         Globals::enableBillboards = !Globals::enableBillboards;
-        *isActivePtr = false;
+        isActive = false;
         selectedView = ViewState::KEEP_CURRENT;
         break;
     case DebugOption::TOGGLE_DEBUG_PRINT:
         Globals::enableDebugPrint = !Globals::enableDebugPrint;
-        *isActivePtr = false;
+        isActive = false;
         selectedView = ViewState::KEEP_CURRENT;
         break;
     case DebugOption::CYCLE_CAMERA_MODE:
@@ -248,7 +258,7 @@ ViewState PauseMenuComponent::debugOptionSelected()
             CameraMode mode = cameraModes[(static_cast<int>(cameraSystem.getMode()) + 1) % cameraModes.size()];
             ae::BroadcastEvent(Event::SetCameraMode{mode});
         }
-        *isActivePtr = false;
+        isActive = false;
         openDebugMenu();
         selectedView = ViewState::KEEP_CURRENT;
         break;
@@ -368,7 +378,7 @@ ViewState PauseMenuComponent::characterAnimOptionSelected()
         break;
     }
 
-    *isActivePtr = false;
+    isActive = false;
     animationCtrl->play();
     return selectedView;
 }

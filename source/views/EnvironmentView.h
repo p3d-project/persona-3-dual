@@ -14,11 +14,11 @@
 #include "components/ui/MenuHUDScreen.h"
 // controllers
 #include "controllers/AnimationController.h"
-#include "controllers/GraphicsController.h"
-#include "controllers/UIController.h"
 
 #include "components/DialogueComponent.hpp"
+#include "components/GraphicsComponent.hpp"
 #include "components/MovementComponent.hpp"
+#include "managers/RenderManager.hpp"
 #include "systems/CameraSystem.hpp"
 
 class EnvironmentView : public BaseView
@@ -76,15 +76,19 @@ class EnvironmentView : public BaseView
 
     virtual const EnvironmentDbEntry* getEnvironmentDbEntry() = 0;
 
-    virtual void setMovementConfig() = 0;
-
-    virtual void setDialogueConfig() = 0;
+    virtual void setTextConfig() = 0;
 
     virtual void setMusic() = 0;
 
-    virtual ViewState onTileCheck(TileType tile, u32 pressed) = 0;
+    virtual void setupUI()
+    {
+    }
 
-    virtual void onSetupDialogueAndUI()
+    virtual void setMovementConfig()
+    {
+    }
+
+    virtual void setDialogueConfig()
     {
     }
 
@@ -95,6 +99,12 @@ class EnvironmentView : public BaseView
     virtual void onEnvironmentUpdate()
     {
     }
+
+    virtual void cleanupHook()
+    {
+    }
+
+    virtual ViewState onTileCheck(TileType tile, u32 pressed) = 0;
 
     // -------------------------------------------------
     // Battle
@@ -129,29 +139,44 @@ class EnvironmentView : public BaseView
     Event::ConfigureCamera camConfig;
 
     // -------------------------------------------------
-    // Controllers
+    // player
     MovementComponent* movement = nullptr;
+    // TODO: move dialogue, text component to actual actors!
+    // In this case, it would be the Akihiko billboard
     DialogueComponent* dialogue = nullptr;
+    TextComponent* text = nullptr;
+    TextComponent* textSub = nullptr;
 
-    UIController* uiCtrl = UIController::getInstance();
+    // view
+    ae::Entity* environment = nullptr;
+    GraphicsComponent* graphics = nullptr;
+    TextComponent* textMenu = nullptr;
+
     AnimationController* animationCtrl = AnimationController::getInstance();
-    GraphicsController* graphicsCtrl = GraphicsController::getInstance();
     MusicController* musicCtrl = MusicController::getInstance();
 
-    DialogueScreen* dialogueScreen = DialogueScreen::getInstance();
-    MenuHUDScreen* menuHUDScreen = MenuHUDScreen::getInstance();
+    // ui
+    DialogueScreen* dialogueScreen = nullptr;
+    MenuHUDScreen* menuHUDScreen = nullptr;
+    // MenuBackgroundScreen* menuBackgroundScreen = nullptr;
 
-    BattleMenuComponent* battleMenuCmpt = BattleMenuComponent::getInstance();
-    PauseMenuComponent* pauseMenuCmpt = PauseMenuComponent::getInstance();
+    BattleMenuComponent* battleMenuCmpt = nullptr;
+    PauseMenuComponent* pauseMenuCmpt = nullptr;
+
+    std::array<int, 3> bgMain;
+    std::array<int, 4> bgSub;
 
     // Environment
     Environment env;
     const EnvironmentDbEntry* dbEntry = nullptr;
 
+    // text
     uint16_t* textVideoBuffer;
     uint16_t* textVideoBufferSub;
-    Font* cosmeticaFont = nullptr;
-    TextController* textCtrl = TextController::getInstance();
+    std::string FONT_NAME = "cosmetica";
+    int FONT_SIZE = 12;
+
+    RenderManager& render = RenderManager::GetInstance();
 
   private:
     // fog properties
@@ -160,4 +185,18 @@ class EnvironmentView : public BaseView
     int mass = 1;
     // how far the fog is (0x0000 to 0x8000)
     int depth = 0x6000;
+
+    /**
+     * @brief Loads a single .grit asset and returns its raw tile pointer.
+     *
+     * Stashes the owning GraphicAsset in @p asset so the caller can unload it
+     * once the texture has been uploaded to VRAM.
+     *
+     * @param path  Full path (base path + grit base name) of the asset to load.
+     * @param asset Output parameter that receives the loaded GraphicAsset,
+     *              which the caller is responsible for unloading later.
+     * @return Raw pointer to the asset's tile data, reinterpreted as
+     *         unsigned int, suitable for passing to the texture upload code.
+     */
+    const unsigned int* loadEnvironmentBitmap(const std::string& path, GraphicAsset& asset);
 };

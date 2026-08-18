@@ -1,10 +1,11 @@
 #pragma once
-#include "controllers/GraphicsController.h"
 #include "controllers/MusicController.h"
 #include "views/BaseView.h"
 #include <maxmod9.h>
 #include <nds/arm9/console.h>
 #include <nds/arm9/keyboard.h>
+
+#include "components/GraphicsComponent.hpp"
 
 class SignContractView : public BaseView
 {
@@ -32,7 +33,9 @@ class SignContractView : public BaseView
 
     void cancelSFX();
 
-    GraphicsController* graphicsCtrl = GraphicsController::getInstance();
+    ae::Entity* signContract = nullptr;
+    GraphicsComponent* graphics = nullptr;
+
     MusicController* musicCtrl = MusicController::getInstance();
 
   public:

@@ -2,14 +2,17 @@
 #include "components/menu/MainMenuComponent.h"
 #include "views/BaseView.h"
 
+#include "components/GraphicsComponent.hpp"
+#include "components/TextComponent.hpp"
+#include "controllers/MusicController.h"
 #include "managers/MathManager.hpp"
+#include "managers/RenderManager.hpp"
 
 class MainMenuView : public BaseView
 {
   private:
     PrintConsole console;
-    MainMenuComponent mainMenuCmpt;
-    bool isMainMenuCmptActive;
+    MainMenuComponent* mainMenuCmpt = nullptr;
     int bg[3];
 
     // for silhouette animation
@@ -29,8 +32,16 @@ class MainMenuView : public BaseView
     int baseSpeed = 20;
     int fluctuation = 50;
 
+    // text
+    std::string FONT_NAME = "cosmetica";
+    int FONT_SIZE = 12;
+
+    ae::Entity* mainMenu = nullptr;
+    GraphicsComponent* graphics = nullptr;
+    TextComponent* textMenu = nullptr;
+
     MathManager& math = MathManager::GetInstance();
-    GraphicsController* graphicsCtrl = GraphicsController::getInstance();
+    RenderManager& render = RenderManager::GetInstance();
     MusicController* musicCtrl = MusicController::getInstance();
 
   public:

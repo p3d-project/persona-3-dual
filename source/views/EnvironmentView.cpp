@@ -11,23 +11,6 @@
 
 namespace
 {
-/**
- * @brief Loads a single .grit asset and returns its raw tile pointer.
- *
- * Stashes the owning GraphicAsset in @p asset so the caller can unload it
- * once the texture has been uploaded to VRAM.
- *
- * @param path  Full path (base path + grit base name) of the asset to load.
- * @param asset Output parameter that receives the loaded GraphicAsset,
- *              which the caller is responsible for unloading later.
- * @return Raw pointer to the asset's tile data, reinterpreted as
- *         unsigned int, suitable for passing to the texture upload code.
- */
-const unsigned int* loadEnvironmentBitmap(const std::string& path, GraphicAsset& asset)
-{
-    asset = GraphicsController::getInstance()->loadGrit(path);
-    return reinterpret_cast<const unsigned int*>(asset.tiles);
-}
 
 /**
  * @brief Strips the compiled ".img.bin" suffix from a texture filename to
@@ -54,6 +37,12 @@ std::string gritBaseName(const char* compiledFileName)
 }
 } // namespace
 
+const unsigned int* EnvironmentView::loadEnvironmentBitmap(const std::string& path, GraphicAsset& asset)
+{
+    asset = graphics->loadGraphic(path);
+    return reinterpret_cast<const unsigned int*>(asset.tiles);
+}
+
 void EnvironmentView::setupEnvironment()
 {
     GraphicAsset envTextures[MAX_ENVIRONMENT_TEXTURES] = {};
@@ -68,29 +57,45 @@ void EnvironmentView::setupEnvironment()
 
     if (!env.load(dbEntry, bitmapsEnv))
     {
-        textCtrl->drawText("EnvironmentView: failed to load environment " + std::string(dbEntry->name),
-                           cosmeticaFont,
-                           textVideoBufferSub,
-                           0,
-                           0,
-                           TextColor::Red);
+        textSub->drawText(
+            "EnvironmentView: failed to load environment " + std::string(dbEntry->name), 0, 0, TextColor::Red);
     }
 
     for (int i = 0; i < dbEntry->textureCount; ++i)
     {
-        graphicsCtrl->unloadGrit(envTextures[i]);
+        graphics->unloadGraphic(envTextures[i]);
     }
 }
 
 void EnvironmentView::init()
 {
+    // clearing so nothing from the previous enviorment shows during load
+    glClearColor(0, 0, 0, 31);
+    glClearDepth(0x7FFF);
+    glFlush(0);
+    swiWaitForVBlank();
+
+    if (environment == nullptr)
+    {
+        environment = engine.CreateEntity();
+        graphics = engine.CreateComponent<GraphicsComponent>();
+        textMenu = engine.CreateComponent<TextComponent>();
+
+        environment->AddComponent(graphics);
+        environment->AddComponent(textMenu);
+    }
+
     if (player != nullptr)
     {
         movement = engine.CreateComponent<MovementComponent>();
         dialogue = engine.CreateComponent<DialogueComponent>();
+        text = engine.CreateComponent<TextComponent>();
+        textSub = engine.CreateComponent<TextComponent>();
 
         player->AddComponent(movement);
         player->AddComponent(dialogue);
+        player->AddComponent(text);
+        player->AddComponent(textSub);
     }
 
     // set modes
@@ -210,43 +215,29 @@ void EnvironmentView::init()
     textVideoBufferSub = (uint16_t*)bgGetGfxPtr(bgTextSub);
     bgSetPriority(bgTextSub, 0);
 
-    cosmeticaFont = textCtrl->loadFont("cosmetica", 12);
-    textCtrl->loadDefaultPalette();
+    // config text/textSub
+    setTextConfig();
 
     // setup environment geometry/textures (fully generic, data-driven)
     setupEnvironment();
 
-    // setup dialogue rendering target (which sub-bg the dialogue box uses)
-    demo_dialogue_bg_slot = bgSharedSub1;
-
-    // setup pause menu
-    pauseMenuCmpt->init(bgSharedSub1, &Globals::isPauseMenuActive, textVideoBuffer, textVideoBufferSub);
-
-    // setup battle menu
-    battleMenuCmpt->init(-1, &isBattleMenuActive, textVideoBuffer, textVideoBufferSub);
-
-    MenuBackgroundScreen::getInstance()->bgId = bgSharedSub1;
-    MenuBackgroundScreen::getInstance()->load();
-
     // setup UI
     // NOTE: bg 0 is the 3D view
-    int bgMain[3] = {1, 2, 3};
+    bgMain = {1, 2, 3};
     // TODO: Setting the first index to anything other than bgSharedSub results in black bg (but sprites still load)
     // This might be okay/intended, as long as we create 4 seperate bg to pass in
-    int bgSub[4] = {bgSharedSub2, bgSharedSub3, 2, 3};
+    bgSub = {bgSharedSub2, bgSharedSub3, 4, 5};
 
     // initialize sub sprite engine with 1D mapping, 128 byte boundry, external palette support
     oamInit(&oamSub, SpriteMapping_1D_128, true);
 
-    uiCtrl->setGraphics(bgSub, bgMain, &oamSub, nullptr);
-    uiCtrl->registerScreen(menuHUDScreen, false);
-    uiCtrl->registerScreen(dialogueScreen, false);
-    uiCtrl->show(menuHUDScreen, false);
+    // setup dialogue rendering target (which sub-bg the dialogue box uses)
+    demo_dialogue_bg_slot = bgSharedSub1;
+
+    setupUI();
 
     // setup music (room-specific path/loop points)
     setMusic();
-
-    onSetupDialogueAndUI();
 
     // setup view phases
     prevPauseState = false;
@@ -275,20 +266,29 @@ ViewState EnvironmentView::update()
     {
         if (!prevBattleState)
         {
-            uiCtrl->hideAll();
+            prevBattleState = true;
+
+            ae::BroadcastEvent(Event::HideAllScreens{});
+            ae::BroadcastEvent(Event::ShowMenu{battleMenuCmpt});
+
+            movement->stop();
+            ae::BroadcastEvent(Event::StopCamera{});
 
             startBattle();
-
-            prevBattleState = true;
         }
 
         if (!BattleSystem::GetInstance().IsActive() && prevBattleState)
         {
             prevBattleState = false;
 
-            uiCtrl->show(menuHUDScreen, false);
+            ae::BroadcastEvent(Event::ShowScreen{menuHUDScreen});
+            ae::BroadcastEvent(Event::HideAllMenus{});
 
             prevEnvironmentState = true;
+
+            movement->start();
+            ae::BroadcastEvent(Event::StartCamera{});
+
             phase = ViewPhase::Environment;
 
             setMusic();
@@ -301,12 +301,16 @@ ViewState EnvironmentView::update()
     {
         if (!prevPauseState)
         {
-            uiCtrl->hideAll();
-            pauseMenuCmpt->reset();
+            movement->stop();
+            ae::BroadcastEvent(Event::StopCamera{});
+
             prevPauseState = true;
+
+            ae::BroadcastEvent(Event::HideAllScreens{});
+            ae::BroadcastEvent(Event::ShowMenu{pauseMenuCmpt});
         }
 
-        ViewState menuResult = pauseMenuCmpt->update(systemKeysDown);
+        ViewState menuResult = ViewState::KEEP_CURRENT;
 
         if (menuResult != ViewState::KEEP_CURRENT)
         {
@@ -314,12 +318,19 @@ ViewState EnvironmentView::update()
             return menuResult;
         }
 
-        if (systemKeysDown & KEY_START)
+        if ((systemKeysDown & KEY_START) || pauseMenuCmpt->isClosed)
         {
-            textCtrl->clearScreen(textVideoBufferSub);
             prevPauseState = false;
-            phase = ViewPhase::Environment;
+            textSub->clearScreen();
+
+            ae::BroadcastEvent(Event::HideAllMenus{});
+
             prevEnvironmentState = false;
+
+            movement->start();
+            ae::BroadcastEvent(Event::StartCamera{});
+
+            phase = ViewPhase::Environment;
         }
 
         break;
@@ -331,8 +342,10 @@ ViewState EnvironmentView::update()
 
         if (!isActive && !prevDialogueState)
         {
-            uiCtrl->show(dialogueScreen, false);
+            ae::BroadcastEvent(Event::ShowScreen{dialogueScreen});
 
+            movement->stop();
+            ae::BroadcastEvent(Event::StopCamera{});
             setDialogueConfig();
             dialogue->start();
 
@@ -340,10 +353,17 @@ ViewState EnvironmentView::update()
         }
         else if (!isActive && prevDialogueState)
         {
-            bgHide(bgSharedSub1);
+            // TODO: remove manually managed dialogue backgrounds
+            // the demo_dialogue loader function manually calls bgShow, which is bad!
+            render.hideBg(bgSharedSub1);
+
+            ae::BroadcastEvent(Event::HideAllScreens{});
 
             prevDialogueState = false;
             prevEnvironmentState = false;
+
+            movement->start();
+            ae::BroadcastEvent(Event::StartCamera{});
 
             phase = ViewPhase::Environment;
         }
@@ -355,7 +375,7 @@ ViewState EnvironmentView::update()
     {
         if (!prevEnvironmentState)
         {
-            uiCtrl->show(menuHUDScreen, false);
+            ae::BroadcastEvent(Event::ShowScreen{menuHUDScreen});
             prevEnvironmentState = true;
         }
 
@@ -364,8 +384,12 @@ ViewState EnvironmentView::update()
 
         if (systemKeysDown & KEY_START)
         {
-            textCtrl->clearScreen(textVideoBufferSub);
+            textSub->clearScreen();
             prevEnvironmentState = false;
+
+            movement->stop();
+            ae::BroadcastEvent(Event::StopCamera{});
+
             phase = ViewPhase::Pause;
             break;
         }
@@ -377,6 +401,10 @@ ViewState EnvironmentView::update()
             if (menuHUDScreen->onTouch(&touch) == 1)
             {
                 prevEnvironmentState = false;
+
+                movement->stop();
+                ae::BroadcastEvent(Event::StopCamera{});
+
                 phase = ViewPhase::Pause;
                 break;
             }
@@ -386,6 +414,9 @@ ViewState EnvironmentView::update()
 
         if (tileResult != ViewState::KEEP_CURRENT)
         {
+            movement->stop();
+            ae::BroadcastEvent(Event::StopCamera{});
+
             musicCtrl->pause();
             return tileResult;
         }
@@ -423,7 +454,7 @@ ViewState EnvironmentView::update()
         {
             if (frame % 60 == 30) //restricting this 2Hz otherwise it tanks performance
             {
-                textCtrl->clearArea(textVideoBufferSub, 1, 120, 128, 72);
+                textSub->clearArea(1, 120, 128, 72);
                 char buf[128];
                 std::string debugText = "";
                 std::sprintf(buf, "Touch x = %04X, %04X\n", touch.rawx, touch.px);
@@ -442,7 +473,7 @@ ViewState EnvironmentView::update()
                              (int)(CameraSystem::GetInstance().getAngle() * 100),
                              (int)(charPos.facingAngle * 100));
                 debugText += buf;
-                textCtrl->drawText(debugText, cosmeticaFont, textVideoBufferSub, 1, 120, TextColor::Red);
+                textSub->drawText(debugText, 1, 120, TextColor::Red);
             }
         }
 
@@ -464,23 +495,56 @@ ViewState EnvironmentView::update()
 
 void EnvironmentView::cleanup()
 {
+    cleanupHook();
+
+    if (text != nullptr)
+    {
+        text->clearScreen();
+    }
+
+    if (textSub != nullptr)
+    {
+        textSub->clearScreen();
+    }
+
+    if (graphics != nullptr)
+    {
+        graphics->unloadAll();
+    }
+
+    // entity
+    if (environment != nullptr)
+    {
+        environment->RemoveComponent<GraphicsComponent>();
+        environment->RemoveComponent<TextComponent>();
+        engine.DestroyEntity(environment);
+
+        environment = nullptr;
+        graphics = nullptr;
+        textMenu = nullptr;
+    }
+
+    // entity
     if (player != nullptr)
     {
         player->RemoveComponent<MovementComponent>();
         player->RemoveComponent<DialogueComponent>();
+        player->RemoveComponent<TextComponent>();
+
         movement = nullptr;
         dialogue = nullptr;
+        text = nullptr;
+        textSub = nullptr;
     }
 
-    textCtrl->clearScreen(textVideoBuffer);
-    textCtrl->clearScreen(textVideoBufferSub);
-    textCtrl->unloadPalette();
-    pauseMenuCmpt->cancelSFX();
+    // hide UI screens/menus
+    ae::BroadcastEvent(Event::HideAllScreens{});
+    ae::BroadcastEvent(Event::HideAllMenus{});
+
     musicCtrl->cleanup();
     animationCtrl->stop();
 
     BaseView::cleanup();
 
     env.cleanup();
-    uiCtrl->cleanup();
 }

@@ -1,10 +1,10 @@
 #pragma once
 #include "components/DialogueComponent.hpp"
-#include "components/menu/BaseMenu.h"
+#include "components/menu/UIMenu.h"
 #include "controllers/AnimationController.h"
-#include "controllers/GraphicsController.h"
 #include "core/globals.h"
 #include "dialogue/demo_dialogue.h"
+#include "managers/RenderManager.hpp"
 #include "systems/CameraSystem.hpp"
 #include <array>
 
@@ -20,7 +20,7 @@
 #define CHARACTER_ANIM_OPTIONS 25
 #define SKILLS 2
 
-class PauseMenuComponent : public BaseMenu
+class PauseMenuComponent : public UIMenu
 {
   private:
     PauseMenuComponent() {};
@@ -28,6 +28,7 @@ class PauseMenuComponent : public BaseMenu
     static PauseMenuComponent* instance;
 
     CameraSystem& cameraSystem = CameraSystem::GetInstance();
+    RenderManager& rm = RenderManager::GetInstance();
 
     std::array<CameraMode, 4> cameraModes = {
         CameraMode::Free, CameraMode::Static, CameraMode::CCTV, CameraMode::Follow};
@@ -180,25 +181,20 @@ class PauseMenuComponent : public BaseMenu
     ViewState systemOptionSelected();
     ViewState characterAnimOptionSelected();
 
+    bool isDialogueStarted = false;
     ae::Entity* pauseMenu = nullptr;
     DialogueComponent* dialogue = nullptr;
-    GraphicsController* graphicsCtrl = GraphicsController::getInstance();
     AnimationController* animationCtrl = AnimationController::getInstance();
+
+    void resetHook() override;
+    void closeHook() override;
 
   public:
     static void create();
     static void destroy();
     static PauseMenuComponent* getInstance();
 
-    void init(int iBgSlot,
-              bool* isActive = &Globals::isPauseMenuActive,
-              uint16_t* iTextVideoBuffer = nullptr,
-              uint16_t* iTextVideoBufferSub = nullptr,
-              const std::string& iPauseMessage = "Pause") override;
-    ViewState update(int keys) override;
+    ViewState updateHook() override;
 
-    /**
-     * @brief Resets the pause menu to its initial state.
-     */
-    void reset() override;
+    bool isClosed = false;
 };

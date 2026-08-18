@@ -1,5 +1,4 @@
 #pragma once
-#include "controllers/GraphicsController.h"
 #include <array>
 #include <nds.h>
 

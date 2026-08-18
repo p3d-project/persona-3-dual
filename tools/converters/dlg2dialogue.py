@@ -317,11 +317,10 @@ class CodeGenerator:
         s = self.scene
         out += [
             f'#include "{s}_dialogue.h"',
-            '#include "controllers/GraphicsController.h"',
             '#include "core/globals.h"',
             "#include <nds.h>",
             "",
-            f"int {s}_dialogue_bg_slot = 0;",
+            f"int {s}_dialogue_bg_slot = -1;",
             "",
         ]
 
@@ -356,7 +355,7 @@ class CodeGenerator:
                 out += [
                     f"    {vp}_bg_loaders[{i}] = []()",
                     "    {",
-                    f'        GraphicAsset bg = GraphicsController::getInstance()->loadGrit(fatBasePath + "graphics/dialogue/backgrounds/{nm}");',
+                    f'        GraphicAsset bg = genericGraphics->loadGraphic("graphics/dialogue/backgrounds/{nm}/{nm}");',
                     "        if (bg.tiles)",
                     "        {",
                     f"            dmaCopy(bg.tiles, bgGetGfxPtr({s}_dialogue_bg_slot), bg.tilesLen);",
@@ -364,8 +363,8 @@ class CodeGenerator:
                     "            vramSetBankH(VRAM_H_LCD);",
                     "            dmaCopy(bg.pal, &VRAM_H_EXT_PALETTE[0][0], bg.palLen);",
                     "            vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE);",
-                    f"            bgShow({s}_dialogue_bg_slot);",
-                    "            GraphicsController::getInstance()->unloadGrit(bg);",
+                    f"            RenderManager::GetInstance().showBg({s}_dialogue_bg_slot);",
+                    "            genericGraphics->unloadGraphic(bg);",
                     "        }",
                     "    };",
                 ]

@@ -17,6 +17,13 @@ void SignContractView::cancelSFX()
 
 void SignContractView::init()
 {
+    if (signContract == nullptr)
+    {
+        signContract = engine.CreateEntity();
+        graphics = engine.CreateComponent<GraphicsComponent>();
+        signContract->AddComponent(graphics);
+    }
+
     // set both screens to black
     setBrightness(3, -16);
 
@@ -43,8 +50,7 @@ void SignContractView::init()
     bgSetPriority(bg[0], 0);
 
     // load contract background from runtime assets
-    GraphicAsset contractBg =
-        graphicsCtrl->loadGrit(fatBasePath + "graphics/SignContractView/backgrounds/contract/contract");
+    GraphicAsset contractBg = graphics->loadGraphic("graphics/SignContractView/backgrounds/contract/contract");
 
     dmaFillHalfWords(0, bgGetMapPtr(bg[0]), 8192);
     if (contractBg.tiles)
@@ -57,7 +63,7 @@ void SignContractView::init()
         dmaCopy(contractBg.pal, &VRAM_E_EXT_PALETTE[0][0], contractBg.palLen);
     vramSetBankE(VRAM_E_BG_EXT_PALETTE);
 
-    graphicsCtrl->unloadGrit(contractBg);
+    graphics->unloadGraphic(contractBg);
 
     // setup console
     consoleInit(&animatedConsole, 0, BgType_Text4bpp, BgSize_T_256x256, 5, 3, false, true);
@@ -257,6 +263,20 @@ ViewState SignContractView::update()
 
 void SignContractView::cleanup()
 {
+    if (graphics != nullptr)
+    {
+        graphics->unloadAll();
+    }
+
+    if (signContract != nullptr)
+    {
+        signContract->RemoveComponent<GraphicsComponent>();
+        engine.DestroyEntity(signContract);
+
+        signContract = nullptr;
+        graphics = nullptr;
+    }
+
     // update save data (names)
     ae::BroadcastEvent(Event::WriteSave{});
     musicCtrl->cleanup();

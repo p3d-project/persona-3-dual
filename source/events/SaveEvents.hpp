@@ -6,8 +6,6 @@
 
 #pragma once
 #include "core/enums.h"
-#include "core/geometry.h"
-#include "core/structs.h"
 #include <aegis/aegis.hpp>
 
 namespace Event

@@ -2,37 +2,48 @@
 #include "battleActions/BattleParticipant.h"
 #include "battleActions/actions/ActionBase.h"
 #include "battleActions/personas/PersonaBase.h"
-#include "components/menu/BaseMenu.h"
 #include "components/menu/BattleMenuComponent.h"
+#include "components/menu/UIMenu.h"
 #include <etl/vector.h>
 
-class BattleMenuComponent : public BaseMenu
+class BattleMenuComponent : public UIMenu
 {
   private:
+    friend class BattleSystem;
     BattleMenuComponent() {};
     virtual ~BattleMenuComponent() = default;
     static BattleMenuComponent* instance;
 
     BattleMenuOptions loadedOption = BattleMenuOptions::NONE;
+    int selectedBattleOption = -1;
+    bool isCancelled = false;
 
     etl::vector<MenuOption, 10> battleOptions;
     int alertStartFrame = 0;
     bool messagePrinted = false;
 
+    void resetHook() override;
+    void closeHook() override
+    {
+    }
+
     // option handlers
-    int battleOptionSelected();
+    ViewState battleOptionSelected();
 
   public:
     static void create();
     static void destroy();
     static BattleMenuComponent* getInstance();
 
-    void init(int iBgSlot,
-              bool* isActive,
-              uint16_t* iTextVideoBuffer,
-              uint16_t* iTextVideoBufferSub,
-              const std::string& iPauseMessage = "") override;
-    ViewState update(int keys) override;
+    ViewState updateHook() override;
+    void prevOption() override;
+
+  protected:
+    // helpers
+    void resetLoadedOptions();
+    int consumeSelectedBattleOption();
+    bool consumeCancel();
+
     // option loaders
     void loadActionOptions(std::array<ActionBase*, 4>* actions, std::string name);
     void loadSkillOptions(PersonaBase* persona);
@@ -41,5 +52,4 @@ class BattleMenuComponent : public BaseMenu
     void loadAllOutAttackConfirmation();
     void loadAlertOptions(const std::string& text);
     bool isAlertExpired(int durationFrames) const;
-    void reset();
 };

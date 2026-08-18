@@ -53,15 +53,16 @@ class MathManager : public ae::Manager, public ae::Singleton<MathManager>
     */
     float tan(float r);
 
+    // TODO: replace with native atan2 solution in upcoming BlocksDS update
     /**
      * @brief Computes the arctangent from two angles using an approximation.
      *
      * @details Function courtesy of https://yal.cc/fast-atan2/.
      * @note Does not handle infinities or NaNs. Has a limited input range (±45deg).
      *
-     * @param y Angle 2 in radians.
-     * @param x Angle 1 in radians.
-     * @return The arctangent of the two angles.
+     * @param y Point 2.
+     * @param x Point 1.
+     * @return The arctangent angle of the two points.
      *
      * @author Vadym Diachenko (yellowafterlife)
      */

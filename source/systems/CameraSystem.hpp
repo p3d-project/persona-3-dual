@@ -29,7 +29,9 @@ class CameraSystem : public ae::SystemRouter<CameraSystem,
                                              Event::ConfigureCamera,
                                              Event::SetCameraMode,
                                              Event::SetCameraPath,
-                                             Event::SetCharacterPosition>,
+                                             Event::SetCharacterPosition,
+                                             Event::StartCamera,
+                                             Event::StopCamera>,
                      public ae::Singleton<CameraSystem>
 {
   public:
@@ -84,6 +86,20 @@ class CameraSystem : public ae::SystemRouter<CameraSystem,
      * @param msg The event payload containing the pointer to CharacterPosition
      */
     void on_receive(const Event::SetCharacterPosition& msg);
+
+    /**
+     * @brief ETL message handler to make the Camera active
+     *
+     * @param msg The event payload (unused)
+     */
+    void on_receive(const Event::StartCamera& msg);
+
+    /**
+     * @brief ETL message handler to disable the Camera
+     *
+     * @param msg The event payload (unused)
+     */
+    void on_receive(const Event::StopCamera& msg);
 
     /**
      * @brief Fallback handler for unhandled ETL messages.

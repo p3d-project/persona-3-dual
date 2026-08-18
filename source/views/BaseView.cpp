@@ -1,6 +1,8 @@
 #include "BaseView.h"
 #include "core/globals.h"
 
+// TODO: recieve and handle etl message Event::SwitchView
+
 void BaseView::cleanup()
 {
     // clear screen

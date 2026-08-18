@@ -8,6 +8,7 @@
 
 enum class ViewState
 {
+    DEFAULT,
     KEEP_CURRENT,
     DISCLAIMER,
     INTRO_VIDEO,
@@ -340,14 +341,22 @@ enum : etl::message_id_t
 {
     ExecuteBattle = 0,
     BattleResult,
-    SetTextVideoBufferSub,
     CameraPosition,
     ConfigureCamera,
     SetCameraMode,
     SetCameraPath,
+    StartCamera,
+    StopCamera,
     SetCharacterPosition,
     WriteSave,
-    ReadSave
+    ReadSave,
+    ConfigureUIScreen,
+    ShowScreen,
+    HideAllScreens,
+    ConfigureUIMenu,
+    SwitchView,
+    ShowMenu,
+    HideAllMenus
 };
 } // namespace EventID
 
@@ -355,7 +364,9 @@ enum class ComponentType : ae::ComponentTypeID
 {
     None = 0,
     Movement,
-    Dialogue
+    Dialogue,
+    Graphics,
+    Text
 };
 
 /**
@@ -375,4 +386,46 @@ enum class CameraMode
     CCTV,
     Follow,
     Path
+};
+
+/**
+ * @brief Human Readable enum for text colors.
+ */
+enum TextColor
+{
+    Transparent = 0,
+    Black = 1,
+    White = 2,
+    DualGreen = 3,
+    DualGreen2 = 4,
+    DarkGreen = 5,
+    DarkerGreen = 6,
+    DarkestGreen = 7,
+    LightBlue = 8,
+    RichBlue = 9,
+    DarkBlue = 10,
+    NavyBlue = 11,
+    DarkestBlue = 12,
+    LightOrange = 13,
+    LightPurple = 14,
+    Red = 15,
+    Green = 16,
+    Blue = 17,
+    Yellow = 18,
+    Magenta = 19,
+    Cyan = 20,
+    Gray = 21
+};
+
+/**
+ * @brief Human readable enum for text instructions.
+ */
+enum TextInstruction
+{
+    ColorChange = 0x01,
+    StyleChange = 0x02,
+    StyleBold = 0x01,
+    StyleItalic = 0x02,
+    StyleUnderline = 0x04,
+    Reset = 0xFF
 };

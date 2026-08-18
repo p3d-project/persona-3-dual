@@ -6,6 +6,16 @@
 
 void MainMenuView::init()
 {
+    if (mainMenu == nullptr)
+    {
+        mainMenu = engine.CreateEntity();
+        graphics = engine.CreateComponent<GraphicsComponent>();
+        textMenu = engine.CreateComponent<TextComponent>();
+
+        mainMenu->AddComponent(graphics);
+        mainMenu->AddComponent(textMenu);
+    }
+
     // setup music
     musicCtrl->init((fatBasePath + "music/menus/velvetRoom/aria_of_the_soul.pcm").c_str(), 0.0f, 164.940f);
 
@@ -42,11 +52,13 @@ void MainMenuView::init()
     int bgTextSub = bgInitSub(3, BgType_Bmp8, BgSize_B8_256x256, 4, 0);
     uint16_t* textVideoBufferSub = bgGetGfxPtr(bgTextSub);
     bgSetPriority(bgTextSub, 0);
-    TextController::getInstance()->loadDefaultPalette();
+    textMenu->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
 
-    // setup menu
-    isMainMenuCmptActive = true;
-    mainMenuCmpt.init(-1, &isMainMenuCmptActive, nullptr, textVideoBufferSub);
+    // setup main menu
+    mainMenuCmpt = MainMenuComponent::getInstance();
+    std::array<UIMenu*, 10> menus = {mainMenuCmpt};
+    ae::BroadcastEvent(Event::ConfigureUIMenu{textMenu, menus});
+    ae::BroadcastEvent(Event::ShowMenu{mainMenuCmpt});
 
     // setup console
     consoleInit(&console, 0, BgType_Text4bpp, BgSize_T_256x256, 2, 0, false, true);
@@ -74,10 +86,10 @@ void MainMenuView::init()
     dmaFillHalfWords(2, bgGetMapPtr(bg[2]), 2048);
 
     // load graphics
-    std::string bgPath = fatBasePath + "graphics/MainMenuView/backgrounds/";
-    GraphicAsset silhouetteBg = graphicsCtrl->loadGrit(bgPath + "menuSilhouetteBackground/menuSilhouetteBackground");
-    GraphicAsset doorBg = graphicsCtrl->loadGrit(bgPath + "doorBackground/doorBackground");
-    GraphicAsset fogBg = graphicsCtrl->loadGrit(bgPath + "fogBackground/fogBackground");
+    std::string bgPath = "graphics/MainMenuView/backgrounds/";
+    GraphicAsset silhouetteBg = graphics->loadGraphic(bgPath + "menuSilhouetteBackground/menuSilhouetteBackground");
+    GraphicAsset doorBg = graphics->loadGraphic(bgPath + "doorBackground/doorBackground");
+    GraphicAsset fogBg = graphics->loadGraphic(bgPath + "fogBackground/fogBackground");
 
     dmaCopy(silhouetteBg.tiles, bgGetGfxPtr(bg[0]), silhouetteBg.tilesLen);
     dmaCopy(doorBg.tiles, bgGetGfxPtr(bg[1]), doorBg.tilesLen);
@@ -93,11 +105,11 @@ void MainMenuView::init()
     dmaCopy(fogBg.pal, &VRAM_E_EXT_PALETTE[2][0], fogBg.palLen);
     vramSetBankE(VRAM_E_BG_EXT_PALETTE);
 
-    graphicsCtrl->unloadGrit(silhouetteBg);
-    graphicsCtrl->unloadGrit(doorBg);
-    graphicsCtrl->unloadGrit(fogBg);
+    graphics->unloadGraphic(silhouetteBg);
+    graphics->unloadGraphic(doorBg);
+    graphics->unloadGraphic(fogBg);
 
-    bgHide(bg[2]);
+    render.hideBg(bg[2]);
     bgSetCenter(bg[2], 128, 96); // pivot point on the screen (at the screen's center)
     bgSetScroll(bg[2], 128, 96); // pivot point on the image (at the image's center)
 
@@ -161,8 +173,8 @@ ViewState MainMenuView::update()
         return ViewState::KEEP_CURRENT;
     }
 
-    // update mainComponent AFTER checking if the sillouhete is still moving
-    ViewState result = mainMenuCmpt.update(systemKeysDown);
+    // show mainComponent AFTER checking if the sillouhete is still moving
+    ViewState result = ViewState::KEEP_CURRENT;
     if (result != ViewState::KEEP_CURRENT)
     {
         musicCtrl->pause();
@@ -181,7 +193,7 @@ ViewState MainMenuView::update()
     {
         displayFog = true;
         REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG2 | BLEND_DST_BACKDROP | BLEND_DST_BG1;
-        bgShow(bg[2]);
+        render.showBg(bg[2]);
     }
 
     // fade in fog
@@ -207,6 +219,36 @@ ViewState MainMenuView::update()
 
 void MainMenuView::cleanup()
 {
+    // transition both screens to black
+    for (int i = 0; i > -16; i--)
+    {
+        setBrightness(3, i);
+
+        // wait a few frames
+        for (int duration = 0; duration <= 2; duration++)
+        {
+            swiWaitForVBlank();
+            musicCtrl->update();
+        }
+    }
+
+    if (graphics != nullptr)
+    {
+        graphics->unloadAll();
+    }
+
+    if (mainMenu != nullptr)
+    {
+        mainMenu->RemoveComponent<GraphicsComponent>();
+        mainMenu->RemoveComponent<TextComponent>();
+        engine.DestroyEntity(mainMenu);
+
+        mainMenu = nullptr;
+        graphics = nullptr;
+        textMenu = nullptr;
+    }
+
+    ae::BroadcastEvent(Event::HideAllMenus{});
     musicCtrl->cleanup();
     BaseView::cleanup();
 }

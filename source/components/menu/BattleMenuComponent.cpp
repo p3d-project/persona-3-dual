@@ -29,28 +29,16 @@ BattleMenuComponent* BattleMenuComponent::getInstance()
     return instance;
 }
 
-void BattleMenuComponent::init(int iBgSlot,
-                               bool* isActive,
-                               uint16_t* iTextVideoBuffer,
-                               uint16_t* iTextVideoBufferSub,
-                               const std::string& iPauseMessage)
-{
-    BaseMenu::init(iBgSlot, isActive, iTextVideoBuffer, iTextVideoBufferSub, iPauseMessage);
-
-    options = nullptr;
-    optionCount = 0;
-    startIndex = 0;
-}
-
 // option loaders
 void BattleMenuComponent::loadActionOptions(std::array<ActionBase*, 4>* actions, std::string name)
 {
-    textCtrl->clearScreen(textVideoBufferSub);
     // skip if action options have already been loaded
     if (loadedOption == BattleMenuOptions::ACTION)
     {
         return;
     };
+
+    text->clearScreen();
 
     // set new options
     battleOptions.clear();
@@ -72,12 +60,13 @@ void BattleMenuComponent::loadActionOptions(std::array<ActionBase*, 4>* actions,
 
 void BattleMenuComponent::loadSkillOptions(PersonaBase* persona)
 {
-    textCtrl->clearScreen(textVideoBufferSub);
     // skip if action options have already been loaded
     if (loadedOption == BattleMenuOptions::SKILL)
     {
         return;
     };
+
+    text->clearScreen();
 
     // set new options
     battleOptions.clear();
@@ -100,10 +89,12 @@ void BattleMenuComponent::loadSkillOptions(PersonaBase* persona)
 
 void BattleMenuComponent::loadPersonaOptions(etl::vector<PersonaBase*, 13>* personas)
 {
-    textCtrl->clearScreen(textVideoBufferSub);
     if (loadedOption == BattleMenuOptions::PERSONA)
+    {
         return;
+    }
 
+    text->clearScreen();
     battleOptions.clear();
     loadedOption = BattleMenuOptions::PERSONA;
     pauseMessage = "Persona";
@@ -121,10 +112,15 @@ void BattleMenuComponent::loadPersonaOptions(etl::vector<PersonaBase*, 13>* pers
 
 void BattleMenuComponent::loadTargetOptions(etl::vector<BattleParticipant*, 13>* targets, bool healTarget)
 {
-    textCtrl->clearScreen(textVideoBufferSub);
     BattleMenuOptions targetLoadedOption =
         healTarget ? BattleMenuOptions::TARGET_HEAL : BattleMenuOptions::TARGET_ENEMY;
 
+    if ((loadedOption == BattleMenuOptions::TARGET_HEAL) || (loadedOption == BattleMenuOptions::TARGET_ENEMY))
+    {
+        return;
+    }
+
+    text->clearScreen();
     battleOptions.clear();
     loadedOption = targetLoadedOption;
     pauseMessage = "Target";
@@ -145,12 +141,12 @@ void BattleMenuComponent::loadTargetOptions(etl::vector<BattleParticipant*, 13>*
 
 void BattleMenuComponent::loadAllOutAttackConfirmation()
 {
-    textCtrl->clearScreen(textVideoBufferSub);
     if (loadedOption == BattleMenuOptions::ALL_OUT_ATTACK)
     {
         return;
     };
 
+    text->clearScreen();
     battleOptions.clear();
     loadedOption = BattleMenuOptions::ALL_OUT_ATTACK;
     pauseMessage = "Confirm All-out-attack?";
@@ -185,36 +181,70 @@ bool BattleMenuComponent::isAlertExpired(int durationFrames) const
     return (frame - alertStartFrame) >= durationFrames;
 }
 
-void BattleMenuComponent::reset()
+void BattleMenuComponent::resetHook()
+{
+    pauseMessage = "";
+    options = nullptr;
+    optionCount = 0;
+
+    loadedOption = BattleMenuOptions::NONE;
+    messagePrinted = false;
+    selectedBattleOption = -1;
+}
+
+void BattleMenuComponent::resetLoadedOptions()
 {
     loadedOption = BattleMenuOptions::NONE;
-    *isActivePtr = false;
-    pauseMessage = "";
     messagePrinted = false;
+    text->clearScreen();
+
+    pauseMessage = "";
+
     selectedOption = 0;
     startIndex = 0;
 }
 
-ViewState BattleMenuComponent::update(int keys)
+ViewState BattleMenuComponent::updateHook()
 {
     if (loadedOption == BattleMenuOptions::ALERT)
     {
         if (!messagePrinted)
         {
-            textCtrl->clearScreen(textVideoBufferSub);
+            text->clearScreen();
             messagePrinted = true;
-            textCtrl->drawText(pauseMessage, font, textVideoBufferSub, 0, 0, 2);
+            text->drawText(pauseMessage, 0, 0, 2);
         }
         return ViewState::KEEP_CURRENT;
     }
 
-    return BaseMenu::update(keys);
+    return ViewState::DEFAULT;
 }
 
 // option handlers
-int BattleMenuComponent::battleOptionSelected()
+ViewState BattleMenuComponent::battleOptionSelected()
 {
-    int returnSelectedOption = selectedOption;
-    reset();
-    return returnSelectedOption;
+    selectedBattleOption = selectedOption;
+    resetLoadedOptions();
+    return ViewState::KEEP_CURRENT;
+}
+
+int BattleMenuComponent::consumeSelectedBattleOption()
+{
+    int battleOption = selectedBattleOption;
+    selectedBattleOption = -1;
+    return battleOption;
+}
+
+bool BattleMenuComponent::consumeCancel()
+{
+    bool result = isCancelled;
+    isCancelled = false;
+    return result;
+}
+
+void BattleMenuComponent::prevOption()
+{
+    isCancelled = true;
+    selectedBattleOption = -1;
+    resetLoadedOptions();
 }

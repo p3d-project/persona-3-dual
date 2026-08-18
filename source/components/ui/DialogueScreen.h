@@ -5,6 +5,8 @@
 #include "core/structs.h"
 #include <nds.h>
 
+#include "components/GraphicsComponent.hpp"
+
 class DialogueScreen : public UIScreen
 {
   public:
@@ -18,16 +20,19 @@ class DialogueScreen : public UIScreen
     void removeSprites() override;
 
   private:
-    DialogueScreen() {};
+    DialogueScreen() : UIScreen(false) {};
     ~DialogueScreen() {};
     static DialogueScreen* instance;
 
     // sprites
     // TODO: reduce allocated sprite/sprite registers
     Sprite sprites[50];
-    SpriteRegister calendarSprite[2];
-    SpriteRegister textBox[10];
-    SpriteRegister nameTag[10];
+    GraphicAsset calendarSprite[2];
+    GraphicAsset textBox[10];
+    GraphicAsset nameTag[10];
 
-    void renderBackground();
+    ae::Entity* dialogue = nullptr;
+    GraphicsComponent* graphics = nullptr;
+
+    void loadBackground();
 };

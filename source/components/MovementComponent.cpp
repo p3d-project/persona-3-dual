@@ -132,7 +132,7 @@ void MovementComponent::start()
     isActive = true;
 }
 
-void MovementComponent::end()
+void MovementComponent::stop()
 {
     isActive = false;
 }

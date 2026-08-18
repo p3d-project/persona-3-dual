@@ -28,25 +28,24 @@ MenuHUDScreen* MenuHUDScreen::getInstance()
     return instance;
 }
 
-// TODO: clean up and properly implement class
-
 // helper
-void MenuHUDScreen::renderBackground()
+void MenuHUDScreen::loadBackground()
 {
     if (bgLoaded)
         return;
 
-    std::string bgPath = fatBasePath + "graphics/MenuHUD/backgrounds/";
+    std::string bgPath = "graphics/MenuHUD/backgrounds/";
     GraphicAsset bgHUD =
-        graphicsCtrl->loadGrit(bgPath + (saveData.femcMode ? "menuHUDFEMC/menuHUDFEMC" : "menuHUD/menuHUD"));
+        graphics->loadGraphic(bgPath + (saveData.femcMode ? "menuHUDFEMC/menuHUDFEMC" : "menuHUD/menuHUD"));
 
     dmaCopy(bgHUD.tiles, bgGetGfxPtr(bgId), bgHUD.tilesLen);
     dmaCopy(bgHUD.map, bgGetMapPtr(bgId), bgHUD.mapLen);
+
     vramSetBankH(VRAM_H_LCD);
-    dmaCopy(bgHUD.pal, &VRAM_H_EXT_PALETTE[2][0], bgHUD.palLen);
+    dmaCopy(bgHUD.pal, &VRAM_H_EXT_PALETTE[bgId % 4][0], bgHUD.palLen);
     vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE);
 
-    graphicsCtrl->unloadGrit(bgHUD);
+    graphics->unloadGraphic(bgHUD);
     bgLoaded = true;
 }
 
@@ -141,9 +140,16 @@ int MenuHUDScreen::onTouch(touchPosition* touch)
 
 void MenuHUDScreen::load()
 {
+    if (menuHUD == nullptr)
+    {
+        menuHUD = engine.CreateEntity();
+        graphics = engine.CreateComponent<GraphicsComponent>();
+        menuHUD->AddComponent(graphics);
+    }
+
     // load graphics
     bgLoaded = false;
-    spriteCtrl->spritePath = "graphics/MenuHUD/sprites/";
+    std::string spritePath = "graphics/MenuHUD/sprites/";
 
     // setup sprites
     // moon
@@ -192,23 +198,23 @@ void MenuHUDScreen::load()
 
     // get sprites
     // moon
-    spriteCtrl->switchSprite(SpriteType::MOON, MoonSprite::MOON_22, &moonSprite);
+    moonSprite = graphics->loadSpriteGraphic(spritePath, SpriteType::MOON, MoonSprite::MOON_22);
     // day of the week
-    spriteCtrl->switchSprite(SpriteType::DAY_OF_WEEK, DayOfWeekSprite::TUESDAY, &dayOfWeekSprite);
+    dayOfWeekSprite = graphics->loadSpriteGraphic(spritePath, SpriteType::DAY_OF_WEEK, DayOfWeekSprite::TUESDAY);
     // numbers
-    spriteCtrl->switchSprite(SpriteType::DIGIT, DigitSprite::DIGIT_0, &numberSprites[0]);
-    spriteCtrl->switchSprite(SpriteType::DIGIT, DigitSprite::DIGIT_4, &numberSprites[1]);
-    spriteCtrl->switchSprite(SpriteType::DIGIT, DigitSprite::DIGIT_0, &numberSprites[2]);
-    spriteCtrl->switchSprite(SpriteType::DIGIT, DigitSprite::DIGIT_7, &numberSprites[3]);
+    numberSprites[0] = graphics->loadSpriteGraphic(spritePath, SpriteType::DIGIT, DigitSprite::DIGIT_0);
+    numberSprites[1] = graphics->loadSpriteGraphic(spritePath, SpriteType::DIGIT, DigitSprite::DIGIT_4);
+    numberSprites[2] = graphics->loadSpriteGraphic(spritePath, SpriteType::DIGIT, DigitSprite::DIGIT_0);
+    numberSprites[3] = graphics->loadSpriteGraphic(spritePath, SpriteType::DIGIT, DigitSprite::DIGIT_7);
     // time
-    spriteCtrl->switchSprite(SpriteType::TIME, TimeSprite::EARLY_MORNING_0_0, &timeSprites[0]);
-    spriteCtrl->switchSprite(SpriteType::TIME, TimeSprite::EARLY_MORNING_1_0, &timeSprites[1]);
-    spriteCtrl->switchSprite(SpriteType::TIME, TimeSprite::EARLY_MORNING_2_0, &timeSprites[2]);
-    spriteCtrl->switchSprite(SpriteType::TIME, TimeSprite::EARLY_MORNING_3_0, &timeSprites[3]);
+    timeSprites[0] = graphics->loadSpriteGraphic(spritePath, SpriteType::TIME, TimeSprite::EARLY_MORNING_0_0);
+    timeSprites[1] = graphics->loadSpriteGraphic(spritePath, SpriteType::TIME, TimeSprite::EARLY_MORNING_1_0);
+    timeSprites[2] = graphics->loadSpriteGraphic(spritePath, SpriteType::TIME, TimeSprite::EARLY_MORNING_2_0);
+    timeSprites[3] = graphics->loadSpriteGraphic(spritePath, SpriteType::TIME, TimeSprite::EARLY_MORNING_3_0);
     // skill level
-    spriteCtrl->switchSprite(SpriteType::SKILL_SPRITE, SkillSprite::SKILLS_LEVEL, &skillSprites[0]);
+    skillSprites[0] = graphics->loadSpriteGraphic(spritePath, SpriteType::SKILL_SPRITE, SkillSprite::SKILLS_LEVEL);
     // slash
-    spriteCtrl->switchSprite(SpriteType::DIGIT, DigitSprite::SLASH, &slashSprite);
+    slashSprite = graphics->loadSpriteGraphic(spritePath, SpriteType::DIGIT, DigitSprite::SLASH);
 
     // TODO: initialize any extra sprite registers for max-case arrays?
     // ...
@@ -241,15 +247,22 @@ void MenuHUDScreen::load()
         "tile068",
         "tile069",
     };
+
     bool ok = true;
-    for (int i = 0; i < kAnimFrames; i++)
+    for (int i = 0; i < kAnimFrames; ++i)
     {
-        animAsset[i] = graphicsCtrl->loadGrit(fatBasePath + spriteCtrl->spritePath + names[i]);
+        std::string framePath = std::string(fatBasePath) + "graphics/MenuHUD/sprites/" + names[i] + "/" + names[i];
+        animAsset[i] = graphics->loadGraphic(framePath);
         if (animGfx[i] && animAsset[i].tiles && animAsset[i].tilesLen >= 1024)
+        {
             dmaCopy(animAsset[i].tiles, animGfx[i], 1024);
+        }
         else
+        {
             ok = false;
+        }
     }
+
     if (ok)
     {
         sprites[kAnimSlot].gfx = animGfx[0];
@@ -257,17 +270,32 @@ void MenuHUDScreen::load()
     }
 
     renderBackground();
-};
+}
 
 void MenuHUDScreen::unload()
 {
-    for (int i = 0; i < kAnimFrames; i++)
+    for (int i = 0; i < kAnimFrames; ++i)
     {
-        if (animAsset[i].tiles || animAsset[i].pal || animAsset[i].map)
-            graphicsCtrl->unloadGrit(animAsset[i]);
-        animAsset[i] = {NULL, 0, NULL, 0, NULL, 0};
+        if (animAsset[i].tiles != nullptr || animAsset[i].pal != nullptr || animAsset[i].map != nullptr)
+        {
+            graphics->unloadGraphic(animAsset[i]);
+        }
+        animAsset[i] = GraphicAsset{};
         animGfx[i] = nullptr;
     }
     animReady = false;
-    spriteCtrl->unloadAll();
+
+    if (graphics != nullptr)
+    {
+        graphics->unloadAll();
+    }
+
+    if (menuHUD != nullptr)
+    {
+        menuHUD->RemoveComponent<GraphicsComponent>();
+        engine.DestroyEntity(menuHUD);
+
+        menuHUD = nullptr;
+        graphics = nullptr;
+    }
 }

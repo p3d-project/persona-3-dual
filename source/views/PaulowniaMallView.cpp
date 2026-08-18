@@ -52,7 +52,23 @@ ViewState PaulowniaMallView::onTileCheck(TileType tile, u32 pressed)
     return ViewState::KEEP_CURRENT;
 }
 
-void PaulowniaMallView::setDialogueConfig()
+void PaulowniaMallView::setTextConfig()
 {
-    // No dialogue currently
+    text->configureText(TextConfig(textVideoBuffer, &FONT_NAME, FONT_SIZE));
+    textSub->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
+}
+
+void PaulowniaMallView::setupUI()
+{
+    textMenu->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
+
+    pauseMenuCmpt = PauseMenuComponent::getInstance();
+
+    menuHUDScreen = MenuHUDScreen::getInstance();
+
+    std::array<UIScreen*, 7> screens = {menuHUDScreen};
+    std::array<UIMenu*, 10> menus = {pauseMenuCmpt};
+
+    ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, screens});
+    ae::BroadcastEvent(Event::ConfigureUIMenu{textMenu, menus});
 }

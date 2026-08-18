@@ -59,7 +59,7 @@ ViewState IwatodaiDormView::onTileCheck(TileType tile, u32 pressed)
         // start dialogue
         if (!promptDrawn)
         {
-            textCtrl->drawText("Talk", cosmeticaFont, textVideoBufferSub, 0, 0, TextColor::White);
+            textSub->drawText("Talk", 0, 0, TextColor::White);
             promptDrawn = true;
         }
         if (pressed & KEY_A)
@@ -71,7 +71,7 @@ ViewState IwatodaiDormView::onTileCheck(TileType tile, u32 pressed)
     default:
         if (promptDrawn)
         {
-            textCtrl->clearScreen(textVideoBufferSub);
+            textSub->clearScreen();
             promptDrawn = false;
         }
         break;
@@ -82,8 +82,31 @@ ViewState IwatodaiDormView::onTileCheck(TileType tile, u32 pressed)
 void IwatodaiDormView::setDialogueConfig()
 {
     demo_yukari_kenji_argument_load();
-    dialogue->configureDialogue(DialogueConfig(
-        demo_yukari_kenji_argument_first(), cosmeticaFont, textVideoBufferSub, demo_yukari_kenji_argument_load_bg));
+    dialogue->configureDialogue(
+        DialogueConfig(demo_yukari_kenji_argument_first(), demo_yukari_kenji_argument_load_bg, textMenu));
+}
+
+void IwatodaiDormView::setTextConfig()
+{
+    text->configureText(TextConfig(textVideoBuffer, &FONT_NAME, FONT_SIZE));
+    textSub->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
+}
+
+void IwatodaiDormView::setupUI()
+{
+    textMenu->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
+
+    // setup pause menu
+    pauseMenuCmpt = PauseMenuComponent::getInstance();
+
+    menuHUDScreen = MenuHUDScreen::getInstance();
+    dialogueScreen = DialogueScreen::getInstance();
+
+    std::array<UIScreen*, 7> screens = {menuHUDScreen, dialogueScreen};
+    std::array<UIMenu*, 10> menus = {pauseMenuCmpt};
+
+    ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, screens});
+    ae::BroadcastEvent(Event::ConfigureUIMenu{textMenu, menus});
 }
 
 void IwatodaiDormView::onEnvironmentUpdate()
