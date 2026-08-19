@@ -35,12 +35,12 @@ class MenuHUDScreen : public UIScreen
 
     // sprites
     Sprite sprites[28]; // enough entries for moon, day, digits, times, and repeated skill markers
-    SpriteRegister moonSprite;
-    SpriteRegister dayOfWeekSprite;
-    SpriteRegister numberSprites[4];
-    SpriteRegister timeSprites[4];
-    SpriteRegister skillSprites[18];
-    SpriteRegister slashSprite;
+    GraphicAsset moonSprite;
+    GraphicAsset dayOfWeekSprite;
+    GraphicAsset numberSprites[4];
+    GraphicAsset timeSprites[4];
+    GraphicAsset skillSprites[18];
+    GraphicAsset slashSprite;
 
     static constexpr int kAnimSlot = 12;
     static constexpr int kAnimAffine = 31;
@@ -51,12 +51,6 @@ class MenuHUDScreen : public UIScreen
     int animY = 80;
     bool animReady = false;
 
-    GraphicAsset moonSprite;
-    GraphicAsset dayOfWeekSprite;
-    GraphicAsset numberSprites[4];
-    GraphicAsset timeSprites[4];
-    GraphicAsset skillSprites[18];
-    GraphicAsset slashSprite;
     bool bgLoaded;
     void loadBackground();
 

@@ -62,7 +62,11 @@ void MenuHUDScreen::renderSprites()
     dmaCopy(timeSprites[3].pal, &VRAM_I_EXT_SPR_PALETTE[6][0], timeSprites[3].palLen);     // time (3)
     dmaCopy(skillSprites[0].pal, &VRAM_I_EXT_SPR_PALETTE[7][0], skillSprites[0].palLen);   // skill level
     if (animReady && animAsset[0].pal != NULL && animAsset[0].palLen > 0)
+    {
+        u16* animPalette = static_cast<u16*>(animAsset[0].pal);
+        animPalette[0] = 0;
         dmaCopy(animAsset[0].pal, &VRAM_I_EXT_SPR_PALETTE[8][0], animAsset[0].palLen); // anim frames
+    }
     vramSetBankI(VRAM_I_SUB_SPRITE_EXT_PALETTE);
 
     // draw sprites
@@ -100,6 +104,15 @@ void MenuHUDScreen::tick()
 
     int frameIndex = (frame / 6) % kAnimFrames;
     sprites[kAnimSlot].gfx = animGfx[frameIndex];
+
+    if (animAsset[frameIndex].pal != nullptr && animAsset[frameIndex].palLen > 0)
+    {
+        u16* animPalette = static_cast<u16*>(animAsset[frameIndex].pal);
+        animPalette[0] = 0;
+        vramSetBankI(VRAM_I_LCD);
+        dmaCopy(animAsset[frameIndex].pal, &VRAM_I_EXT_SPR_PALETTE[8][0], animAsset[frameIndex].palLen);
+        vramSetBankI(VRAM_I_SUB_SPRITE_EXT_PALETTE);
+    }
 
     const int cycle = 180;
     animX = 176 - (96 * (frame % cycle)) / (cycle - 1);
@@ -251,8 +264,13 @@ void MenuHUDScreen::load()
     bool ok = true;
     for (int i = 0; i < kAnimFrames; ++i)
     {
-        std::string framePath = std::string(fatBasePath) + "graphics/MenuHUD/sprites/" + names[i] + "/" + names[i];
+        std::string framePath = "graphics/MenuHUD/sprites/" + std::string(names[i]) + "/" + std::string(names[i]);
         animAsset[i] = graphics->loadGraphic(framePath);
+        if (animAsset[i].pal != nullptr && animAsset[i].palLen >= 2)
+        {
+            u16* palette = static_cast<u16*>(animAsset[i].pal);
+            palette[0] = 0;
+        }
         if (animGfx[i] && animAsset[i].tiles && animAsset[i].tilesLen >= 1024)
         {
             dmaCopy(animAsset[i].tiles, animGfx[i], 1024);
@@ -269,7 +287,7 @@ void MenuHUDScreen::load()
         animReady = true;
     }
 
-    renderBackground();
+    loadBackground();
 }
 
 void MenuHUDScreen::unload()
