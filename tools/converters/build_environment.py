@@ -17,10 +17,13 @@ def convert(input_file, output_dir, config):
         return
 
     if config.get("skip_grit"):
-        os.remove(tex_list)
+        try:
+            os.remove(tex_list)
+        except FileNotFoundError:
+            pass
         return
 
-    grit_flags = config.get("grit_flags", "-gb -gB16 -p!")
+    grit_flags = config.get("grit_flags", "-gb -gB16 -gTT -p!")
     pngs = [
         line.strip()
         for line in open(tex_list)
@@ -36,7 +39,10 @@ def convert(input_file, output_dir, config):
         with open(grit_file, "w") as f:
             f.write(grit_flags)
 
-    os.remove(tex_list)
+    try:
+        os.remove(tex_list)
+    except FileNotFoundError:
+        pass
 
 
 if __name__ == "__main__":

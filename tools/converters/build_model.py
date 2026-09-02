@@ -42,7 +42,7 @@ def convert(input_file, output_file, config):
         os.remove(tex_list)
         return
 
-    grit_flags = config.get("grit_flags", "-gb -gB16 -p!")
+    grit_flags = config.get("grit_flags", "-gb -gB16 -gT! -p!")
 
     pngs = [
         line.strip()
