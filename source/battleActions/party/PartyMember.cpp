@@ -1,5 +1,6 @@
 #include "PartyMember.hpp"
 #include "../skills/BattleCalcs.hpp"
+#include <fpm/math.hpp>
 
 PartyMember::PartyMember(const CharacterProfile& iCharacterProfile) : characterProfile(iCharacterProfile)
 
@@ -23,24 +24,26 @@ PartyMember::PartyMember(const CharacterProfile& iCharacterProfile) : characterP
     curPersona = characterProfile.curPersona;
 }
 
-float PartyMember::calculateBaseDamage(BattleParticipant& defender, Skill& skill)
+ae::q20_12_t PartyMember::calculateBaseDamage(BattleParticipant& defender, Skill& skill)
 {
     u32 atk = BattleCalcs::getAtk(curPersona->battleStats, skill);
-    float levelDifference = BattleCalcs::getLevelDifference(lv, defender.lv);
-    float affinityMtp = BattleCalcs::getAffinityMtp(*defender.getBattleStats(), skill);
-    u32 movePower = (skill.skillType == SkillType::RegularAttack) ? (weapon.weaponPower / 2.0f) : skill.movePower;
-    return floor(sqrt((float)(movePower * 15 * atk) / defender.getBattleStats()->en) * 2 * levelDifference *
-                 affinityMtp);
+    ae::q20_12_t levelDifference = BattleCalcs::getLevelDifference(lv, defender.lv);
+    ae::q20_12_t affinityMtp = BattleCalcs::getAffinityMtp(*defender.getBattleStats(), skill);
+    u32 movePower = (skill.skillType == SkillType::RegularAttack) ? (weapon.weaponPower / 2) : skill.movePower;
+
+    return fpm::floor(
+        math.sqrt(math.div(ae::q20_12_t{movePower * 15 * atk}, ae::q20_12_t{defender.getBattleStats()->en})) *
+        ae::q20_12_t{2} * levelDifference * affinityMtp);
 }
 
-float PartyMember::getTeamMultiplier()
+ae::q20_12_t PartyMember::getTeamMultiplier()
 {
-    return 1.0f;
+    return ae::q20_12_t{1.0};
 }
 
-void PartyMember::setCurrentTurnOrderAgility(float boost)
+void PartyMember::setCurrentTurnOrderAgility(ae::q20_12_t boost)
 {
-    currentTurnOrderAgility = curPersona->battleStats.ag * boost;
+    currentTurnOrderAgility = ae::q20_12_t{curPersona->battleStats.ag} * boost;
 }
 
 BattlePhase PartyMember::getInitalTurnPhase()

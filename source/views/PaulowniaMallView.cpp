@@ -8,18 +8,19 @@ PaulowniaMallView::PaulowniaMallView()
 
 void PaulowniaMallView::setupMusic()
 {
-    musicCtrl->init(
-        (fatBasePath + "music/locations/paulowniaMall/overworld/color_your_night.pcm").c_str(), 2.050f, 204.191f);
+    musicCtrl->init((fatBasePath + "music/locations/paulowniaMall/overworld/color_your_night.pcm").c_str(),
+                    ae::q20_12_t{2.05},
+                    ae::q20_12_t{204.191});
 }
 
 void PaulowniaMallView::setupCamera()
 {
     camConfig.mode = CameraMode::Follow;
-    camConfig.initialAngle = 1.5708f * 2;
-    camConfig.distance = 1.0f;
-    camConfig.height = height + 0.4f;
-    camConfig.lookAhead = 0.2f;
-    camConfig.angleIncrement = 0.05f;
+    camConfig.initialAngle = ae::q20_12_t{1.5708 * 2};
+    camConfig.distance = ae::q20_12_t{1};
+    camConfig.height = height + ae::q20_12_t{0.4};
+    camConfig.lookAhead = ae::q20_12_t{0.2};
+    camConfig.angleIncrement = ae::q20_12_t{0.05};
     camConfig.isRotationLocked = true;
 }
 

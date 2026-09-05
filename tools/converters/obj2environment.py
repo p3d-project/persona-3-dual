@@ -54,6 +54,10 @@ def escape_c_string(s):
     return s.replace("\\", "\\\\").replace('"', '\\"')
 
 
+def to_q20_12_raw(f):
+    return round(f * 4096)
+
+
 def floattov16(f):
     return max(-32768, min(32767, int(f * (1 << 12)))) & 0xFFFF
 
@@ -360,11 +364,11 @@ def generate_entry_block(
         struct BillboardData { const char* name; v16 x, y, z;
                                 v16 halfWidth; v16 halfHeight; int texSlot;
                                 short u0, v0; short u1, v1; };
-        struct EnvironmentDbEntry { const char* name; const char* binaryFile;
-                                     float worldOffsetX; float worldOffsetZ;
-                                     float worldWidth; float worldDepth;
-                                     int textureCount; const EnvironmentTexture* textures;
-                                     int billboardCount; const BillboardData* billboards; };
+       struct EnvironmentDbEntry { const char* name; const char* binaryFile;
+                             ae::q20_12_t worldOffsetX; ae::q20_12_t worldOffsetZ;
+                             ae::q20_12_t worldWidth; ae::q20_12_t worldDepth;
+                             int textureCount; const EnvironmentTexture* textures;
+                             int billboardCount; const BillboardData* billboards; };
 
     `bitmap` is left NULL here; the loader/GRIT pipeline fills it in at runtime.
     """
@@ -395,10 +399,20 @@ def generate_entry_block(
         lines.append(f"static const BillboardData {billboards_symbol}[{n_bb}] = {{")
         for b in billboards:
             name = escape_c_string(b.get("name") or "")
+            # x, y, z, hw, hh are Q4.12 (matches libnds v16)
+            # u0, v0, u1, v1 are Q12.4 (matches libnds t16)
             lines.append(
-                f'    {{ "{name}", {to_signed_v16(b["cx"])}, {to_signed_v16(b["cy"])}, {to_signed_v16(b["cz"])}, '
-                f'{to_signed_v16(b["hw"])}, {to_signed_v16(b["hh"])}, {b["slot"]}, '
-                f'{b["u0_16"]}, {b["v0_16"]}, {b["u1_16"]}, {b["v1_16"]} }},'
+                f'    {{ "{name}", '
+                f'ae::q4_12_t::from_raw_value({to_signed_v16(b["cx"])}), '
+                f'ae::q4_12_t::from_raw_value({to_signed_v16(b["cy"])}), '
+                f'ae::q4_12_t::from_raw_value({to_signed_v16(b["cz"])}), '
+                f'ae::q4_12_t::from_raw_value({to_signed_v16(b["hw"])}), '
+                f'ae::q4_12_t::from_raw_value({to_signed_v16(b["hh"])}), '
+                f'{b["slot"]}, '
+                f'ae::q12_4_t::from_raw_value({b["u0_16"]}), '
+                f'ae::q12_4_t::from_raw_value({b["v0_16"]}), '
+                f'ae::q12_4_t::from_raw_value({b["u1_16"]}), '
+                f'ae::q12_4_t::from_raw_value({b["v1_16"]}) }},'
             )
         lines.append("};")
         lines.append("")
@@ -407,9 +421,12 @@ def generate_entry_block(
     lines.append(f"const EnvironmentDbEntry {base_name}EnvironmentDbEntry = {{")
     lines.append(f'    "{base_name}",')
     lines.append(f'    "{bin_runtime_path}",')
+
     lines.append(
-        f"    {world_offset_x:.6f}f, {world_offset_z:.6f}f, "
-        f"{world_width:.6f}f, {world_depth:.6f}f,"
+        f"ae::q20_12_t::from_raw_value({to_q20_12_raw(world_offset_x)}), "
+        f"ae::q20_12_t::from_raw_value({to_q20_12_raw(world_offset_z)}), "
+        f"ae::q20_12_t::from_raw_value({to_q20_12_raw(world_width)}), "
+        f"ae::q20_12_t::from_raw_value({to_q20_12_raw(world_depth)}),"
     )
     lines.append(f"    {n_tex}, {textures_symbol},")
     lines.append(f"    {n_bb}, {billboards_symbol},")

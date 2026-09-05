@@ -25,7 +25,7 @@ class GraphicsComponent : public ae::Component
 
     void Destroy() override;
 
-    void Update(ae::fixed_t /*dt*/) override
+    void Update(ae::q20_12_t /*dt*/) override
     {
     }
 

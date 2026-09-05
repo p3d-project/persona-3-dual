@@ -1,6 +1,8 @@
 #include "TextComponent.hpp"
+#include <aegis/ndsTypes.hpp>
+#include <aegis/types.hpp>
 
-void TextComponent::Update(ae::fixed_t)
+void TextComponent::Update(ae::q20_12_t)
 {
     if (appearingText != nullptr)
     {

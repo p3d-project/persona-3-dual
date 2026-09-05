@@ -1,4 +1,8 @@
 #pragma once
+
+#include <aegis/ndsTypes.hpp>
+#include <aegis/types.hpp>
+
 #include "views/BaseView.hpp"
 
 // environments/data
@@ -67,11 +71,10 @@ class EnvironmentView : public BaseView
     void cleanup() override;
 
   protected:
-    // -------------------------------------------------
     // Room-specific hooks (implemented/overridden by derived rooms)
-    virtual float getCameraYOffset() const
+    virtual ae::q20_12_t getCameraYOffset() const
     {
-        return 0.1f;
+        return ae::q20_12_t{0.1};
     } // default
 
     virtual const EnvironmentDbEntry* getEnvironmentDbEntry() = 0;
@@ -129,7 +132,7 @@ class EnvironmentView : public BaseView
     bool promptDrawn = false;
 
     Event::CameraPosition camPos;
-    const float tileSize = 0.062500f;
+    const ae::q20_12_t tileSize{0.062500};
 
     // Override fields in setCameraConfig() — same struct for all modes
     Event::ConfigureCamera camConfig;

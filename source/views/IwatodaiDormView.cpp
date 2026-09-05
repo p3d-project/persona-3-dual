@@ -13,29 +13,42 @@ IwatodaiDormView::IwatodaiDormView()
 
 // Test path
 static CameraPath dormTestPath = {{
-    {120, {-0.40f, 0.60f, 2.82f}, {0.4f, 0.1f, 2.80f}},
-    {0, {-0.40f, 0.60f, 2.82f}, {0.4f, 0.1f, 2.80f}},
-    {60, {0.40f, 0.80f, 1.80f}, {0.4f, 0.1f, 2.80f}},
-    {120, {1.20f, 0.60f, 2.82f}, {0.4f, 0.1f, 2.80f}},
-    {180, {0.40f, 0.40f, 3.80f}, {0.4f, 0.1f, 2.80f}},
-    {240, {-0.40f, 0.60f, 2.82f}, {0.4f, 0.1f, 2.80f}},
+    {120,
+     {ae::q20_12_t{-0.40}, ae::q20_12_t{0.60}, ae::q20_12_t{2.82}},
+     {ae::q20_12_t{0.4}, ae::q20_12_t{0.1}, ae::q20_12_t{2.80}}},
+    {0,
+     {ae::q20_12_t{-0.40}, ae::q20_12_t{0.60}, ae::q20_12_t{2.82}},
+     {ae::q20_12_t{0.4}, ae::q20_12_t{0.1}, ae::q20_12_t{2.80}}},
+    {60,
+     {ae::q20_12_t{0.40}, ae::q20_12_t{0.80}, ae::q20_12_t{1.80}},
+     {ae::q20_12_t{0.4}, ae::q20_12_t{0.1}, ae::q20_12_t{2.80}}},
+    {120,
+     {ae::q20_12_t{1.20}, ae::q20_12_t{0.60}, ae::q20_12_t{2.82}},
+     {ae::q20_12_t{0.4}, ae::q20_12_t{0.1}, ae::q20_12_t{2.80}}},
+    {180,
+     {ae::q20_12_t{0.40}, ae::q20_12_t{0.40}, ae::q20_12_t{3.80}},
+     {ae::q20_12_t{0.4}, ae::q20_12_t{0.1}, ae::q20_12_t{2.80}}},
+    {240,
+     {ae::q20_12_t{-0.40}, ae::q20_12_t{0.60}, ae::q20_12_t{2.82}},
+     {ae::q20_12_t{0.4}, ae::q20_12_t{0.1}, ae::q20_12_t{2.80}}},
 }};
 
 void IwatodaiDormView::setupCamera()
 {
     camConfig.mode = CameraMode::Path;
-    camConfig.initialAngle = -1.6f;
-    camConfig.distance = 0.8f;
-    camConfig.height = height + 0.6f;
-    camConfig.lookAhead = 0.2f;
-    camConfig.angleIncrement = 0.07f;
+    camConfig.initialAngle = ae::q20_12_t{-1.6};
+    camConfig.distance = ae::q20_12_t{0.8};
+    camConfig.height = height + ae::q20_12_t{0.6};
+    camConfig.lookAhead = ae::q20_12_t{0.2};
+    camConfig.angleIncrement = ae::q20_12_t{0.07};
     camConfig.isRotationLocked = true;
     ae::BroadcastEvent(Event::SetCameraPath{&dormTestPath});
 }
 
 void IwatodaiDormView::setupMusic()
 {
-    musicCtrl->init((fatBasePath + "music/locations/iwatodaiDorm/iwatodai_dorm.pcm").c_str(), 1.300f, -1.000f);
+    musicCtrl->init(
+        (fatBasePath + "music/locations/iwatodaiDorm/iwatodai_dorm.pcm").c_str(), ae::q20_12_t{1.3}, ae::q20_12_t{-1});
 }
 
 void IwatodaiDormView::setupMovement()

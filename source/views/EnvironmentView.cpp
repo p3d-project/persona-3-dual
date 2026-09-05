@@ -440,15 +440,15 @@ ViewState EnvironmentView::update()
             return tileResult;
         }
 
-        gluLookAt(camPos.eye.x,
-                  camPos.eye.y + getCameraYOffset(),
-                  camPos.eye.z,
-                  camPos.target.x,
-                  camPos.target.y,
-                  camPos.target.z,
-                  camPos.up.x,
-                  camPos.up.y,
-                  camPos.up.z);
+        gluLookAtf32(camPos.eye.x.raw_value(),
+                     (camPos.eye.y + getCameraYOffset()).raw_value(),
+                     camPos.eye.z.raw_value(),
+                     camPos.target.x.raw_value(),
+                     camPos.target.y.raw_value(),
+                     camPos.target.z.raw_value(),
+                     camPos.up.x.raw_value(),
+                     camPos.up.y.raw_value(),
+                     camPos.up.z.raw_value());
 
         // environment
         glPushMatrix();
@@ -460,8 +460,8 @@ ViewState EnvironmentView::update()
         // model
         glPushMatrix();
 
-        glTranslatef(charPos.x, charPos.y, charPos.z);
-        glRotatef(charPos.facingAngle, 0.0f, 1.0f, 0.0f);
+        glTranslatef32(charPos.x.raw_value(), charPos.y.raw_value(), charPos.z.raw_value());
+        glRotatef(static_cast<float>(charPos.facingAngle), 0.0f, 1.0f, 0.0f);
         glPolyFmt(POLY_ALPHA(31) | POLY_CULL_BACK | POLY_FOG | POLY_ID(1));
         animationCtrl->render();
         glPopMatrix(1);
@@ -481,8 +481,8 @@ ViewState EnvironmentView::update()
                 debugText += buf;
                 std::sprintf(buf,
                              "tile(x,z): %d, %d\n",
-                             (int)((charPos.x + dbEntry->worldOffsetX) / tileSize),
-                             (int)((charPos.z + dbEntry->worldOffsetZ) / tileSize));
+                             (int)(MathManager::GetInstance().div(charPos.x + dbEntry->worldOffsetX, tileSize)),
+                             (int)(MathManager::GetInstance().div(charPos.z + dbEntry->worldOffsetZ, tileSize)));
                 debugText += buf;
                 std::sprintf(buf, "translate(x,z): %d, %d\n", (int)(charPos.x * 100), (int)(charPos.z * 100));
                 debugText += buf;

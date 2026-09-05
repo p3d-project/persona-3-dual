@@ -1,5 +1,7 @@
 #pragma once
 
+#include <aegis/ndsTypes.hpp>
+#include <aegis/types.hpp>
 #include <nds.h>
 
 struct EnvironmentTexture
@@ -14,14 +16,14 @@ struct EnvironmentTexture
 struct BillboardData
 {
     const char* name;
-    v16 x, y, z;
-    v16 halfWidth;
-    v16 halfHeight;
+    ae::q4_12_t x, y, z;
+    ae::q4_12_t halfWidth;
+    ae::q4_12_t halfHeight;
 
     int texSlot;
 
-    short u0, v0;
-    short u1, v1;
+    ae::q12_4_t u0, v0;
+    ae::q12_4_t u1, v1;
 };
 
 struct EnvironmentDbEntry
@@ -33,10 +35,10 @@ struct EnvironmentDbEntry
     const char* binaryFile;
 
     // World bounds
-    float worldOffsetX;
-    float worldOffsetZ;
-    float worldWidth;
-    float worldDepth;
+    ae::q20_12_t worldOffsetX;
+    ae::q20_12_t worldOffsetZ;
+    ae::q20_12_t worldWidth;
+    ae::q20_12_t worldDepth;
 
     // Texture information
     int textureCount;

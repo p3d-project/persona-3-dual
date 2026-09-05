@@ -158,7 +158,8 @@ void IntroView::init()
 
     // point to music
     musicCtrl->loadSFX(SFX_SELECT);
-    musicCtrl->init((fatBasePath + "music/menus/title/tightrope.pcm").c_str(), 17.962f, 66.082f);
+    musicCtrl->init(
+        (fatBasePath + "music/menus/title/tightrope.pcm").c_str(), ae::q20_12_t{17.962}, ae::q20_12_t{66.082});
 
     // hide sub screen text and attribution text layer
     REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_SRC_BG0 | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;
@@ -370,8 +371,7 @@ ViewState IntroView::update()
     if (frame % 4 == 0)
     {
         waveAngle += 50;
-        // NOTE: since DS does not have floating point numbers, sin (which uses sinLerp) returns value from -4096 -> 4096, which is why we divide by 4096 (shift >> 12)
-        int angle = math.sin(waveAngle);
+        int angle = MathManager::GetInstance().sin(static_cast<ae::angle16_t>(waveAngle)).raw_value();
         int rotationSpeed = baseSpeed + ((angle * fluctuation) >> 12);
         currentRotation += rotationSpeed;
         bgSetRotateScale(bg[3], currentRotation, 256, 256);

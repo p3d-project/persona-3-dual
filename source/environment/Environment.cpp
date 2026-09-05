@@ -193,7 +193,7 @@ void Environment::draw()
     }
 }
 
-void Environment::drawBillboards(bool faceCamera, float camX, float camY, float camZ)
+void Environment::drawBillboards(bool faceCamera, ae::q20_12_t camX, ae::q20_12_t camY, ae::q20_12_t camZ)
 {
     if (!dbEntry || dbEntry->billboardCount == 0)
         return;
@@ -232,48 +232,51 @@ void Environment::drawBillboards(bool faceCamera, float camX, float camY, float 
             inQuads = true;
         }
 
-        v16 rX = 4096, rY = 0, rZ = 0;
-        v16 uX = 0, uY = 4096, uZ = 0;
+        ae::q4_12_t rX{1}, rY{0}, rZ{0};
+        ae::q4_12_t uX{0}, uY{1}, uZ{0};
 
         if (faceCamera)
         {
-            float bx = (float)bb.x / 4096.0f;
-            float bz = (float)bb.z / 4096.0f;
+            //cast to 32 bit type for conversion first
+            ae::q20_12_t bx = ae::q20_12_t::from_raw_value(static_cast<int32_t>(bb.x.raw_value()));
+            ae::q20_12_t bz = ae::q20_12_t::from_raw_value(static_cast<int32_t>(bb.z.raw_value()));
 
-            float dx = camX - bx;
-            float dz = camZ - bz;
+            ae::q20_12_t dx = camX - bx;
+            ae::q20_12_t dz = camZ - bz;
 
-            float dist = sqrtf(dx * dx + dz * dz);
+            // Offset to align model pivot with NDS camera origin
+            ae::q20_12_t dist = math.length(dx, dz, ae::q20_12_t{0});
 
-            if (dist > 0.001f)
+            if (dist > ae::q20_12_t{0.001})
             {
-                dx /= dist;
-                dz /= dist;
+                dx = math.div(dx, dist);
+                dz = math.div(dz, dist);
             }
 
-            rX = (v16)(dz * 4096.0f);
-            rZ = (v16)(-dx * 4096.0f);
+            // narrow type
+            rX = ae::q4_12_t::from_raw_value(static_cast<int16_t>(dz.raw_value()));
+            rZ = ae::q4_12_t::from_raw_value(static_cast<int16_t>((-dx).raw_value()));
         }
 
-        v16 rx = mulf32(rX, bb.halfWidth);
-        v16 ry = mulf32(rY, bb.halfWidth);
-        v16 rz = mulf32(rZ, bb.halfWidth);
+        ae::q4_12_t rx = rX * bb.halfWidth;
+        ae::q4_12_t ry = rY * bb.halfWidth;
+        ae::q4_12_t rz = rZ * bb.halfWidth;
 
-        v16 ux = mulf32(uX, bb.halfHeight);
-        v16 uy = mulf32(uY, bb.halfHeight);
-        v16 uz = mulf32(uZ, bb.halfHeight);
+        ae::q4_12_t ux = uX * bb.halfHeight;
+        ae::q4_12_t uy = uY * bb.halfHeight;
+        ae::q4_12_t uz = uZ * bb.halfHeight;
 
-        glTexCoord2t16(bb.u0, bb.v1);
-        glVertex3v16(bb.x - rx - ux, bb.y - ry - uy, bb.z - rz - uz);
+        glTexCoord2t16(bb.u0.raw_value(), bb.v1.raw_value());
+        glVertex3v16((bb.x - rx - ux).raw_value(), (bb.y - ry - uy).raw_value(), (bb.z - rz - uz).raw_value());
 
-        glTexCoord2t16(bb.u1, bb.v1);
-        glVertex3v16(bb.x + rx - ux, bb.y + ry - uy, bb.z + rz - uz);
+        glTexCoord2t16(bb.u1.raw_value(), bb.v1.raw_value());
+        glVertex3v16((bb.x + rx - ux).raw_value(), (bb.y + ry - uy).raw_value(), (bb.z + rz - uz).raw_value());
 
-        glTexCoord2t16(bb.u1, bb.v0);
-        glVertex3v16(bb.x + rx + ux, bb.y + ry + uy, bb.z + rz + uz);
+        glTexCoord2t16(bb.u1.raw_value(), bb.v0.raw_value());
+        glVertex3v16((bb.x + rx + ux).raw_value(), (bb.y + ry + uy).raw_value(), (bb.z + rz + uz).raw_value());
 
-        glTexCoord2t16(bb.u0, bb.v0);
-        glVertex3v16(bb.x - rx + ux, bb.y - ry + uy, bb.z - rz + uz);
+        glTexCoord2t16(bb.u0.raw_value(), bb.v0.raw_value());
+        glVertex3v16((bb.x - rx + ux).raw_value(), (bb.y - ry + uy).raw_value(), (bb.z - rz + uz).raw_value());
     }
 
     if (inQuads)

@@ -26,7 +26,7 @@ class DialogueComponent : public ae::Component
      *
      * @param dt Fixed-point delta time passed from the aegis engine loop (currently unused).
      */
-    void Update(ae::fixed_t /*dt*/) override;
+    void Update(ae::q20_12_t /*dt*/) override;
 
     ae::ComponentTypeID GetType() const override
     {

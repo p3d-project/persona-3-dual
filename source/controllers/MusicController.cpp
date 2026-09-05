@@ -1,4 +1,5 @@
 #include "MusicController.hpp"
+#include "managers/MathManager.hpp"
 #include <malloc.h>
 #include <nds.h>
 #include <stdint.h>
@@ -307,7 +308,7 @@ MusicController* MusicController::getInstance()
     return instance;
 }
 
-void MusicController::init(const char* filePath, float loopStartSeconds, float loopEndSeconds)
+void MusicController::init(const char* filePath, ae::q20_12_t loopStartSeconds, ae::q20_12_t loopEndSeconds)
 {
     if (s_streamOpen && !s_isVideoAudio && s_currentFilePath == filePath)
     {
@@ -337,17 +338,17 @@ void MusicController::init(const char* filePath, float loopStartSeconds, float l
     s_isVideoAudio = false;
     s_currentFilePath = filePath;
 
-    s_loopStartSamples = (u32)(loopStartSeconds * AUDIO_SAMPLE_RATE);
+    s_loopStartSamples = MathManager::GetInstance().secondsToSamples(loopStartSeconds, AUDIO_SAMPLE_RATE);
     s_loopStartOffset = s_loopStartSamples * BYTES_PER_FRAME;
 
-    if (loopEndSeconds == -1.0f)
+    if (loopEndSeconds == aegis::q20_12_t{-1.0})
     {
         s_loopAtEOF = true;
         s_loopEndSamples = 0;
     }
-    else if (loopEndSeconds > 0.0f)
+    else if (loopEndSeconds > aegis::q20_12_t{0})
     {
-        s_loopEndSamples = (u32)(loopEndSeconds * AUDIO_SAMPLE_RATE);
+        s_loopEndSamples = MathManager::GetInstance().secondsToSamples(loopEndSeconds, AUDIO_SAMPLE_RATE);
     }
     else
     {
@@ -416,9 +417,9 @@ void MusicController::pushVideoAudio(const u8* data, size_t size)
     s_videoRing.write(data, (u32)size);
 }
 
-float MusicController::getVideoTime()
+ae::q20_12_t MusicController::getVideoTime()
 {
-    return (float)s_elapsedSamples / (float)AUDIO_SAMPLE_RATE;
+    return ae::q20_12_t{s_elapsedSamples} / ae::q20_12_t{AUDIO_SAMPLE_RATE};
 }
 
 void MusicController::update()

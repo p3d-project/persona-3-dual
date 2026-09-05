@@ -58,8 +58,7 @@ TurnResult Enemy::resolve(BattleParticipant* target, Skill* skill)
     std::string targetLog = name + " targets " + target->name + "\n";
 
     *resource -= skill->cost;
-    u32 accuracy = BattleCalcs::hitrate(*this, *target, *skill);
-    bool hit = accuracy > u32(rand() % 100);
+    bool hit = BattleCalcs::hit(*this, *target, *skill);
 
     if (!hit)
         return {false, 0, false, targetLog + "Miss"};
@@ -80,29 +79,30 @@ TurnResult Enemy::resolve(BattleParticipant* target, Skill* skill)
     return {true, -(s32)damage, oneMoreResult, targetLog + skill->name};
 }
 
-float Enemy::calculateBaseDamage(BattleParticipant& defender, Skill& skill)
+ae::q20_12_t Enemy::calculateBaseDamage(BattleParticipant& defender, Skill& skill)
 {
     u32 atk = BattleCalcs::getAtk(battleStats, skill);
-    float levelDifference = BattleCalcs::getLevelDifference(lv, defender.lv);
-    float affinityMtp = BattleCalcs::getAffinityMtp(*defender.getBattleStats(), skill);
+    ae::q20_12_t levelDifference = BattleCalcs::getLevelDifference(lv, defender.lv);
+    ae::q20_12_t affinityMtp = BattleCalcs::getAffinityMtp(*defender.getBattleStats(), skill);
+
     if (skill.skillType == SkillType::RegularAttack)
-        return (sqrt((float)(skill.movePower * 6 * atk) /
-                     (8 * defender.getBattleStats()->en + defender.armour.defense)) *
-                9 * levelDifference) *
+        return (math.sqrt(math.div(ae::q20_12_t{skill.movePower * 6 * atk},
+                                   ae::q20_12_t{8 * defender.getBattleStats()->en + defender.armour.defense})) *
+                ae::q20_12_t{9} * levelDifference) *
                affinityMtp;
     else if (skill.skillType == SkillType::Attack || skill.skillType == SkillType::MultiAttack)
-        return (
-            (sqrt((float)(skill.movePower * 6 * atk) / (8 * defender.getBattleStats()->en + defender.armour.defense)) *
-                 9 * levelDifference -
-             10) *
-            affinityMtp);
+        return ((math.sqrt(math.div(ae::q20_12_t{skill.movePower * 6 * atk},
+                                    ae::q20_12_t{8 * defender.getBattleStats()->en + defender.armour.defense})) *
+                     ae::q20_12_t{9} * levelDifference -
+                 ae::q20_12_t{10}) *
+                affinityMtp);
     else
-        return 0;
+        return ae::q20_12_t{0};
 }
 
-float Enemy::getTeamMultiplier()
+ae::q20_12_t Enemy::getTeamMultiplier()
 {
-    return 0.6f;
+    return ae::q20_12_t{0.6};
 }
 
 BattlePhase Enemy::getInitalTurnPhase()
@@ -114,7 +114,7 @@ void Enemy::onDead(Event::BattleResult& battleResult)
 {
 }
 
-void Enemy::setCurrentTurnOrderAgility(float boost)
+void Enemy::setCurrentTurnOrderAgility(ae::q20_12_t boost)
 {
-    currentTurnOrderAgility = battleStats.ag;
+    currentTurnOrderAgility = ae::q20_12_t{battleStats.ag};
 }

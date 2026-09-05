@@ -40,7 +40,8 @@ void SignContractView::init()
     musicCtrl->loadSFX(SFX_MENU);
     musicCtrl->loadSFX(SFX_SELECT);
     musicCtrl->loadSFX(SFX_CANCEL);
-    musicCtrl->init((fatBasePath + "music/menus/contract/mistic.pcm").c_str(), 1.998f, 49.959f);
+    musicCtrl->init(
+        (fatBasePath + "music/menus/contract/mistic.pcm").c_str(), ae::q20_12_t{1.998}, ae::q20_12_t{49.959});
 
     videoSetMode(MODE_5_2D);
     videoSetModeSub(MODE_3_2D | DISPLAY_BG3_ACTIVE);

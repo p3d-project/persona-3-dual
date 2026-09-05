@@ -3,6 +3,7 @@
 #include <nds.h>
 
 #include "data/environmentDb.hpp"
+#include "managers/MathManager.hpp"
 
 // Largest textureCount across all current g_environmentDb entries (dorm = 32).
 // Bump this if a future room introduces more textures than that.
@@ -84,7 +85,7 @@ class Environment
      * @param camZ World-space Z coordinate of the camera, used only when
      *             @p faceCamera is true.
      */
-    void drawBillboards(bool faceCamera, float camX, float camY, float camZ);
+    void drawBillboards(bool faceCamera, ae::q20_12_t camX, ae::q20_12_t camY, ae::q20_12_t camZ);
 
     /**
      * @brief Frees all display lists and deletes all textures owned by
@@ -107,4 +108,6 @@ class Environment
     u32* displayLists[MAX_ENVIRONMENT_TEXTURES];
     u32 dlSizes[MAX_ENVIRONMENT_TEXTURES];
     int textureIDs[MAX_ENVIRONMENT_TEXTURES];
+
+    MathManager& math = MathManager::GetInstance();
 };

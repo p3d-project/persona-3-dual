@@ -8,8 +8,7 @@ TurnResult AttackAction::resolve(PartyMember* user, BattleParticipant* target, S
     Skill* atk = user->baseAttackAction;
     Enemy* enemy = static_cast<Enemy*>(target);
 
-    u32 accuracy = BattleCalcs::hitrate(*user, *target, *atk);
-    bool hit = accuracy > u32(rand() % 100);
+    bool hit = BattleCalcs::hit(*user, *target, *atk);
 
     if (!hit)
         return {false, 0, false, "Miss"};

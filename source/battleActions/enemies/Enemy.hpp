@@ -24,11 +24,14 @@ struct Enemy : BattleParticipant
         return &battleStats;
     }
 
-    float calculateBaseDamage(BattleParticipant& defender, Skill& skill) override;
-    float getTeamMultiplier() override;
+    ae::q20_12_t calculateBaseDamage(BattleParticipant& defender, Skill& skill) override;
+    ae::q20_12_t getTeamMultiplier() override;
     BattlePhase getInitalTurnPhase() override;
     void onDead(Event::BattleResult& battleResult) override;
-    void setCurrentTurnOrderAgility(float boost);
+    void setCurrentTurnOrderAgility(ae::q20_12_t boost);
 
     virtual ~Enemy() = default;
+
+  private:
+    MathManager& math = MathManager::GetInstance();
 };

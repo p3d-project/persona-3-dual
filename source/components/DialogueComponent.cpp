@@ -7,7 +7,7 @@ void DialogueComponent::Init()
     isActive = false;
 }
 
-void DialogueComponent::Update(ae::fixed_t)
+void DialogueComponent::Update(ae::q20_12_t)
 {
     if (!isActive || current == nullptr)
     {

@@ -43,7 +43,7 @@ class UISystem : public ae::SystemRouter<UISystem,
      */
     void Shutdown() override;
 
-    void Update(ae::fixed_t /*dt*/) override;
+    void Update(ae::q20_12_t /*dt*/) override;
 
     // TODO: move out of UISystem. Only here as a temporary fix
     void on_receive(const Event::SwitchView& msg);

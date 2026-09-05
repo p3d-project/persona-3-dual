@@ -2,6 +2,8 @@
 
 #include "controllers/MusicController.hpp"
 #include "types/StateTypes.hpp"
+#include <aegis/ndsTypes.hpp>
+#include <aegis/types.hpp>
 
 #include <nds.h>
 #include <string>
@@ -31,8 +33,9 @@ class VideoController
      * @param iFps Fallback frame rate when the file has no header.
      * @param iNextState View state returned after playback completes.
      */
-    void init(std::string iFileName, float iFps, ViewState iNextState);
+
     /** @brief Advances playback and renders the next available frame. */
+    void init(std::string iFileName, ae::q20_12_t iFps, ViewState iNextState);
     ViewState update();
     /** @brief Stops playback and releases the file and frame buffer. */
     void cleanup();
@@ -46,7 +49,7 @@ class VideoController
     static VideoController* instance;
 
     ViewState nextState = ViewState::DEFAULT;
-    float fps = 0.0f;
+    ae::q20_12_t fps{0};
 
     FILE* videoFile = nullptr;
     bool fileEOF = false;

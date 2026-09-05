@@ -27,7 +27,7 @@ class TextComponent : public ae::Component
      */
     void Destroy() override;
 
-    void Update(ae::fixed_t /*dt*/) override;
+    void Update(ae::q20_12_t /*dt*/) override;
 
     ae::ComponentTypeID GetType() const override
     {

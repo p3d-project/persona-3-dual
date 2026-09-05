@@ -39,16 +39,26 @@ static const EnvironmentTexture iwatodai_dorm_floor_1_textures[32] = {
 };
 
 static const BillboardData iwatodai_dorm_floor_1_billboards[1] = {
-    {"Akihiko_Plane.001", 2641, 751, 5320, 360, 733, 31, 0, 0, 512, 1024},
+    {"Akihiko_Plane.001",
+     ae::q4_12_t::from_raw_value(2641),
+     ae::q4_12_t::from_raw_value(751),
+     ae::q4_12_t::from_raw_value(5320),
+     ae::q4_12_t::from_raw_value(360),
+     ae::q4_12_t::from_raw_value(733),
+     31,
+     ae::q12_4_t::from_raw_value(0),
+     ae::q12_4_t::from_raw_value(0),
+     ae::q12_4_t::from_raw_value(512),
+     ae::q12_4_t::from_raw_value(1024)},
 };
 
 const EnvironmentDbEntry iwatodai_dorm_floor_1EnvironmentDbEntry = {
     "iwatodai_dorm_floor_1",
     "iwatodai_dorm_floor_1.bin",
-    2.243581f,
-    3.500000f,
-    4.487161f,
-    7.000000f,
+    ae::q20_12_t::from_raw_value(9190),
+    ae::q20_12_t::from_raw_value(14336),
+    ae::q20_12_t::from_raw_value(18379),
+    ae::q20_12_t::from_raw_value(28672),
     32,
     iwatodai_dorm_floor_1_textures,
     1,
@@ -83,16 +93,26 @@ static const EnvironmentTexture iwatodai_streets_textures[22] = {
 };
 
 static const BillboardData iwatodai_streets_billboards[1] = {
-    {"Enemy_Plane.002", 70, 518, 3367, 784, 518, 21, 0, 0, 1024, 1024},
+    {"Enemy_Plane.002",
+     ae::q4_12_t::from_raw_value(70),
+     ae::q4_12_t::from_raw_value(518),
+     ae::q4_12_t::from_raw_value(3367),
+     ae::q4_12_t::from_raw_value(784),
+     ae::q4_12_t::from_raw_value(518),
+     21,
+     ae::q12_4_t::from_raw_value(0),
+     ae::q12_4_t::from_raw_value(0),
+     ae::q12_4_t::from_raw_value(1024),
+     ae::q12_4_t::from_raw_value(1024)},
 };
 
 const EnvironmentDbEntry iwatodai_streetsEnvironmentDbEntry = {
     "iwatodai_streets",
     "iwatodai_streets.bin",
-    5.000000f,
-    2.817436f,
-    10.000000f,
-    5.634871f,
+    ae::q20_12_t::from_raw_value(20480),
+    ae::q20_12_t::from_raw_value(11540),
+    ae::q20_12_t::from_raw_value(40960),
+    ae::q20_12_t::from_raw_value(23080),
     22,
     iwatodai_streets_textures,
     1,
@@ -138,10 +158,10 @@ static const EnvironmentTexture paulownia_mall_textures[31] = {
 const EnvironmentDbEntry paulownia_mallEnvironmentDbEntry = {
     "paulownia_mall",
     "paulownia_mall.bin",
-    6.000000f,
-    4.349365f,
-    12.000000f,
-    8.698730f,
+    ae::q20_12_t::from_raw_value(24576),
+    ae::q20_12_t::from_raw_value(17815),
+    ae::q20_12_t::from_raw_value(49152),
+    ae::q20_12_t::from_raw_value(35630),
     31,
     paulownia_mall_textures,
     0,
@@ -167,10 +187,10 @@ static const EnvironmentTexture station_textures[11] = {
 const EnvironmentDbEntry stationEnvironmentDbEntry = {
     "station",
     "station.bin",
-    1.283423f,
-    3.000000f,
-    2.566845f,
-    6.000000f,
+    ae::q20_12_t::from_raw_value(5257),
+    ae::q20_12_t::from_raw_value(12288),
+    ae::q20_12_t::from_raw_value(10514),
+    ae::q20_12_t::from_raw_value(24576),
     11,
     station_textures,
     0,

@@ -1,6 +1,8 @@
 #pragma once
 #include "types/AnimationTypes.hpp"
+#include <aegis/ndsTypes.hpp>
 
+#include <aegis/types.hpp>
 #include <nds.h>
 #include <vector>
 
@@ -61,9 +63,9 @@ class AnimationController
          * @brief Sets animation playback speed.
          * @param speedMultiplier Multiplier relative to the default speed.
          */
-    void setAnimationSpeed(float speedMultiplier = 1.0f)
+    void setAnimationSpeed(ae::q20_12_t speedMultiplier = ae::q20_12_t{1.0})
     {
-        animSpeedFP = (int)(speedMultiplier * 128.0f);
+        animSpeedFP = (int)(speedMultiplier * ae::q20_12_t{128.0});
     }
 
     /** @brief Advances the selected animation by one frame tick. */

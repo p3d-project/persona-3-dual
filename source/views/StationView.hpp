@@ -23,15 +23,15 @@ class StationView : public EnvironmentView
 
   private:
     // movement and camera
-    const Point2D<float> characterSize = Point2D<float>(0.1f, 0.1f);
-    const float speed = 0.02f;
-    const float angleIncrement = 0.05f;
-    const float distance = 0.7f;
-    const float lookAhead = 0.3f;
+    const Point2D<ae::q20_12_t> characterSize{ae::q20_12_t{0.1}, ae::q20_12_t{0.1}};
+    const ae::q20_12_t speed{0.02};
+    const ae::q20_12_t angleIncrement{0.05};
+    const ae::q20_12_t distance{0.7};
+    const ae::q20_12_t lookAhead{0.3};
 
     // character position
-    const Point2D<float> characterTranslate = Point2D<float>(-0.0175f, 1.3216f);
-    const float height = 0.0f;
-    const float angle = 1.5708f * 2; // 180 degrees (rad)
-    const float characterFacingAngle = 180.0f;
+    const Point2D<ae::q20_12_t> characterTranslate{ae::q20_12_t{-0.0175}, ae::q20_12_t{1.3216}};
+    const ae::q20_12_t height{0};
+    const ae::q20_12_t angle{1.5708 * 2}; // 180 degrees (rad)
+    const ae::q20_12_t characterFacingAngle{180};
 };

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <aegis/ndsTypes.hpp>
+#include <aegis/types.hpp>
 #include <core/geometry.hpp>
 #include <nds.h>
 
@@ -42,10 +44,10 @@ enum class TileType
 
 struct CharacterPosition
 {
-    float x;
-    float z;
-    float y; // height
-    float facingAngle;
+    ae::q20_12_t x;
+    ae::q20_12_t z;
+    ae::q20_12_t y; // height
+    ae::q20_12_t facingAngle;
 };
 
 /**
@@ -59,30 +61,30 @@ struct MovementConfig
     uint16_t* collisionMap;
 
     // world
-    float tileSize;
-    float worldOffsetX;
-    float worldOffsetZ;
-    Point2D<float> characterSize;
+    ae::q20_12_t tileSize;
+    ae::q20_12_t worldOffsetX;
+    ae::q20_12_t worldOffsetZ;
+    Point2D<ae::q20_12_t> characterSize;
 
     // translation
-    float speed;
-    float height;
-    Point2D<float> characterTranslate;
-    float characterFacingAngle;
+    ae::q20_12_t speed;
+    ae::q20_12_t height;
+    Point2D<ae::q20_12_t> characterTranslate;
+    ae::q20_12_t characterFacingAngle;
 
     MovementConfig() = default;
 
     MovementConfig(int iMapWidth,
                    int iMapHeight,
                    uint16_t* iCollisionMap,
-                   float iTileSize,
-                   float iWorldOffsetX,
-                   float iWorldOffsetZ,
-                   Point2D<float> iCharacterSize,
-                   float iSpeed,
-                   float iHeight,
-                   Point2D<float> iCharacterTranslate,
-                   float iCharacterFacingAngle)
+                   ae::q20_12_t iTileSize,
+                   ae::q20_12_t iWorldOffsetX,
+                   ae::q20_12_t iWorldOffsetZ,
+                   Point2D<ae::q20_12_t> iCharacterSize,
+                   ae::q20_12_t iSpeed,
+                   ae::q20_12_t iHeight,
+                   Point2D<ae::q20_12_t> iCharacterTranslate,
+                   ae::q20_12_t iCharacterFacingAngle)
         : mapWidth(iMapWidth), mapHeight(iMapHeight), collisionMap(iCollisionMap), tileSize(iTileSize),
           worldOffsetX(iWorldOffsetX), worldOffsetZ(iWorldOffsetZ), characterSize(iCharacterSize), speed(iSpeed)
     {

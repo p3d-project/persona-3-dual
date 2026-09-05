@@ -1,4 +1,6 @@
 #pragma once
+#include <aegis/types.hpp>
+
 #include "views/EnvironmentView.hpp"
 
 #include "data/environmentDb.hpp"
@@ -14,9 +16,9 @@ class PaulowniaMallView : public EnvironmentView
     {
         return g_environmentDb[2];
     }
-    float getCameraYOffset() const override
+    ae::q20_12_t getCameraYOffset() const override
     {
-        return 0.3f;
+        return ae::q20_12_t{0.3};
     }
     void setupMovement() override;
     void setupMusic() override;
@@ -27,11 +29,11 @@ class PaulowniaMallView : public EnvironmentView
 
   private:
     // movement and camera
-    const Point2D<float> characterSize = Point2D<float>(0.1f, 0.1f);
-    const float speed = 0.03f;
+    const Point2D<ae::q20_12_t> characterSize{ae::q20_12_t{0.1}, ae::q20_12_t{0.1}};
+    const ae::q20_12_t speed{0.03};
 
     // character position
-    const Point2D<float> characterTranslate = Point2D<float>(0.0122f, 2.3355f);
-    const float height = 0.2f;
-    const float characterFacingAngle = 180.0f;
+    const Point2D<ae::q20_12_t> characterTranslate{ae::q20_12_t{0.0122}, ae::q20_12_t{2.3355}};
+    const ae::q20_12_t height{0.2};
+    const ae::q20_12_t characterFacingAngle{180};
 };

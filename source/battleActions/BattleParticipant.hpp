@@ -3,11 +3,11 @@
 #include "BattleStats.hpp"
 #include "ParticipantType.hpp"
 #include "armours/Armour.hpp"
+#include "events/BattleEvents.hpp"
+#include "managers/MathManager.hpp"
 #include "shoes/Shoe.hpp"
 #include "skills/Skill.hpp"
-
-#include "events/BattleEvents.hpp"
-
+#include <aegis/ndsTypes.hpp>
 #include <nds.h>
 #include <vector>
 
@@ -42,14 +42,14 @@ struct BattleParticipant
     Armour armour;
     Shoe shoe;
 
-    float currentTurnOrderAgility;
+    ae::q20_12_t currentTurnOrderAgility;
     bool oneMore = false;
     bool knockedDown = false;
 
     virtual BattleStats* getBattleStats() = 0;
-    virtual float calculateBaseDamage(BattleParticipant& defender, Skill& skill) = 0;
-    virtual float getTeamMultiplier() = 0;
-    virtual void setCurrentTurnOrderAgility(float boost) = 0;
+    virtual ae::q20_12_t calculateBaseDamage(BattleParticipant& defender, Skill& skill) = 0;
+    virtual ae::q20_12_t getTeamMultiplier() = 0;
+    virtual void setCurrentTurnOrderAgility(ae::q20_12_t boost) = 0;
     virtual BattlePhase getInitalTurnPhase() = 0;
     virtual void onDead(Event::BattleResult& battleResult) = 0;
 

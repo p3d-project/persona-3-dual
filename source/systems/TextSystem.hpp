@@ -21,7 +21,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
     {
     }
 
-    void Update(ae::fixed_t /*dt*/) override
+    void Update(ae::q20_12_t /*dt*/) override
     {
     }
 

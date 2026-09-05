@@ -19,28 +19,31 @@ void MovementComponent::Destroy()
     isActive = false;
 }
 
-void MovementComponent::Update(ae::fixed_t)
+void MovementComponent::Update(ae::q20_12_t)
 {
     // TODO: don't broadcast on every update (waste cpu cycles). Set it once?
     ae::BroadcastEvent(Event::SetCharacterPosition{isCharacterAt()});
-    float cameraAngle = CameraSystem::GetInstance().getMovementAngle();
-    float forwardX;
-    float forwardZ;
-    float rightX;
-    float rightZ;
+    ae::q20_12_t cameraAngle = CameraSystem::GetInstance().getMovementAngle();
+    ae::q20_12_t forwardX;
+    ae::q20_12_t forwardZ;
+    ae::q20_12_t rightX;
+    ae::q20_12_t rightZ;
 
-    float deltaX = 0.0f;
-    float deltaZ = 0.0f;
+    ae::q20_12_t deltaX{0};
+    ae::q20_12_t deltaZ{0};
 
-    float nextX;
-    float nextZ;
+    ae::q20_12_t nextX;
+    ae::q20_12_t nextZ;
 
-    float angleRad;
+    ae::q20_12_t angleRad;
 
-    forwardX = -math.sin(cameraAngle) * config.speed;
-    forwardZ = math.cos(cameraAngle) * config.speed;
-    rightX = math.cos(cameraAngle) * config.speed;
-    rightZ = math.sin(cameraAngle) * config.speed;
+    const ae::q20_12_t sinVal = ae::q20_12_t{math.sin(cameraAngle)};
+    const ae::q20_12_t cosVal = ae::q20_12_t{math.cos(cameraAngle)};
+
+    forwardX = -sinVal * config.speed;
+    forwardZ = cosVal * config.speed;
+    rightX = cosVal * config.speed;
+    rightZ = sinVal * config.speed;
 
     if (systemKeysHeld & KEY_UP)
     {
@@ -66,7 +69,7 @@ void MovementComponent::Update(ae::fixed_t)
         deltaZ += rightZ;
     }
 
-    if (deltaX != 0.0f || deltaZ != 0.0f)
+    if (deltaX != ae::q20_12_t{0} || deltaZ != ae::q20_12_t{0})
     {
         // set walking animation
         if (Globals::enableCharacterAnim && (animationCtrl->getCurrentAnimIndex() != walkAnim))
@@ -75,9 +78,9 @@ void MovementComponent::Update(ae::fixed_t)
         }
 
         // normalize diagonal movement to prevent faster speed
-        if (deltaX != 0.0f && deltaZ != 0.0f)
+        if (deltaX != ae::q20_12_t{0} && deltaZ != ae::q20_12_t{0})
         {
-            const float invSqrt2 = 0.707106781187f;
+            const ae::q20_12_t invSqrt2{0.707106781187};
             deltaX *= invSqrt2;
             deltaZ *= invSqrt2;
         }
@@ -112,11 +115,10 @@ void MovementComponent::Update(ae::fixed_t)
         config.characterTranslate.z = nextZ;
     }
 
-    if (deltaX != 0.0f || deltaZ != 0.0f)
+    if (deltaX != ae::q20_12_t{0} || deltaZ != ae::q20_12_t{0})
     {
-        // return angle in radians and convert to degrees
-        angleRad = math.atan2(deltaZ, deltaX);
-        config.characterFacingAngle = angleRad * (180.0f / 3.14159265f);
+        angleRad = math.atan2(deltaX, deltaZ);
+        config.characterFacingAngle = angleRad * math.div(ae::q20_12_t{180}, ae::q20_12_t{3.14159265});
     }
 }
 
@@ -149,8 +151,10 @@ CharacterPosition MovementComponent::isCharacterAt()
 
 TileType MovementComponent::isTileAt()
 {
-    int tileX = (int)((config.characterTranslate.x + config.worldOffsetX) / config.tileSize);
-    int tileZ = (int)((config.characterTranslate.z + config.worldOffsetZ) / config.tileSize);
+    MathManager& math = MathManager::GetInstance();
+
+    int tileX = (int)(math.div(config.characterTranslate.x + config.worldOffsetX, config.tileSize));
+    int tileZ = (int)(math.div(config.characterTranslate.z + config.worldOffsetZ, config.tileSize));
     return isTileAt(tileX, tileZ);
 }
 
@@ -164,14 +168,14 @@ TileType MovementComponent::isTileAt(int tileX, int tileZ)
     return (TileType)config.collisionMap[(tileZ * config.mapWidth) + tileX];
 }
 
-bool MovementComponent::isTileWalkable(float worldX, float worldZ)
+bool MovementComponent::isTileWalkable(ae::q20_12_t worldX, ae::q20_12_t worldZ)
 {
-    float distanceToEdge = config.characterSize.x * 0.5f;
+    ae::q20_12_t distanceToEdge = config.characterSize.x * ae::q20_12_t{0.5};
 
-    int tileMinX = (int)((worldX - distanceToEdge + config.worldOffsetX) / config.tileSize);
-    int tileMaxX = (int)((worldX + distanceToEdge + config.worldOffsetX) / config.tileSize);
-    int tileMinZ = (int)((worldZ - distanceToEdge + config.worldOffsetZ) / config.tileSize);
-    int tileMaxZ = (int)((worldZ + distanceToEdge + config.worldOffsetZ) / config.tileSize);
+    int tileMinX = static_cast<int>(math.div(worldX - distanceToEdge + config.worldOffsetX, config.tileSize));
+    int tileMaxX = static_cast<int>(math.div(worldX + distanceToEdge + config.worldOffsetX, config.tileSize));
+    int tileMinZ = static_cast<int>(math.div(worldZ - distanceToEdge + config.worldOffsetZ, config.tileSize));
+    int tileMaxZ = static_cast<int>(math.div(worldZ + distanceToEdge + config.worldOffsetZ, config.tileSize));
 
     for (int z = tileMinZ; z <= tileMaxZ; z++)
     {

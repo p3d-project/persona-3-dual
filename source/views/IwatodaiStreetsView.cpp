@@ -30,11 +30,11 @@ void IwatodaiStreetsView::startBattle()
 void IwatodaiStreetsView::setupCamera()
 {
     camConfig.mode = CameraMode::Follow;
-    camConfig.initialAngle = 1.5708f * 2;
-    camConfig.distance = 1.0f;
-    camConfig.height = height + 0.6f;
-    camConfig.lookAhead = 0.2f;
-    camConfig.angleIncrement = 0.05f;
+    camConfig.initialAngle = ae::q20_12_t{1.5708 * 2};
+    camConfig.distance = ae::q20_12_t{1};
+    camConfig.height = height + ae::q20_12_t{0.6};
+    camConfig.lookAhead = ae::q20_12_t{0.2};
+    camConfig.angleIncrement = ae::q20_12_t{0.05};
     camConfig.isRotationLocked = true;
 }
 
@@ -55,7 +55,9 @@ void IwatodaiStreetsView::setupMovement()
 
 void IwatodaiStreetsView::setupMusic()
 {
-    musicCtrl->init((fatBasePath + "music/locations/iwatodaiStreets/changing_seasons.pcm").c_str(), 31.0f, 177.587f);
+    musicCtrl->init((fatBasePath + "music/locations/iwatodaiStreets/changing_seasons.pcm").c_str(),
+                    ae::q20_12_t{31},
+                    ae::q20_12_t{177.587});
 }
 
 ViewState IwatodaiStreetsView::onTileCheck(TileType tile, u32 pressed)

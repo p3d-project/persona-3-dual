@@ -4,7 +4,7 @@
 
 void VideoView::init()
 {
-    videoCtrl->init(filename, 15.0f, nextView);
+    videoCtrl->init(filename, ae::q20_12_t{15.0}, nextView);
     setBrightness(2, -16);
 }
 

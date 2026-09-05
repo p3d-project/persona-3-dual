@@ -11,11 +11,11 @@
 
 struct BattleStats
 {
-    u32 st;
-    u32 ma;
-    u32 en;
-    u32 ag;
-    u32 lu;
+    uint8_t st;
+    uint8_t ma;
+    uint8_t en;
+    uint8_t ag;
+    uint8_t lu;
 
     enum Affinity
     {

@@ -11,6 +11,8 @@
 
 #include "core/routerIDs.hpp"
 #include <aegis/component.hpp>
+#include <aegis/ndsTypes.hpp>
+#include <aegis/types.hpp>
 
 #include "controllers/AnimationController.hpp"
 #include "managers/MathManager.hpp"
@@ -29,7 +31,7 @@ class MovementComponent : public ae::Component
      *
      * @param dt Fixed-point delta time passed from the aegis engine loop (currently unused).
      */
-    void Update(ae::fixed_t /*dt*/) override;
+    void Update(ae::q20_12_t /*dt*/) override;
 
     ae::ComponentTypeID GetType() const override
     {
@@ -46,14 +48,14 @@ class MovementComponent : public ae::Component
     void configureMovement(const MovementConfig& config);
 
     /**
-     * @brief Start the Update(ae::fixed_t) loop by setting isActive to true
+     * @brief Start the Update(ae::q20_12_t) loop by setting isActive to true
      *
      * Movement must be set by configureMovement() before start() can be called
      */
     void start();
 
     /**
-     * @brief Stop the Update(ae::fixed_t) loop by setting isActive to false
+     * @brief Stop the Update(ae::q20_12_t) loop by setting isActive to false
      */
     void stop();
 
@@ -105,5 +107,5 @@ class MovementComponent : public ae::Component
      *
      * @return true if there is collision at the given position in 3D space, otherwise false
      */
-    bool isTileWalkable(float worldX, float worldZ);
+    bool isTileWalkable(ae::q20_12_t worldX, ae::q20_12_t worldZ);
 };

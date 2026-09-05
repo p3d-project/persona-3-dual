@@ -16,13 +16,13 @@
 namespace Event
 {
 /**
- * @brief Output of @ref CameraSystem::Update(ae::fixed_t), consumed by gluLookAt().
+ * @brief Output of @ref CameraSystem::Update(ae::q20_12_t), consumed by gluLookAt().
  */
 struct CameraPosition : public etl::message<EventID::CameraPosition>
 {
-    Vec3<float> eye;    ///< Camera eye position.
-    Vec3<float> target; ///< Look-at point.
-    Vec3<float> up;     ///< Up vector (default 0,1,0).
+    Vec3<ae::q20_12_t> eye;    ///< Camera eye position.
+    Vec3<ae::q20_12_t> target; ///< Look-at point.
+    Vec3<ae::q20_12_t> up;     ///< Up vector (default 0,1,0).
 };
 
 /**
@@ -36,16 +36,16 @@ struct ConfigureCamera : public etl::message<EventID::ConfigureCamera>
     CameraMode mode = CameraMode::Follow;
 
     // Static / CCTV — fixed eye position
-    Vec3<float> eye = {};
-    Vec3<float> target = {}; ///< Look-at point. Used by Static only.
+    Vec3<ae::q20_12_t> eye = {};
+    Vec3<ae::q20_12_t> target = {}; ///< Look-at point. Used by Static only.
 
     // Follow / Free
-    float initialAngle = 0.0f;     ///< Starting orbit angle in radians.
-    float distance = 1.5f;         ///< Distance from character to camera eye.
-    float height = 0.6f;           ///< Eye height above the character origin.
-    float lookAhead = 0.5f;        ///< Distance ahead of the character for the look-at point.
-    float angleIncrement = 0.05f;  ///< Radians rotated per frame on L/R input.
-    bool isRotationLocked = false; ///< Disable camera angle rotation on L/R input.
+    ae::q20_12_t initialAngle{0};      ///< Starting orbit angle in radians.
+    ae::q20_12_t distance{1.5};        ///< Distance from character to camera eye.
+    ae::q20_12_t height{0.6};          ///< Eye height above the character origin.
+    ae::q20_12_t lookAhead{0.5};       ///< Distance ahead of the character for the look-at point.
+    ae::q20_12_t angleIncrement{0.05}; ///< Radians rotated per frame on L/R input.
+    bool isRotationLocked = false;     ///< Disable camera angle rotation on L/R input.
 };
 
 /**

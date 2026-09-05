@@ -1,4 +1,6 @@
 #pragma once
+#include <aegis/ndsTypes.hpp>
+#include <aegis/types.hpp>
 #include <maxmod9.h>
 #include <nds.h>
 #include <stdio.h>
@@ -30,7 +32,9 @@ class MusicController
      * @param loopStartSeconds Loop start position in seconds.
      * @param loopEndSeconds Loop end position in seconds, or -1 to loop at EOF.
      */
-    void init(const char* filePath, float loopStartSeconds = 0.0f, float loopEndSeconds = -1.0f);
+    void init(const char* filePath,
+              ae::q20_12_t loopStartSeconds = ae::q20_12_t{0},
+              ae::q20_12_t loopEndSeconds = ae::q20_12_t{-1.0});
     /** @brief Fills audio buffers and services the Maxmod stream. */
     void update();
     /** @brief Pauses the active stream. */
@@ -40,14 +44,16 @@ class MusicController
 
     /** @brief Starts the audio stream used by video playback. */
     void initVideoAudio();
+
     /**
      * @brief Queues decoded video audio for playback.
      * @param data Interleaved stereo 16-bit PCM data.
      * @param size Number of bytes in @p data.
      */
     void pushVideoAudio(const u8* data, size_t size);
+
     /** @return Elapsed video audio time in seconds. */
-    float getVideoTime();
+    ae::q20_12_t getVideoTime();
 
     /** @brief Loads a sound effect into Maxmod. */
     void loadSFX(mm_word effectID);

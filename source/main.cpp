@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
     SwitchView(new DisclaimerView());
 
     // TODO: set to constant tied to VBlank
-    const ae::fixed_t dt = ae::fixed_t(1) / 60;
+    const ae::q20_12_t dt = MathManager::GetInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
 
     while (1)
     {

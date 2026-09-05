@@ -1,64 +1,84 @@
 #include "BattleCalcs.hpp"
+#include <aegis/ndsTypes.hpp>
+#include <fpm/math.hpp>
 
 u32 BattleCalcs::attack(BattleParticipant& attacker, BattleParticipant& defender, Skill& skill)
 {
-    float base = attacker.calculateBaseDamage(defender, skill);
-    float range = 95 + (u32)(rand() % 11);
-    return std::clamp((u32)trunc(base * range / 100.0f), (u32)1, (u32)99999);
+    ae::q20_12_t base = attacker.calculateBaseDamage(defender, skill);
+    ae::q20_12_t range = ae::q20_12_t{95} + ae::q20_12_t{(rand() % 11)};
+    return std::clamp(
+        static_cast<u32>(fpm::trunc(MathManager::GetInstance().div(base * ae::q20_12_t{range}, ae::q20_12_t{100}))),
+        (u32)1,
+        (u32)99999);
 }
 
-u32 BattleCalcs::hitrate(BattleParticipant& attacker, BattleParticipant& defender, Skill& skill)
+bool BattleCalcs::hit(BattleParticipant& attacker, BattleParticipant& defender, Skill& skill)
 {
+    MathManager& math = MathManager::GetInstance();
+
     BattleStats& attackerStats = *attacker.getBattleStats();
     BattleStats& defenderStats = *defender.getBattleStats();
 
     if (skill.hitRate == 100)
-        return skill.hitRate;
+        return true;
 
-    float baseAccuracy = (float)(attackerStats.ag + 200) / (defenderStats.ag + 200);
-    u32 multipliedAccuracy;
+    ae::q20_12_t baseAccuracy = math.div(ae::q20_12_t{attackerStats.ag + 200}, ae::q20_12_t{defenderStats.ag + 200});
+    ae::q20_12_t multipliedAccuracy;
     if (attacker.participantType == ParticipantType::Enemy)
     {
-        float shoeMultiplier = (float)(attackerStats.ag + 200) / (defender.shoe.evasion / 2.0f + 200);
-        multipliedAccuracy = baseAccuracy * skill.hitRate * shoeMultiplier;
+        ae::q20_12_t shoeMultiplier =
+            math.div(ae::q20_12_t{attackerStats.ag + 200},
+                     math.div(ae::q20_12_t{defender.shoe.evasion}, ae::q20_12_t{2}) + ae::q20_12_t{200});
+        multipliedAccuracy = baseAccuracy * ae::q20_12_t{skill.hitRate} * shoeMultiplier;
     }
     else
     {
-        multipliedAccuracy = (u32)(baseAccuracy * skill.hitRate);
+        multipliedAccuracy = baseAccuracy * ae::q20_12_t{skill.hitRate};
     }
 
-    return std::clamp(multipliedAccuracy, (u32)50, (u32)99);
+    multipliedAccuracy = std::clamp(multipliedAccuracy, ae::q20_12_t{50}, ae::q20_12_t{99});
+    return multipliedAccuracy > ae::q20_12_t{rand() % 100};
 }
 
 u32 BattleCalcs::healing(BattleParticipant& user, Skill& skill)
 {
     BattleStats* battleStats = user.getBattleStats();
-    float teamMultiplier = user.getTeamMultiplier();
+    ae::q20_12_t teamMultiplier = user.getTeamMultiplier();
 
-    u32 magicBoost = BattleCalcs::getMagicBoostHeal(battleStats->ma);
-    u32 base = (u32)floor((skill.movePower + magicBoost) * teamMultiplier);
-    u32 range = 95 + (u32)(rand() % 11);
-    return (u32)floor(base * range / 100.0f);
+    uint8_t magicBoost = BattleCalcs::getMagicBoostHeal(battleStats->ma);
+    ae::q20_12_t base = fpm::floor(ae::q20_12_t{skill.movePower + magicBoost} * teamMultiplier);
+    ae::q20_12_t range = ae::q20_12_t{95} + ae::q20_12_t{(rand() % 11)};
+
+    return static_cast<u32>(fpm::floor(MathManager::GetInstance().div(base * range, ae::q20_12_t{100})));
 }
 
 u32 BattleCalcs::allOutAttack(Player& attacker, BattleParticipant& defender, u32 participantCount)
 {
-    float levelDifference = BattleCalcs::getLevelDifference(attacker.lv, defender.lv);
+    MathManager& math = MathManager::GetInstance();
+
+    ae::q20_12_t levelDifference = BattleCalcs::getLevelDifference(attacker.lv, defender.lv);
     BattleStats& attackerStats = *attacker.getBattleStats();
     BattleStats& defenderStats = *defender.getBattleStats();
 
-    float affinityMtp = BattleCalcs::getAffinityMtp(*defender.getBattleStats(), SkillDb::allOutAttack);
-    float base = trunc(sqrt((float)((attacker.weapon.weaponPower / 2.0f) * 15 * attackerStats.st) / defenderStats.en) *
-                       1.6f * (levelDifference * levelDifference) * affinityMtp * participantCount);
-    float range = 95 + (u32)(rand() % 11);
-    return (u32)trunc(base * range / 100.0f);
+    ae::q20_12_t affinityMtp = BattleCalcs::getAffinityMtp(*defender.getBattleStats(), SkillDb::allOutAttack);
+
+    ae::q20_12_t base = fpm::trunc(
+        math.sqrt(math.div(ae::q20_12_t{(attacker.weapon.weaponPower / 2) * 15 * attackerStats.st},
+                           ae::q20_12_t{defenderStats.en})) *
+        ae::q20_12_t{1.6} * (levelDifference * levelDifference) * affinityMtp * ae::q20_12_t{participantCount});
+
+    ae::q20_12_t range = ae::q20_12_t{95} + ae::q20_12_t{(rand() % 11)};
+    return static_cast<u32>(fpm::trunc(math.div(base * range, ae::q20_12_t{100})));
 }
 
-const float BattleCalcs::levelMultipliers[24] = {0.5f,  0.51f, 0.53f, 0.59f, 0.66f, 0.75f, 0.84f, 0.91f,
-                                                 0.97f, 0.99f, 1.0f,  1.0f,  1.0f,  1.0f,  1.01f, 1.03f,
-                                                 1.09f, 1.16f, 1.25f, 1.34f, 1.41f, 1.47f, 1.49f, 1.5f};
+const ae::q20_12_t BattleCalcs::levelMultipliers[24] = {
+    ae::q20_12_t{0.5},  ae::q20_12_t{0.51}, ae::q20_12_t{0.53}, ae::q20_12_t{0.59}, ae::q20_12_t{0.66},
+    ae::q20_12_t{0.75}, ae::q20_12_t{0.84}, ae::q20_12_t{0.91}, ae::q20_12_t{0.97}, ae::q20_12_t{0.99},
+    ae::q20_12_t{1.0},  ae::q20_12_t{1.0},  ae::q20_12_t{1.0},  ae::q20_12_t{1.0},  ae::q20_12_t{1.01},
+    ae::q20_12_t{1.03}, ae::q20_12_t{1.09}, ae::q20_12_t{1.16}, ae::q20_12_t{1.25}, ae::q20_12_t{1.34},
+    ae::q20_12_t{1.41}, ae::q20_12_t{1.47}, ae::q20_12_t{1.49}, ae::q20_12_t{1.5}};
 
-const float BattleCalcs::magicBoostTableHeal[20] = {
+const uint8_t BattleCalcs::magicBoostTableHeal[20] = {
     0,   // 1-5
     6,   // 6-10
     12,  // 11-15
@@ -83,59 +103,43 @@ const float BattleCalcs::magicBoostTableHeal[20] = {
 
 u32 BattleCalcs::getAtk(BattleStats& attackerStats, Skill& skill)
 {
-    if (skill.skillRace == SkillRace::phys)
-    {
-        return attackerStats.st;
-    }
-    else
-    {
-        return attackerStats.ma;
-    }
+    return skill.skillRace == SkillRace::phys ? attackerStats.st : attackerStats.ma;
 }
 
-/**
- * @brief gets a multiplier used for damage calcs based on some arbitrary hardcoded table
- *
- * @author Nolan Kolb (TrueGiles / themoonwalker8692)
- */
-float BattleCalcs::getLevelDifference(u32 attackerLevel, u32 defenderLevel)
+ae::q20_12_t BattleCalcs::getLevelDifference(u32 attackerLevel, u32 defenderLevel)
 {
     s32 diff = attackerLevel - defenderLevel;
     diff = std::clamp(diff, (s32)-13, (s32)10);
 
-    return levelMultipliers[diff + 13]; // offset so -13 is 0
+    // offset so -13 is 0
+    return levelMultipliers[diff + 13];
 }
 
-float BattleCalcs::getAffinityMtp(BattleStats& defenderStats, Skill& skill)
+ae::q20_12_t BattleCalcs::getAffinityMtp(BattleStats& defenderStats, Skill& skill)
 {
     u32 affinity = defenderStats.affinities[(u32)skill.element];
 
     switch (affinity)
     {
     case BattleStats::Affinity::Weak:
-        return 1.25f;
+        return ae::q20_12_t{1.25};
     case BattleStats::Affinity::Resist:
-        return 0.5f;
+        return ae::q20_12_t{0.5};
     case BattleStats::Affinity::Null:
-        return 0.0f;
+        return ae::q20_12_t{0.0};
     case BattleStats::Affinity::Absorb:
-        return -1.0f;
+        return ae::q20_12_t{-1.0};
     case BattleStats::Affinity::Repel:
-        return -2.0f; // TODO: add repel logic
+        return ae::q20_12_t{-2.0}; // TODO: add repel logic
     case BattleStats::Affinity::Neutral:
     default:
-        return 1.0f;
+        return ae::q20_12_t{1.0};
     }
 }
 
-/**
- * @brief gets a boost for healing based on some arbitrary table, decided by lvl
- *
- * @author Nolan Kolb (TrueGiles / themoonwalker8692)
- */
-u32 BattleCalcs::getMagicBoostHeal(u32& magic)
+uint8_t BattleCalcs::getMagicBoostHeal(uint8_t& magic)
 {
-    u32 index = (magic - 1) / 5;
-    index = std::clamp(index, (u32)0, (u32)19);
+    uint8_t index = (magic - 1) / 5;
+    index = std::clamp(index, (uint8_t)0, (uint8_t)19);
     return magicBoostTableHeal[index];
 }
