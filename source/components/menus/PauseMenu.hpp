@@ -32,7 +32,7 @@ class PauseMenu : public UIMenu
     static PauseMenu* instance;
 
     CameraSystem& cameraSystem = CameraSystem::GetInstance();
-    UIManager& ui = RenderManager::GetInstance();
+    UIManager& ui = UIManager::GetInstance();
 
     etl::array<CameraMode, 4> cameraModes = {
         CameraMode::Free, CameraMode::Static, CameraMode::CCTV, CameraMode::Follow};
