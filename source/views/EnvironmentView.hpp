@@ -185,13 +185,7 @@ class EnvironmentView : public BaseView
     Dialogue* dialogueFirstLine = nullptr;
 
   private:
-    // -------------------------------------------------
-    // Fog properties
-    uint8_t shift = 1;
-    // how thick (translucent) the fog is
-    uint8_t mass = 1;
-    // how far the fog is (0x0000 to 0x8000)
-    uint16_t depth = 0x6000;
+    RenderManager& render = RenderManager::GetInstance();
 
     /**
      * @brief Loads a single .grit asset and returns its raw tile pointer.

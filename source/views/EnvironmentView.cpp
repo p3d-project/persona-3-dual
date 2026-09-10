@@ -104,10 +104,7 @@ void EnvironmentView::setupEnvironment()
 void EnvironmentView::init()
 {
     // clearing so nothing from the previous enviorment shows during load
-    glClearColor(0, 0, 0, 31);
-    glClearDepth(0x7FFF);
-    glFlush(0);
-    swiWaitForVBlank();
+    render.cleanup3DView();
 
     if (environment == nullptr)
     {
@@ -147,56 +144,21 @@ void EnvironmentView::init()
     vramSetBankI(VRAM_I_SUB_SPRITE_EXT_PALETTE);
     bgExtPaletteEnableSub();
 
-    // 3D init
-    glInit();
-    glEnable(GL_ANTIALIAS);  // cleans up edges
-    glEnable(GL_TEXTURE_2D); // for textures
-    // glEnable(GL_BLEND);      // useful for UI
-    glEnable(GL_FOG);     // fog effect
-    glEnable(GL_OUTLINE); // stylistic outline
+    View3DConfig default3DConfig{
+        settings : GL_ANTIALIAS | GL_TEXTURE_2D | GL_FOG | GL_OUTLINE,
+        polyParams : POLY_ALPHA(31) | POLY_CULL_BACK | POLY_FOG,
+        outlineColor : RGB15(0, 0, 0),
+        fogRed : 22,
+        fogGreen : 25,
+        fogBlue : 28,
+        fogAlpha : 31
+    };
+    render.initialize3DView(default3DConfig);
 
-    glClearColor(0, 0, 0, 31);
-    glClearPolyID(0);
-    glClearDepth(0x7FFF);
-
-    // viewport
-    glViewport(0, 0, 255, 191);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    // zNear is how close the camera can see, zFar is the maximum draw distance
-    gluPerspective(55, 256.0 / 192.0, 0.1, 40);
-
-    // outline
-    glSetOutlineColor(0, RGB15(0, 0, 0));
-
-    // fog
-    // setup color
-    glFogColor(22, 25, 28, 31); // daytime blue
+    // Fog - storing these for now
+    // glFogColor(22, 25, 28, 31); // daytime blue
     // glFogColor(30, 25, 16, 31);  // evening orange
     // glFogColor(16, 17, 19, 31);  // rainy gray
-
-    // how much depth difference there is between table entries
-    glFogShift(shift);
-    // depth at which the fog starts (and the table starts applying)
-    glFogOffset(depth);
-
-    // generate a linear density table
-    uint8_t density = 0;
-    for (uint8_t i = 0; i < 32; ++i) // it has 32 steps
-    {
-        glFogDensity(i, density);
-        // exponentially increase mass the furthur back the fog is
-        density += (mass * i) >> 2;
-
-        // entries are 7 bit, so cap the density to 127
-        if (density > 127)
-        {
-            density = 127;
-        }
-    }
-
-    glPolyFmt(POLY_ALPHA(31) | POLY_CULL_BACK | POLY_FOG);
-    glColor3b(255, 255, 255);
 
     dbEntry = getEnvironmentDbEntry();
     if (!dbEntry)

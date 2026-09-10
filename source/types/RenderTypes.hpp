@@ -1,6 +1,5 @@
 #pragma once
 
-// TODO: REMOVE ONCE FLOAT CHANGES MERGED
 #include <aegis/ndsTypes.hpp>
 #include <aegis/types.hpp>
 #include <fpm/fixed.hpp>
@@ -9,26 +8,21 @@
 
 struct View3DConfig
 {
-    DISP3DCNT_ENUM settings;
+    int settings;
     uint32_t polyParams = POLY_ALPHA(31) | POLY_CULL_BACK;
-
-    int viewportLeft = 0;
-    int viewportTop = 0;
-    int viewportRight = 255;
-    int viewportBottom = 191;
 
     int clearColorRed = 0;
     int clearColorGreen = 0;
     int clearColorBlue = 0;
     int clearColorAlpha = 31;
 
-    ae::q12_3_t clearDepth = ae::q12_3_t{0};
+    int clearDepth = 0x7FFF;
     int clearPolyID = 0;
 
-    int fov = 70;
-    ae::q20_12_t aspect = ae::q20_12_t{256} / ae::q20_12_t{192};
+    int fov = 55;
+    double aspect = 256.0 / 192.0;
     /// @brief Defines how close the cmaera can see.
-    ae::q20_12_t nearPlane = ae::q20_12_t{0.1};
+    double nearPlane = 0.1;
     /// @brief Defines how far the camera can see.
     int farPlane = 40;
 
