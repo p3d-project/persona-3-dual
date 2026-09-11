@@ -148,10 +148,7 @@ void EnvironmentView::init()
         settings : GL_ANTIALIAS | GL_TEXTURE_2D | GL_FOG | GL_OUTLINE,
         polyParams : POLY_ALPHA(31) | POLY_CULL_BACK | POLY_FOG,
         outlineColor : RGB15(0, 0, 0),
-        fogRed : 22,
-        fogGreen : 25,
-        fogBlue : 28,
-        fogAlpha : 31
+        fogColor : RGBA(22, 25, 28, 31),
     };
     render.initialize3DView(default3DConfig);
 
