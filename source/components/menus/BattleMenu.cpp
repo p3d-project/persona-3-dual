@@ -245,6 +245,11 @@ bool BattleMenu::consumeCancel()
 
 void BattleMenu::prevOption()
 {
+    //If we're in the root of the menu, cancel out the back input
+    if (loadedOption == BattleMenuOptions::ACTION)
+    {
+        return;
+    }
     isCancelled = true;
     selectedBattleOption = -1;
     resetLoadedOptions();
