@@ -42,7 +42,7 @@ void RenderManager::initialize3DView(View3DConfig config)
     glInit();
 
     glEnable(config.settings);
-    glClearColor(config.clearColorRed, config.clearColorGreen, config.clearColorBlue, config.clearColorAlpha);
+    glClearColor(config.clearColor.red, config.clearColor.green, config.clearColor.blue, config.clearColor.alpha);
     glClearPolyID(config.clearPolyID);
     glClearDepth(config.clearDepth);
 
@@ -56,9 +56,9 @@ void RenderManager::initialize3DView(View3DConfig config)
         glSetOutlineColor(0, config.outlineColor);
     }
 
-    if (config.fogRed != -1)
+    if (config.fogColor.red != -1)
     {
-        glFogColor(config.fogRed, config.fogGreen, config.fogBlue, config.fogAlpha);
+        glFogColor(config.fogColor.red, config.fogColor.green, config.fogColor.blue, config.fogColor.alpha);
 
         // How much depth difference there is between table entries
         glFogShift(config.shift);

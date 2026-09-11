@@ -6,16 +6,40 @@
 
 #include <nds.h>
 
+/**
+ * @brief Data structure to store RGBA values as 8-bit signed integers.
+ */
+struct RGBA
+{
+    int8_t red;
+    int8_t green;
+    int8_t blue;
+    int8_t alpha;
+
+    /**
+     * @brief Constructor to initialize RGBA data structure .
+     *
+     * @param r Red component (0-31)
+     * @param g Green component (0-31)
+     * @param b Blue component (0-31)
+     * @param a Alpha component (0-31)
+     */
+    RGBA(int8_t r, int8_t g, int8_t b, int8_t a) : red(r), green(g), blue(b), alpha(a)
+    {
+    }
+};
+
+/**
+ * @brief Data structure to store 3D view configuration parameters.
+ */
 struct View3DConfig
 {
+    /// @brief This is a bitmask of various settings, which will be passed to `glEnable()`.
     int settings;
+    /// @brief This is a bitmask of various polygon parameters, which will be passed to `glPolyFmt()`.
     uint32_t polyParams = POLY_ALPHA(31) | POLY_CULL_BACK;
 
-    int clearColorRed = 0;
-    int clearColorGreen = 0;
-    int clearColorBlue = 0;
-    int clearColorAlpha = 31;
-
+    RGBA clearColor = RGBA(0, 0, 0, 31);
     int clearDepth = 0x7FFF;
     int clearPolyID = 0;
 
@@ -29,14 +53,8 @@ struct View3DConfig
     /// @brief Outline color in RGB15 format. If -1, outline will not be enabled.
     rgb outlineColor = -1;
 
-    /// @brief Red component of fog color (0-31). If -1, fog will not be enabled.
-    int8_t fogRed = -1;
-    /// @brief Green component of fog color (0-31).
-    int8_t fogGreen;
-    /// @brief Blue component of fog color (0-31).
-    int8_t fogBlue;
-    /// @brief Alpha component of fog color (0-31).
-    int8_t fogAlpha;
+    /// @brief RGBA values for the foh color. If the r value is -1, fog will not be enabled.
+    RGBA fogColor = RGBA(-1, 0, 0, 0);
     uint8_t shift = 1;
     /// @brief How thick (translucent) the fog is
     uint8_t mass = 1;
