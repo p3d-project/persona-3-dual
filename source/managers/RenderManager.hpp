@@ -98,5 +98,7 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
     friend class Singleton<RenderManager>;
     RenderManager() = default;
 
+    static inline const ae::q20_12_t DEGREE_MODIFIER = ae::q20_12_t{1 << 15} / ae::q20_12_t{360};
+
     MathManager& math = MathManager::GetInstance();
 };

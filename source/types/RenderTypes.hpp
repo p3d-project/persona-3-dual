@@ -44,9 +44,9 @@ struct View3DConfig
     int clearPolyID = 0;
 
     int fov = 55;
-    double aspect = 256.0 / 192.0;
+    ae::q20_12_t aspect = ae::q20_12_t{256} / ae::q20_12_t{192};
     /// @brief Defines how close the cmaera can see.
-    double nearPlane = 0.1;
+    ae::q20_12_t nearPlane = ae::q20_12_t{0.1};
     /// @brief Defines how far the camera can see.
     int farPlane = 40;
 

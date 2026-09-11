@@ -49,7 +49,10 @@ void RenderManager::initialize3DView(View3DConfig config)
     glViewport(0, 0, 255, 191);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(config.fov, config.aspect, config.nearPlane, config.farPlane);
+    gluPerspectivef32((int)(config.fov * DEGREE_MODIFIER),
+                      config.aspect.raw_value(),
+                      config.nearPlane.raw_value(),
+                      floattof32(config.farPlane));
 
     if (config.outlineColor != -1)
     {
