@@ -419,7 +419,9 @@ void MusicController::pushVideoAudio(const u8* data, size_t size)
 
 ae::q20_12_t MusicController::getVideoTime()
 {
-    return ae::q20_12_t{s_elapsedSamples} / ae::q20_12_t{AUDIO_SAMPLE_RATE};
+    //needs to be calcuated like this to not get an overflow
+    return ae::q20_12_t::from_raw_value(
+        static_cast<int32_t>((static_cast<int64_t>(s_elapsedSamples) * 4096) / AUDIO_SAMPLE_RATE));
 }
 
 void MusicController::update()
