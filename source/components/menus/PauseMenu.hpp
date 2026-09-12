@@ -1,7 +1,7 @@
 #pragma once
 #include "components/menus/UIMenu.hpp"
 #include "controllers/AnimationController.hpp"
-#include "managers/RenderManager.hpp"
+#include "managers/UIManager.hpp"
 #include "systems/CameraSystem.hpp"
 #include <etl/array.h>
 
@@ -32,7 +32,7 @@ class PauseMenu : public UIMenu
     static PauseMenu* instance;
 
     CameraSystem& cameraSystem = CameraSystem::GetInstance();
-    RenderManager& rm = RenderManager::GetInstance();
+    UIManager& ui = UIManager::GetInstance();
 
     etl::array<CameraMode, 4> cameraModes = {
         CameraMode::Free, CameraMode::Static, CameraMode::CCTV, CameraMode::Follow};

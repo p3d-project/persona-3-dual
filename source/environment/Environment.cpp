@@ -6,42 +6,6 @@
 #include <stdlib.h>
 #include <string>
 
-/**
- * @brief Converts a raw texture dimension in pixels to the corresponding
- *        libnds TEXTURE_SIZE_* enum value.
- *
- * @param size Texture width/height in pixels. Expected to be one of the
- *             power-of-two values 8, 16, 32, 64, 128, 256, 512, or 1024.
- * @return The matching TEXTURE_SIZE_* constant, or TEXTURE_SIZE_8 as a
- *         fallback if @p size does not match a supported value (a message
- *         is also printed to the debug console in that case).
- */
-static int textureSizeEnum(int size)
-{
-    switch (size)
-    {
-    case 8:
-        return TEXTURE_SIZE_8;
-    case 16:
-        return TEXTURE_SIZE_16;
-    case 32:
-        return TEXTURE_SIZE_32;
-    case 64:
-        return TEXTURE_SIZE_64;
-    case 128:
-        return TEXTURE_SIZE_128;
-    case 256:
-        return TEXTURE_SIZE_256;
-    case 512:
-        return TEXTURE_SIZE_512;
-    case 1024:
-        return TEXTURE_SIZE_1024;
-    default:
-        printf("Invalid texture size %d\n", size);
-        return TEXTURE_SIZE_8;
-    }
-}
-
 Environment::Environment() : dbEntry(nullptr)
 {
     for (int i = 0; i < MAX_ENVIRONMENT_TEXTURES; i++)
@@ -154,17 +118,12 @@ bool Environment::load(const EnvironmentDbEntry* entry,
         if (bitmaps.empty() || !bitmaps[i])
             continue;
 
-        glGenTextures(1, &textureIDs[i]);
-        glBindTexture(GL_TEXTURE_2D, textureIDs[i]);
-
-        glTexImage2D(GL_TEXTURE_2D,
-                     0,
-                     GL_RGBA,
-                     textureSizeEnum(entry->textures[i].width),
-                     textureSizeEnum(entry->textures[i].height),
-                     0,
-                     TEXGEN_TEXCOORD | GL_TEXTURE_WRAP_S | GL_TEXTURE_WRAP_T,
-                     bitmaps[i]);
+        render.uploadTexture(textureIDs[i],
+                             GL_RGBA,
+                             entry->textures[i].width,
+                             entry->textures[i].height,
+                             TEXGEN_TEXCOORD | GL_TEXTURE_WRAP_S | GL_TEXTURE_WRAP_T,
+                             bitmaps[i]);
     }
 
     return true;
@@ -180,16 +139,7 @@ void Environment::draw()
         if (!textureIDs[i])
             continue;
 
-        glBindTexture(GL_TEXTURE_2D, textureIDs[i]);
-
-        if (displayLists[i])
-        {
-            // Guard against corrupted DL pointers
-            glCallList(displayLists[i]);
-        }
-
-        while (GFX_BUSY)
-            ;
+        render.renderTexturedModel(displayLists[i], textureIDs[i]);
     }
 }
 
@@ -198,89 +148,18 @@ void Environment::drawBillboards(bool faceCamera, ae::q20_12_t camX, ae::q20_12_
     if (!dbEntry || dbEntry->billboardCount == 0)
         return;
 
-    int currentSlot = -1;
-    bool inQuads = false;
-
     for (int i = 0; i < dbEntry->billboardCount; i++)
     {
         const auto& bb = dbEntry->billboards[i];
-
+        // Skip any billboard that references an out-of-range texture slot
         if (bb.texSlot >= dbEntry->textureCount)
             continue;
-
+        // Skip any billboard that references a texture slot that has no bound texture ID
         if (!textureIDs[bb.texSlot])
             continue;
 
-        if (bb.texSlot != currentSlot)
-        {
-            if (inQuads)
-            {
-                glEnd();
-                inQuads = false;
-            }
-
-            while (GFX_BUSY)
-                ;
-
-            glBindTexture(GL_TEXTURE_2D, textureIDs[bb.texSlot]);
-            currentSlot = bb.texSlot;
-        }
-
-        if (!inQuads)
-        {
-            glBegin(GL_QUADS);
-            inQuads = true;
-        }
-
-        ae::q4_12_t rX{1}, rY{0}, rZ{0};
-        ae::q4_12_t uX{0}, uY{1}, uZ{0};
-
-        if (faceCamera)
-        {
-            //cast to 32 bit type for conversion first
-            ae::q20_12_t bx = ae::q20_12_t::from_raw_value(static_cast<int32_t>(bb.x.raw_value()));
-            ae::q20_12_t bz = ae::q20_12_t::from_raw_value(static_cast<int32_t>(bb.z.raw_value()));
-
-            ae::q20_12_t dx = camX - bx;
-            ae::q20_12_t dz = camZ - bz;
-
-            // Offset to align model pivot with NDS camera origin
-            ae::q20_12_t dist = math.length(dx, dz, ae::q20_12_t{0});
-
-            if (dist > ae::q20_12_t{0.001})
-            {
-                dx = math.div(dx, dist);
-                dz = math.div(dz, dist);
-            }
-
-            // narrow type
-            rX = ae::q4_12_t::from_raw_value(static_cast<int16_t>(dz.raw_value()));
-            rZ = ae::q4_12_t::from_raw_value(static_cast<int16_t>((-dx).raw_value()));
-        }
-
-        ae::q4_12_t rx = rX * bb.halfWidth;
-        ae::q4_12_t ry = rY * bb.halfWidth;
-        ae::q4_12_t rz = rZ * bb.halfWidth;
-
-        ae::q4_12_t ux = uX * bb.halfHeight;
-        ae::q4_12_t uy = uY * bb.halfHeight;
-        ae::q4_12_t uz = uZ * bb.halfHeight;
-
-        glTexCoord2t16(bb.u0.raw_value(), bb.v1.raw_value());
-        glVertex3v16((bb.x - rx - ux).raw_value(), (bb.y - ry - uy).raw_value(), (bb.z - rz - uz).raw_value());
-
-        glTexCoord2t16(bb.u1.raw_value(), bb.v1.raw_value());
-        glVertex3v16((bb.x + rx - ux).raw_value(), (bb.y + ry - uy).raw_value(), (bb.z + rz - uz).raw_value());
-
-        glTexCoord2t16(bb.u1.raw_value(), bb.v0.raw_value());
-        glVertex3v16((bb.x + rx + ux).raw_value(), (bb.y + ry + uy).raw_value(), (bb.z + rz + uz).raw_value());
-
-        glTexCoord2t16(bb.u0.raw_value(), bb.v0.raw_value());
-        glVertex3v16((bb.x - rx + ux).raw_value(), (bb.y - ry + uy).raw_value(), (bb.z - rz + uz).raw_value());
+        render.renderTexturedBillboard(bb, textureIDs[bb.texSlot], faceCamera, camX, camY, camZ);
     }
-
-    if (inQuads)
-        glEnd();
 }
 
 void Environment::cleanup()
@@ -300,8 +179,7 @@ void Environment::cleanup()
             // Previously this only zeroed the id without ever releasing the
             // underlying GPU texture slot, leaking VRAM texture memory on
             // every single room transition.
-            glDeleteTextures(1, &textureIDs[i]);
-            textureIDs[i] = 0;
+            render.deleteTexture(textureIDs[i]);
         }
     }
 

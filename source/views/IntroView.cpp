@@ -119,7 +119,7 @@ void IntroView::init()
     vramSetBankE(VRAM_E_BG_EXT_PALETTE);
     vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE);
 
-    render.hideBg(bg[3]);         // hide overlay
+    ui.hideBg(bg[3]);             // hide overlay
     bgSetCenter(bg[3], 128, 96);  // pivot point on the screen (at the screen's center)
     bgSetScroll(bg[3], 256, 256); // pivot point on the image (at the image's center)
 
@@ -357,7 +357,7 @@ ViewState IntroView::update()
         displayOverlay = true;
         REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_DST_BG2;
         REG_BLDALPHA = 0 | (16 << 8);
-        render.showBg(bg[3]);
+        ui.showBg(bg[3]);
     }
 
     // fade in overlay
