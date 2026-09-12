@@ -428,28 +428,25 @@ def write_mdl_file(output_path, nodes, textures, images, animations=[]):
         if animations != [] and animations is not None and len(animations) > 0:
             # Animations
             for anim in animations:
-                # 1. Anim Header: 32-byte name | u32 num_frames | s16 fps
+                # Anim Header: 32-byte name | u32 num_frames | s16 fps | u32 trackCount
                 name_bytes = anim["name"].encode("ascii")[:31].ljust(32, b"\0")
+                tracks = anim["tracks"]
                 f.write(
                     struct.pack(
-                        "<32sIh",
+                        "<32sIhI",
                         name_bytes,
                         anim["num_frames"],
                         float_to_s16(anim["fps"]),
+                        len(tracks),
                     )
                 )
 
-                # 2. Track Count: u32 trackCount
-                tracks = anim["tracks"]
-                f.write(struct.pack("<I", len(tracks)))
-
-                # 3. Individual Tracks
+                # Individual Tracks
                 for track in tracks:
                     # Node Index
-                    f.write(struct.pack("<i", track["nodeIndex"]))
-                    f.write(struct.pack("<I", len(track["t"])))
+                    f.write(struct.pack("<iI", track["nodeIndex"], len(track["t"])))
 
-                    # Translation Keys: u32 count -> s16 time, s32 x, s32 y, s32 z
+                    # Translation Keys: s16 time, s32 x, s32 y, s32 z
                     for k in track["t"]:
                         val = k["val"]
                         f.write(
@@ -462,7 +459,7 @@ def write_mdl_file(output_path, nodes, textures, images, animations=[]):
                             )
                         )
 
-                    # Rotation Keys: u32 count -> s16 time, s16 x, s16 y, s16 z, s16 w
+                    # Rotation Keys: s16 time, s16 x, s16 y, s16 z, s16 w
                     f.write(struct.pack("<I", len(track["r"])))
                     for k in track["r"]:
                         val = k["val"]
