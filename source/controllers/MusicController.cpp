@@ -169,7 +169,7 @@ static FILE* s_audioFile = nullptr;
 static bool s_isPaused = false;
 static bool s_streamOpen = false;
 static std::string s_currentFilePath = "";
-static u32 s_elapsedSamples = 0;
+static uint64_t s_elapsedSamples = 0;
 static u32 s_loopStartSamples = 0;
 static u32 s_loopEndSamples = 0;
 static long s_loopStartOffset = 0;
@@ -419,7 +419,8 @@ void MusicController::pushVideoAudio(const u8* data, size_t size)
 
 ae::q20_12_t MusicController::getVideoTime()
 {
-    return ae::q20_12_t{s_elapsedSamples} / ae::q20_12_t{AUDIO_SAMPLE_RATE};
+    //needs to be calcuated like this to not get an overflow
+    return ae::q20_12_t::from_raw_value(static_cast<int32_t>((s_elapsedSamples << 12) / AUDIO_SAMPLE_RATE));
 }
 
 void MusicController::update()
