@@ -4,6 +4,7 @@
 
 #include "data/environmentDb.hpp"
 #include "managers/MathManager.hpp"
+#include "managers/RenderManager.hpp"
 
 // Largest textureCount across all current g_environmentDb entries (dorm = 32).
 // Bump this if a future room introduces more textures than that.
@@ -110,4 +111,5 @@ class Environment
     int textureIDs[MAX_ENVIRONMENT_TEXTURES];
 
     MathManager& math = MathManager::GetInstance();
+    RenderManager& render = RenderManager::GetInstance();
 };

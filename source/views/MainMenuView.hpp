@@ -4,7 +4,7 @@
 #include "components/menus/MainMenu.hpp"
 #include "controllers/MusicController.hpp"
 #include "managers/MathManager.hpp"
-#include "managers/RenderManager.hpp"
+#include "managers/UIManager.hpp"
 #include "views/BaseView.hpp"
 
 class MainMenuView : public BaseView
@@ -39,7 +39,7 @@ class MainMenuView : public BaseView
     TextComponent* textMenu = nullptr;
 
     MathManager& math = MathManager::GetInstance();
-    RenderManager& render = RenderManager::GetInstance();
+    UIManager& ui = UIManager::GetInstance();
     MusicController* musicCtrl = MusicController::getInstance();
 
   public:

@@ -20,7 +20,7 @@
 #include "components/screens/UIScreen.hpp"
 
 #include "controllers/MusicController.hpp"
-#include "managers/RenderManager.hpp"
+#include "managers/UIManager.hpp"
 
 // TODO: add a way to indicate reduced # of bg slots
 class UISystem : public ae::SystemRouter<UISystem,
@@ -188,7 +188,7 @@ class UISystem : public ae::SystemRouter<UISystem,
      */
     void resetUIResources();
 
-    RenderManager& render = RenderManager::GetInstance();
+    UIManager& ui = UIManager::GetInstance();
 
     OamState* oamSub = nullptr;
     OamState* oamMain = nullptr;

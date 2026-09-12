@@ -3,7 +3,7 @@
 #include "components/TextComponent.hpp"
 #include "controllers/MusicController.hpp"
 #include "managers/MathManager.hpp"
-#include "managers/RenderManager.hpp"
+#include "managers/UIManager.hpp"
 #include "views/BaseView.hpp"
 
 #include <etl/array.h>
@@ -58,7 +58,7 @@ class IntroView : public BaseView
     TextComponent* text = nullptr;
 
     MathManager& math = MathManager::GetInstance();
-    RenderManager& render = RenderManager::GetInstance();
+    UIManager& ui = UIManager::GetInstance();
     MusicController* musicCtrl = MusicController::getInstance();
 
   public:
