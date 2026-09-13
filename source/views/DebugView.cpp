@@ -6,7 +6,6 @@
 
 /**
  * TODO:
- * Add cleanup function
  * Rename qoaPlay functions to follow correct naming scheme
  * use ae types for values/numbers
  * Move into AudioSystem, AudioManager
@@ -37,54 +36,27 @@ typedef struct
 // TODO: remove static keyword?
 static void audioInit();
 static mm_word audioUpdate(mm_word length, mm_addr dest, mm_stream_formats format);
-qoaplay_desc* s_qp = nullptr;
+qoaplay_desc* qp = nullptr;
 bool isLoopingEnabled = false;
 int startFrame = 0;
 int endFrame = 0;
 
-void DebugView::init()
-{
-    videoSetMode(MODE_3_2D);
-    videoSetModeSub(MODE_0_2D);
-
-    vramSetBankA(VRAM_A_MAIN_BG_0x06000000);
-    vramSetBankD(VRAM_D_MAIN_BG_0x06020000);
-    vramSetBankC(VRAM_C_SUB_BG);
-
-    // set brightness on bottom screen to completely dark (no visible image)
-    setBrightness(2, -16);
-
-    // set audio
-    audioInit();
-}
-
-ViewState DebugView::update()
-{
-    mmStreamUpdate();
-    return ViewState::KEEP_CURRENT;
-}
-
-void DebugView::cleanup()
-{
-    BaseView::cleanup();
-}
-
-double qoaplay_get_duration(qoaplay_desc* qp)
+double qoaplay_get_duration()
 {
     return (double)qp->info.samples / (double)qp->info.samplerate;
 }
 
-double qoaplay_get_time(qoaplay_desc* qp)
+double qoaplay_get_time()
 {
     return (double)qp->samplePos / (double)qp->info.samplerate;
 }
 
-int qoaplay_get_frame(qoaplay_desc* qp)
+int qoaplay_get_frame()
 {
     return qp->samplePos / QOA_FRAME_LEN;
 }
 
-void qoaplay_seek_frame(qoaplay_desc* qp, int frame)
+void qoaplay_seek_frame(int frame)
 {
     if (frame < 0)
     {
@@ -106,9 +78,9 @@ void qoaplay_seek_frame(qoaplay_desc* qp, int frame)
 void setLoop(float startTime, float endTime)
 {
     isLoopingEnabled = true;
-    startFrame = ceil((startTime * s_qp->info.samplerate) / QOA_FRAME_LEN);
-    endFrame = endTime != -1 ? ceil((endTime * s_qp->info.samplerate) / QOA_FRAME_LEN)
-                             : ceil(s_qp->info.samples / QOA_FRAME_LEN);
+    startFrame = ceil((startTime * qp->info.samplerate) / QOA_FRAME_LEN);
+    endFrame =
+        endTime != -1 ? ceil((endTime * qp->info.samplerate) / QOA_FRAME_LEN) : ceil(qp->info.samples / QOA_FRAME_LEN);
 }
 
 void loop()
@@ -118,14 +90,14 @@ void loop()
         return;
     }
 
-    if (qoaplay_get_frame(s_qp) >= endFrame)
+    if (qoaplay_get_frame() >= endFrame)
     {
         // rewind to start time
-        qoaplay_seek_frame(s_qp, startFrame);
+        qoaplay_seek_frame(startFrame);
     }
 }
 
-void qoaplay_rewind(qoaplay_desc* qp)
+void qoaplay_rewind()
 {
     fseek(qp->file, qp->firstFramePos, SEEK_SET);
     qp->samplePos = 0;
@@ -133,7 +105,7 @@ void qoaplay_rewind(qoaplay_desc* qp)
     qp->sampleDataPos = 0;
 }
 
-unsigned int qoaplay_decode_frame(qoaplay_desc* qp)
+unsigned int qoaplay_decode_frame()
 {
     qp->bufferLen = fread(qp->buffer, 1, qoa_max_frame_size(&qp->info), qp->file);
 
@@ -144,7 +116,7 @@ unsigned int qoaplay_decode_frame(qoaplay_desc* qp)
     return frame_len;
 }
 
-unsigned int qoaplay_decode(qoaplay_desc* qp, short* sample_data, int num_samples)
+unsigned int qoaplay_decode(short* sample_data, int num_samples)
 {
     int src_index = qp->sampleDataPos * qp->info.channels;
     int dst_index = 0;
@@ -157,11 +129,11 @@ unsigned int qoaplay_decode(qoaplay_desc* qp, short* sample_data, int num_sample
             loop();
 
             // decode audio
-            if (!qoaplay_decode_frame(qp))
+            if (!qoaplay_decode_frame())
             {
                 // loop to the beginning if audio is finished
-                qoaplay_rewind(qp);
-                qoaplay_decode_frame(qp);
+                qoaplay_rewind();
+                qoaplay_decode_frame();
             }
             src_index = 0;
         }
@@ -212,18 +184,18 @@ static void audioInit()
     unsigned int bufferSize = qoa_max_frame_size(&qoa);
     unsigned int sampleDataSize = qoa.channels * QOA_FRAME_LEN * sizeof(short) * 2;
 
-    s_qp = (qoaplay_desc*)malloc(sizeof(qoaplay_desc) + bufferSize + sampleDataSize);
-    memset(s_qp, 0, sizeof(qoaplay_desc));
+    qp = (qoaplay_desc*)malloc(sizeof(qoaplay_desc) + bufferSize + sampleDataSize);
+    memset(qp, 0, sizeof(qoaplay_desc));
 
     // set qoaplay_desc values
-    s_qp->firstFramePos = firstFramePos;
-    s_qp->file = file;
-    s_qp->buffer = ((unsigned char*)s_qp) + sizeof(qoaplay_desc);
-    s_qp->sampleData = (short*)(((unsigned char*)s_qp) + sizeof(qoaplay_desc) + bufferSize);
+    qp->firstFramePos = firstFramePos;
+    qp->file = file;
+    qp->buffer = ((unsigned char*)qp) + sizeof(qoaplay_desc);
+    qp->sampleData = (short*)(((unsigned char*)qp) + sizeof(qoaplay_desc) + bufferSize);
 
-    s_qp->info.channels = qoa.channels;
-    s_qp->info.samplerate = qoa.samplerate;
-    s_qp->info.samples = qoa.samples;
+    qp->info.channels = qoa.channels;
+    qp->info.samplerate = qoa.samplerate;
+    qp->info.samples = qoa.samples;
 
     // set loop
     setLoop(17.962, 66.082);
@@ -242,13 +214,52 @@ static void audioInit()
 
 mm_word audioUpdate(mm_word length, mm_addr dest, mm_stream_formats format)
 {
-    if (((s_qp->info.channels == 1) && (format != MM_STREAM_16BIT_MONO)) ||
-        ((s_qp->info.channels == 2) && (format != MM_STREAM_16BIT_STEREO)))
+    if (((qp->info.channels == 1) && (format != MM_STREAM_16BIT_MONO)) ||
+        ((qp->info.channels == 2) && (format != MM_STREAM_16BIT_STEREO)))
     {
         // TODO: display error message
         // audio channels do not match...
     }
 
-    unsigned int decoded = qoaplay_decode(s_qp, (short*)dest, length);
+    unsigned int decoded = qoaplay_decode((short*)dest, length);
     return decoded;
+}
+
+void audioCleanup()
+{
+    qp = nullptr;
+    isLoopingEnabled = false;
+    startFrame = 0;
+    endFrame = 0;
+
+    fclose(qp->file);
+    free(qp);
+}
+
+void DebugView::init()
+{
+    videoSetMode(MODE_3_2D);
+    videoSetModeSub(MODE_0_2D);
+
+    vramSetBankA(VRAM_A_MAIN_BG_0x06000000);
+    vramSetBankD(VRAM_D_MAIN_BG_0x06020000);
+    vramSetBankC(VRAM_C_SUB_BG);
+
+    // set brightness on bottom screen to completely dark (no visible image)
+    setBrightness(2, -16);
+
+    // set audio
+    audioInit();
+}
+
+ViewState DebugView::update()
+{
+    mmStreamUpdate();
+    return ViewState::KEEP_CURRENT;
+}
+
+void DebugView::cleanup()
+{
+    audioCleanup();
+    BaseView::cleanup();
 }
