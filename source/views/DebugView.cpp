@@ -22,15 +22,14 @@ typedef struct
 {
     qoa_desc info;
     FILE* file;
+    uint32_t firstFramePos;
+    uint32_t samplePos;
 
-    unsigned int firstFramePos;
-    unsigned int samplePos;
+    uint32_t bufferLen;
+    uint8_t* buffer;
 
-    unsigned int bufferLen;
-    unsigned char* buffer;
-
-    unsigned int sampleDataPos;
-    unsigned int sampleDataLen;
+    uint32_t sampleDataPos;
+    uint32_t sampleDataLen;
     short* sampleData;
 } qoaplay_desc;
 
@@ -43,8 +42,8 @@ void seekFrame(int frame);
 void setLoop(ae::q20_12_t startTime, ae::q20_12_t endTime);
 void loop();
 void rewind();
-unsigned int decodeFrame();
-unsigned int decode(short* sample_data, int num_samples);
+uint32_t decodeFrame();
+uint32_t decode(short* sample_data, int num_samples);
 void audioInit();
 mm_word audioUpdate(mm_word length, mm_addr dest, mm_stream_formats format);
 void audioCleanup();
@@ -84,19 +83,28 @@ void seekFrame(int frame)
     qp->sampleDataLen = 0;
     qp->sampleDataPos = 0;
 
-    unsigned int offset = qp->firstFramePos + frame * qoa_max_frame_size(&qp->info);
+    uint32_t offset = qp->firstFramePos + frame * qoa_max_frame_size(&qp->info);
     fseek(qp->file, offset, SEEK_SET);
 }
 
 void setLoop(ae::q20_12_t startTime, ae::q20_12_t endTime)
 {
     isLoopingEnabled = true;
-    bool isLoopingToEnd = endTime == ae::q20_12_t{-1};
-    ae::q20_12_t sampleRate{qp->info.samplerate};
 
-    startFrame = static_cast<int>(startTime * sampleRate) / QOA_FRAME_LEN;
-    endFrame =
-        !isLoopingToEnd ? static_cast<int>(endTime * sampleRate) / QOA_FRAME_LEN : qp->info.samples / QOA_FRAME_LEN;
+    // use 64-bit integers to prevent overflow
+    // .raw_value() returns the number pre-multiplied by 2^12, so we shift right by 12
+    int64_t startSample = ((int64_t)startTime.raw_value() * qp->info.samplerate) >> 12;
+    startFrame = startSample / QOA_FRAME_LEN;
+
+    if (endTime != ae::q20_12_t{-1})
+    {
+        int64_t endSample = ((int64_t)endTime.raw_value() * qp->info.samplerate) >> 12;
+        endFrame = endSample / QOA_FRAME_LEN;
+    }
+    else
+    {
+        endFrame = qp->info.samples / QOA_FRAME_LEN;
+    }
 }
 
 void loop()
@@ -121,18 +129,18 @@ void rewind()
     qp->sampleDataPos = 0;
 }
 
-unsigned int decodeFrame()
+uint32_t decodeFrame()
 {
     qp->bufferLen = fread(qp->buffer, 1, qoa_max_frame_size(&qp->info), qp->file);
 
-    unsigned int frame_len;
+    uint32_t frame_len;
     qoa_decode_frame(qp->buffer, qp->bufferLen, &qp->info, qp->sampleData, &frame_len);
     qp->sampleDataPos = 0;
     qp->sampleDataLen = frame_len;
     return frame_len;
 }
 
-unsigned int decode(short* sample_data, int num_samples)
+uint32_t decode(short* sample_data, int num_samples)
 {
     int src_index = qp->sampleDataPos * qp->info.channels;
     int dst_index = 0;
@@ -177,7 +185,7 @@ void audioInit()
     }
 
     // read header
-    unsigned char header[QOA_MIN_FILESIZE];
+    uint8_t header[QOA_MIN_FILESIZE];
     int read = fread(header, QOA_MIN_FILESIZE, 1, file);
     if (!read)
     {
@@ -186,7 +194,7 @@ void audioInit()
 
     // decode header
     qoa_desc qoa;
-    unsigned int firstFramePos = qoa_decode_header(header, QOA_MIN_FILESIZE, &qoa);
+    uint32_t firstFramePos = qoa_decode_header(header, QOA_MIN_FILESIZE, &qoa);
     if (!firstFramePos)
     {
         return;
@@ -197,8 +205,8 @@ void audioInit()
 
     // allocate one chunk of memory for the qoaplay_desc struct, the sample data
     // for one frame and a buffer to hold one frame of encoded data.
-    unsigned int bufferSize = qoa_max_frame_size(&qoa);
-    unsigned int sampleDataSize = qoa.channels * QOA_FRAME_LEN * sizeof(short) * 2;
+    uint32_t bufferSize = qoa_max_frame_size(&qoa);
+    uint32_t sampleDataSize = qoa.channels * QOA_FRAME_LEN * sizeof(short) * 2;
 
     qp = (qoaplay_desc*)malloc(sizeof(qoaplay_desc) + bufferSize + sampleDataSize);
     memset(qp, 0, sizeof(qoaplay_desc));
@@ -206,8 +214,8 @@ void audioInit()
     // set qoaplay_desc values
     qp->firstFramePos = firstFramePos;
     qp->file = file;
-    qp->buffer = ((unsigned char*)qp) + sizeof(qoaplay_desc);
-    qp->sampleData = (short*)(((unsigned char*)qp) + sizeof(qoaplay_desc) + bufferSize);
+    qp->buffer = ((uint8_t*)qp) + sizeof(qoaplay_desc);
+    qp->sampleData = (short*)(((uint8_t*)qp) + sizeof(qoaplay_desc) + bufferSize);
 
     qp->info.channels = qoa.channels;
     qp->info.samplerate = qoa.samplerate;
@@ -233,11 +241,15 @@ mm_word audioUpdate(mm_word length, mm_addr dest, mm_stream_formats format)
     if (((qp->info.channels == 1) && (format != MM_STREAM_16BIT_MONO)) ||
         ((qp->info.channels == 2) && (format != MM_STREAM_16BIT_STEREO)))
     {
-        // TODO: display error message
-        // audio channels do not match...
+        consoleDemoInit();
+        printf("Audio format from the current audio track does not match the original audio format\n");
+        while (1)
+        {
+            swiWaitForVBlank();
+        }
     }
 
-    unsigned int decoded = decode((short*)dest, length);
+    uint32_t decoded = decode((short*)dest, length);
     return decoded;
 }
 
