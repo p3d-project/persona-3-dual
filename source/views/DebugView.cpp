@@ -4,6 +4,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**
+ * TODO:
+ * Add cleanup function
+ * Rename qoaPlay functions to follow correct naming scheme
+ * use ae types for values/numbers
+ * Move into AudioSystem, AudioManager
+ * Add doxygen documentation
+ */
+
 //audio
 #define QOA_IMPLEMENTATION
 #include "debug/qoa.h"
@@ -25,9 +34,13 @@ typedef struct
     short* sampleData;
 } qoaplay_desc;
 
+// TODO: remove static keyword?
 static void audioInit();
 static mm_word audioUpdate(mm_word length, mm_addr dest, mm_stream_formats format);
-qoaplay_desc* s_qp;
+qoaplay_desc* s_qp = nullptr;
+bool isLoopingEnabled = false;
+int startFrame = 0;
+int endFrame = 0;
 
 void DebugView::init()
 {
@@ -56,6 +69,62 @@ void DebugView::cleanup()
     BaseView::cleanup();
 }
 
+double qoaplay_get_duration(qoaplay_desc* qp)
+{
+    return (double)qp->info.samples / (double)qp->info.samplerate;
+}
+
+double qoaplay_get_time(qoaplay_desc* qp)
+{
+    return (double)qp->samplePos / (double)qp->info.samplerate;
+}
+
+int qoaplay_get_frame(qoaplay_desc* qp)
+{
+    return qp->samplePos / QOA_FRAME_LEN;
+}
+
+void qoaplay_seek_frame(qoaplay_desc* qp, int frame)
+{
+    if (frame < 0)
+    {
+        frame = 0;
+    }
+    if (frame > qp->info.samples / QOA_FRAME_LEN)
+    {
+        frame = qp->info.samples / QOA_FRAME_LEN;
+    }
+
+    qp->samplePos = frame * QOA_FRAME_LEN;
+    qp->sampleDataLen = 0;
+    qp->sampleDataPos = 0;
+
+    unsigned int offset = qp->firstFramePos + frame * qoa_max_frame_size(&qp->info);
+    fseek(qp->file, offset, SEEK_SET);
+}
+
+void setLoop(float startTime, float endTime)
+{
+    isLoopingEnabled = true;
+    startFrame = ceil((startTime * s_qp->info.samplerate) / QOA_FRAME_LEN);
+    endFrame = endTime != -1 ? ceil((endTime * s_qp->info.samplerate) / QOA_FRAME_LEN)
+                             : ceil(s_qp->info.samples / QOA_FRAME_LEN);
+}
+
+void loop()
+{
+    if (!isLoopingEnabled)
+    {
+        return;
+    }
+
+    if (qoaplay_get_frame(s_qp) >= endFrame)
+    {
+        // rewind to start time
+        qoaplay_seek_frame(s_qp, startFrame);
+    }
+}
+
 void qoaplay_rewind(qoaplay_desc* qp)
 {
     fseek(qp->file, qp->firstFramePos, SEEK_SET);
@@ -81,19 +150,23 @@ unsigned int qoaplay_decode(qoaplay_desc* qp, short* sample_data, int num_sample
     int dst_index = 0;
     for (int i = 0; i < num_samples; i++)
     {
-        /* Do we have to decode more samples? */
+        // do we have to decode more samples?
         if (qp->sampleDataLen - qp->sampleDataPos == 0)
         {
+            // loop audio section
+            loop();
+
+            // decode audio
             if (!qoaplay_decode_frame(qp))
             {
-                // Loop to the beginning
+                // loop to the beginning if audio is finished
                 qoaplay_rewind(qp);
                 qoaplay_decode_frame(qp);
             }
             src_index = 0;
         }
 
-        /* Write raw 16-bit PCM samples in interleaved channel order. */
+        // write raw 16-bit PCM samples in interleaved channel order
         for (int c = 0; c < qp->info.channels; c++)
         {
             sample_data[dst_index++] = qp->sampleData[src_index++];
@@ -134,7 +207,7 @@ static void audioInit()
     // rewind file back to beginning of the first frame
     fseek(file, firstFramePos, SEEK_SET);
 
-    // Allocate one chunk of memory for the qoaplay_desc struct, the sample data
+    // allocate one chunk of memory for the qoaplay_desc struct, the sample data
     // for one frame and a buffer to hold one frame of encoded data.
     unsigned int bufferSize = qoa_max_frame_size(&qoa);
     unsigned int sampleDataSize = qoa.channels * QOA_FRAME_LEN * sizeof(short) * 2;
@@ -152,10 +225,13 @@ static void audioInit()
     s_qp->info.samplerate = qoa.samplerate;
     s_qp->info.samples = qoa.samples;
 
+    // set loop
+    setLoop(17.962, 66.082);
+
     // setup maxmod audio
     mm_stream stream;
     stream.sampling_rate = qoa.samplerate;
-    stream.buffer_length = bufferSize; // TODO: 2048?
+    stream.buffer_length = bufferSize;
     stream.callback = audioUpdate;
     stream.format = (qoa.channels == 1) ? MM_STREAM_16BIT_MONO : MM_STREAM_16BIT_STEREO;
     stream.timer = MM_TIMER0;
