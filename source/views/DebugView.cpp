@@ -33,36 +33,48 @@ typedef struct
     short* sampleData;
 } qoaplay_desc;
 
-// TODO: remove static keyword?
-static void audioInit();
-static mm_word audioUpdate(mm_word length, mm_addr dest, mm_stream_formats format);
+// NOTE: these functions are not used
+double getDuration();
+double getTime();
+
+int getFrame();
+void seekFrame(int frame);
+void setLoop(float startTime, float endTime);
+void loop();
+void rewind();
+unsigned int decodeFrame();
+unsigned int decode(short* sample_data, int num_samples);
+void audioInit();
+mm_word audioUpdate(mm_word length, mm_addr dest, mm_stream_formats format);
+void audioCleanup();
+
 qoaplay_desc* qp = nullptr;
 bool isLoopingEnabled = false;
 int startFrame = 0;
 int endFrame = 0;
 
-double qoaplay_get_duration()
+double getDuration()
 {
     return (double)qp->info.samples / (double)qp->info.samplerate;
 }
 
-double qoaplay_get_time()
+double getTime()
 {
     return (double)qp->samplePos / (double)qp->info.samplerate;
 }
 
-int qoaplay_get_frame()
+int getFrame()
 {
     return qp->samplePos / QOA_FRAME_LEN;
 }
 
-void qoaplay_seek_frame(int frame)
+void seekFrame(int frame)
 {
     if (frame < 0)
     {
         frame = 0;
     }
-    if (frame > qp->info.samples / QOA_FRAME_LEN)
+    if (frame > (int)qp->info.samples / QOA_FRAME_LEN)
     {
         frame = qp->info.samples / QOA_FRAME_LEN;
     }
@@ -90,14 +102,14 @@ void loop()
         return;
     }
 
-    if (qoaplay_get_frame() >= endFrame)
+    if (getFrame() >= endFrame)
     {
         // rewind to start time
-        qoaplay_seek_frame(startFrame);
+        seekFrame(startFrame);
     }
 }
 
-void qoaplay_rewind()
+void rewind()
 {
     fseek(qp->file, qp->firstFramePos, SEEK_SET);
     qp->samplePos = 0;
@@ -105,7 +117,7 @@ void qoaplay_rewind()
     qp->sampleDataPos = 0;
 }
 
-unsigned int qoaplay_decode_frame()
+unsigned int decodeFrame()
 {
     qp->bufferLen = fread(qp->buffer, 1, qoa_max_frame_size(&qp->info), qp->file);
 
@@ -116,7 +128,7 @@ unsigned int qoaplay_decode_frame()
     return frame_len;
 }
 
-unsigned int qoaplay_decode(short* sample_data, int num_samples)
+unsigned int decode(short* sample_data, int num_samples)
 {
     int src_index = qp->sampleDataPos * qp->info.channels;
     int dst_index = 0;
@@ -129,17 +141,17 @@ unsigned int qoaplay_decode(short* sample_data, int num_samples)
             loop();
 
             // decode audio
-            if (!qoaplay_decode_frame())
+            if (!decodeFrame())
             {
                 // loop to the beginning if audio is finished
-                qoaplay_rewind();
-                qoaplay_decode_frame();
+                rewind();
+                decodeFrame();
             }
             src_index = 0;
         }
 
         // write raw 16-bit PCM samples in interleaved channel order
-        for (int c = 0; c < qp->info.channels; c++)
+        for (int c = 0; c < (int)qp->info.channels; c++)
         {
             sample_data[dst_index++] = qp->sampleData[src_index++];
         }
@@ -149,7 +161,7 @@ unsigned int qoaplay_decode(short* sample_data, int num_samples)
     return num_samples;
 }
 
-static void audioInit()
+void audioInit()
 {
     std::string filePath = fatBasePath + "music/menus/title/tightrope.qoa";
 
@@ -221,7 +233,7 @@ mm_word audioUpdate(mm_word length, mm_addr dest, mm_stream_formats format)
         // audio channels do not match...
     }
 
-    unsigned int decoded = qoaplay_decode((short*)dest, length);
+    unsigned int decoded = decode((short*)dest, length);
     return decoded;
 }
 
