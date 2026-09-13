@@ -1,5 +1,6 @@
 #include "views/DebugView.hpp"
 #include "core/globals.hpp"
+#include <aegis/types.hpp>
 #include <nds.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,12 +35,12 @@ typedef struct
 } qoaplay_desc;
 
 // NOTE: these functions are not used
-double getDuration();
-double getTime();
+ae::q20_12_t getDuration();
+ae::q20_12_t getTime();
 
 int getFrame();
 void seekFrame(int frame);
-void setLoop(float startTime, float endTime);
+void setLoop(ae::q20_12_t startTime, ae::q20_12_t endTime);
 void loop();
 void rewind();
 unsigned int decodeFrame();
@@ -53,14 +54,14 @@ bool isLoopingEnabled = false;
 int startFrame = 0;
 int endFrame = 0;
 
-double getDuration()
+ae::q20_12_t getDuration()
 {
-    return (double)qp->info.samples / (double)qp->info.samplerate;
+    return ae::q20_12_t{qp->info.samples} / ae::q20_12_t{qp->info.samplerate};
 }
 
-double getTime()
+ae::q20_12_t getTime()
 {
-    return (double)qp->samplePos / (double)qp->info.samplerate;
+    return ae::q20_12_t{qp->samplePos} / ae::q20_12_t{qp->info.samplerate};
 }
 
 int getFrame()
@@ -87,12 +88,15 @@ void seekFrame(int frame)
     fseek(qp->file, offset, SEEK_SET);
 }
 
-void setLoop(float startTime, float endTime)
+void setLoop(ae::q20_12_t startTime, ae::q20_12_t endTime)
 {
     isLoopingEnabled = true;
-    startFrame = ceil((startTime * qp->info.samplerate) / QOA_FRAME_LEN);
+    bool isLoopingToEnd = endTime == ae::q20_12_t{-1};
+    ae::q20_12_t sampleRate{qp->info.samplerate};
+
+    startFrame = static_cast<int>(startTime * sampleRate) / QOA_FRAME_LEN;
     endFrame =
-        endTime != -1 ? ceil((endTime * qp->info.samplerate) / QOA_FRAME_LEN) : ceil(qp->info.samples / QOA_FRAME_LEN);
+        !isLoopingToEnd ? static_cast<int>(endTime * sampleRate) / QOA_FRAME_LEN : qp->info.samples / QOA_FRAME_LEN;
 }
 
 void loop()
@@ -210,7 +214,7 @@ void audioInit()
     qp->info.samples = qoa.samples;
 
     // set loop
-    setLoop(17.962, 66.082);
+    setLoop(ae::q20_12_t{17.962}, ae::q20_12_t{66.082});
 
     // setup maxmod audio
     mm_stream stream;
