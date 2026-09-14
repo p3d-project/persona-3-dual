@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
 
             case ViewState::INTRO_VIDEO:
             {
-                SwitchView(new VideoView(saveData.introVideoPath, ViewState::INTRO));
+                SwitchView(new VideoView("intro.vid", ViewState::INTRO));
                 break;
             }
 
