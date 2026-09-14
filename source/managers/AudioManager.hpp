@@ -8,6 +8,7 @@
 #include "types/AudioTypes.hpp"
 #include <aegis/manager.hpp>
 #include <maxmod9.h>
+#include <string>
 
 class AudioManager : public ae::Manager, public ae::Singleton<AudioManager>
 {
@@ -17,6 +18,16 @@ class AudioManager : public ae::Manager, public ae::Singleton<AudioManager>
     void Process() override;
 
     void Shutdown() override;
+
+    // TODO: add doxygen
+    void registerAudio(std::string path, ae::q20_12_t loopStartTime, ae::q20_12_t loopEndTime);
+    void playAudio();
+    void pauseAudio();
+    void stopAudio();
+
+    void registerSFX(SFX sfx);
+    void playSFX(SFX sfx, int volume, int panning);
+    void stopSFX();
 
   private:
     friend class Singleton<AudioManager>;
@@ -42,6 +53,6 @@ class AudioManager : public ae::Manager, public ae::Singleton<AudioManager>
     static mm_word audioCallback(mm_word length, mm_addr dest, mm_stream_formats format);
     mm_word processStream(mm_word length, mm_addr dest, mm_stream_formats format);
 
-    // TODO: do something about this, not a good fn. Move to process()?
-    void audioInit();
+    // sfx helper
+    int fetchSFXSampleId(SFX sfx);
 };

@@ -1,17 +1,22 @@
+#define QOA_IMPLEMENTATION
 #include "AudioManager.hpp"
 #include "core/globals.hpp"
-#include <nds.h>
-#include <string>
-
-#define QOA_IMPLEMENTATION
-#include "debug/qoa.h"
 #include "soundbank_bin.h"
+#include <nds.h>
 
 /**
  * TODO:
- * Move into AudioSystem or component
- * Add doxygen documentation
- * Create fork of qoa & apply changes to the fork, & pull in qoa as a submodule
+ * Current PR:
+ * Add doxygen documentation throughout audio code
+ * Add qoa mp3->qoa encoder into the build script
+ * Create fork of qoa, apply changes to the fork, & pull qoa in as a submodule
+ *
+ * Seperate PR:
+ * Replacing all instances of sfx, music playback with audio manager & components
+ *
+ * Seperate PR (use AI):
+ * Removing MusicController functions, moving relevant code into VideoController
+ * Converting VideoController to use new AudioManager instead
  */
 
 void AudioManager::Init()
@@ -25,9 +30,6 @@ void AudioManager::Init()
 
     // initialize maxmod (for sfx)
     mmInitDefaultMem((mm_addr)soundbank_bin);
-
-    // debug
-    audioInit();
 }
 
 void AudioManager::Process()
@@ -41,13 +43,7 @@ void AudioManager::Process()
 
 void AudioManager::Shutdown()
 {
-    qp = nullptr;
-    isLoopingEnabled = false;
-    startFrame = 0;
-    endFrame = 0;
-
-    fclose(qp->file);
-    free(qp);
+    stopAudio();
 }
 
 ae::q20_12_t AudioManager::getDuration()
@@ -170,12 +166,32 @@ uint32_t AudioManager::decode(short* sample_data, int num_samples)
     return num_samples;
 }
 
-void AudioManager::audioInit()
+mm_word AudioManager::audioCallback(mm_word length, mm_addr dest, mm_stream_formats format)
 {
-    std::string filePath = fatBasePath + "music/menus/title/tightrope.qoa";
+    return AudioManager::GetInstance().processStream(length, dest, format);
+}
 
+mm_word AudioManager::processStream(mm_word length, mm_addr dest, mm_stream_formats format)
+{
+    if (((qp->info.channels == 1) && (format != MM_STREAM_16BIT_MONO)) ||
+        ((qp->info.channels == 2) && (format != MM_STREAM_16BIT_STEREO)))
+    {
+        consoleDemoInit();
+        printf("AudioManager: Audio format from the current audio track does not match the original audio format\n");
+        while (1)
+        {
+            swiWaitForVBlank();
+        }
+    }
+
+    uint32_t decoded = decode((short*)dest, length);
+    return decoded;
+}
+
+void AudioManager::registerAudio(std::string path, ae::q20_12_t loopStartTime, ae::q20_12_t loopEndTime)
+{
     // open header
-    FILE* file = fopen(filePath.c_str(), "rb");
+    FILE* file = fopen(path.c_str(), "rb");
     if (!file)
     {
         return;
@@ -219,7 +235,7 @@ void AudioManager::audioInit()
     qp->info.samples = qoa.samples;
 
     // set loop
-    setLoop(ae::q20_12_t{17.962}, ae::q20_12_t{66.082});
+    setLoop(loopStartTime, loopEndTime);
 
     // setup maxmod audio
     mm_stream stream;
@@ -231,26 +247,95 @@ void AudioManager::audioInit()
     stream.manual = true;
 
     mmStreamOpen(&stream);
+    mmPause();
 }
 
-mm_word AudioManager::audioCallback(mm_word length, mm_addr dest, mm_stream_formats format)
+void AudioManager::playAudio()
 {
-    return AudioManager::GetInstance().processStream(length, dest, format);
+    mmResume();
 }
 
-mm_word AudioManager::processStream(mm_word length, mm_addr dest, mm_stream_formats format)
+void AudioManager::pauseAudio()
 {
-    if (((qp->info.channels == 1) && (format != MM_STREAM_16BIT_MONO)) ||
-        ((qp->info.channels == 2) && (format != MM_STREAM_16BIT_STEREO)))
+    mmPause();
+}
+
+void AudioManager::stopAudio()
+{
+    if (qp)
     {
+        if (qp->file)
+        {
+            fclose(qp->file);
+            qp->file = nullptr;
+        }
+
+        free(qp);
+        qp = nullptr;
+    }
+
+    isLoopingEnabled = false;
+    startFrame = 0;
+    endFrame = 0;
+
+    mmStreamClose();
+}
+
+// TODO: implement, sampleId
+void AudioManager::registerSFX(SFX sfx)
+{
+    mm_word sampleId = fetchSFXSampleId(sfx);
+    mmLoadEffect(sampleId);
+}
+
+// TODO: implement, sampleID
+void AudioManager::playSFX(SFX sfx, int volume, int panning)
+{
+    mm_word sampleId = fetchSFXSampleId(sfx);
+
+    mm_sound_effect effect;
+    effect.id = sampleId;
+    effect.rate = (int)(1.0f * (1 << 10));
+    effect.handle = 0;
+    effect.volume = volume;
+    effect.panning = panning;
+    mmEffectEx(&effect);
+}
+
+void AudioManager::stopSFX()
+{
+    mmEffectCancelAll();
+}
+
+int AudioManager::fetchSFXSampleId(SFX sfx)
+{
+    switch (sfx)
+    {
+    case SFX::SFX_0:
+    {
+        return SFX_CANCEL;
+    }
+
+    case SFX::SFX_1:
+    {
+        return SFX_MENU;
+    }
+
+    case SFX::SFX_2:
+    {
+        return SFX_SELECT;
+    }
+
+    default:
+    {
+        // throw an error
         consoleDemoInit();
-        printf("Audio format from the current audio track does not match the original audio format\n");
+        printf("AudioManager: SFX sample not found\n");
         while (1)
         {
             swiWaitForVBlank();
         }
+        return -1;
     }
-
-    uint32_t decoded = decode((short*)dest, length);
-    return decoded;
+    }
 }

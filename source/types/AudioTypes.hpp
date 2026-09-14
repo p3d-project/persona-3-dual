@@ -1,7 +1,8 @@
 #pragma once
-#include "debug/qoa.h"
 #include <cstdint>
 #include <cstdio>
+
+#include "debug/qoa.h"
 
 struct qoaplay_desc
 {
@@ -16,4 +17,11 @@ struct qoaplay_desc
     uint32_t sampleDataPos;
     uint32_t sampleDataLen;
     short* sampleData;
+};
+
+enum class SFX
+{
+    SFX_0 = 0,
+    SFX_1,
+    SFX_2,
 };
