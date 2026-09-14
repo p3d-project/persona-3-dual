@@ -19,9 +19,6 @@
 // debug
 #include "views/DebugView.hpp"
 
-// sfx
-#include "soundbank_bin.h"
-
 // DBs
 #include "battleActions/armours/ArmourDb.hpp"
 #include "battleActions/enemies/EnemyProfileDb.hpp"
@@ -108,16 +105,6 @@ int main(int argc, char* argv[])
         }
     }
 
-    // initialize maxmod (for audio)
-    mm_ds_system sys;
-    sys.mod_count = 0;
-    sys.samp_count = 0;
-    sys.mem_bank = 0;
-    mmInit(&sys);
-
-    // initialize maxmod (for sfx)
-    mmInitDefaultMem((mm_addr)soundbank_bin);
-
     // setup db's. DO NOT CHANGE order
     WeaponDb::Initialize();
     SkillDb::Initialize();
@@ -154,6 +141,7 @@ int main(int argc, char* argv[])
     engine.RegisterManager(&IOManager::GetInstance());
     engine.RegisterManager(&TextManager::GetInstance());
     engine.RegisterManager(&UIManager::GetInstance());
+    engine.RegisterManager(&AudioManager::GetInstance());
 
     // initialize engine
     engine.InitAll();
