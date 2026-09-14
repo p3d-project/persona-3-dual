@@ -100,43 +100,15 @@ ViewState MainMenu::levelOptionSelected()
 
 ViewState MainMenu::settingOptionSelected()
 {
+    //no settings as of now
     ViewState selectedView;
     switch (static_cast<SettingOptions>(selectedOption))
     {
-    case SettingOptions::CHANGE_INTRO_VIDEO:
-        changeMenu(settingIntroOptions);
-        selectedView = ViewState::KEEP_CURRENT;
-        break;
-
     default:
         selectedView = ViewState::KEEP_CURRENT;
     }
 
     return selectedView;
-}
-
-ViewState MainMenu::settingIntroOptionSelected()
-{
-    switch (static_cast<SettingIntroOptions>(selectedOption))
-    {
-    case SettingIntroOptions::ORIGINAL:
-        strncpy(saveData.introVideoPath, "base.vid", sizeof(saveData.introVideoPath));
-        break;
-    case SettingIntroOptions::FES:
-        strncpy(saveData.introVideoPath, "fes.vid", sizeof(saveData.introVideoPath));
-        break;
-    case SettingIntroOptions::PORTABLE:
-        strncpy(saveData.introVideoPath, "portable.vid", sizeof(saveData.introVideoPath));
-        break;
-    case SettingIntroOptions::RELOAD:
-        strncpy(saveData.introVideoPath, "reload.vid", sizeof(saveData.introVideoPath));
-        break;
-    default:
-        strncpy(saveData.introVideoPath, "reload.vid", sizeof(saveData.introVideoPath));
-    }
-
-    updateSave();
-    return ViewState::KEEP_CURRENT;
 }
 
 void MainMenu::updateSave()

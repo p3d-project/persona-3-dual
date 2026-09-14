@@ -17,17 +17,9 @@ enum class LevelOptions
     SIGN_CONTRACT,
 };
 
-enum class SettingIntroOptions
-{
-    ORIGINAL = 0,
-    FES,
-    PORTABLE,
-    RELOAD
-};
-
+//No settings as of now
 enum class SettingOptions
 {
-    CHANGE_INTRO_VIDEO = 0,
 };
 
 class MainMenu : public UIMenu
@@ -51,23 +43,14 @@ class MainMenu : public UIMenu
         {"Sign Contract", -1, MENU_BIND(MainMenu, levelOptionSelected)},
     };
 
-    MenuOption settingOptions[2] = {
-        {"Change Intro Video", -1, MENU_BIND(MainMenu, settingOptionSelected)},
+    MenuOption settingOptions[1] = {
         {"v1.1.0", -1, nullptr},
-    };
-
-    MenuOption settingIntroOptions[4] = {
-        {"Original", -1, MENU_BIND(MainMenu, settingIntroOptionSelected)},
-        {"FES", -1, MENU_BIND(MainMenu, settingIntroOptionSelected)},
-        {"Portable", -1, MENU_BIND(MainMenu, settingIntroOptionSelected)},
-        {"Reload", -1, MENU_BIND(MainMenu, settingIntroOptionSelected)},
     };
 
     // option handlers
     ViewState mainMenuOptionSelected();
     ViewState levelOptionSelected();
     ViewState settingOptionSelected();
-    ViewState settingIntroOptionSelected();
 
     void resetHook() override;
     void closeHook() override;
