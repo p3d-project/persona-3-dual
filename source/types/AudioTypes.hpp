@@ -4,6 +4,9 @@
 
 #include "debug/qoa.h"
 
+/**
+ * @brief QOA audio stream data
+ */
 struct qoaplay_desc
 {
     qoa_desc info;
@@ -19,6 +22,9 @@ struct qoaplay_desc
     short* sampleData;
 };
 
+/**
+ * @brief SFX wrapper enums
+ */
 enum class SFX
 {
     SFX_0 = 0,

@@ -19,7 +19,9 @@ class SFXComponent : public ae::Component
     {
     }
 
-    // TODO: add doxygen
+    /**
+     * @brief Automatically stops all SFX audio from playing
+     */
     void Destroy() override;
 
     void Update(ae::q20_12_t /*dt*/) override
@@ -31,9 +33,27 @@ class SFXComponent : public ae::Component
         return TYPE_ID;
     }
 
-    // TODO: add doxygen
+    /**
+     * @brief Register the SFX to use
+     *
+     * @note Multiple SFXs can be registered at once
+     *
+     * @param sfx the SFX to register
+     */
     void registerSFX(SFX sfx);
-    void playSFX(SFX sfx, int volume, int panning);
+
+    /**
+     * @brief Play the specified SFX, if registered
+     *
+     * @param sfx the SFX to play
+     * @param volume the volume of the SFX. Range is from 0-127
+     * @param panning the direction to play the sound effect (left to right). The range is 0-127 (64 plays both left and right equally)
+     */
+    void playSFX(SFX sfx, int volume = 127, int panning = 64);
+
+    /**
+     * @brief Stops all SFX audio from playing
+     */
     void stopSFX();
 
   protected:

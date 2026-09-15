@@ -2,7 +2,7 @@
 
 void MusicComponent::Destroy()
 {
-    am.stopAudio();
+    stopMusic();
 }
 
 void MusicComponent::registerMusic(std::string path, ae::q20_12_t loopStartTime, ae::q20_12_t loopEndTime)

@@ -2,7 +2,7 @@
 
 void SFXComponent::Destroy()
 {
-    am.stopAudio();
+    stopSFX();
 }
 
 void SFXComponent::registerSFX(SFX sfx)
