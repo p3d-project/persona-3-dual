@@ -35,5 +35,6 @@ enum class ComponentType : ae::ComponentTypeID
     Movement,
     Dialogue,
     Graphics,
-    Text
+    Text,
+    Mesh
 };

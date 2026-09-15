@@ -98,6 +98,17 @@ class FileBuffer
         return size;
     }
 
+    size_t read(void* dest, size_t bytes, size_t count, size_t* offset)
+    {
+        if (*offset + bytes * count > size)
+        {
+            return 0; // Out of bounds
+        }
+        memcpy(dest, data + *offset, bytes * count);
+        *offset += bytes * count;
+        return count;
+    }
+
     /**
      * @brief Releases the file data to the caller.
      * @return The previously owned data pointer, or nullptr if empty.
