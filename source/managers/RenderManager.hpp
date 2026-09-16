@@ -62,6 +62,16 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
                        const void* bitmap);
 
     /**
+     * @brief Renders a model with a solid color.
+     *
+     * @param displayList Pointer to the display list of the model to render.
+     * @param r The red component of the color to use for rendering (0 - 255; default 255).
+     * @param g The green component of the color to use for rendering (0 - 255; default 255).
+     * @param b The blue component of the color to use for rendering (0 - 255; default 255).
+     */
+    void renderModel(const void* displayList, uint8_t r = 255, uint8_t g = 255, uint8_t b = 255);
+
+    /**
      * @brief Renders a textured model.
      *
      * @param displayList Pointer to the display list of the model to render.

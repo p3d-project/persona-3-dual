@@ -108,9 +108,26 @@ void RenderManager::uploadTexture(int& textureID,
     glTexImage2D(GL_TEXTURE_2D, 0, texType, textureSizeEnum(sizeX), textureSizeEnum(sizeY), 0, param, texture);
 }
 
+void RenderManager::renderModel(const void* displayList, uint8_t r, uint8_t g, uint8_t b)
+{
+    glDisable(GL_TEXTURE_2D);
+    glColor3b(r, g, b);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // Guard against corrupted DL pointers
+    if (displayList)
+    {
+        glCallList(displayList);
+    }
+    while (GFX_BUSY)
+        ;
+}
+
 void RenderManager::renderTexturedModel(const void* displayList, const int texture)
 {
+    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture);
+    glColor3b(255, 255, 255);
 
     // Guard against corrupted DL pointers
     if (displayList)

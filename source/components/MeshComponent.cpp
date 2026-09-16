@@ -172,3 +172,25 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
     buffer.release(); // Release the buffer after loading is complete
     return true;
 }
+
+void MeshComponent::drawMesh()
+{
+    for (const auto& node : nodes)
+    {
+        for (const auto& sl : node.subLists)
+        {
+            if (sl.displayList.empty())
+            {
+                continue;
+            }
+            if (sl.texSlot >= 0 && sl.texSlot < static_cast<int32_t>(textures.size()))
+            {
+                render.renderTexturedModel(sl.displayList.data(), textures[sl.texSlot].textureID);
+            }
+            else
+            {
+                render.renderModel(sl.displayList.data(), 0, 255, 0);
+            }
+        }
+    }
+}
