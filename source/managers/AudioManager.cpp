@@ -3,21 +3,7 @@
 #include "core/globals.hpp"
 #include "soundbank_bin.h"
 #include <nds.h>
-
-/**
- * TODO:
- * Current PR:
- * Add doxygen documentation throughout audio code
- * Add qoa mp3->qoa encoder into the build script
- * Create fork of qoa, apply changes to the fork, & pull qoa in as a submodule
- *
- * Seperate PR:
- * Replacing all instances of sfx, music playback with audio manager & components
- *
- * Seperate PR (use AI):
- * Removing MusicController functions, moving relevant code into VideoController
- * Converting VideoController to use new AudioManager instead
- */
+#include <p3d-qoa>
 
 void AudioManager::Init()
 {
@@ -27,6 +13,7 @@ void AudioManager::Init()
     sys.samp_count = 0;
     sys.mem_bank = 0;
     mmInit(&sys);
+    isAudioRegistered = false;
 
     // initialize maxmod (for sfx)
     mmInitDefaultMem((mm_addr)soundbank_bin);
@@ -34,11 +21,10 @@ void AudioManager::Init()
 
 void AudioManager::Process()
 {
-    // TODO: somehow here, have the audioInit fn run
-    // have the audiosystem submit a payload (string path) to get an audio track
-    // boolean. If no audio yet, don't update mmStreamUpdate()
-
-    mmStreamUpdate();
+    if (isAudioRegistered)
+    {
+        mmStreamUpdate();
+    }
 }
 
 void AudioManager::Shutdown()
@@ -248,6 +234,7 @@ void AudioManager::registerAudio(std::string path, ae::q20_12_t loopStartTime, a
 
     mmStreamOpen(&stream);
     mmPause();
+    isAudioRegistered = true;
 }
 
 void AudioManager::playAudio()
@@ -279,16 +266,15 @@ void AudioManager::stopAudio()
     endFrame = 0;
 
     mmStreamClose();
+    isAudioRegistered = false;
 }
 
-// TODO: implement, sampleId
 void AudioManager::registerSFX(SFX sfx)
 {
     mm_word sampleId = fetchSFXSampleId(sfx);
     mmLoadEffect(sampleId);
 }
 
-// TODO: implement, sampleID
 void AudioManager::playSFX(SFX sfx, int volume, int panning)
 {
     mm_word sampleId = fetchSFXSampleId(sfx);

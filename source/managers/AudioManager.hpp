@@ -70,6 +70,7 @@ class AudioManager : public ae::Manager, public ae::Singleton<AudioManager>
 
     qoaplay_desc* qp = nullptr;
     bool isLoopingEnabled = false;
+    bool isAudioRegistered = false;
     int startFrame = 0;
     int endFrame = 0;
 
@@ -85,7 +86,7 @@ class AudioManager : public ae::Manager, public ae::Singleton<AudioManager>
      *
      * @return ae::q20_12_t the time in seconds
      */
-    ae::q20_12_t getTime();     // unused
+    ae::q20_12_t getTime(); // unused
 
     /**
      * @brief Get the current audio frame

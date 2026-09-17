@@ -1,8 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <cstdio>
-
-#include "debug/qoa.h"
+#include <p3d-qoa>
 
 /**
  * @brief QOA audio stream data
