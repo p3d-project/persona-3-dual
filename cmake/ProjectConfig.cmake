@@ -70,3 +70,5 @@ if(P3D_USE_BUNDLED_AEGIS_ENGINE)
 
     add_subdirectory(${CMAKE_SOURCE_DIR}/libs/aegis_engine EXCLUDE_FROM_ALL)
 endif()
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/libs/p3d-qoa EXCLUDE_FROM_ALL)
