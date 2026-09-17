@@ -16,8 +16,6 @@
 #include "views/SignContractView.hpp"
 #include "views/StationView.hpp"
 #include "views/VideoView.hpp"
-// debug
-#include "views/DebugView.hpp"
 
 // DBs
 #include "battleActions/armours/ArmourDb.hpp"
@@ -154,7 +152,7 @@ int main(int argc, char* argv[])
     ae::BroadcastEvent(Event::ReadSave{});
 
     // Default is DisclaimerView
-    SwitchView(new DebugView());
+    SwitchView(new DisclaimerView());
 
     // TODO: set to constant tied to VBlank
     const ae::q20_12_t dt = MathManager::GetInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
