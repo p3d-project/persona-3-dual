@@ -477,7 +477,7 @@ def write_mdl_file(output_path, nodes, textures, images, animations=[]):
         # Write texture binary data to end of file
         for image in images:
             # Anim Header: 32-byte name | u32 byteLength
-            tex_name_bytes = tex["name"].encode("ascii")[:31].ljust(32, b"\0")
+            tex_name_bytes = image["name"].encode("ascii")[:31].ljust(32, b"\0")
             f.write(struct.pack("<32sI", tex_name_bytes, image["byteLength"]))
             f.write(image["data"])
 
