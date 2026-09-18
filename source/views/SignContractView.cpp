@@ -2,6 +2,7 @@
 
 #include "core/globals.hpp"
 #include "events/SaveEvents.hpp"
+#include "systems/UISystem.hpp"
 
 #include <cstring>
 #include <nds.h>
@@ -30,6 +31,9 @@ void SignContractView::init()
         signContract->AddComponent(text);
         signContract->AddComponent(musicCmpt);
         signContract->AddComponent(sfxCmpt);
+
+        UISystem::GetInstance().SetMusicComponent(musicCmpt);
+        UISystem::GetInstance().SetSFXComponent(sfxCmpt);
     }
 
     // set both screens to black
@@ -40,7 +44,7 @@ void SignContractView::init()
     sfxCmpt->registerSFX(SFX::SFX_2);
     sfxCmpt->registerSFX(SFX::SFX_0);
     musicCmpt->registerMusic(
-        (fatBasePath + "music/menus/contract/mistic.pcm").c_str(), ae::q20_12_t{1.998}, ae::q20_12_t{49.959});
+        (fatBasePath + "music/menus/contract/mistic.qoa").c_str(), ae::q20_12_t{1.998}, ae::q20_12_t{49.959});
 
     videoSetMode(MODE_5_2D);
     videoSetModeSub(MODE_3_2D | DISPLAY_BG3_ACTIVE);

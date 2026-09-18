@@ -1,5 +1,6 @@
 #include "IntroView.hpp"
 #include "core/globals.hpp"
+#include "systems/UISystem.hpp"
 
 #include "soundbank.h"
 #include <maxmod9.h>
@@ -20,6 +21,9 @@ void IntroView::init()
         intro->AddComponent(text);
         intro->AddComponent(musicCmpt);
         intro->AddComponent(sfxCmpt);
+
+        UISystem::GetInstance().SetMusicComponent(musicCmpt);
+        UISystem::GetInstance().SetSFXComponent(sfxCmpt);
     }
 
     // set video mode for 3 text layers and 1 extended rotation layer
@@ -163,7 +167,7 @@ void IntroView::init()
     // point to music
     sfxCmpt->registerSFX(SFX::SFX_2);
     musicCmpt->registerMusic(
-        (fatBasePath + "music/menus/title/tightrope.pcm").c_str(), ae::q20_12_t{17.962}, ae::q20_12_t{66.082});
+        (fatBasePath + "music/menus/title/tightrope.qoa").c_str(), ae::q20_12_t{17.962}, ae::q20_12_t{66.082});
 
     // hide sub screen text and attribution text layer
     REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_SRC_BG0 | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;

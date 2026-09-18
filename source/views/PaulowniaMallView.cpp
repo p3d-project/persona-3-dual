@@ -8,7 +8,7 @@ PaulowniaMallView::PaulowniaMallView()
 
 void PaulowniaMallView::setupMusic()
 {
-    musicCmpt->registerMusic((fatBasePath + "music/locations/paulowniaMall/overworld/color_your_night.pcm").c_str(),
+    musicCmpt->registerMusic((fatBasePath + "music/locations/paulowniaMall/overworld/color_your_night.qoa").c_str(),
                              ae::q20_12_t{2.05},
                              ae::q20_12_t{204.191});
 }

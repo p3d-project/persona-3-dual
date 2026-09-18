@@ -9,11 +9,13 @@
 void BattleSystem::on_receive(const Event::ExecuteBattle& msg)
 {
     isActive = true;
-    musicCtrl = MusicController::getInstance();
     battleMenuCmpt = BattleMenu::getInstance();
 
-    std::string path = fatBasePath + "music/battle/" + "mass_destruction.pcm";
-    musicCtrl->init(path.c_str(), ae::q20_12_t{0}, ae::q20_12_t{-1});
+    std::string path = fatBasePath + "music/battle/" + "mass_destruction.qoa";
+    if (musicCmpt != nullptr)
+    {
+        musicCmpt->registerMusic(path, ae::q20_12_t{0}, ae::q20_12_t{-1});
+    }
 
     this->player = new Player(msg.player);
     battleParticipants.push_back(this->player);
@@ -344,7 +346,11 @@ void BattleSystem::Update(ae::q20_12_t)
 
 void BattleSystem::Shutdown()
 {
-    musicCtrl->pause();
+    if (musicCmpt != nullptr)
+    {
+        musicCmpt->pauseMusic();
+        musicCmpt = nullptr;
+    }
 
     isActive = false;
 

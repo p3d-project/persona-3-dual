@@ -55,7 +55,7 @@ void IwatodaiStreetsView::setupMovement()
 
 void IwatodaiStreetsView::setupMusic()
 {
-    musicCmpt->registerMusic((fatBasePath + "music/locations/iwatodaiStreets/changing_seasons.pcm").c_str(),
+    musicCmpt->registerMusic((fatBasePath + "music/locations/iwatodaiStreets/changing_seasons.qoa").c_str(),
                              ae::q20_12_t{31},
                              ae::q20_12_t{177.587});
 }

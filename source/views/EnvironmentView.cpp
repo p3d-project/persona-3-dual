@@ -124,6 +124,7 @@ void EnvironmentView::init()
     {
         musicCmpt = engine.CreateComponent<MusicComponent>();
         environment->AddComponent(musicCmpt);
+        BattleSystem::GetInstance().SetMusicComponent(musicCmpt);
     }
 
     if (player != nullptr)
