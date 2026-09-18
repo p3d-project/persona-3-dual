@@ -163,6 +163,7 @@ class PauseMenu : public UIMenu
     };
 
     // menu navigation handlers
+    void updateCameraOptionName();
     ViewState openDebugMenu();
     ViewState openSkillMenu();
     ViewState openItemMenu();
