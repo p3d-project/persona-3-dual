@@ -124,21 +124,67 @@ def encode_8bit_raw(
                 src.read(1024)
 
 
-def extract_pcm(input_path: str, out_pcm: str):
+def extract_pcm(
+    input_path: str, out_pcm: str, frequency: int = 32000, channels: int = 2
+):
     cmd = [
         "ffmpeg",
         "-y",
         "-i",
         input_path,
+        "-vn",
         "-f",
         "s16le",
         "-ar",
-        "32000",
+        str(frequency),
         "-ac",
-        "2",
+        str(channels),
         out_pcm,
     ]
     _ffmpeg_run(cmd)
+
+
+def extract_pcm_wav(
+    input_path: str, out_wav: str, frequency: int = 32000, channels: int = 2
+):
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        input_path,
+        "-vn",
+        "-acodec",
+        "pcm_s16le",
+        "-ar",
+        str(frequency),
+        "-ac",
+        str(channels),
+        out_wav,
+    ]
+    _ffmpeg_run(cmd)
+
+
+def ensure_qoaconv() -> str:
+    qoa_dir = os.path.normpath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "libs", "p3d-qoa")
+    )
+    subprocess.run(["make", "qoaconv"], cwd=qoa_dir, check=True)
+    qoaconv = os.path.join(qoa_dir, "qoaconv")
+    if not os.path.exists(qoaconv):
+        raise FileNotFoundError(f"Expected built converter at {qoaconv}")
+    return qoaconv
+
+
+def build_qoa_sidecar(
+    input_path: str, output_path: str, frequency: int = 32000, channels: int = 2
+):
+    qoa_out = os.path.splitext(output_path)[0] + ".qoa"
+    temp_wav = os.path.join(os.path.dirname(output_path), ".video_audio_tmp.wav")
+    extract_pcm_wav(input_path, temp_wav, frequency=frequency, channels=channels)
+    qoaconv = ensure_qoaconv()
+    subprocess.run([qoaconv, temp_wav, qoa_out], check=True)
+    os.remove(temp_wav)
+    return qoa_out
 
 
 def interweave(
@@ -149,11 +195,12 @@ def interweave(
     w: int,
     h: int,
     bpp: int,
+    sample_rate: int = 32000,
+    channels: int = 2,
     pal_file: str = None,
 ):
     frame_size = w * h * bpp
-    sample_rate = 32000
-    bytes_per_sample = 4
+    bytes_per_sample = 2 * channels
 
     with open(raw_video, "rb") as f_vid, open(pcm_audio, "rb") as f_aud, open(
         out_vid, "wb"
@@ -197,6 +244,8 @@ def convert(input_path, output_path, config):
     fps = config.get("fps", 24)
     size = config.get("size", "256x192")
     bits = config.get("bits", 16)
+    frequency = int(config.get("frequency", 32000))
+    channels = int(config.get("channels", 2))
 
     w, h = (int(x) for x in size.split("x"))
     bpp = 2 if bits == 16 else 1
@@ -204,13 +253,17 @@ def convert(input_path, output_path, config):
     if not output_path.endswith(".vid"):
         output_path += ".vid"
 
-    print(f"Processing ({bits}-bit, {fps} fps)...")
+    qoa_path = build_qoa_sidecar(
+        input_path, output_path, frequency=frequency, channels=channels
+    )
+
+    print(f"Processing ({bits}-bit, {fps} fps, {frequency} Hz, {channels} ch)...")
     with tempfile.TemporaryDirectory() as tmp_dir:
         raw_vid = os.path.join(tmp_dir, "v.raw")
         pcm_aud = os.path.join(tmp_dir, "a.pcm")
         pal_file = os.path.join(tmp_dir, "p.pal") if bits == 8 else None
 
-        extract_pcm(input_path, pcm_aud)
+        extract_pcm(input_path, pcm_aud, frequency=frequency, channels=channels)
 
         if bits == 16:
             tmp_vid = os.path.join(tmp_dir, "tmp.raw")
@@ -219,9 +272,12 @@ def convert(input_path, output_path, config):
         else:
             encode_8bit_raw(input_path, fps, size, raw_vid, pal_file)
 
-        frames = interweave(raw_vid, pcm_aud, output_path, fps, w, h, bpp, pal_file)
+        frames = interweave(
+            raw_vid, pcm_aud, output_path, fps, w, h, bpp, frequency, channels, pal_file
+        )
 
     print(f"Written: {output_path} / {frames} frames")
+    print(f"Audio sidecar: {qoa_path}")
 
 
 if __name__ == "__main__":
@@ -231,7 +287,15 @@ if __name__ == "__main__":
     parser.add_argument("--bits", type=int, choices=[8, 16], default=16)
     parser.add_argument("--fps", type=int, default=24)
     parser.add_argument("--size", default="256x192")
+    parser.add_argument("--frequency", type=int, default=32000)
+    parser.add_argument("--channels", type=int, default=2)
     args = parser.parse_args()
 
-    cli_config = {"bits": args.bits, "fps": args.fps, "size": args.size}
+    cli_config = {
+        "bits": args.bits,
+        "fps": args.fps,
+        "size": args.size,
+        "frequency": args.frequency,
+        "channels": args.channels,
+    }
     convert(args.input, args.output, cli_config)

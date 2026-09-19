@@ -12,11 +12,10 @@ ViewState VideoView::update()
 {
     if ((systemKeysDown & KEY_A) || (systemKeysDown & KEY_START) || (systemKeysDown & KEY_TOUCH))
     {
-        musicCtrl->pause();
+        audio.pauseAudio();
         for (int i = 0; i <= 16; i++)
         {
             setBrightness(3, -i);
-            musicCtrl->update();
             swiWaitForVBlank();
         }
 

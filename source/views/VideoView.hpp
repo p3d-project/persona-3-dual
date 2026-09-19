@@ -1,6 +1,6 @@
 #pragma once
-#include "controllers/MusicController.hpp"
 #include "controllers/VideoController.hpp"
+#include "managers/AudioManager.hpp"
 #include "views/BaseView.hpp"
 
 class VideoView : public BaseView
@@ -20,5 +20,5 @@ class VideoView : public BaseView
     const char* filename;
     const ViewState nextView;
     VideoController* videoCtrl = VideoController::getInstance();
-    MusicController* musicCtrl = MusicController::getInstance();
+    AudioManager& audio = AudioManager::GetInstance();
 };

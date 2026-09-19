@@ -1,6 +1,6 @@
 #pragma once
 
-#include "controllers/MusicController.hpp"
+#include "managers/AudioManager.hpp"
 #include "types/StateTypes.hpp"
 #include <aegis/ndsTypes.hpp>
 #include <aegis/types.hpp>
@@ -68,10 +68,8 @@ class VideoController
     u32 frameSize = 0;
     u32 bufferSize = 0;
 
-    u8 audioBuf[16384];
-
     /** @brief Reads audio and one video frame into the playback buffers. */
     void refillBuffer();
 
-    MusicController* musicCtrl = MusicController::getInstance();
+    AudioManager& audio = AudioManager::GetInstance();
 };

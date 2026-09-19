@@ -64,16 +64,6 @@ class AudioManager : public ae::Manager, public ae::Singleton<AudioManager>
      */
     void stopSFX();
 
-  private:
-    friend class Singleton<AudioManager>;
-    AudioManager() = default;
-
-    qoaplay_desc* qp = nullptr;
-    bool isLoopingEnabled = false;
-    bool isAudioRegistered = false;
-    int startFrame = 0;
-    int endFrame = 0;
-
     /**
      * @brief Get the total duration of the audio
      *
@@ -86,7 +76,17 @@ class AudioManager : public ae::Manager, public ae::Singleton<AudioManager>
      *
      * @return ae::q20_12_t the time in seconds
      */
-    ae::q20_12_t getTime(); // unused
+    ae::q20_12_t getTime();
+
+  private:
+    friend class Singleton<AudioManager>;
+    AudioManager() = default;
+
+    qoaplay_desc* qp = nullptr;
+    bool isLoopingEnabled = false;
+    bool isAudioRegistered = false;
+    int startFrame = 0;
+    int endFrame = 0;
 
     /**
      * @brief Get the current audio frame

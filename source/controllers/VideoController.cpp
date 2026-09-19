@@ -5,6 +5,21 @@
 #include <stdio.h>
 #include <string.h> // for memcmp
 
+namespace
+{
+std::string getVideoQoaPath(const std::string& videoPath)
+{
+    std::string qoaPath = videoPath;
+    const std::string::size_type dotPos = qoaPath.find_last_of('.');
+    if (dotPos != std::string::npos)
+    {
+        qoaPath.erase(dotPos);
+    }
+    qoaPath += ".qoa";
+    return qoaPath;
+}
+} // namespace
+
 VideoController* VideoController::instance = nullptr;
 
 void VideoController::create()
@@ -71,7 +86,7 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
     vramSetBankD(VRAM_D_MAIN_BG_0x06020000);
     vramSetBankC(VRAM_C_SUB_BG);
 
-    musicCtrl->initVideoAudio();
+    audio.stopAudio();
 
     videoFile = fopen(videoPath.c_str(), "rb");
     if (!videoFile)
@@ -82,6 +97,15 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
         {
             swiWaitForVBlank();
         }
+    }
+
+    const std::string qoaPath = getVideoQoaPath(videoPath);
+    FILE* qoaFile = fopen(qoaPath.c_str(), "rb");
+    if (qoaFile != nullptr)
+    {
+        fclose(qoaFile);
+        audio.registerAudio(qoaPath, ae::q20_12_t{0}, ae::q20_12_t{-1});
+        audio.playAudio();
     }
 
     // Read the optional dynamic video header.
@@ -171,24 +195,12 @@ void VideoController::refillBuffer()
         return;
     }
 
-    // clamp audio buffer to prevent potential stack buffer overflow
     if (audioSize > 0)
     {
-        u32 safeSize = (audioSize > sizeof(audioBuf)) ? sizeof(audioBuf) : audioSize;
-
-        // Keep audio chunks aligned to complete stereo sample frames.
-        safeSize -= (safeSize % BYTES_PER_FRAME);
-
-        if (safeSize > 0)
+        if (fseek(videoFile, static_cast<long>(audioSize), SEEK_CUR) != 0)
         {
-            fread(audioBuf, 1, safeSize, videoFile);
-            musicCtrl->pushVideoAudio(audioBuf, safeSize);
-        }
-
-        u32 consumed = safeSize;
-        if (audioSize > consumed)
-        {
-            fseek(videoFile, audioSize - consumed, SEEK_CUR); // Skip overflowing/unaligned remainder
+            fileEOF = true;
+            return;
         }
     }
 
@@ -210,16 +222,13 @@ void VideoController::refillBuffer()
 
 ViewState VideoController::update()
 {
-    musicCtrl->update();
-
     // Service audio between disk reads to avoid underruns.
     for (int r = 0; r < READS_PER_UPDATE; r++)
     {
         refillBuffer();
-        musicCtrl->update();
     }
 
-    int expectedFrame = (int)(musicCtrl->getVideoTime() * fps);
+    int expectedFrame = (int)(audio.getTime() * fps);
 
     if (currentFrame > expectedFrame && !fileEOF)
     {
@@ -254,10 +263,7 @@ ViewState VideoController::update()
 
 void VideoController::cleanup()
 {
-    if (musicCtrl != nullptr)
-    {
-        musicCtrl->cleanup();
-    }
+    audio.stopAudio();
 
     if (ramBuffer != nullptr)
     {
