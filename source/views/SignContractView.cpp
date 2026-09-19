@@ -9,9 +9,6 @@
 #include <nds/arm9/keyboard.h>
 #include <stdio.h>
 
-// sfx
-#include "soundbank.h"
-
 void SignContractView::cancelSFX()
 {
     sfxCmpt->stopSFX();

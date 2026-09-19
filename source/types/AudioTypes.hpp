@@ -3,6 +3,11 @@
 #include <cstdio>
 #include <p3d-qoa>
 
+extern "C"
+{
+#include "soundbank.h"
+}
+
 /**
  * @brief QOA audio stream data
  */
@@ -26,7 +31,7 @@ struct qoaplay_desc
  */
 enum class SFX
 {
-    SFX_0 = 0,
-    SFX_1,
-    SFX_2,
+    SFX_0 = SFX_CANCEL,
+    SFX_1 = SFX_MENU,
+    SFX_2 = SFX_SELECT
 };

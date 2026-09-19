@@ -3,9 +3,6 @@
 #include <nds.h>
 #include <string>
 
-// sfx
-#include "soundbank.h"
-
 PauseMenu* PauseMenu::instance = nullptr;
 
 void PauseMenu::create()

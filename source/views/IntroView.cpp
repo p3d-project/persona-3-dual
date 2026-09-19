@@ -2,7 +2,6 @@
 #include "core/globals.hpp"
 #include "systems/UISystem.hpp"
 
-#include "soundbank.h"
 #include <maxmod9.h>
 #include <nds.h>
 #include <string>
@@ -165,6 +164,7 @@ void IntroView::init()
     graphics->unloadGraphic(logoRight);
 
     // point to music
+    sfxCmpt->registerSFX(SFX::SFX_0);
     sfxCmpt->registerSFX(SFX::SFX_2);
     musicCmpt->registerMusic(
         (fatBasePath + "music/menus/title/tightrope.qoa").c_str(), ae::q20_12_t{17.962}, ae::q20_12_t{66.082});

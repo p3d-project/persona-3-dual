@@ -13,13 +13,6 @@ void UISystem::Init()
 {
     isActive = false;
     renderUIText = false;
-
-    if (sfxCmpt != nullptr)
-    {
-        sfxCmpt->registerSFX(SFX::SFX_1);
-        sfxCmpt->registerSFX(SFX::SFX_2);
-        sfxCmpt->registerSFX(SFX::SFX_0);
-    }
 }
 
 void UISystem::Update(ae::q20_12_t dt)
@@ -286,6 +279,13 @@ void UISystem::on_receive(const Event::HideAllScreens& /*msg*/)
 
 void UISystem::on_receive(const Event::ShowMenu& msg)
 {
+    if (sfxCmpt != nullptr)
+    {
+        sfxCmpt->registerSFX(SFX::SFX_1);
+        sfxCmpt->registerSFX(SFX::SFX_2);
+        sfxCmpt->registerSFX(SFX::SFX_0);
+    }
+
     if (activeMenu != nullptr)
     {
         activeMenu->isActive = false;

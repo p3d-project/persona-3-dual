@@ -155,12 +155,4 @@ class AudioManager : public ae::Manager, public ae::Singleton<AudioManager>
      * @return mm_word the decoded audio data
      */
     mm_word processStream(mm_word length, mm_addr dest, mm_stream_formats format);
-
-    /**
-     * @brief Fetch the SFX id based on the enum value
-     *
-     * @param sfx the SFX enum
-     * @return int the SFX id
-     */
-    int fetchSFXSampleId(SFX sfx);
 };
