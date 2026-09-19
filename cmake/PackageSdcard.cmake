@@ -24,7 +24,7 @@ if(NOT EXISTS "${P3D_DATA}")
 endif()
 
 execute_process(
-    COMMAND "${P3D_PYTHON_EXECUTABLE}" -c "with open('sdcard.img', 'wb') as f: f.truncate(512 * 1024 * 1024 * 4)"
+    COMMAND "${P3D_PYTHON_EXECUTABLE}" -c "with open('sdcard.img', 'wb') as f: f.truncate(int(1024 * 1024 * 1024 * 0.5))"
     WORKING_DIRECTORY "${P3D_SOURCE_DIR}"
     RESULT_VARIABLE create_result
 )
