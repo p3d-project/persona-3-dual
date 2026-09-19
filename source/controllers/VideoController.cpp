@@ -232,7 +232,9 @@ static mm_word videoAudioCallback(mm_word length, mm_addr dest, mm_stream_format
         {
             n = length - done;
         }
-        memcpy(out + done * ch, a->pcm + a->pcmPos * ch, n * ch * sizeof(short));
+        const size_t copySamples = static_cast<size_t>(n) * static_cast<size_t>(ch);
+        const size_t copyBytes = copySamples * sizeof(short);
+        memcpy(out + done * ch, a->pcm + a->pcmPos * ch, copyBytes);
         a->pcmPos += n;
         done += n;
     }
@@ -242,7 +244,9 @@ static mm_word videoAudioCallback(mm_word length, mm_addr dest, mm_stream_format
     if (done < length)
     {
         uint32_t pad = length - done;
-        memset(out + done * ch, 0, pad * ch * sizeof(short));
+        const size_t padSamples = static_cast<size_t>(pad) * static_cast<size_t>(ch);
+        const size_t padBytes = padSamples * sizeof(short);
+        memset(out + done * ch, 0, padBytes);
         if (a->fileEnded)
         {
             a->freeRunSamples += pad; // no more audio will come: let time pass
