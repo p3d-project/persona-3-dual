@@ -12,13 +12,13 @@
 #include "components/DialogueComponent.hpp"
 #include "components/GraphicsComponent.hpp"
 #include "components/MovementComponent.hpp"
+#include "components/MusicComponent.hpp"
 #include "components/menus/BattleMenu.hpp"
 #include "components/menus/PauseMenu.hpp"
 #include "components/screens/DialogueScreen.hpp"
 #include "components/screens/MenuHUDScreen.hpp"
 // controllers
 #include "controllers/AnimationController.hpp"
-#include "controllers/MusicController.hpp"
 // managers
 #include "managers/RenderManager.hpp"
 //systems
@@ -153,7 +153,7 @@ class EnvironmentView : public BaseView
     TextComponent* textSubAlt = nullptr;
 
     AnimationController* animationCtrl = AnimationController::getInstance();
-    MusicController* musicCtrl = MusicController::getInstance();
+    MusicComponent* musicCmpt = nullptr;
 
     // -------------------------------------------------
     // UI

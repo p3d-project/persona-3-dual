@@ -2,23 +2,16 @@
 
 #include "core/globals.hpp"
 #include "events/SaveEvents.hpp"
+#include "systems/UISystem.hpp"
 
 #include <cstring>
 #include <nds.h>
 #include <nds/arm9/keyboard.h>
 #include <stdio.h>
 
-// sfx
-#include "soundbank.h"
-
 void SignContractView::cancelSFX()
 {
-    musicCtrl->stopSFX(sfxMenuHandle);
-    musicCtrl->stopSFX(sfxSelectHandle);
-    musicCtrl->stopSFX(sfxCancelHandle);
-    sfxMenuHandle = 0;
-    sfxSelectHandle = 0;
-    sfxCancelHandle = 0;
+    sfxCmpt->stopSFX();
 }
 
 void SignContractView::init()
@@ -28,20 +21,27 @@ void SignContractView::init()
         signContract = engine.CreateEntity();
         graphics = engine.CreateComponent<GraphicsComponent>();
         text = engine.CreateComponent<TextComponent>();
+        musicCmpt = engine.CreateComponent<MusicComponent>();
+        sfxCmpt = engine.CreateComponent<SFXComponent>();
 
         signContract->AddComponent(graphics);
         signContract->AddComponent(text);
+        signContract->AddComponent(musicCmpt);
+        signContract->AddComponent(sfxCmpt);
+
+        UISystem::GetInstance().SetMusicComponent(musicCmpt);
+        UISystem::GetInstance().SetSFXComponent(sfxCmpt);
     }
 
     // set both screens to black
     setBrightness(3, -16);
 
     // setup music
-    musicCtrl->loadSFX(SFX_MENU);
-    musicCtrl->loadSFX(SFX_SELECT);
-    musicCtrl->loadSFX(SFX_CANCEL);
-    musicCtrl->init(
-        (fatBasePath + "music/menus/contract/mistic.pcm").c_str(), ae::q20_12_t{1.998}, ae::q20_12_t{49.959});
+    sfxCmpt->registerSFX(SFX::SFX_1);
+    sfxCmpt->registerSFX(SFX::SFX_2);
+    sfxCmpt->registerSFX(SFX::SFX_0);
+    musicCmpt->registerMusic(
+        (fatBasePath + "music/menus/contract/mistic.qoa").c_str(), ae::q20_12_t{1.998}, ae::q20_12_t{49.959});
 
     videoSetMode(MODE_5_2D);
     videoSetModeSub(MODE_3_2D | DISPLAY_BG3_ACTIVE);
@@ -102,7 +102,6 @@ void SignContractView::init()
         for (int duration = 0; duration <= 2; duration++)
         {
             swiWaitForVBlank();
-            musicCtrl->update();
         }
     }
 }
@@ -116,7 +115,7 @@ ViewState SignContractView::update()
     {
         key = 8;
         cancelSFX();
-        sfxCancelHandle = musicCtrl->playSFX(SFX_CANCEL, 255, 128);
+        sfxCmpt->playSFX(SFX::SFX_0, 255, 128);
 
         if (isLastName)
         {
@@ -159,7 +158,7 @@ ViewState SignContractView::update()
     {
         key = 10;
         cancelSFX();
-        sfxSelectHandle = musicCtrl->playSFX(SFX_SELECT, 255, 128);
+        sfxCmpt->playSFX(SFX::SFX_2, 255, 128);
 
         if (isLastName)
         {
@@ -189,10 +188,9 @@ ViewState SignContractView::update()
                 for (int duration = 0; duration <= 2; duration++)
                 {
                     swiWaitForVBlank();
-                    musicCtrl->update();
                 }
             }
-            musicCtrl->pause();
+            musicCmpt->pauseMusic();
 
             return ViewState::CUTSCENE_2;
         }
@@ -201,7 +199,7 @@ ViewState SignContractView::update()
     else if (key > 0)
     {
         cancelSFX();
-        sfxMenuHandle = musicCtrl->playSFX(SFX_MENU, 255, 128);
+        sfxCmpt->playSFX(SFX::SFX_1, 255, 128);
 
         if (isLastName && (lastNameIndex < 31))
         {
@@ -235,7 +233,6 @@ ViewState SignContractView::update()
         }
     }
 
-    musicCtrl->update();
     return ViewState::KEEP_CURRENT;
 }
 
@@ -248,11 +245,12 @@ void SignContractView::cleanup()
         signContract = nullptr;
         graphics = nullptr;
         text = nullptr;
+        musicCmpt = nullptr;
+        sfxCmpt = nullptr;
     }
 
     // update save data (names)
     ae::BroadcastEvent(Event::WriteSave{});
     keyboardHide();
-    musicCtrl->cleanup();
     BaseView::cleanup();
 }

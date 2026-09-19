@@ -1,5 +1,6 @@
 #include "MainMenuView.hpp"
 #include "core/globals.hpp"
+#include "systems/UISystem.hpp"
 
 #include <nds.h>
 #include <stdio.h>
@@ -12,14 +13,18 @@ void MainMenuView::init()
         mainMenu = engine.CreateEntity();
         graphics = engine.CreateComponent<GraphicsComponent>();
         textMenu = engine.CreateComponent<TextComponent>();
+        musicCmpt = engine.CreateComponent<MusicComponent>();
 
         mainMenu->AddComponent(graphics);
         mainMenu->AddComponent(textMenu);
+        mainMenu->AddComponent(musicCmpt);
+
+        UISystem::GetInstance().SetMusicComponent(musicCmpt);
     }
 
     // setup music
-    musicCtrl->init(
-        (fatBasePath + "music/menus/velvetRoom/aria_of_the_soul.pcm").c_str(), ae::q20_12_t{0}, ae::q20_12_t{164.940});
+    musicCmpt->registerMusic(
+        (fatBasePath + "music/menus/velvetRoom/aria_of_the_soul.qoa").c_str(), ae::q20_12_t{0}, ae::q20_12_t{164.940});
 
     // transition both screens from black
     for (int i = -16; i < 0; i++)
@@ -30,7 +35,6 @@ void MainMenuView::init()
         for (int duration = 0; duration <= 2; duration++)
         {
             swiWaitForVBlank();
-            musicCtrl->update();
         }
     }
 
@@ -125,15 +129,12 @@ void MainMenuView::init()
         for (int frame = 0; frame <= 6; frame++)
         {
             swiWaitForVBlank();
-            musicCtrl->update();
         }
     }
 }
 
 ViewState MainMenuView::update()
 {
-    musicCtrl->update();
-
     if (isSilhouetteStillMoving)
     {
         // skip the animation if the user skipped it
@@ -174,7 +175,7 @@ ViewState MainMenuView::update()
     ViewState result = ViewState::KEEP_CURRENT;
     if (result != ViewState::KEEP_CURRENT)
     {
-        musicCtrl->pause();
+        musicCmpt->pauseMusic();
         return result;
     }
 
@@ -226,7 +227,6 @@ void MainMenuView::cleanup()
         for (int duration = 0; duration <= 2; duration++)
         {
             swiWaitForVBlank();
-            musicCtrl->update();
         }
     }
 
@@ -237,8 +237,7 @@ void MainMenuView::cleanup()
         mainMenu = nullptr;
         graphics = nullptr;
         textMenu = nullptr;
+        musicCmpt = nullptr;
     }
-
-    musicCtrl->cleanup();
     BaseView::cleanup();
 }

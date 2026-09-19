@@ -24,8 +24,8 @@ void IwatodaiDormView::setupCamera()
 
 void IwatodaiDormView::setupMusic()
 {
-    musicCtrl->init(
-        (fatBasePath + "music/locations/iwatodaiDorm/iwatodai_dorm.pcm").c_str(), ae::q20_12_t{1.3}, ae::q20_12_t{-1});
+    musicCmpt->registerMusic(
+        (fatBasePath + "music/locations/iwatodaiDorm/iwatodai_dorm.qoa").c_str(), ae::q20_12_t{1.3}, ae::q20_12_t{-1});
 }
 
 void IwatodaiDormView::setupMovement()

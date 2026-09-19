@@ -53,6 +53,7 @@ set(P3D_MAIN_CPP ${CMAKE_SOURCE_DIR}/source/main.cpp)
 if(P3D_BUILD_NDS)
     set(P3D_GAME_LIBRARY_SOURCES ${P3D_GAME_SOURCES})
     list(REMOVE_ITEM P3D_GAME_LIBRARY_SOURCES ${P3D_MAIN_CPP})
+    add_subdirectory(${CMAKE_SOURCE_DIR}/libs/p3d-qoa)
 else()
     set(P3D_GAME_LIBRARY_SOURCES ${CMAKE_SOURCE_DIR}/source/battleActions/skills/BattleCalcsCoreTestExample.cpp)
 endif()
@@ -70,5 +71,3 @@ if(P3D_USE_BUNDLED_AEGIS_ENGINE)
 
     add_subdirectory(${CMAKE_SOURCE_DIR}/libs/aegis_engine EXCLUDE_FROM_ALL)
 endif()
-
-add_subdirectory(${CMAKE_SOURCE_DIR}/libs/p3d-qoa EXCLUDE_FROM_ALL)

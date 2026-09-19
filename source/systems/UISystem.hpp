@@ -11,15 +11,15 @@
 
 #include "core/routerIDs.hpp"
 #include "events/UIEvents.hpp"
-#include "soundbank.h"
 
 #include "events/GenericEvents.hpp"
 
+#include "components/MusicComponent.hpp"
+#include "components/SFXComponent.hpp"
 #include "components/TextComponent.hpp"
 #include "components/menus/UIMenu.hpp"
 #include "components/screens/UIScreen.hpp"
 
-#include "controllers/MusicController.hpp"
 #include "managers/UIManager.hpp"
 
 // TODO: add a way to indicate reduced # of bg slots
@@ -44,6 +44,15 @@ class UISystem : public ae::SystemRouter<UISystem,
     void Shutdown() override;
 
     void Update(ae::q20_12_t /*dt*/) override;
+
+    void SetMusicComponent(MusicComponent* music)
+    {
+        musicCmpt = music;
+    }
+    void SetSFXComponent(SFXComponent* sfx)
+    {
+        sfxCmpt = sfx;
+    }
 
     // TODO: move out of UISystem. Only here as a temporary fix
     void on_receive(const Event::SwitchView& msg);
@@ -211,12 +220,8 @@ class UISystem : public ae::SystemRouter<UISystem,
     std::array<UIMenu*, 10> menus = {};
     UIMenu* activeMenu = nullptr;
     TextComponent* text = nullptr;
-    MusicController* musicCtrl = MusicController::getInstance();
-
-    // menu sfx
-    mm_sfxhand sfxMenuHandle = 0;
-    mm_sfxhand sfxSelectHandle = 0;
-    mm_sfxhand sfxCancelHandle = 0;
+    MusicComponent* musicCmpt = nullptr;
+    SFXComponent* sfxCmpt = nullptr;
 
     bool renderUIText = false;
 };

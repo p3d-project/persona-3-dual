@@ -70,6 +70,9 @@ p3d_add_asset_group(music
     COMMENT "Generating music assets"
     PATTERNS
     ${CMAKE_SOURCE_DIR}/assets/music/*.mp3
+    ${CMAKE_SOURCE_DIR}/assets/music/*.build.json
+    ${CMAKE_SOURCE_DIR}/assets/music/**/*.mp3
+    ${CMAKE_SOURCE_DIR}/assets/music/**/*.build.json
 )
 p3d_add_asset_group(video
     COMMENT "Generating video assets"

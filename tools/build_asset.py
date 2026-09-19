@@ -31,6 +31,8 @@ def load_config(input_file: str) -> dict:
 def guess_asset_type(input_file: str) -> Optional[str]:
     """Guess the asset type based on file extension."""
     ext = os.path.splitext(input_file)[1].lower()
+    if ext == ".mp3":
+        return "mp32qoa"
     if ext == ".mp4":
         return "video2vid"
     if ext == ".jmap":
