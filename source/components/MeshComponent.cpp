@@ -95,6 +95,7 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
     FileBuffer buffer = io.openFileBuffer(*meshFilePath);
     if (buffer.get() == nullptr)
     {
+        model.reset();
         return false;
     }
 
@@ -103,11 +104,13 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
 
     if (buffer.read(&rawHeader, sizeof(RawModelHeader), 1, &offset) != 1)
     {
+        model.reset();
         return false;
     }
 
     if (memcmp(rawHeader.magic, "MDL3", 4) != 0)
     {
+        model.reset();
         return false;
     }
 
@@ -116,6 +119,7 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
 
     if (rawHeader.animCount > 0)
     {
+        model.reset();
         return false; // Animations not supported for static meshes
     }
 
@@ -126,6 +130,7 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
         if (!loadTextureHeader(buffer, *tex, offset))
         {
             delete tex;
+            model.reset();
             return false;
         }
         model->textures.push_back(tex);
@@ -140,6 +145,7 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
         if (buffer.read(&rawNode, sizeof(RawNodeHeader), 1, &offset) != 1)
         {
             delete node;
+            model.reset();
             return false;
         }
 
@@ -155,6 +161,7 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
                 buffer.read(&sl.dlSize, sizeof(uint32_t), 1, &offset) != 1)
             {
                 delete node;
+                model.reset();
                 return false;
             }
 
@@ -167,6 +174,7 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
                     wordCount == std::numeric_limits<size_t>::max())
                 {
                     delete node;
+                    model.reset();
                     return false;
                 }
 
@@ -187,6 +195,7 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
     {
         if (!loadEmbeddedImage(buffer, *model->textures[i], offset))
         {
+            model.reset();
             return false;
         }
     }
