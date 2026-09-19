@@ -10,13 +10,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define VID_AUDIO_NONE 0
-#define VID_AUDIO_QOA 1
+constexpr uint8_t VID_AUDIO_NONE = 0;
+constexpr uint8_t VID_AUDIO_QOA = 1;
 
 namespace
 {
-constexpr u32 RING_SIZE = 32768; // compressed audio ring, must be a power of two
-constexpr u32 RING_MASK = RING_SIZE - 1;
+constexpr uint32_t RING_SIZE = 32768; // compressed audio ring, must be a power of two
+constexpr uint32_t RING_MASK = RING_SIZE - 1;
 static_assert(AUDIO_CHUNK_MAX <= RING_SIZE, "audio ring must hold at least one audio chunk");
 } // namespace
 
@@ -28,30 +28,30 @@ static VideoAudio* g_audio = nullptr;
 
 struct VideoAudio
 {
-    u8* ring = nullptr;
-    u32 head = 0;
-    u32 count = 0;
+    uint8_t* ring = nullptr;
+    uint32_t head = 0;
+    uint32_t count = 0;
 
     short* pcm = nullptr; // one decoded QOA frame, interleaved
-    u32 pcmPos = 0;
-    u32 pcmLen = 0;
+    uint32_t pcmPos = 0;
+    uint32_t pcmLen = 0;
 
-    u8* scratch = nullptr; // for frames that wrap around the ring end
-    u32 scratchSize = 0;
+    uint8_t* scratch = nullptr; // for frames that wrap around the ring end
+    uint32_t scratchSize = 0;
 
     qoa_desc desc;
-    u32 rate = 0;
-    u32 channels = 0;
-    u32 streamSamples = 0;
+    uint32_t rate = 0;
+    uint32_t channels = 0;
+    uint32_t streamSamples = 0;
 
-    u32 contentSamples = 0; // real audio samples handed to maxmod
-    u32 freeRunSamples = 0; // silence after the file ended (keeps the clock running)
-    u32 silentRun = 0;      // consecutive fully-silent samples
+    uint32_t contentSamples = 0; // real audio samples handed to maxmod
+    uint32_t freeRunSamples = 0; // silence after the file ended (keeps the clock running)
+    uint32_t silentRun = 0;      // consecutive fully-silent samples
     bool fileEnded = false;
     bool fault = false;
     bool streamOpen = false;
 
-    bool open(u32 sampleRate, u32 numChannels)
+    bool open(uint32_t sampleRate, uint32_t numChannels)
     {
         rate = sampleRate;
         channels = numChannels;
@@ -60,16 +60,16 @@ struct VideoAudio
         desc.samplerate = sampleRate;
 
         scratchSize = qoa_max_frame_size(&desc);
-        ring = (u8*)malloc(RING_SIZE);
+        ring = (uint8_t*)malloc(RING_SIZE);
         pcm = (short*)malloc(QOA_FRAME_LEN * numChannels * sizeof(short));
-        scratch = (u8*)malloc(scratchSize);
+        scratch = (uint8_t*)malloc(scratchSize);
         if (!ring || !pcm || !scratch)
         {
             close();
             return false;
         }
 
-        u32 s = (rate * VIDEO_AUDIO_STREAM_MS / 1000) & ~15u;
+        uint32_t s = (rate * VIDEO_AUDIO_STREAM_MS / 1000) & ~15u;
         streamSamples = s < 512 ? 512 : (s > 8192 ? 8192 : s);
         return true;
     }
@@ -116,16 +116,16 @@ struct VideoAudio
         }
     }
 
-    u32 space() const
+    uint32_t space() const
     {
         return RING_SIZE - count;
     }
 
     // Reads `size` bytes from f directly into the ring (handles wrap-around).
-    bool readFrom(FILE* f, u32 size)
+    bool readFrom(FILE* f, uint32_t size)
     {
-        u32 tail = (head + count) & RING_MASK;
-        u32 first = RING_SIZE - tail;
+        uint32_t tail = (head + count) & RING_MASK;
+        uint32_t first = RING_SIZE - tail;
         if (first > size)
         {
             first = size;
@@ -152,12 +152,12 @@ struct VideoAudio
             return false;
         }
 
-        u8 h[8];
-        for (u32 i = 0; i < 8; i++)
+        uint8_t h[8];
+        for (uint32_t i = 0; i < 8; i++)
         {
             h[i] = ring[(head + i) & RING_MASK];
         }
-        u32 size = ((u32)h[6] << 8) | h[7];
+        uint32_t size = ((uint32_t)h[6] << 8) | h[7];
         if (h[0] != channels || size < 8 || size > scratchSize)
         {
             fault = true;
@@ -168,8 +168,8 @@ struct VideoAudio
             return false; // underrun
         }
 
-        const u8* src;
-        u32 toEnd = RING_SIZE - head;
+        const uint8_t* src;
+        uint32_t toEnd = RING_SIZE - head;
         if (size <= toEnd)
         {
             src = ring + head;
@@ -181,7 +181,7 @@ struct VideoAudio
             src = scratch;
         }
 
-        u32 len = 0;
+        uint32_t len = 0;
         qoa_decode_frame(src, size, &desc, pcm, &len);
         head = (head + size) & RING_MASK;
         count -= size;
@@ -196,11 +196,11 @@ struct VideoAudio
     }
 
     // Playback position in samples (what is audible, not just decoded).
-    u32 clock() const
+    uint32_t clock() const
     {
         s32 latency = (s32)streamSamples + (VIDEO_SYNC_OFFSET_MS * (s32)rate) / 1000;
         s32 played = (s32)(contentSamples + freeRunSamples) - latency;
-        return played > 0 ? (u32)played : 0;
+        return played > 0 ? (uint32_t)played : 0;
     }
 
     bool failed() const
@@ -218,8 +218,8 @@ static mm_word videoAudioCallback(mm_word length, mm_addr dest, mm_stream_format
     }
 
     short* out = (short*)dest;
-    const u32 ch = a->channels;
-    u32 done = 0;
+    const uint32_t ch = a->channels;
+    uint32_t done = 0;
 
     while (done < length)
     {
@@ -227,7 +227,7 @@ static mm_word videoAudioCallback(mm_word length, mm_addr dest, mm_stream_format
         {
             break;
         }
-        u32 n = a->pcmLen - a->pcmPos;
+        uint32_t n = a->pcmLen - a->pcmPos;
         if (n > length - done)
         {
             n = length - done;
@@ -241,7 +241,7 @@ static mm_word videoAudioCallback(mm_word length, mm_addr dest, mm_stream_format
 
     if (done < length)
     {
-        u32 pad = length - done;
+        uint32_t pad = length - done;
         memset(out + done * ch, 0, pad * ch * sizeof(short));
         if (a->fileEnded)
         {
@@ -318,9 +318,9 @@ int VideoController::clockFrame() const
 {
     if (aud)
     {
-        return (int)(((u64)aud->clock() * (u32)fpsInt) / aud->rate);
+        return (int)(((u64)aud->clock() * (uint32_t)fpsInt) / aud->rate);
     }
-    return (int)(((u64)silentVblanks * (u32)fpsInt) / 60);
+    return (int)(((u64)silentVblanks * (uint32_t)fpsInt) / 60);
 }
 
 void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState iNextState)
@@ -374,11 +374,11 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
     }
 
     // Read the optional dynamic video header.
-    u8 header[16];
+    uint8_t header[16];
     size_t hRead = fread(header, 1, 16, videoFile);
-    u8 audioCodec = VID_AUDIO_NONE;
-    u32 audioRate = 0;
-    u32 audioChannels = 0;
+    uint8_t audioCodec = VID_AUDIO_NONE;
+    uint32_t audioRate = 0;
+    uint32_t audioChannels = 0;
 
     if (hRead == 16 && memcmp(header, "VID\0", 4) == 0)
     {
@@ -414,7 +414,7 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
         }
     }
 
-    frameSize = (u32)frameW * frameH * bpp;
+    frameSize = (uint32_t)frameW * frameH * bpp;
     bufferSize = frameSize * FRAMES_TO_BUFFER;
 
     // Select the background format from the parsed bit depth.
@@ -422,7 +422,7 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
     {
         bg = bgInit(3, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
 
-        u16 palette[256];
+        uint16_t palette[256];
         size_t palRead = fread(palette, 2, 256, videoFile);
         if (palRead != 256)
         {
@@ -448,7 +448,7 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
     // Clear the first frame target before playback.
     dmaFillWords(0, bgGetGfxPtr(bg), frameSize);
 
-    ramBuffer = (u8*)memalign(32, bufferSize);
+    ramBuffer = (uint8_t*)memalign(32, bufferSize);
     if (!ramBuffer)
     {
         consoleDemoInit();
@@ -492,10 +492,10 @@ bool VideoController::refillBuffer()
         return false;
     }
 
-    // Each frame starts with a u32 audio size.
+    // Each frame starts with a uint32_t audio size.
     if (!haveChunkHeader)
     {
-        u32 size = 0;
+        uint32_t size = 0;
         if (fread(&size, 4, 1, videoFile) != 1)
         {
             setEOF();
@@ -530,17 +530,17 @@ bool VideoController::refillBuffer()
     haveChunkHeader = false;
 
     // Read the video frame in slices, feeding the audio stream in between.
-    u8* dest = &ramBuffer[writeIndex * frameSize];
-    u32 got = 0;
+    uint8_t* dest = &ramBuffer[writeIndex * frameSize];
+    uint32_t got = 0;
     while (got < frameSize)
     {
-        u32 n = frameSize - got;
+        uint32_t n = frameSize - got;
         if (n > VIDEO_READ_SLICE)
         {
             n = VIDEO_READ_SLICE;
         }
         size_t r = fread(dest + got, 1, n, videoFile);
-        got += (u32)r;
+        got += (uint32_t)r;
         if (r != n)
         {
             break;
@@ -569,7 +569,7 @@ ViewState VideoController::update()
     if (aud && aud->failed())
     {
         stopInternalAudio();
-        silentVblanks = (u32)(((u64)currentFrame * 60) / (u32)fpsInt);
+        silentVblanks = (uint32_t)(((u64)currentFrame * 60) / (uint32_t)fpsInt);
     }
 
     if (!aud)
