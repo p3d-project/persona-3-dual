@@ -59,12 +59,38 @@ jobs:
           lfs: false # Restored via cache below
           submodules: recursive
 
+      # The workspace folder is owned by the runner user but we run as root, so
+      # git rejects it ("dubious ownership") and git-lfs then says "Not in a Git
+      # repository". checkout only sets this in a temporary config, so set it
+      # here for every later step. '*' also covers submodule directories.
+      # This must stay the FIRST step after checkout.
+      - name: Mark workspace as safe for git
+        run: git config --global --add safe.directory '*'
+
+      # Make sure submodules are present, then build qoaconv up front so a failure
+      # shows a readable error instead of a traceback deep inside the asset build.
+      - name: Initialize submodules and build qoaconv
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive --force
+
+          DR=libs/p3d-qoa/libs/dr_libs
+          if [ ! -f "$DR/dr_mp3.h" ]; then
+            echo "::warning::dr_libs missing after submodule init, cloning fallback"
+            rm -rf "$DR"
+            git clone --depth 1 https://github.com/mackron/dr_libs.git "$DR"
+          fi
+          test -f "$DR/dr_mp3.h"
+
+          make -C libs/p3d-qoa qoaconv
+
       # --- 1. LFS cache ---
       # Generate a stable hash of all LFS pointers so the cache key changes
       # only when LFS files themselves change, not on every commit.
       - name: Generate LFS cache key
         id: lfs-key
         run: |
+          set -o pipefail
           LFS_HASH=$(git lfs ls-files -l | cut -d' ' -f1 | sort | sha256sum | cut -d' ' -f1)
           echo "hash=${LFS_HASH}" >> $GITHUB_OUTPUT
 
