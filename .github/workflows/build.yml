@@ -40,13 +40,10 @@ jobs:
 
     # CCACHE_DIR: explicit path so ccache writes inside the mounted workspace
     # and actions/cache can find it at a stable absolute location.
-    # GIT_DIR: explicit path so git commands work correctly inside the container
-    # regardless of which directory a step happens to execute from.
     # HOME: pin to /root so the venv at /root/.venv (baked into the image) is
     # found correctly; GitHub Actions containers default HOME to /github/home.
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
-      GIT_DIR: ${{ github.workspace }}/.git
       HOME: /root
 
     # Ensure every run step executes from the repo root where .git lives.
