@@ -1,6 +1,8 @@
 #include "RenderManager.hpp"
 #include <nds.h>
 
+static constexpr int32_t ONE_Q12 = 1 << 12;
+
 /**
  * @brief Converts a raw texture dimension in pixels to the corresponding
  *        libnds TEXTURE_SIZE_* enum value.
@@ -108,11 +110,37 @@ void RenderManager::uploadTexture(int& textureID,
     glTexImage2D(GL_TEXTURE_2D, 0, texType, textureSizeEnum(sizeX), textureSizeEnum(sizeY), 0, param, texture);
 }
 
-void RenderManager::renderModel(const void* displayList, uint8_t r, uint8_t g, uint8_t b)
+void RenderManager::renderTexturedModel(const void* displayList,
+                                        const int texture,
+                                        ae::q20_12_t posX,
+                                        ae::q20_12_t posY,
+                                        ae::q20_12_t posZ,
+                                        ae::q20_12_t rotX,
+                                        ae::q20_12_t rotY,
+                                        ae::q20_12_t rotZ,
+                                        ae::q20_12_t scale)
 {
-    glDisable(GL_TEXTURE_2D);
-    glColor3b(r, g, b);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    if (!displayList)
+    {
+        return;
+    }
+
+    glPushMatrix();
+
+    glTranslatef32(posX.raw_value(), posY.raw_value(), posZ.raw_value());
+
+    // Only apply rotations if they are non-zero
+    if (rotX.raw_value())
+        glRotatef32(rotX.raw_value(), ONE_Q12, 0, 0);
+    if (rotY.raw_value())
+        glRotatef32(rotY.raw_value(), 0, ONE_Q12, 0);
+    if (rotZ.raw_value())
+        glRotatef32(rotZ.raw_value(), 0, 0, ONE_Q12);
+
+    if (scale.raw_value() != ONE_Q12)
+    {
+        glScalef32(scale.raw_value(), scale.raw_value(), scale.raw_value());
+    }
 
     // Guard against corrupted DL pointers
     if (displayList)
@@ -121,21 +149,8 @@ void RenderManager::renderModel(const void* displayList, uint8_t r, uint8_t g, u
     }
     while (GFX_BUSY)
         ;
-}
 
-void RenderManager::renderTexturedModel(const void* displayList, const int texture)
-{
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glColor3b(255, 255, 255);
-
-    // Guard against corrupted DL pointers
-    if (displayList)
-    {
-        glCallList(displayList);
-    }
-    while (GFX_BUSY)
-        ;
+    glPopMatrix(1);
 }
 
 void RenderManager::renderTexturedBillboard(
@@ -202,6 +217,9 @@ void RenderManager::renderDisplayList(const void* list)
 
 void RenderManager::deleteTexture(int& texture)
 {
-    glDeleteTextures(1, &texture);
-    texture = 0;
+    if (texture != -1)
+    {
+        glDeleteTextures(1, &texture);
+        texture = -1;
+    }
 }

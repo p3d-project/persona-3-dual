@@ -62,22 +62,27 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
                        const void* bitmap);
 
     /**
-     * @brief Renders a model with a solid color.
-     *
-     * @param displayList Pointer to the display list of the model to render.
-     * @param r The red component of the color to use for rendering (0 - 255; default 255).
-     * @param g The green component of the color to use for rendering (0 - 255; default 255).
-     * @param b The blue component of the color to use for rendering (0 - 255; default 255).
-     */
-    void renderModel(const void* displayList, uint8_t r = 255, uint8_t g = 255, uint8_t b = 255);
-
-    /**
      * @brief Renders a textured model.
      *
      * @param displayList Pointer to the display list of the model to render.
      * @param texture The ID of the texture to use for rendering.
+     * @param posX The X position of the model.
+     * @param posY The Y position of the model.
+     * @param posZ The Z position of the model.
+     * @param rotX The rotation of the model around the X axis.
+     * @param rotY The rotation of the model around the Y axis.
+     * @param rotZ The rotation of the model around the Z axis.
+     * @param scale The scale to apply to the model (default 1).
      */
-    void renderTexturedModel(const void* displayList, const int texture);
+    void renderTexturedModel(const void* displayList,
+                             const int texture,
+                             ae::q20_12_t posX,
+                             ae::q20_12_t posY,
+                             ae::q20_12_t posZ,
+                             ae::q20_12_t rotX,
+                             ae::q20_12_t rotY,
+                             ae::q20_12_t rotZ,
+                             ae::q20_12_t scale = ae::q20_12_t{1});
 
     /**
      * @brief Renders a textured billboard.
@@ -100,7 +105,7 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
 
     /**
      * @brief Deletes a texture from the GPU and resets its ID.
-     * @param texture The ID of the texture to delete. This will be set to 0 after deletion.
+     * @param texture The ID of the texture to delete. This will be set to -1 after deletion.
      */
     void deleteTexture(int& texture);
 
