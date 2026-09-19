@@ -104,7 +104,7 @@ class FileBuffer
         {
             return 0; // Out of bounds
         }
-        memcpy(dest, data + *offset, bytes * count);
+        memcpy(dest, static_cast<const byte*>(data) + *offset, bytes * count);
         *offset += bytes * count;
         return count;
     }
