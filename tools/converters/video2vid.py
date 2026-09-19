@@ -40,6 +40,8 @@ DEFAULTS = {
     "channels": 1,
     "audio_lead_ms": 100,
     "no_audio": False,
+    "lowpass_hz": None,  # None = auto (40% of frequency), 0 = off
+    "gain_db": -3.0,
 }
 
 
@@ -69,6 +71,10 @@ def normalize_config(config: dict) -> dict:
     cfg["audio_lead_ms"] = int(cfg["audio_lead_ms"])
     cfg["no_audio"] = bool(cfg["no_audio"])
     cfg["size"] = str(cfg["size"])
+    cfg["gain_db"] = float(cfg["gain_db"])
+    cfg["lowpass_hz"] = None if cfg["lowpass_hz"] is None else int(cfg["lowpass_hz"])
+    if cfg["lowpass_hz"] is not None and cfg["lowpass_hz"] < 0:
+        raise ValueError("lowpass_hz must be >= 0")
     if cfg["fps"] <= 0:
         raise ValueError("fps must be > 0")
     if cfg["bits"] not in (8, 16):
@@ -235,10 +241,28 @@ def encode_8bit_raw(
 # --------------------------------------------------------------------------- #
 # Audio (WAV -> QOA via the vendored qoaconv, same tool as mp32qoa.py)
 # --------------------------------------------------------------------------- #
+def build_audio_filter(frequency: int, lowpass_hz, gain_db: float) -> str:
+    """Resample first so the low-pass cutoff is always below the target Nyquist."""
+    chain = [f"aresample={frequency}"]
+    cutoff = int(frequency * 0.4) if lowpass_hz is None else int(lowpass_hz)
+    if cutoff > 0:
+        chain.append(f"lowpass=f={min(cutoff, int(frequency * 0.49))}")
+    if gain_db:
+        chain.append(f"volume={gain_db}dB")
+    return ",".join(chain)
+
+
 def extract_pcm_wav(
-    input_path: str, out_wav: str, frequency: int, channels: int, duration: float
+    input_path: str,
+    out_wav: str,
+    frequency: int,
+    channels: int,
+    duration: float,
+    lowpass_hz=None,
+    gain_db: float = -3.0,
 ):
-    """Extract audio, padded with silence / trimmed to exactly the video duration."""
+    """Extract audio, low-passed and attenuated, padded/trimmed to the video duration."""
+    chain = build_audio_filter(frequency, lowpass_hz, gain_db)
     base = ["ffmpeg", "-y", "-i", input_path, "-vn"]
     tail = [
         "-acodec",
@@ -252,9 +276,11 @@ def extract_pcm_wav(
         out_wav,
     ]
     try:
-        _ffmpeg_run(base + ["-af", f"apad=whole_dur={duration:.6f}"] + tail, quiet=True)
+        _ffmpeg_run(
+            base + ["-af", f"{chain},apad=whole_dur={duration:.6f}"] + tail, quiet=True
+        )
     except subprocess.CalledProcessError:
-        _ffmpeg_run(base + tail)  # older ffmpeg without apad whole_dur
+        _ffmpeg_run(base + ["-af", chain] + tail)  # older ffmpeg without apad whole_dur
 
 
 def ensure_qoaconv() -> Path:
@@ -435,7 +461,15 @@ def convert(input_path, output_path, config=None):
         if use_audio:
             wav = os.path.join(tmp_dir, "a.wav")
             qoa = os.path.join(tmp_dir, "a.qoa")
-            extract_pcm_wav(input_path, wav, frequency, channels, total_frames / fps)
+            extract_pcm_wav(
+                input_path,
+                wav,
+                frequency,
+                channels,
+                total_frames / fps,
+                cfg["lowpass_hz"],
+                cfg["gain_db"],
+            )
             wav_to_qoa(wav, qoa)
             qoa_frames, a_rate, a_ch = read_qoa_frames(qoa)
             if a_rate != frequency or a_ch != channels:
@@ -482,6 +516,14 @@ if __name__ == "__main__":
         help="how far audio is muxed ahead of video (default 100)",
     )
     parser.add_argument("--no-audio", action="store_true", default=None)
+    parser.add_argument(
+        "--lowpass-hz",
+        type=int,
+        help="low-pass cutoff; default 40%% of frequency, 0 = off",
+    )
+    parser.add_argument(
+        "--gain-db", type=float, help="gain in dB before encoding (default -3, 0 = off)"
+    )
     args = parser.parse_args()
 
     convert(
