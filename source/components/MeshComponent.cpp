@@ -1,21 +1,21 @@
 #include "MeshComponent.hpp"
+#include <memory>
 
 void MeshComponent::Update(ae::q20_12_t)
 {
+    drawMesh();
 }
 
 void MeshComponent::Destroy()
 {
     isActive = false;
+    model.reset();
 }
 
 bool MeshComponent::loadTextureHeader(FileBuffer& buffer, MDL3Texture& tex, size_t& offset)
 {
     RawTextureHeader raw;
 
-    //if (fread(rawName, 1, 64, f) != 64 || fread(&tex.width, sizeof(uint16_t), 1, f) != 1 ||
-    //    fread(&tex.height, sizeof(uint16_t), 1, f) != 1 || fread(&isRGBA, sizeof(uint8_t), 1, f) != 1 ||
-    //    fread(pad, sizeof(uint8_t), 3, f) != 3)
     if (buffer.read(&raw, sizeof(RawTextureHeader), 1, &offset) != 1)
     {
         return false;
@@ -66,10 +66,10 @@ bool MeshComponent::loadEmbeddedImage(FileBuffer& buffer, MDL3Texture& tex, size
         return false;
     }
 
+    // Explicity delete old VRAM textures if previously allocated
     if (tex.textureID != -1)
     {
-        glDeleteTextures(1, &tex.textureID); // shouldnt be here
-        tex.textureID = -1;
+        render.deleteTexture(tex.textureID);
     }
 
     GL_TEXTURE_TYPE_ENUM texType = tex.isRGBA ? GL_RGBA : GL_RGB16;
@@ -85,14 +85,20 @@ bool MeshComponent::loadEmbeddedImage(FileBuffer& buffer, MDL3Texture& tex, size
 
 bool MeshComponent::loadMesh(std::string* meshFilePath)
 {
-    FileBuffer buffer = io.openFileBuffer(meshFilePath);
+    if (meshFilePath == nullptr)
+    {
+        return false;
+    }
+
+    model = std::make_unique<MDL3Model>();
+
+    FileBuffer buffer = io.openFileBuffer(*meshFilePath);
     if (buffer.get() == nullptr)
     {
         return false;
     }
 
     size_t offset = 0;
-
     RawModelHeader rawHeader;
 
     if (buffer.read(&rawHeader, sizeof(RawModelHeader), 1, &offset) != 1)
@@ -105,92 +111,109 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
         return false;
     }
 
-    nodeCount = rawHeader.nodeCount;
-    texCount = rawHeader.texCount;
+    model->nodeCount = rawHeader.nodeCount;
+    model->texCount = rawHeader.texCount;
+
+    if (rawHeader.animCount > 0)
+    {
+        return false; // Animations not supported for static meshes
+    }
 
     // Read Texture Headers
-    textures.resize(texCount);
-    for (uint32_t i = 0; i < texCount; ++i)
+    for (uint32_t i = 0; i < model->texCount; ++i)
     {
-        if (!loadTextureHeader(buffer, textures[i], offset))
+        MDL3Texture* tex = new MDL3Texture();
+        if (!loadTextureHeader(buffer, *tex, offset))
         {
+            delete tex;
             return false;
         }
+        model->textures.push_back(tex);
     }
 
     // Read in Nodes
-    nodes.resize(nodeCount);
-    for (uint32_t i = 0; i < nodeCount; ++i)
+    for (uint32_t i = 0; i < model->nodeCount; ++i)
     {
-        auto& node = nodes[i];
-        uint32_t subListCount = 0;
-
+        Node* node = new Node();
         RawNodeHeader rawNode;
 
-        if (buffer.read(&rawNode, sizeof(int32_t), 1, &offset) != 1)
+        if (buffer.read(&rawNode, sizeof(RawNodeHeader), 1, &offset) != 1)
         {
+            delete node;
             return false;
         }
 
-        node.pid = rawNode.pid;
-        node.px = rawNode.posX;
-        node.py = rawNode.posY;
-        node.pz = rawNode.posZ;
-        node.subLists.resize(rawNode.subListCount);
+        node->pid = rawNode.pid;
+        node->px = rawNode.posX;
+        node->py = rawNode.posY;
+        node->pz = rawNode.posZ;
+
         for (uint32_t j = 0; j < rawNode.subListCount; ++j)
         {
-            auto& sl = node.subLists[j];
+            SubList_N sl;
             if (buffer.read(&sl.texSlot, sizeof(int32_t), 1, &offset) != 1 ||
                 buffer.read(&sl.dlSize, sizeof(uint32_t), 1, &offset) != 1)
             {
+                delete node;
                 return false;
             }
 
             if (sl.dlSize > 0)
             {
-                sl.displayList.resize(sl.dlSize + 1);
-                sl.displayList[0] = sl.dlSize;
-                if (buffer.read(&sl.displayList[1], sizeof(uint32_t), sl.dlSize, &offset) != sl.dlSize)
+                const size_t wordCount = sl.dlSize;
+
+                // Out of file bounds check
+                if (offset > buffer.length() || wordCount > (buffer.length() - offset) / sizeof(uint32_t) ||
+                    wordCount == std::numeric_limits<size_t>::max())
                 {
+                    delete node;
                     return false;
                 }
+
+                const size_t rawByteSize = wordCount * sizeof(uint32_t);
+                sl.displayList = reinterpret_cast<const uint32_t*>(static_cast<const uint8_t*>(buffer.get()) + offset -
+                                                                   sizeof(uint32_t));
+                offset += rawByteSize;
             }
+            node->subLists.push_back(std::move(sl));
         }
+        model->nodes.push_back(node);
     }
 
-    // Skip animation data for now
+    // Skip animation data on static meshes
 
-    // Read embedded images
-    for (uint32_t i = 0; i < texCount; ++i)
+    //Textures
+    for (uint32_t i = 0; i < model->texCount; ++i)
     {
-        if (!loadEmbeddedImage(buffer, textures[i], offset))
+        if (!loadEmbeddedImage(buffer, *model->textures[i], offset))
         {
             return false;
         }
     }
 
-    buffer.release(); // Release the buffer after loading is complete
+    isActive = true;
     return true;
 }
 
 void MeshComponent::drawMesh()
 {
-    for (const auto& node : nodes)
+    for (const auto& node : model->nodes)
     {
-        for (const auto& sl : node.subLists)
+        for (const auto& sl : node->subLists)
         {
-            if (sl.displayList.empty())
+            if (sl.displayList == nullptr)
             {
                 continue;
             }
-            if (sl.texSlot >= 0 && sl.texSlot < static_cast<int32_t>(textures.size()))
-            {
-                render.renderTexturedModel(sl.displayList.data(), textures[sl.texSlot].textureID);
-            }
-            else
-            {
-                render.renderModel(sl.displayList.data(), 0, 255, 0);
-            }
+            render.renderTexturedModel(sl.displayList,
+                                       model->textures[sl.texSlot]->textureID,
+                                       ae::q20_12_t{0},
+                                       ae::q20_12_t{0},
+                                       ae::q20_12_t{0},
+                                       ae::q20_12_t{180},
+                                       ae::q20_12_t{90},
+                                       ae::q20_12_t{-90},
+                                       ae::q20_12_t{0.5});
         }
     }
 }

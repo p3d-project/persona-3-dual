@@ -8,6 +8,7 @@
 
 #include "components/DialogueComponent.hpp"
 #include "components/GraphicsComponent.hpp"
+#include "components/MeshComponent.hpp"
 #include "components/MovementComponent.hpp"
 #include "components/TextComponent.hpp"
 
@@ -58,6 +59,7 @@ using LargestMessage = etl::largest_type<Event::BattleResult,
                                          Event::WriteSave,
                                          GraphicsComponent,
                                          TextComponent,
+                                         MeshComponent,
                                          Event::ConfigureUIScreen,
                                          Event::ShowScreen,
                                          Event::HideAllScreens,
