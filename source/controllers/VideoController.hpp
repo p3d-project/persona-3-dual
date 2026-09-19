@@ -1,21 +1,38 @@
 #pragma once
 
-#include "managers/AudioManager.hpp"
 #include "types/StateTypes.hpp"
 #include <aegis/ndsTypes.hpp>
 #include <aegis/types.hpp>
 
 #include <nds.h>
+#include <stdio.h>
 #include <string>
 
 #define FRAMES_TO_BUFFER 15
-#define READS_PER_UPDATE 3
+#define READS_PER_UPDATE 3 // max frame reads per update() (reads stop early if a frame is due)
+
+// Max audio payload in one frame chunk. Must match MAX_AUDIO_CHUNK in video2vid.py.
+#define AUDIO_CHUNK_MAX 16384
+
+// Video frames are read from the SD card in slices of this size; the audio
+// stream is fed between slices so a long read can't underrun it.
+#define VIDEO_READ_SLICE 16384
+
+// Length of the maxmod stream buffer in ms. Bigger = more tolerance for slow reads.
+#define VIDEO_AUDIO_STREAM_MS 100
+
+// Fine sync tuning in ms. Positive delays the picture (use if picture leads sound),
+// negative advances it (use if picture lags sound).
+#define VIDEO_SYNC_OFFSET_MS 0
+
+struct VideoAudio; // internal QOA player, defined in VideoController.cpp
 
 /**
- * @brief Streams decoded video frames and synchronized audio from a video file.
+ * @brief Streams video frames and multiplexed QOA audio from a single .vid file.
  *
- * Frames are buffered in RAM and copied to a DS background as playback advances.
- * The controller owns its file handle and frame buffer and is a singleton.
+ * Audio is decoded and streamed by a private QOA/maxmod player inside this
+ * class (AudioManager is not used for playback). The audio clock drives frame
+ * pacing; files without audio use a vblank clock instead.
  */
 class VideoController
 {
@@ -33,11 +50,12 @@ class VideoController
      * @param iFps Fallback frame rate when the file has no header.
      * @param iNextState View state returned after playback completes.
      */
+    void init(std::string iFileName, ae::q20_12_t iFps, ViewState iNextState);
 
     /** @brief Advances playback and renders the next available frame. */
-    void init(std::string iFileName, ae::q20_12_t iFps, ViewState iNextState);
     ViewState update();
-    /** @brief Stops playback and releases the file and frame buffer. */
+
+    /** @brief Stops playback and releases the file, audio stream and frame buffer. */
     void cleanup();
 
   private:
@@ -49,7 +67,7 @@ class VideoController
     static VideoController* instance;
 
     ViewState nextState = ViewState::DEFAULT;
-    ae::q20_12_t fps{0};
+    int fpsInt = 24;
 
     FILE* videoFile = nullptr;
     bool fileEOF = false;
@@ -68,8 +86,17 @@ class VideoController
     u32 frameSize = 0;
     u32 bufferSize = 0;
 
-    /** @brief Reads audio and one video frame into the playback buffers. */
-    void refillBuffer();
+    // multiplexed audio
+    VideoAudio* aud = nullptr; // non-null while the internal audio player is active
+    bool haveChunkHeader = false;
+    u32 pendingAudioSize = 0;
+    u32 silentVblanks = 0; // pacing clock when there is no audio
+    bool waitedThisUpdate = false;
 
-    AudioManager& audio = AudioManager::GetInstance();
+    /** @brief Reads one audio chunk (into the audio ring) and one video frame. @return true if a frame was read. */
+    bool refillBuffer();
+    void pumpAudio();
+    void setEOF();
+    int clockFrame() const;
+    void stopInternalAudio();
 };
