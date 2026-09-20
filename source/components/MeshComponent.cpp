@@ -170,8 +170,7 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
                 const size_t wordCount = sl.dlSize;
 
                 // Out of file bounds check
-                if (offset > buffer.length() || wordCount > (buffer.length() - offset) / sizeof(uint32_t) ||
-                    wordCount == std::numeric_limits<size_t>::max())
+                if (offset + (wordCount * sizeof(uint32_t)) > buffer.length())
                 {
                     delete node;
                     model.reset();
@@ -179,8 +178,12 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
                 }
 
                 const size_t rawByteSize = wordCount * sizeof(uint32_t);
-                sl.displayList = reinterpret_cast<const uint32_t*>(static_cast<const uint8_t*>(buffer.get()) + offset -
-                                                                   sizeof(uint32_t));
+
+                // Allocate persistent memory for the display list
+                uint32_t* displayList = new uint32_t[wordCount + 1];
+                displayList[0] = wordCount;
+                memcpy(&displayList[1], static_cast<const uint8_t*>(buffer.get()) + offset, rawByteSize);
+                sl.displayList = displayList;
                 offset += rawByteSize;
             }
             node->subLists.push_back(std::move(sl));

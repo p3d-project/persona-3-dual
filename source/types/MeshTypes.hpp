@@ -112,6 +112,14 @@ struct MDL3Model
         {
             if (node)
             {
+                for (SubList_N& sl : node->subLists)
+                {
+                    if (sl.displayList)
+                    {
+                        delete[] sl.displayList;
+                        sl.displayList = nullptr;
+                    }
+                }
                 delete node;
             }
         }
