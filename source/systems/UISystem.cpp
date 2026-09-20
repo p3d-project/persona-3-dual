@@ -76,13 +76,17 @@ void UISystem::Update(ae::q20_12_t dt)
         text->clearScreen();
         renderUIText = true;
 
-        if (activeMenu->options[activeMenu->selectedOption].onSelect != nullptr)
+        if (!activeMenu->options.empty() && activeMenu->selectedOption >= 0 &&
+            activeMenu->selectedOption < static_cast<int>(activeMenu->options.size()))
         {
-            ViewState result = (activeMenu->*(activeMenu->options[activeMenu->selectedOption].onSelect))();
-            if (result != ViewState::KEEP_CURRENT)
+            if (activeMenu->options[activeMenu->selectedOption].onSelect != nullptr)
             {
-                activeMenu->nextViewState = result;
-                activeMenu->isActive = false;
+                ViewState result = (activeMenu->*(activeMenu->options[activeMenu->selectedOption].onSelect))();
+                if (result != ViewState::KEEP_CURRENT)
+                {
+                    activeMenu->nextViewState = result;
+                    activeMenu->isActive = false;
+                }
             }
         }
     }
