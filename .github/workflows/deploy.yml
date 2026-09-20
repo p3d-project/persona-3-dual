@@ -37,7 +37,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy docs/doxygen/html --project-name=persona-3-dual --branch=${{ github.head_ref }} --commit-dirty=true
+          command: pages deploy docs/doxygen/html --project-name=persona-3-dual --branch=${{ github.head_ref || github.ref_name }} --commit-dirty=true
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Post PR Comment
