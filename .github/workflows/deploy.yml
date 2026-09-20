@@ -37,15 +37,14 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy docs/doxygen/html --project-name=persona-3-dual --commit-dirty=true
-          # Optional: Enable this if you want to have GitHub Deployments triggered
+          command: pages deploy docs/doxygen/html --project-name=persona-3-dual --branch=${{ github.head_ref }} --commit-dirty=true
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Post PR Comment
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        uses: actions/github-script@v9
         env:
-          PREVIEW_URL: ${{ steps.deploy_docs.outputs.deployment-url }}
+          PREVIEW_URL: ${{ steps.deploy_docs.outputs.pages-deployment-alias-url }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
