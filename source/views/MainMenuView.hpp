@@ -1,6 +1,7 @@
 #pragma once
 #include "components/GraphicsComponent.hpp"
 #include "components/MusicComponent.hpp"
+#include "components/SFXComponent.hpp"
 #include "components/TextComponent.hpp"
 #include "components/menus/MainMenu.hpp"
 #include "managers/MathManager.hpp"
@@ -41,6 +42,7 @@ class MainMenuView : public BaseView
     MathManager& math = MathManager::GetInstance();
     UIManager& ui = UIManager::GetInstance();
     MusicComponent* musicCmpt = nullptr;
+    SFXComponent* sfxCmpt = nullptr;
 
   public:
     void init() override;

@@ -28,9 +28,6 @@ void SignContractView::init()
         signContract->AddComponent(text);
         signContract->AddComponent(musicCmpt);
         signContract->AddComponent(sfxCmpt);
-
-        UISystem::GetInstance().SetMusicComponent(musicCmpt);
-        UISystem::GetInstance().SetSFXComponent(sfxCmpt);
     }
 
     // set both screens to black
