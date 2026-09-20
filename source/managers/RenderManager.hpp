@@ -53,8 +53,11 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
      * @param sizeY The height of the texture in pixels.
      * @param param The parameters of the texture.
      * @param bitmap Pointer to the texture data to load.
+     * @return True if the texture was successfully uploaded, false otherwise.
+     *
+     * @note Will delete old texture if textureID is not -1, and will set textureID to the new texture ID.
      */
-    void uploadTexture(int& textureID,
+    bool uploadTexture(int& textureID,
                        const GL_TEXTURE_TYPE_ENUM texType,
                        const int sizeX,
                        const int sizeY,

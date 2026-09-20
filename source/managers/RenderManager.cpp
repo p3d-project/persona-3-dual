@@ -97,7 +97,7 @@ void RenderManager::cleanup3DView()
     swiWaitForVBlank();
 }
 
-void RenderManager::uploadTexture(int& textureID,
+bool RenderManager::uploadTexture(int& textureID,
                                   const GL_TEXTURE_TYPE_ENUM texType,
                                   const int sizeX,
                                   const int sizeY,
@@ -107,7 +107,7 @@ void RenderManager::uploadTexture(int& textureID,
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, texType, textureSizeEnum(sizeX), textureSizeEnum(sizeY), 0, param, texture);
+    return glTexImage2D(GL_TEXTURE_2D, 0, texType, textureSizeEnum(sizeX), textureSizeEnum(sizeY), 0, param, texture);
 }
 
 void RenderManager::renderTexturedModel(const void* displayList,
@@ -123,6 +123,11 @@ void RenderManager::renderTexturedModel(const void* displayList,
     if (!displayList)
     {
         return;
+    }
+
+    if (texture != -1)
+    {
+        glBindTexture(GL_TEXTURE_2D, texture);
     }
 
     glPushMatrix();
