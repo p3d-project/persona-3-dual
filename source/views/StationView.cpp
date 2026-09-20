@@ -8,9 +8,9 @@ StationView::StationView()
 
 void StationView::setupMusic()
 {
-    musicCtrl->init((fatBasePath + "music/locations/paulowniaMall/station/paulownia_mall.pcm").c_str(),
-                    ae::q20_12_t{2.002},
-                    ae::q20_12_t{73.93});
+    musicCmpt->registerMusic((fatBasePath + "music/locations/paulowniaMall/station/paulownia_mall.qoa").c_str(),
+                             ae::q20_12_t{2.002},
+                             ae::q20_12_t{73.93});
 }
 
 void StationView::setupCamera()

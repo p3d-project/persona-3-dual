@@ -13,11 +13,6 @@ void UISystem::Init()
 {
     isActive = false;
     renderUIText = false;
-
-    // load sfx
-    musicCtrl->loadSFX(SFX_MENU);
-    musicCtrl->loadSFX(SFX_SELECT);
-    musicCtrl->loadSFX(SFX_CANCEL);
 }
 
 void UISystem::Update(ae::q20_12_t dt)
@@ -33,21 +28,25 @@ void UISystem::Update(ae::q20_12_t dt)
     if (updateHookState != ViewState::DEFAULT)
     {
         ae::BroadcastEvent(Event::SwitchView{updateHookState});
-        // TODO: remove after musicCtrl refactor for aegis engine compliance
-        musicCtrl->update();
         return;
     }
 
     // navigate options
     if (systemKeysDown & KEY_DOWN)
     {
-        sfxMenuHandle = musicCtrl->playSFX(SFX_MENU, 255, 128);
+        if (sfxCmpt != nullptr)
+        {
+            sfxCmpt->playSFX(SFX::SFX_1, 255, 128);
+        }
         activeMenu->selectedOption = (activeMenu->selectedOption + 1) % activeMenu->options.size();
         renderUIText = true;
     }
     else if (systemKeysDown & KEY_UP)
     {
-        sfxMenuHandle = musicCtrl->playSFX(SFX_MENU, 255, 128);
+        if (sfxCmpt != nullptr)
+        {
+            sfxCmpt->playSFX(SFX::SFX_1, 255, 128);
+        }
         activeMenu->selectedOption =
             (activeMenu->selectedOption + activeMenu->options.size() - 1) % activeMenu->options.size();
         renderUIText = true;
@@ -70,24 +69,34 @@ void UISystem::Update(ae::q20_12_t dt)
     if (systemKeysDown & KEY_A)
     {
         cancelSFX();
-        sfxSelectHandle = musicCtrl->playSFX(SFX_SELECT, 255, 128);
+        if (sfxCmpt != nullptr)
+        {
+            sfxCmpt->playSFX(SFX::SFX_2, 255, 128);
+        }
         text->clearScreen();
         renderUIText = true;
 
-        if (activeMenu->options[activeMenu->selectedOption].onSelect != nullptr)
+        if (!activeMenu->options.empty() && activeMenu->selectedOption >= 0 &&
+            activeMenu->selectedOption < static_cast<int>(activeMenu->options.size()))
         {
-            ViewState result = (activeMenu->*(activeMenu->options[activeMenu->selectedOption].onSelect))();
-            if (result != ViewState::KEEP_CURRENT)
+            if (activeMenu->options[activeMenu->selectedOption].onSelect != nullptr)
             {
-                activeMenu->nextViewState = result;
-                activeMenu->isActive = false;
+                ViewState result = (activeMenu->*(activeMenu->options[activeMenu->selectedOption].onSelect))();
+                if (result != ViewState::KEEP_CURRENT)
+                {
+                    activeMenu->nextViewState = result;
+                    activeMenu->isActive = false;
+                }
             }
         }
     }
     else if (systemKeysDown & KEY_B)
     {
         cancelSFX();
-        musicCtrl->playSFX(SFX_CANCEL, 255, 128);
+        if (sfxCmpt != nullptr)
+        {
+            sfxCmpt->playSFX(SFX::SFX_0, 255, 128);
+        }
         activeMenu->selectedOption = 0;
         activeMenu->startIndex = 0;
         text->clearScreen();
@@ -274,6 +283,13 @@ void UISystem::on_receive(const Event::HideAllScreens& /*msg*/)
 
 void UISystem::on_receive(const Event::ShowMenu& msg)
 {
+    if (sfxCmpt != nullptr)
+    {
+        sfxCmpt->registerSFX(SFX::SFX_1);
+        sfxCmpt->registerSFX(SFX::SFX_2);
+        sfxCmpt->registerSFX(SFX::SFX_0);
+    }
+
     if (activeMenu != nullptr)
     {
         activeMenu->isActive = false;
@@ -455,12 +471,10 @@ void UISystem::cleanupScreens()
 
 void UISystem::cancelSFX()
 {
-    musicCtrl->stopSFX(sfxMenuHandle);
-    musicCtrl->stopSFX(sfxSelectHandle);
-    musicCtrl->stopSFX(sfxCancelHandle);
-    sfxMenuHandle = 0;
-    sfxSelectHandle = 0;
-    sfxCancelHandle = 0;
+    if (sfxCmpt != nullptr)
+    {
+        sfxCmpt->stopSFX();
+    }
 }
 
 void UISystem::resetUIResources()

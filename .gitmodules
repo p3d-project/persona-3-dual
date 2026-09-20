@@ -7,3 +7,6 @@
 [submodule "libs/googletest"]
 	path = libs/googletest
 	url = https://github.com/google/googletest
+[submodule "libs/p3d-qoa"]
+	path = libs/p3d-qoa
+	url = https://github.com/p3d-project/p3d-qoa.git

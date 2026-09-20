@@ -5,6 +5,7 @@ if(NOT P3D_SOURCE_DIR)
 endif()
 
 file(GLOB_RECURSE P3D_MUSIC_OUTPUTS
+    "${P3D_SOURCE_DIR}/data/music/*.qoa"
     "${P3D_SOURCE_DIR}/data/music/*.pcm"
 )
 file(GLOB_RECURSE P3D_VIDEO_OUTPUTS

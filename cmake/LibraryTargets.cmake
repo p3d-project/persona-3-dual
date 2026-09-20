@@ -25,6 +25,10 @@ if(TARGET aegis_engine)
     target_link_libraries(p3d_game PUBLIC aegis_engine)
 endif()
 
+if(TARGET p3d_qoa)
+    target_link_libraries(p3d_game PUBLIC p3d_qoa)
+endif()
+
 target_sources(p3d_game
     PUBLIC
     FILE_SET p3d_game_headers TYPE HEADERS

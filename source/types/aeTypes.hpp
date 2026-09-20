@@ -36,5 +36,7 @@ enum class ComponentType : ae::ComponentTypeID
     Dialogue,
     Graphics,
     Text,
+    Music,
+    SFX,
     Mesh
 };

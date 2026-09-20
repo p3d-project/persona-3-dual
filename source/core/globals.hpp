@@ -12,6 +12,7 @@
 #include "components/MovementComponent.hpp"
 #include "components/TextComponent.hpp"
 
+#include "managers/AudioManager.hpp"
 #include "managers/IOManager.hpp"
 #include "managers/MathManager.hpp"
 #include "managers/RenderManager.hpp"

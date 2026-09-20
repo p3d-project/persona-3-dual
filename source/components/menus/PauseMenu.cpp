@@ -3,9 +3,6 @@
 #include <nds.h>
 #include <string>
 
-// sfx
-#include "soundbank.h"
-
 PauseMenu* PauseMenu::instance = nullptr;
 
 void PauseMenu::create()
@@ -56,7 +53,7 @@ void PauseMenu::closeHook()
 
 // menu navigation handlers
 
-ViewState PauseMenu::openDebugMenu()
+void PauseMenu::updateCameraOptionName()
 {
     switch (cameraSystem.getMode())
     {
@@ -79,6 +76,11 @@ ViewState PauseMenu::openDebugMenu()
         debugOptions[static_cast<int>(DebugOption::CYCLE_CAMERA_MODE)].name = "Camera: ?";
         break;
     }
+}
+
+ViewState PauseMenu::openDebugMenu()
+{
+    updateCameraOptionName();
     return changeMenu(debugOptions);
 }
 
@@ -200,12 +202,10 @@ ViewState PauseMenu::debugOptionSelected()
 
     case DebugOption::TOGGLE_BILLBOARDS:
         Globals::enableBillboards = !Globals::enableBillboards;
-        isActive = false;
         selectedView = ViewState::KEEP_CURRENT;
         break;
     case DebugOption::TOGGLE_DEBUG_PRINT:
         Globals::enableDebugPrint = !Globals::enableDebugPrint;
-        isActive = false;
         selectedView = ViewState::KEEP_CURRENT;
         break;
     case DebugOption::CYCLE_CAMERA_MODE:
@@ -218,8 +218,7 @@ ViewState PauseMenu::debugOptionSelected()
             CameraMode mode = cameraModes[(static_cast<int>(cameraSystem.getMode()) + 1) % cameraModes.size()];
             ae::BroadcastEvent(Event::SetCameraMode{mode});
         }
-        isActive = false;
-        openDebugMenu();
+        updateCameraOptionName();
         selectedView = ViewState::KEEP_CURRENT;
         break;
     default:
@@ -338,7 +337,6 @@ ViewState PauseMenu::characterAnimOptionSelected()
         break;
     }
 
-    isActive = false;
     animationCtrl->play();
     return selectedView;
 }
