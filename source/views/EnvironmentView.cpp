@@ -120,6 +120,13 @@ void EnvironmentView::init()
         environment->AddComponent(textSubAlt);
     }
 
+    if (musicCmpt == nullptr)
+    {
+        musicCmpt = engine.CreateComponent<MusicComponent>();
+        environment->AddComponent(musicCmpt);
+        BattleSystem::GetInstance().SetMusicComponent(musicCmpt);
+    }
+
     if (player != nullptr)
     {
         movement = engine.CreateComponent<MovementComponent>();
@@ -395,7 +402,7 @@ ViewState EnvironmentView::update()
             movement->stop();
             ae::BroadcastEvent(Event::StopCamera{});
 
-            musicCtrl->pause();
+            musicCmpt->pauseMusic();
             return tileResult;
         }
 
@@ -467,7 +474,6 @@ ViewState EnvironmentView::update()
     }
 
     animationCtrl->update();
-    musicCtrl->update();
 
     return ViewState::KEEP_CURRENT;
 }
@@ -486,6 +492,7 @@ void EnvironmentView::cleanup()
         text = nullptr;
         textSub = nullptr;
         textSubAlt = nullptr;
+        musicCmpt = nullptr;
     }
 
     // entity
@@ -507,7 +514,6 @@ void EnvironmentView::cleanup()
 
     dialogueFirstLine = nullptr;
 
-    musicCtrl->cleanup();
     animationCtrl->unloadTextures();
     animationCtrl->stop();
 

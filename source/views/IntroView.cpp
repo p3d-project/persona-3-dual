@@ -1,7 +1,7 @@
 #include "IntroView.hpp"
 #include "core/globals.hpp"
+#include "systems/UISystem.hpp"
 
-#include "soundbank.h"
 #include <maxmod9.h>
 #include <nds.h>
 #include <string>
@@ -13,9 +13,16 @@ void IntroView::init()
         intro = engine.CreateEntity();
         graphics = engine.CreateComponent<GraphicsComponent>();
         text = engine.CreateComponent<TextComponent>();
+        musicCmpt = engine.CreateComponent<MusicComponent>();
+        sfxCmpt = engine.CreateComponent<SFXComponent>();
 
         intro->AddComponent(graphics);
         intro->AddComponent(text);
+        intro->AddComponent(musicCmpt);
+        intro->AddComponent(sfxCmpt);
+
+        UISystem::GetInstance().SetMusicComponent(musicCmpt);
+        UISystem::GetInstance().SetSFXComponent(sfxCmpt);
     }
 
     // set video mode for 3 text layers and 1 extended rotation layer
@@ -157,9 +164,10 @@ void IntroView::init()
     graphics->unloadGraphic(logoRight);
 
     // point to music
-    musicCtrl->loadSFX(SFX_SELECT);
-    musicCtrl->init(
-        (fatBasePath + "music/menus/title/tightrope.pcm").c_str(), ae::q20_12_t{17.962}, ae::q20_12_t{66.082});
+    sfxCmpt->registerSFX(SFX::SFX_0);
+    sfxCmpt->registerSFX(SFX::SFX_2);
+    musicCmpt->registerMusic(
+        (fatBasePath + "music/menus/title/tightrope.qoa").c_str(), ae::q20_12_t{17.962}, ae::q20_12_t{66.082});
 
     // hide sub screen text and attribution text layer
     REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_SRC_BG0 | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;
@@ -177,7 +185,6 @@ void IntroView::init()
         // wait for duration amount of frames
         for (int frame = 0; frame <= 3; frame++)
         {
-            musicCtrl->update();
             swiWaitForVBlank();
         }
     }
@@ -193,7 +200,6 @@ void IntroView::init()
         // wait for duration amount of frames
         for (int frame = 0; frame <= 6; frame++)
         {
-            musicCtrl->update();
             swiWaitForVBlank();
         }
     }
@@ -201,13 +207,11 @@ void IntroView::init()
 
 ViewState IntroView::update()
 {
-    musicCtrl->update();
-
     // transition to menu state on any input
     if ((systemKeysDown & KEY_A) || (systemKeysDown & KEY_START) || (systemKeysDown & KEY_TOUCH))
     {
-        musicCtrl->playSFX(SFX_SELECT, 255, 128);
-        musicCtrl->pause();
+        sfxCmpt->playSFX(SFX::SFX_2, 255, 128);
+        musicCmpt->pauseMusic();
         // transition both screens to black
         for (int i = 0; i <= 16; i++)
         {
@@ -216,7 +220,6 @@ ViewState IntroView::update()
             // wait a few frames
             for (int duration = 0; duration <= 2; duration++)
             {
-                musicCtrl->update();
                 swiWaitForVBlank();
             }
         }
@@ -224,8 +227,8 @@ ViewState IntroView::update()
     }
     else if (systemKeysDown & KEY_B)
     {
-        musicCtrl->playSFX(SFX_CANCEL, 255, 128);
-        musicCtrl->pause();
+        sfxCmpt->playSFX(SFX::SFX_0, 255, 128);
+        musicCmpt->pauseMusic();
         // transition both screens to black
         for (int i = 0; i <= 16; i++)
         {
@@ -234,7 +237,6 @@ ViewState IntroView::update()
             // wait a few frames
             for (int duration = 0; duration <= 2; duration++)
             {
-                musicCtrl->update();
                 swiWaitForVBlank();
             }
         }
@@ -390,9 +392,9 @@ void IntroView::cleanup()
         intro = nullptr;
         graphics = nullptr;
         text = nullptr;
+        musicCmpt = nullptr;
+        sfxCmpt = nullptr;
     }
-
-    musicCtrl->cleanup();
 
     // clear all sprites from oam
     oamClear(&oamMain, 0, 0);

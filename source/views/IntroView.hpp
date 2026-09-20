@@ -1,7 +1,8 @@
 #pragma once
 #include "components/GraphicsComponent.hpp"
+#include "components/MusicComponent.hpp"
+#include "components/SFXComponent.hpp"
 #include "components/TextComponent.hpp"
-#include "controllers/MusicController.hpp"
 #include "managers/MathManager.hpp"
 #include "managers/UIManager.hpp"
 #include "views/BaseView.hpp"
@@ -59,7 +60,8 @@ class IntroView : public BaseView
 
     MathManager& math = MathManager::GetInstance();
     UIManager& ui = UIManager::GetInstance();
-    MusicController* musicCtrl = MusicController::getInstance();
+    MusicComponent* musicCmpt = nullptr;
+    SFXComponent* sfxCmpt = nullptr;
 
   public:
     void init() override;

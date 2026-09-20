@@ -55,9 +55,9 @@ void IwatodaiStreetsView::setupMovement()
 
 void IwatodaiStreetsView::setupMusic()
 {
-    musicCtrl->init((fatBasePath + "music/locations/iwatodaiStreets/changing_seasons.pcm").c_str(),
-                    ae::q20_12_t{31},
-                    ae::q20_12_t{177.587});
+    musicCmpt->registerMusic((fatBasePath + "music/locations/iwatodaiStreets/changing_seasons.qoa").c_str(),
+                             ae::q20_12_t{31},
+                             ae::q20_12_t{177.587});
 }
 
 ViewState IwatodaiStreetsView::onTileCheck(TileType tile, u32 pressed)
@@ -66,19 +66,19 @@ ViewState IwatodaiStreetsView::onTileCheck(TileType tile, u32 pressed)
     {
     case TileType::SCENE_0:
     {
-        musicCtrl->pause();
+        musicCmpt->pauseMusic();
         return ViewState::IWATODAI_DORM;
     }
 
     case TileType::SCENE_1:
     {
-        musicCtrl->pause();
+        musicCmpt->pauseMusic();
         return ViewState::PAULOWNIA_MALL;
     }
 
     case TileType::SCENE_2:
     {
-        musicCtrl->pause();
+        musicCmpt->pauseMusic();
         return ViewState::STATION;
     }
 

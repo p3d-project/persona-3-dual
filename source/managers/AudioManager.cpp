@@ -1,9 +1,15 @@
 #define QOA_IMPLEMENTATION
 #include "AudioManager.hpp"
 #include "core/globals.hpp"
-#include "soundbank_bin.h"
+
 #include <nds.h>
 #include <p3d-qoa>
+
+extern "C"
+{
+#include "soundbank.h"
+#include "soundbank_bin.h"
+}
 
 void AudioManager::Init()
 {
@@ -271,16 +277,13 @@ void AudioManager::stopAudio()
 
 void AudioManager::registerSFX(SFX sfx)
 {
-    mm_word sampleId = fetchSFXSampleId(sfx);
-    mmLoadEffect(sampleId);
+    mmLoadEffect((int)sfx);
 }
 
 void AudioManager::playSFX(SFX sfx, int volume, int panning)
 {
-    mm_word sampleId = fetchSFXSampleId(sfx);
-
     mm_sound_effect effect;
-    effect.id = sampleId;
+    effect.id = (int)sfx;
     effect.rate = (int)(1.0f * (1 << 10));
     effect.handle = 0;
     effect.volume = volume;
@@ -291,37 +294,4 @@ void AudioManager::playSFX(SFX sfx, int volume, int panning)
 void AudioManager::stopSFX()
 {
     mmEffectCancelAll();
-}
-
-int AudioManager::fetchSFXSampleId(SFX sfx)
-{
-    switch (sfx)
-    {
-    case SFX::SFX_0:
-    {
-        return SFX_CANCEL;
-    }
-
-    case SFX::SFX_1:
-    {
-        return SFX_MENU;
-    }
-
-    case SFX::SFX_2:
-    {
-        return SFX_SELECT;
-    }
-
-    default:
-    {
-        // throw an error
-        consoleDemoInit();
-        printf("AudioManager: SFX sample not found\n");
-        while (1)
-        {
-            swiWaitForVBlank();
-        }
-        return -1;
-    }
-    }
 }

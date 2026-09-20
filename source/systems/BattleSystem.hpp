@@ -12,8 +12,8 @@
 #include "events/GenericEvents.hpp"
 #include <aegis/system.hpp>
 
+#include "components/MusicComponent.hpp"
 #include "components/menus/BattleMenu.hpp"
-#include "controllers/MusicController.hpp"
 
 #include <algorithm>
 #include <array>
@@ -41,6 +41,11 @@ class BattleSystem : public ae::SystemRouter<BattleSystem, Event::ExecuteBattle>
 {
   public:
     void Init() override;
+
+    void SetMusicComponent(MusicComponent* music)
+    {
+        musicCmpt = music;
+    }
 
     void Shutdown() override;
 
@@ -235,6 +240,6 @@ class BattleSystem : public ae::SystemRouter<BattleSystem, Event::ExecuteBattle>
         return a->currentTurnOrderAgility > b->currentTurnOrderAgility;
     }
 
-    MusicController* musicCtrl = nullptr;
+    MusicComponent* musicCmpt = nullptr;
     BattleMenu* battleMenuCmpt = nullptr;
 };

@@ -73,18 +73,18 @@ endif()
 p3d_group_enabled(music P3D_RUN_MUSIC)
 
 if(P3D_RUN_MUSIC)
-    # Music .mp3 -> data/music/**/*.pcm
+    # Music .mp3 -> data/music/**/*.qoa
     file(GLOB_RECURSE MP3_FILES "${ASSETS_DIR}/music/*.mp3")
 
     foreach(mp3 IN LISTS MP3_FILES)
         file(RELATIVE_PATH rel "${ASSETS_DIR}/music" "${mp3}")
-        string(REGEX REPLACE "\\.mp3$" ".pcm" rel_pcm "${rel}")
-        set(out_pcm "${DATA_DIR}/music/${rel_pcm}")
-        get_filename_component(out_dir "${out_pcm}" DIRECTORY)
+        string(REGEX REPLACE "\\.mp3$" ".qoa" rel_qoa "${rel}")
+        set(out_qoa "${DATA_DIR}/music/${rel_qoa}")
+        get_filename_component(out_dir "${out_qoa}" DIRECTORY)
         file(MAKE_DIRECTORY "${out_dir}")
         p3d_run(
             WORKING_DIRECTORY "${P3D_SOURCE_DIR}"
-            COMMAND "${P3D_FFMPEG_EXECUTABLE}" -i "${mp3}" -f s16le -ar 32000 -ac 2 "${out_pcm}" -y -loglevel error
+            COMMAND "${P3D_PYTHON_EXECUTABLE}" "${TOOLS_DIR}/build_asset.py" "${mp3}" "${out_qoa}"
         )
     endforeach()
 endif()

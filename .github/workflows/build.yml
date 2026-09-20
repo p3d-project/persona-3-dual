@@ -40,19 +40,17 @@ jobs:
 
     # CCACHE_DIR: explicit path so ccache writes inside the mounted workspace
     # and actions/cache can find it at a stable absolute location.
-    # GIT_DIR: explicit path so git commands work correctly inside the container
-    # regardless of which directory a step happens to execute from.
     # HOME: pin to /root so the venv at /root/.venv (baked into the image) is
     # found correctly; GitHub Actions containers default HOME to /github/home.
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
-      GIT_DIR: ${{ github.workspace }}/.git
       HOME: /root
 
     # Ensure every run step executes from the repo root where .git lives.
     defaults:
       run:
         working-directory: ${{ github.workspace }}
+        shell: bash
 
     steps:
       - name: Checkout repository
@@ -62,12 +60,21 @@ jobs:
           lfs: false # Restored via cache below
           submodules: recursive
 
+      # The workspace folder is owned by the runner user but we run as root, so
+      # git rejects it ("dubious ownership") and git-lfs then says "Not in a Git
+      # repository". checkout only sets this in a temporary config, so set it
+      # here for every later step. '*' also covers submodule directories.
+      # This must stay the FIRST step after checkout.
+      - name: Mark workspace as safe for git
+        run: git config --global --add safe.directory '*'
+
       # --- 1. LFS cache ---
       # Generate a stable hash of all LFS pointers so the cache key changes
       # only when LFS files themselves change, not on every commit.
       - name: Generate LFS cache key
         id: lfs-key
         run: |
+          set -o pipefail
           LFS_HASH=$(git lfs ls-files -l | cut -d' ' -f1 | sort | sha256sum | cut -d' ' -f1)
           echo "hash=${LFS_HASH}" >> $GITHUB_OUTPUT
 
