@@ -124,35 +124,32 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
     }
 
     // Read Texture Headers
+    model->textures.resize(model->texCount);
     for (uint32_t i = 0; i < model->texCount; ++i)
     {
-        MDL3Texture* tex = new MDL3Texture();
-        if (!loadTextureHeader(buffer, *tex, offset))
+        if (!loadTextureHeader(buffer, model->textures[i], offset))
         {
-            delete tex;
             model.reset();
             return false;
         }
-        model->textures.push_back(tex);
     }
 
     // Read in Nodes
+    model->nodes.resize(model->nodeCount);
     for (uint32_t i = 0; i < model->nodeCount; ++i)
     {
-        Node* node = new Node();
         RawNodeHeader rawNode;
 
         if (buffer.read(&rawNode, sizeof(RawNodeHeader), 1, &offset) != 1)
         {
-            delete node;
             model.reset();
             return false;
         }
 
-        node->pid = rawNode.pid;
-        node->px = rawNode.posX;
-        node->py = rawNode.posY;
-        node->pz = rawNode.posZ;
+        model->nodes[i].pid = rawNode.pid;
+        model->nodes[i].px = rawNode.posX;
+        model->nodes[i].py = rawNode.posY;
+        model->nodes[i].pz = rawNode.posZ;
 
         for (uint32_t j = 0; j < rawNode.subListCount; ++j)
         {
@@ -160,7 +157,6 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
             if (buffer.read(&sl.texSlot, sizeof(int32_t), 1, &offset) != 1 ||
                 buffer.read(&sl.dlSize, sizeof(uint32_t), 1, &offset) != 1)
             {
-                delete node;
                 model.reset();
                 return false;
             }
@@ -172,7 +168,6 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
                 // Out of file bounds check
                 if (offset + (wordCount * sizeof(uint32_t)) > buffer.length())
                 {
-                    delete node;
                     model.reset();
                     return false;
                 }
@@ -186,9 +181,8 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
                 sl.displayList = displayList;
                 offset += rawByteSize;
             }
-            node->subLists.push_back(std::move(sl));
+            model->nodes[i].subLists.push_back(std::move(sl));
         }
-        model->nodes.push_back(node);
     }
 
     // Skip animation data on static meshes
@@ -196,7 +190,7 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
     //Textures
     for (uint32_t i = 0; i < model->texCount; ++i)
     {
-        if (!loadEmbeddedImage(buffer, *model->textures[i], offset))
+        if (!loadEmbeddedImage(buffer, model->textures[i], offset))
         {
             model.reset();
             return false;
@@ -209,16 +203,16 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
 
 void MeshComponent::drawMesh()
 {
-    for (const auto& node : model->nodes)
+    for (const Node& node : model->nodes)
     {
-        for (const auto& sl : node->subLists)
+        for (const SubList_N& sl : node.subLists)
         {
             if (sl.displayList == nullptr)
             {
                 continue;
             }
             render.renderTexturedModel(sl.displayList,
-                                       model->textures[sl.texSlot]->textureID,
+                                       model->textures[sl.texSlot].textureID,
                                        ae::q20_12_t{0},
                                        ae::q20_12_t{0},
                                        ae::q20_12_t{0},

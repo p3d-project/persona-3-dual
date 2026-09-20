@@ -96,8 +96,8 @@ struct MDL3Model
 {
     uint32_t nodeCount = 0;
     uint32_t texCount = 0;
-    etl::vector<MDL3Texture*, 8> textures;
-    etl::vector<Node*, 64> nodes;
+    etl::vector<MDL3Texture, 8> textures;
+    etl::vector<Node, 64> nodes;
     etl::vector<Animation_N*, 32> animations;
 
     MDL3Model() = default;
@@ -108,25 +108,16 @@ struct MDL3Model
             delete anim;
         }
 
-        for (Node* node : nodes)
+        for (Node node : nodes)
         {
-            if (node)
+            for (SubList_N& sl : node.subLists)
             {
-                for (SubList_N& sl : node->subLists)
+                if (sl.displayList)
                 {
-                    if (sl.displayList)
-                    {
-                        delete[] sl.displayList;
-                        sl.displayList = nullptr;
-                    }
+                    delete[] sl.displayList;
+                    sl.displayList = nullptr;
                 }
-                delete node;
             }
-        }
-
-        for (MDL3Texture* tex : textures)
-        {
-            delete tex;
         }
     }
 };
