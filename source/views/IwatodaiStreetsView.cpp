@@ -23,6 +23,8 @@ IwatodaiStreetsView::~IwatodaiStreetsView()
 void IwatodaiStreetsView::startBattle()
 {
     // start battle
+    musicCmpt->stopMusic();
+    BattleSystem::GetInstance().SetMusicComponent(musicCmpt);
     Event::ExecuteBattle msg(CharacterProfileDb::player, characterProfiles, enemyProfiles, battleStartCondition);
     ae::BroadcastEvent(msg);
 }
