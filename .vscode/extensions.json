@@ -1,7 +1,11 @@
 {
     "recommendations": [
-        "ms-vscode.cpptools", // for game dev
+        "ms-vscode-remote.remote-containers",
+        "ms-vscode.cpptools",
         "ms-python.python",
-        "ms-vscode-remote.remote-containers"
+        "ms-vscode.cmake-tools",
+        "cschlosser.doxdocgen",
+        "matepek.vscode-catch2-test-adapter",
+        "eamodio.gitlens"
     ]
 }
