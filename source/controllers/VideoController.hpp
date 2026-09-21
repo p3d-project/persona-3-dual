@@ -115,7 +115,6 @@ class VideoController
     bool haveChunkHeader = false;  ///< True if the current chunk's audio size has been read.
     uint32_t pendingAudioSize = 0; ///< Audio bytes still to be read for the current chunk.
     uint32_t silentVblanks = 0;    ///< Pacing clock (vblanks) used when there is no audio.
-    bool waitedThisUpdate = false; ///< True if update() already waited for vblank.
 
     /**
      * @brief Reads one audio chunk (into the audio ring) and one video frame.
