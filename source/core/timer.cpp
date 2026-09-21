@@ -1,16 +1,10 @@
 #include "timer.hpp"
+#include "managers/MathManager.hpp"
 
 void Timer::start(ae::q20_12_t durationSeconds)
 {
     startFrame = frame;
     durationFrames = static_cast<uint32_t>((static_cast<uint64_t>(durationSeconds.raw_value()) * TARGET_FPS) >> 12);
-    running = true;
-}
-
-void Timer::start(uint32_t durationFrames)
-{
-    startFrame = frame;
-    this->durationFrames = durationFrames;
     running = true;
 }
 
@@ -23,9 +17,20 @@ bool Timer::isFinished()
     return (frame - startFrame) >= durationFrames;
 }
 
+ae::q20_12_t Timer::getDuration()
+{
+    return ae::q20_12_t::from_raw_value(
+        static_cast<int32_t>((static_cast<uint64_t>(durationFrames) << 12) / TARGET_FPS));
+}
+
 ae::q20_12_t Timer::getElapsed()
 {
     uint32_t elapsedFrames = frame - startFrame;
     return ae::q20_12_t::from_raw_value(
         static_cast<int32_t>((static_cast<uint64_t>(elapsedFrames) << 12) / TARGET_FPS));
+}
+
+ae::q20_12_t Timer::getProgress()
+{
+    return MathManager::GetInstance().div(getElapsed(), getDuration());
 }

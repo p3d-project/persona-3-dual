@@ -3,6 +3,7 @@
 #include "components/MusicComponent.hpp"
 #include "components/SFXComponent.hpp"
 #include "components/TextComponent.hpp"
+#include "core/timer.hpp"
 #include "managers/MathManager.hpp"
 #include "managers/UIManager.hpp"
 #include "views/BaseView.hpp"
@@ -12,6 +13,9 @@
 class IntroView : public BaseView
 {
   private:
+    Timer fadeTimer;
+    ViewState nextViewState = ViewState::KEEP_CURRENT;
+
     Sprite logoSprite[2];
     // 64
     SpriteRenderState srs0 = {logoSprite[0], 5, 128};

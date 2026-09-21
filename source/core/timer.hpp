@@ -23,13 +23,6 @@ class Timer
     void start(ae::q20_12_t durationSeconds);
 
     /**
-     * @brief Starts a timer.
-     *
-     * @param durationFrames How long it takes until the Timer is finished in frames.
-     */
-    void start(uint32_t durationFrames);
-
-    /**
      * @brief Checks if the timer expired.
      *
      * @return Returns if the timer is finished.
@@ -37,11 +30,25 @@ class Timer
     bool isFinished();
 
     /**
+     * @brief Gets duration of the timer.
+     *
+     * @return Duration in seconds.
+     */
+    ae::q20_12_t getDuration();
+
+    /**
      * @brief Gets elapsed time since the timer was started.
      *
      * @return Elapsed time in seconds.
      */
     ae::q20_12_t getElapsed();
+
+    /**
+     * @brief Gets progress of how much of the time has passed.
+     *
+     * @return Progess percentage.
+     */
+    ae::q20_12_t getProgress();
 
   private:
     uint32_t startFrame = 0;

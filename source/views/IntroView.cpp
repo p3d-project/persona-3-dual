@@ -174,209 +174,230 @@ void IntroView::init()
     // blend control. takes effect mode / source / destination
     REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG2 | BLEND_DST_BACKDROP;
 
-    // fade top screen in
-    for (int i = 0; i <= 16; i++)
-    {
-        setBrightness(1, -16 + i);
-
-        // wait for duration amount of frames
-        for (int frame = 0; frame <= 3; frame++)
-        {
-            swiWaitForVBlank();
-        }
-    }
-
-    // fade skyBackgrounds in
-    for (int i = 0; i <= 16; i++)
-    {
-        // source opacity / dest opacity. They should add up to 16
-        REG_BLDALPHA = i | ((16 - i) << 8);
-        // fade sub screen
-        setBrightness(2, -16 + i);
-
-        // wait for duration amount of frames
-        for (int frame = 0; frame <= 6; frame++)
-        {
-            swiWaitForVBlank();
-        }
-    }
+    setBrightness(1, -16);
+    transitionPhase = TransitionPhase::FADING_IN_TOP;
+    fadeTimer.start(ae::q20_12_t{1.1});
 }
 
 ViewState IntroView::update()
 {
-    // transition to menu state on any input
-    if ((systemKeysDown & KEY_A) || (systemKeysDown & KEY_START) || (systemKeysDown & KEY_TOUCH))
+    switch (transitionPhase)
     {
-        sfxCmpt->playSFX(SFX::SFX_2, 255, 128);
-        musicCmpt->pauseMusic();
-        // transition both screens to black
-        for (int i = 0; i <= 16; i++)
+    case TransitionPhase::FADING_IN_TOP:
+    {
+        if (fadeTimer.isFinished())
         {
-            setBrightness(3, -i);
+            transitionPhase = TransitionPhase::FADING_IN_SKY;
+            fadeTimer.start(ae::q20_12_t{2});
+        }
+        else
+        {
+            int brightness = -16 + (fadeTimer.getProgress().raw_value() >> 8);
+            setBrightness(1, brightness);
+        }
 
-            // wait a few frames
-            for (int duration = 0; duration <= 2; duration++)
+        break;
+    }
+
+    case TransitionPhase::FADING_IN_SKY:
+    {
+        if (fadeTimer.isFinished())
+        {
+            transitionPhase = TransitionPhase::IDLE;
+            setBrightness(2, 0);
+        }
+        else
+        {
+            int fadeVal = fadeTimer.getProgress().raw_value() >> 8;
+
+            REG_BLDALPHA = fadeVal | ((16 - fadeVal) << 8);
+            setBrightness(2, -16 + fadeVal);
+        }
+        break;
+    }
+
+    case TransitionPhase::IDLE:
+    {
+        bool transitionTriggered = false;
+
+        // transition to menu state on any input
+        if ((systemKeysDown & KEY_A) || (systemKeysDown & KEY_START) || (systemKeysDown & KEY_TOUCH))
+        {
+            sfxCmpt->playSFX(SFX::SFX_2, 255, 128);
+            nextViewState = ViewState::MAIN_MENU;
+            transitionTriggered = true;
+        }
+        else if (systemKeysDown & KEY_B)
+        {
+            sfxCmpt->playSFX(SFX::SFX_0, 255, 128);
+            nextViewState = ViewState::INTRO_VIDEO;
+            transitionTriggered = true;
+        }
+
+        if (transitionTriggered)
+        {
+            musicCmpt->pauseMusic();
+            transitionPhase = TransitionPhase::FADING_OUT;
+            fadeTimer.start(ae::q20_12_t{0.85});
+            break;
+        }
+
+        // scroll silhouette background
+        // animate X (moving right towards 0)
+        if (silhouetteX < 0 && frame % 5 == 0)
+        {
+            silhouetteX += (-silhouetteX) / 6 + 1;
+            if (silhouetteX > 0)
+                silhouetteX = 0;
+        }
+
+        // animate Y (moving up towards 0)
+        if (silhouetteY > 0 && frame % 5 == 0)
+        {
+            silhouetteY += (-silhouetteY) / 6 + 1;
+            if (silhouetteY < 0)
+                silhouetteY = 0;
+        }
+
+        bgSetScroll(bg[0], -silhouetteX, -silhouetteY);
+
+        // perform code after silhouette slide-in
+        if (silhouetteX < 0 || silhouetteY < 0)
+        {
+            return ViewState::KEEP_CURRENT;
+        }
+
+        if (animateText)
+        {
+            durationCounter++;
+
+            if (durationCounter >= duration)
             {
-                swiWaitForVBlank();
+                durationCounter = 0;
+                textAlpha += textAlphaDirection;
+
+                if (textAlpha >= 16)
+                {
+                    textAlpha = 16;
+                    textAlphaDirection = -1; // Start fading out
+                }
+                else if (textAlpha <= 0)
+                {
+                    textAlpha = 0;
+                    textAlphaDirection = 1; // Start fading in
+                }
+
+                REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;
+                REG_BLDALPHA_SUB = textAlpha | ((16 - textAlpha) << 8);
             }
         }
-        return ViewState::MAIN_MENU;
-    }
-    else if (systemKeysDown & KEY_B)
-    {
-        sfxCmpt->playSFX(SFX::SFX_0, 255, 128);
-        musicCmpt->pauseMusic();
-        // transition both screens to black
-        for (int i = 0; i <= 16; i++)
-        {
-            setBrightness(3, -i);
 
-            // wait a few frames
-            for (int duration = 0; duration <= 2; duration++)
+        // setup logoSprite
+        if (!displayLogo)
+        {
+            displayLogo = true;
+            int spriteId = 0;
+            for (SpriteRenderState& srs : spriteRenderStates)
             {
-                swiWaitForVBlank();
+                oamSet(&oamMain,
+                       spriteId++,
+                       srs.x,
+                       srs.y,
+                       srs.priority,
+                       srs.sprite.paletteAlpha,
+                       srs.sprite.size,
+                       srs.sprite.format,
+                       srs.sprite.gfx,
+                       srs.affineIndex,
+                       srs.sizeDouble,
+                       srs.hide,
+                       srs.hflip,
+                       srs.vflip,
+                       srs.mosaic);
+
+                oamMain.oamMemory[spriteId].attribute[0] |= ATTR0_TYPE_BLENDED;
             }
+
+            // setup fade for main screen sprites
+            REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_SPRITE | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BG2;
+            REG_BLDALPHA = 0 | (16 << 8);
+
+            // setup fade for sub screen attribution text layer
+            REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;
+            REG_BLDALPHA_SUB = 0 | (16 << 8);
         }
-        return ViewState::INTRO_VIDEO;
-    }
 
-    // scroll silhouette background
-    // animate X (moving right towards 0)
-    if (silhouetteX < 0 && frame % 5 == 0)
-    {
-        silhouetteX += (-silhouetteX) / 6 + 1;
-        if (silhouetteX > 0)
-            silhouetteX = 0;
-    }
-
-    // animate Y (moving up towards 0)
-    if (silhouetteY > 0 && frame % 5 == 0)
-    {
-        silhouetteY += (-silhouetteY) / 6 + 1;
-        if (silhouetteY < 0)
-            silhouetteY = 0;
-    }
-
-    bgSetScroll(bg[0], -silhouetteX, -silhouetteY);
-
-    // perform code after silhouette slide-in
-    if (silhouetteX < 0 || silhouetteY < 0)
-    {
-        return ViewState::KEEP_CURRENT;
-    }
-
-    if (animateText)
-    {
-        durationCounter++;
-
-        if (durationCounter >= duration)
+        // fade in attribution text layer and logoSprite
+        if (logoOpacity < 16 && frame % 4 == 0)
         {
-            durationCounter = 0;
-            textAlpha += textAlphaDirection;
+            logoOpacity++;
+            REG_BLDALPHA = logoOpacity | ((16 - logoOpacity) << 8);
+            REG_BLDALPHA_SUB = logoOpacity | ((16 - logoOpacity) << 8);
+        }
 
-            if (textAlpha >= 16)
-            {
-                textAlpha = 16;
-                textAlphaDirection = -1; // Start fading out
-            }
-            else if (textAlpha <= 0)
-            {
-                textAlpha = 0;
-                textAlphaDirection = 1; // Start fading in
-            }
+        // code after sprite fade in
+        if (logoOpacity < 16)
+        {
+            oamMain.oamMemory[0].attribute[0] &= ~ATTR0_TYPE_BLENDED; // disable sprite blending
+            oamMain.oamMemory[1].attribute[0] &= ~ATTR0_TYPE_BLENDED; // disable sprite blending
+            return ViewState::KEEP_CURRENT;
+        }
 
+        // setup animated text
+        if (logoOpacity >= 16 && !animateText)
+        {
+            animateText = true;
             REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;
             REG_BLDALPHA_SUB = textAlpha | ((16 - textAlpha) << 8);
+            text->drawText("\xFF\x02\x01Press Any Button", 45, 80, TextColor::White);
         }
-    }
 
-    // setup logoSprite
-    if (!displayLogo)
-    {
-        displayLogo = true;
-        int spriteId = 0;
-        for (SpriteRenderState& srs : spriteRenderStates)
+        // setup blending for overlay
+        if (!displayOverlay)
         {
-            oamSet(&oamMain,
-                   spriteId++,
-                   srs.x,
-                   srs.y,
-                   srs.priority,
-                   srs.sprite.paletteAlpha,
-                   srs.sprite.size,
-                   srs.sprite.format,
-                   srs.sprite.gfx,
-                   srs.affineIndex,
-                   srs.sizeDouble,
-                   srs.hide,
-                   srs.hflip,
-                   srs.vflip,
-                   srs.mosaic);
-
-            oamMain.oamMemory[spriteId].attribute[0] |= ATTR0_TYPE_BLENDED;
+            displayOverlay = true;
+            REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_DST_BG2;
+            REG_BLDALPHA = 0 | (16 << 8);
+            ui.showBg(bg[3]);
         }
 
-        // setup fade for main screen sprites
-        REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_SPRITE | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BG2;
-        REG_BLDALPHA = 0 | (16 << 8);
+        // fade in overlay
+        if (overlayOpacity < 6 && frame % 4 == 0)
+        {
+            overlayOpacity++;
+            REG_BLDALPHA = overlayOpacity | ((16 - overlayOpacity) << 8);
+        }
 
-        // setup fade for sub screen attribution text layer
-        REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;
-        REG_BLDALPHA_SUB = 0 | (16 << 8);
-    }
+        // rotate overlay
+        if (frame % 4 == 0)
+        {
+            waveAngle += 50;
+            int angle = MathManager::GetInstance().sin(static_cast<ae::angle16_t>(waveAngle)).raw_value();
+            int rotationSpeed = baseSpeed + ((angle * fluctuation) >> 12);
+            currentRotation += rotationSpeed;
+            bgSetRotateScale(bg[3], currentRotation, 256, 256);
+        }
 
-    // fade in attribution text layer and logoSprite
-    if (logoOpacity < 16 && frame % 4 == 0)
-    {
-        logoOpacity++;
-        REG_BLDALPHA = logoOpacity | ((16 - logoOpacity) << 8);
-        REG_BLDALPHA_SUB = logoOpacity | ((16 - logoOpacity) << 8);
-    }
-
-    // code after sprite fade in
-    if (logoOpacity < 16)
-    {
-        oamMain.oamMemory[0].attribute[0] &= ~ATTR0_TYPE_BLENDED; // disable sprite blending
-        oamMain.oamMemory[1].attribute[0] &= ~ATTR0_TYPE_BLENDED; // disable sprite blending
+        // default state
         return ViewState::KEEP_CURRENT;
     }
-
-    // setup animated text
-    if (logoOpacity >= 16 && !animateText)
+    case TransitionPhase::FADING_OUT:
     {
-        animateText = true;
-        REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;
-        REG_BLDALPHA_SUB = textAlpha | ((16 - textAlpha) << 8);
-        text->drawText("\xFF\x02\x01Press Any Button", 45, 80, TextColor::White);
+        if (fadeTimer.isFinished())
+        {
+            setBrightness(3, -16);
+            return nextViewState;
+        }
+        else
+        {
+            ae::q20_12_t progress = fadeTimer.getProgress();
+            int fadeVal = progress.raw_value() >> 8; // 0-16
+            setBrightness(3, -fadeVal);
+        }
+        break;
+    }
     }
 
-    // setup blending for overlay
-    if (!displayOverlay)
-    {
-        displayOverlay = true;
-        REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_DST_BG2;
-        REG_BLDALPHA = 0 | (16 << 8);
-        ui.showBg(bg[3]);
-    }
-
-    // fade in overlay
-    if (overlayOpacity < 6 && frame % 4 == 0)
-    {
-        overlayOpacity++;
-        REG_BLDALPHA = overlayOpacity | ((16 - overlayOpacity) << 8);
-    }
-
-    // rotate overlay
-    if (frame % 4 == 0)
-    {
-        waveAngle += 50;
-        int angle = MathManager::GetInstance().sin(static_cast<ae::angle16_t>(waveAngle)).raw_value();
-        int rotationSpeed = baseSpeed + ((angle * fluctuation) >> 12);
-        currentRotation += rotationSpeed;
-        bgSetRotateScale(bg[3], currentRotation, 256, 256);
-    }
-
-    // default state
     return ViewState::KEEP_CURRENT;
 }
 
