@@ -20,9 +20,6 @@ void IntroView::init()
         intro->AddComponent(text);
         intro->AddComponent(musicCmpt);
         intro->AddComponent(sfxCmpt);
-
-        UISystem::GetInstance().SetMusicComponent(musicCmpt);
-        UISystem::GetInstance().SetSFXComponent(sfxCmpt);
     }
 
     // set video mode for 3 text layers and 1 extended rotation layer

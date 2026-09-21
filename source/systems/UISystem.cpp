@@ -142,6 +142,11 @@ void UISystem::Shutdown()
     resetUIResources();
 }
 
+void UISystem::SetSFXComponent(SFXComponent* sfx)
+{
+    sfxCmpt = sfx;
+}
+
 void UISystem::on_receive(const Event::SwitchView& msg)
 {
     nextView = msg.view;
@@ -485,6 +490,7 @@ void UISystem::resetUIResources()
 
     isActive = false;
     renderUIText = false;
+    sfxCmpt = nullptr;
 }
 
 void UISystem::cleanupMenus()

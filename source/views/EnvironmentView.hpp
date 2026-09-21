@@ -13,6 +13,7 @@
 #include "components/GraphicsComponent.hpp"
 #include "components/MovementComponent.hpp"
 #include "components/MusicComponent.hpp"
+#include "components/SFXComponent.hpp"
 #include "components/menus/BattleMenu.hpp"
 #include "components/menus/PauseMenu.hpp"
 #include "components/screens/DialogueScreen.hpp"
@@ -154,6 +155,7 @@ class EnvironmentView : public BaseView
 
     AnimationController* animationCtrl = AnimationController::getInstance();
     MusicComponent* musicCmpt = nullptr;
+    SFXComponent* sfxCmpt = nullptr;
 
     // -------------------------------------------------
     // UI
