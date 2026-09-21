@@ -111,7 +111,13 @@ class FileBuffer
      */
     size_t read(void* dest, size_t bytes, size_t count, size_t* offset)
     {
-        if (*offset + bytes * count > size)
+        // Guard against null pointers
+        if (!dest || !offset)
+        {
+            return 0;
+        }
+
+        if (*offset > size || (bytes != 0 && count > (size - *offset) / bytes))
         {
             return 0; // Out of bounds
         }

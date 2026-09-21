@@ -71,7 +71,7 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
      * @param model The 3D model to render.
      *
      * @note This function will render the model at the origin (0, 0, 0) with no rotation or scaling applied.
-     * It is intended for environment models. There is a seperate function for rendering with transformations.
+     * It is intended for environment models. There is a separate function for rendering with transformations.
      */
     void renderMeshComponent(MDL3Model& model);
 

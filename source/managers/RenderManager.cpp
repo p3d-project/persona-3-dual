@@ -105,9 +105,16 @@ bool RenderManager::uploadTexture(int& textureID,
                                   int param,
                                   const void* texture)
 {
+    if (textureID != -1 && textureID != 0)
+    {
+        glDeleteTextures(1, &textureID);
+        textureID = -1;
+    }
+
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
+    // glTexImage2D can returns 0 on failure, we can use this to catch out of VRAM errors, etc.
     return glTexImage2D(GL_TEXTURE_2D, 0, texType, textureSizeEnum(sizeX), textureSizeEnum(sizeY), 0, param, texture);
 }
 

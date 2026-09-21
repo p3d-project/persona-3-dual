@@ -95,19 +95,23 @@ bool MeshComponent::loadEmbeddedImage(FileBuffer& buffer, MDL3Texture& tex, size
         return false;
     }
 
-    // Explicity delete old VRAM textures if previously allocated
+    // Explicitly delete old VRAM textures if previously allocated
     if (tex.textureID != -1)
     {
         render.deleteTexture(tex.textureID);
     }
 
     GL_TEXTURE_TYPE_ENUM texType = tex.isRGBA ? GL_RGBA : GL_RGB16;
-    render.uploadTexture(tex.textureID,
-                         texType,
-                         tex.width,
-                         tex.height,
-                         TEXGEN_TEXCOORD | GL_TEXTURE_WRAP_S | GL_TEXTURE_WRAP_T,
-                         alignedBuffer);
+    if (!render.uploadTexture(tex.textureID,
+                              texType,
+                              tex.width,
+                              tex.height,
+                              TEXGEN_TEXCOORD | GL_TEXTURE_WRAP_S | GL_TEXTURE_WRAP_T,
+                              alignedBuffer))
+    {
+        free(alignedBuffer);
+        return false;
+    }
     free(alignedBuffer);
     return true;
 }
@@ -195,7 +199,7 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
                 const size_t wordCount = sl.dlSize;
 
                 // Out of file bounds check
-                if (offset + (wordCount * sizeof(uint32_t)) > buffer.length())
+                if (offset > buffer.length() || wordCount > (buffer.length() - offset) / sizeof(uint32_t))
                 {
                     model.reset();
                     return false;
