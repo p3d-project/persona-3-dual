@@ -91,6 +91,7 @@ void RenderManager::initialize3DView(View3DConfig config)
 
 void RenderManager::cleanup3DView()
 {
+    activeTexture = -1;
     glClearColor(0, 0, 0, 31);
     glClearDepth(0x7FFF);
     glFlush(0);
@@ -110,8 +111,18 @@ bool RenderManager::uploadTexture(int& textureID,
     return glTexImage2D(GL_TEXTURE_2D, 0, texType, textureSizeEnum(sizeX), textureSizeEnum(sizeY), 0, param, texture);
 }
 
-void RenderManager::renderTexturedModel(const void* displayList,
-                                        const int texture,
+void RenderManager::renderMeshComponent(MDL3Model& model)
+{
+    for (const Node& node : model.nodes)
+    {
+        for (const SubList_N& sl : node.subLists)
+        {
+            renderDisplayList(sl.displayList, model.textures[sl.texSlot].textureID);
+        }
+    }
+}
+
+void RenderManager::renderMeshComponent(MDL3Model& model,
                                         ae::q20_12_t posX,
                                         ae::q20_12_t posY,
                                         ae::q20_12_t posZ,
@@ -120,40 +131,35 @@ void RenderManager::renderTexturedModel(const void* displayList,
                                         uint32_t rotZ,
                                         ae::q20_12_t scale)
 {
-    if (!displayList)
-    {
-        return;
-    }
-
-    if (texture != -1)
-    {
-        glBindTexture(GL_TEXTURE_2D, texture);
-    }
-
     glPushMatrix();
-
-    glTranslatef32(posX.raw_value(), posY.raw_value(), posZ.raw_value());
-
-    // Only apply rotations if they are non-zero
+    if (posX.raw_value() || posY.raw_value() || posZ.raw_value())
+    {
+        glTranslatef32(posX.raw_value(), posY.raw_value(), posZ.raw_value());
+    }
     if (rotX)
+    {
         glRotatef32(rotX, 1, 0, 0);
+    }
     if (rotY)
+    {
         glRotatef32(rotY, 0, 1, 0);
+    }
     if (rotZ)
+    {
         glRotatef32(rotZ, 0, 0, 1);
-
+    }
     if (scale.raw_value() != ONE_Q12)
     {
         glScalef32(scale.raw_value(), scale.raw_value(), scale.raw_value());
     }
 
-    // Guard against corrupted DL pointers
-    if (displayList)
+    for (const Node& node : model.nodes)
     {
-        glCallList(displayList);
+        for (const SubList_N& sl : node.subLists)
+        {
+            renderDisplayList(sl.displayList, model.textures[sl.texSlot].textureID);
+        }
     }
-    while (GFX_BUSY)
-        ;
 
     glPopMatrix(1);
 }
@@ -161,9 +167,11 @@ void RenderManager::renderTexturedModel(const void* displayList,
 void RenderManager::renderTexturedBillboard(
     BillboardData bb, const int texture, bool faceCamera, ae::q20_12_t camX, ae::q20_12_t camY, ae::q20_12_t camZ)
 {
-    while (GFX_BUSY)
-        ;
-    glBindTexture(GL_TEXTURE_2D, texture);
+    if (texture != -1 && texture != activeTexture)
+    {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        activeTexture = texture;
+    }
     glBegin(GL_QUADS);
 
     ae::q4_12_t rX{1}, rY{0}, rZ{0};
@@ -215,9 +223,20 @@ void RenderManager::renderTexturedBillboard(
     glEnd();
 }
 
-void RenderManager::renderDisplayList(const void* list)
+void RenderManager::renderDisplayList(const void* displayList, const int texture)
 {
-    glCallList(list);
+    if (!displayList)
+    {
+        return;
+    }
+
+    if (texture != -1 && texture != activeTexture)
+    {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        activeTexture = texture;
+    }
+
+    glCallList(displayList);
 }
 
 void RenderManager::deleteTexture(int& texture)

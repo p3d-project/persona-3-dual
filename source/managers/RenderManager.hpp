@@ -7,6 +7,7 @@
 #pragma once
 #include "managers/MathManager.hpp"
 #include "types/EnvironmentTypes.hpp"
+#include "types/MeshTypes.hpp"
 #include "types/RenderTypes.hpp"
 #include <aegis/manager.hpp>
 
@@ -65,20 +66,28 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
                        const void* bitmap);
 
     /**
-     * @brief Renders a textured model.
+     * @brief Renders a MDL3 model.
      *
-     * @param displayList Pointer to the display list of the model to render.
-     * @param texture The ID of the texture to use for rendering.
+     * @param model The 3D model to render.
+     *
+     * @note This function will render the model at the origin (0, 0, 0) with no rotation or scaling applied.
+     * It is intended for environment models. There is a seperate function for rendering with transformations.
+     */
+    void renderMeshComponent(MDL3Model& model);
+
+    /**
+     * @brief Renders a MDL3 model.
+     *
+     * @param model The 3D model to render.
      * @param posX The X position of the model.
      * @param posY The Y position of the model.
      * @param posZ The Z position of the model.
-     * @param rotX The rotation of the model around the X axis.
-     * @param rotY The rotation of the model around the Y axis.
-     * @param rotZ The rotation of the model around the Z axis.
-     * @param scale The scale to apply to the model (default 1).
+     * @param rotX The X rotation of the model.
+     * @param rotY The Y rotation of the model.
+     * @param rotZ The Z rotation of the model.
+     * @param scale The scale of the model (default 1).
      */
-    void renderTexturedModel(const void* displayList,
-                             const int texture,
+    void renderMeshComponent(MDL3Model& model,
                              ae::q20_12_t posX,
                              ae::q20_12_t posY,
                              ae::q20_12_t posZ,
@@ -100,11 +109,17 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
     void renderTexturedBillboard(
         BillboardData bb, const int texture, bool faceCamera, ae::q20_12_t camX, ae::q20_12_t camY, ae::q20_12_t camZ);
 
+    // TODO: make this function inline
     /**
-     * @brief Directly passes a display list to the GPU for rendering.
-     * @param list Pointer to the display list to render.
+     * @brief Renders a textured model.
+     *
+     * @param displayList Pointer to the display list of the model to render.
+     * @param texture The ID of the texture to use for rendering.
+     *
+     * @warning This function should not be used outside of RenderManager as it will soon be inlined & private.
+     * Calls from outside of RenderManager should start using renderMeshComponent() instead.
      */
-    void renderDisplayList(const void* list);
+    void renderDisplayList(const void* displayList, const int texture);
 
     /**
      * @brief Deletes a texture from the GPU and resets its ID.
@@ -117,6 +132,7 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
     RenderManager() = default;
 
     static inline const ae::q20_12_t DEGREE_MODIFIER = ae::q20_12_t{1 << 15} / ae::q20_12_t{360};
+    int activeTexture = -1;
 
     MathManager& math = MathManager::GetInstance();
 };

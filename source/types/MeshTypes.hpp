@@ -1,7 +1,5 @@
 #pragma once
 
-#include "managers/RenderManager.hpp"
-
 #include <etl/vector.h>
 #include <nds.h>
 
@@ -17,15 +15,7 @@ struct MDL3Texture
     char name[65] = {0};
 
     MDL3Texture() = default;
-    ~MDL3Texture()
-    {
-        if (textureID != -1)
-        {
-            int id = textureID;
-            textureID = -1; // Prevent double deletion
-            RenderManager::GetInstance().deleteTexture(id);
-        }
-    }
+    ~MDL3Texture() = default;
 };
 
 // TODO: figure out a way to make the vector sizes dynamic or compiletimed
@@ -101,25 +91,7 @@ struct MDL3Model
     etl::vector<Animation_N*, 32> animations;
 
     MDL3Model() = default;
-    ~MDL3Model()
-    {
-        for (Animation_N* anim : animations)
-        {
-            delete anim;
-        }
-
-        for (Node node : nodes)
-        {
-            for (SubList_N& sl : node.subLists)
-            {
-                if (sl.displayList)
-                {
-                    delete[] sl.displayList;
-                    sl.displayList = nullptr;
-                }
-            }
-        }
-    }
+    ~MDL3Model() = default;
 };
 
 #pragma pack(push, 1)

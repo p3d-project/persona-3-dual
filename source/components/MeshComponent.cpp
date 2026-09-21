@@ -9,7 +9,36 @@ void MeshComponent::Update(ae::q20_12_t)
 void MeshComponent::Destroy()
 {
     isActive = false;
-    model.reset();
+
+    if (model)
+    {
+        for (MDL3Texture& tex : model->textures)
+        {
+            if (tex.textureID != -1)
+            {
+                render.deleteTexture(tex.textureID);
+            }
+        }
+
+        for (Node& node : model->nodes)
+        {
+            for (SubList_N& sl : node.subLists)
+            {
+                if (sl.displayList)
+                {
+                    delete[] sl.displayList;
+                    sl.displayList = nullptr;
+                }
+            }
+        }
+
+        for (Animation_N* anim : model->animations)
+        {
+            delete anim;
+        }
+
+        model.reset();
+    }
 }
 
 bool MeshComponent::loadTextureHeader(FileBuffer& buffer, MDL3Texture& tex, size_t& offset)
@@ -185,6 +214,13 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
         }
     }
 
+    for (Node& node : model->nodes)
+    {
+        std::sort(node.subLists.begin(),
+                  node.subLists.end(),
+                  [](const SubList_N& a, const SubList_N& b) { return a.texSlot < b.texSlot; });
+    }
+
     // Skip animation data on static meshes
 
     //Textures
@@ -203,22 +239,5 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
 
 void MeshComponent::drawMesh()
 {
-    for (const Node& node : model->nodes)
-    {
-        for (const SubList_N& sl : node.subLists)
-        {
-            if (sl.displayList == nullptr)
-            {
-                continue;
-            }
-            render.renderTexturedModel(sl.displayList,
-                                       model->textures[sl.texSlot].textureID,
-                                       ae::q20_12_t{0},
-                                       ae::q20_12_t{0},
-                                       ae::q20_12_t{0},
-                                       0,
-                                       0,
-                                       0);
-        }
-    }
+    render.renderMeshComponent(*model);
 }
