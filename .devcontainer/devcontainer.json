@@ -13,7 +13,11 @@
         "vscode": {
             "extensions": [
                 "ms-vscode.cpptools",
-                "ms-python.python"
+                "ms-python.python",
+                "ms-vscode.cmake-tools",
+                "cschlosser.doxdocgen",
+                "matepek.vscode-catch2-test-adapter",
+                "eamodio.gitlens"
             ]
         }
     },
