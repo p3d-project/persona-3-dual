@@ -82,9 +82,9 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
                              ae::q20_12_t posX,
                              ae::q20_12_t posY,
                              ae::q20_12_t posZ,
-                             ae::q20_12_t rotX,
-                             ae::q20_12_t rotY,
-                             ae::q20_12_t rotZ,
+                             uint32_t rotX,
+                             uint32_t rotY,
+                             uint32_t rotZ,
                              ae::q20_12_t scale = ae::q20_12_t{1});
 
     /**

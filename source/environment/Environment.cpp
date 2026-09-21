@@ -139,14 +139,8 @@ void Environment::draw()
         if (!textureIDs[i])
             continue;
 
-        render.renderTexturedModel(displayLists[i],
-                                   textureIDs[i],
-                                   ae::q20_12_t{0},
-                                   ae::q20_12_t{0},
-                                   ae::q20_12_t{0},
-                                   ae::q20_12_t{0},
-                                   ae::q20_12_t{0},
-                                   ae::q20_12_t{0});
+        render.renderTexturedModel(
+            displayLists[i], textureIDs[i], ae::q20_12_t{0}, ae::q20_12_t{0}, ae::q20_12_t{0}, 0, 0, 0);
     }
 }
 

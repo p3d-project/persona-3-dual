@@ -115,9 +115,9 @@ void RenderManager::renderTexturedModel(const void* displayList,
                                         ae::q20_12_t posX,
                                         ae::q20_12_t posY,
                                         ae::q20_12_t posZ,
-                                        ae::q20_12_t rotX,
-                                        ae::q20_12_t rotY,
-                                        ae::q20_12_t rotZ,
+                                        uint32_t rotX,
+                                        uint32_t rotY,
+                                        uint32_t rotZ,
                                         ae::q20_12_t scale)
 {
     if (!displayList)
@@ -135,12 +135,12 @@ void RenderManager::renderTexturedModel(const void* displayList,
     glTranslatef32(posX.raw_value(), posY.raw_value(), posZ.raw_value());
 
     // Only apply rotations if they are non-zero
-    if (rotX.raw_value())
-        glRotatef32(rotX.raw_value(), ONE_Q12, 0, 0);
-    if (rotY.raw_value())
-        glRotatef32(rotY.raw_value(), 0, ONE_Q12, 0);
-    if (rotZ.raw_value())
-        glRotatef32(rotZ.raw_value(), 0, 0, ONE_Q12);
+    if (rotX)
+        glRotatef32(rotX, 1, 0, 0);
+    if (rotY)
+        glRotatef32(rotY, 0, 1, 0);
+    if (rotZ)
+        glRotatef32(rotZ, 0, 0, 1);
 
     if (scale.raw_value() != ONE_Q12)
     {
