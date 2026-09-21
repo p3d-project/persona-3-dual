@@ -27,7 +27,7 @@
 #include <aegis/engine.hpp>
 
 // variables
-extern volatile int frame;
+extern volatile uint32_t frame;
 extern ViewState nextView;
 extern volatile u32 systemKeysDown;
 extern volatile u32 systemKeysHeld;
