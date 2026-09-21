@@ -1,3 +1,9 @@
+/**
+ * @file BattleSystem.hpp
+ * @brief Timer util to track if a duration has passed.
+ * @author Nolan Kolb (TrueGiles / themoonwalker8692)
+ */
+
 #pragma once
 #include <aegis/types.hpp>
 #include <cstdint>
@@ -9,8 +15,32 @@ constexpr uint32_t TARGET_FPS = 60;
 class Timer
 {
   public:
+    /**
+     * @brief Starts a timer.
+     *
+     * @param durationSeconds How long it takes until the Timer is finished in seconds.
+     */
     void start(ae::q20_12_t durationSeconds);
+
+    /**
+     * @brief Starts a timer.
+     *
+     * @param durationFrames How long it takes until the Timer is finished in frames.
+     */
+    void start(uint32_t durationFrames);
+
+    /**
+     * @brief Checks if the timer expired.
+     *
+     * @return Returns if the timer is finished.
+     */
     bool isFinished();
+
+    /**
+     * @brief Gets elapsed time since the timer was started.
+     *
+     * @return Elapsed time in seconds.
+     */
     ae::q20_12_t getElapsed();
 
   private:

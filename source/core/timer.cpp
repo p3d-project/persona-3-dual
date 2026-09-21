@@ -7,6 +7,13 @@ void Timer::start(ae::q20_12_t durationSeconds)
     running = true;
 }
 
+void Timer::start(uint32_t durationFrames)
+{
+    startFrame = frame;
+    this->durationFrames = durationFrames;
+    running = true;
+}
+
 bool Timer::isFinished()
 {
     if (!running)

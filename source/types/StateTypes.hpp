@@ -16,3 +16,12 @@ enum class ViewState
     STATION,
     PAULOWNIA_MALL,
 };
+
+enum class TransitionPhase
+{
+    FADING_IN_TOP,
+    FADING_IN_SKY,
+    IDLE,
+    FADING_OUT_TO_MENU,
+    FADING_OUT_TO_VIDEO
+};
