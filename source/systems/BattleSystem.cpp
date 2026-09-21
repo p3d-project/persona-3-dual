@@ -348,8 +348,7 @@ void BattleSystem::Shutdown()
 {
     if (musicCmpt != nullptr)
     {
-        musicCmpt->pauseMusic();
-        musicCmpt = nullptr;
+        musicCmpt->stopMusic();
     }
 
     isActive = false;
@@ -378,6 +377,11 @@ void BattleSystem::Shutdown()
     partyMembers.clear();
     enemies.clear();
     player = nullptr;
+}
+
+void BattleSystem::SetMusicComponent(MusicComponent* music)
+{
+    musicCmpt = music;
 }
 
 void BattleSystem::applyResult(const TurnResult& turnResult, BattleParticipant* target)

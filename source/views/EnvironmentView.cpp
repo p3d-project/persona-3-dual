@@ -113,18 +113,17 @@ void EnvironmentView::init()
         text = engine.CreateComponent<TextComponent>();
         textSub = engine.CreateComponent<TextComponent>();
         textSubAlt = engine.CreateComponent<TextComponent>();
+        musicCmpt = engine.CreateComponent<MusicComponent>();
+        sfxCmpt = engine.CreateComponent<SFXComponent>();
 
         environment->AddComponent(graphics);
         environment->AddComponent(text);
         environment->AddComponent(textSub);
         environment->AddComponent(textSubAlt);
-    }
-
-    if (musicCmpt == nullptr)
-    {
-        musicCmpt = engine.CreateComponent<MusicComponent>();
         environment->AddComponent(musicCmpt);
-        BattleSystem::GetInstance().SetMusicComponent(musicCmpt);
+        environment->AddComponent(sfxCmpt);
+
+        UISystem::GetInstance().SetSFXComponent(sfxCmpt);
     }
 
     if (player != nullptr)

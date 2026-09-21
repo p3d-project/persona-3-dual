@@ -39,20 +39,17 @@ class UISystem : public ae::SystemRouter<UISystem,
     void Init() override;
 
     /**
+     * @brief Performs menu navigation logic
+     */
+    void Update(ae::q20_12_t /*dt*/) override;
+
+    /**
      * @brief Unloads and cleans up all registered screens. Wrapper for cleanup
      */
     void Shutdown() override;
 
-    void Update(ae::q20_12_t /*dt*/) override;
-
-    void SetMusicComponent(MusicComponent* music)
-    {
-        musicCmpt = music;
-    }
-    void SetSFXComponent(SFXComponent* sfx)
-    {
-        sfxCmpt = sfx;
-    }
+    // TODO: replace with ae dependancy injection
+    void SetSFXComponent(SFXComponent* sfx);
 
     // TODO: move out of UISystem. Only here as a temporary fix
     void on_receive(const Event::SwitchView& msg);
@@ -220,7 +217,6 @@ class UISystem : public ae::SystemRouter<UISystem,
     std::array<UIMenu*, 10> menus = {};
     UIMenu* activeMenu = nullptr;
     TextComponent* text = nullptr;
-    MusicComponent* musicCmpt = nullptr;
     SFXComponent* sfxCmpt = nullptr;
 
     bool renderUIText = false;

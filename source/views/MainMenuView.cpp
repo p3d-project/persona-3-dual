@@ -14,12 +14,14 @@ void MainMenuView::init()
         graphics = engine.CreateComponent<GraphicsComponent>();
         textMenu = engine.CreateComponent<TextComponent>();
         musicCmpt = engine.CreateComponent<MusicComponent>();
+        sfxCmpt = engine.CreateComponent<SFXComponent>();
 
         mainMenu->AddComponent(graphics);
         mainMenu->AddComponent(textMenu);
         mainMenu->AddComponent(musicCmpt);
+        mainMenu->AddComponent(sfxCmpt);
 
-        UISystem::GetInstance().SetMusicComponent(musicCmpt);
+        UISystem::GetInstance().SetSFXComponent(sfxCmpt);
     }
 
     // setup music
@@ -238,6 +240,7 @@ void MainMenuView::cleanup()
         graphics = nullptr;
         textMenu = nullptr;
         musicCmpt = nullptr;
+        sfxCmpt = nullptr;
     }
     BaseView::cleanup();
 }

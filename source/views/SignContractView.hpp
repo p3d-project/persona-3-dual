@@ -32,15 +32,6 @@ class SignContractView : public BaseView
     void cancelSFX();
 
   public:
-    void SetMusicComponent(MusicComponent* music)
-    {
-        musicCmpt = music;
-    }
-    void SetSFXComponent(SFXComponent* sfx)
-    {
-        sfxCmpt = sfx;
-    }
-
     void init() override;
     ViewState update() override;
     void cleanup() override;
