@@ -31,7 +31,7 @@ GameEngine engine;
 ae::Entity* player;
 
 // variables
-volatile int frame = 0;
+volatile uint32_t frame = 0;
 volatile u32 systemKeysDown = 0;
 volatile u32 systemKeysHeld = 0;
 std::string fatBasePath = "";
