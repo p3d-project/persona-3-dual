@@ -19,6 +19,7 @@ enum class ViewState
 
 enum class TransitionPhase
 {
+    FADING_IN,
     FADING_IN_TOP,
     FADING_IN_SKY,
     IDLE,

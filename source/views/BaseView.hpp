@@ -13,6 +13,4 @@ class BaseView
     virtual void init() = 0;        // view setup
     virtual ViewState update() = 0; // view update
     virtual void cleanup();         // view cleanup
-
-    TransitionPhase transitionPhase = TransitionPhase::IDLE;
 };

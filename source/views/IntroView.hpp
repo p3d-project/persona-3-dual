@@ -6,6 +6,7 @@
 #include "core/timer.hpp"
 #include "managers/MathManager.hpp"
 #include "managers/UIManager.hpp"
+#include "types/StateTypes.hpp"
 #include "views/BaseView.hpp"
 
 #include <etl/array.h>
@@ -14,6 +15,7 @@ class IntroView : public BaseView
 {
   private:
     Timer fadeTimer;
+    TransitionPhase transitionPhase = TransitionPhase::FADING_IN_TOP;
     ViewState nextViewState = ViewState::KEEP_CURRENT;
 
     Sprite logoSprite[2];
