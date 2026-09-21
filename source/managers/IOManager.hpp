@@ -98,6 +98,17 @@ class FileBuffer
         return size;
     }
 
+    /**
+     * @brief Reads a section from the file buffer into @p dest.
+     *
+     * @param dest Destination buffer to read into.
+     * @param bytes Number of bytes to read per element.
+     * @param count Number of elements to read.
+     * @param offset Pointer to the current offset in the file buffer. The offset will be updated after reading.
+     * @return Number of elements successfully read. Returns 0 if the read would go out
+     *
+     * @note This function mirrors functionality from std::fread.
+     */
     size_t read(void* dest, size_t bytes, size_t count, size_t* offset)
     {
         if (*offset + bytes * count > size)
