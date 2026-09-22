@@ -29,6 +29,9 @@ class MeshComponent : public ae::Component
      */
     void Destroy() override;
 
+    /**
+     * @brief Draws the mesh to the screen every frame.
+     */
     void Update(ae::q20_12_t /*dt*/) override;
 
     ae::ComponentTypeID GetType() const override
@@ -68,13 +71,13 @@ class MeshComponent : public ae::Component
      */
     bool loadTextureHeader(FileBuffer& buffer, MDL3Texture& tex, size_t& offset);
     /**
-     * @brief Loads an embedded image from the file buffer and uploads it to the GPU.
+     * @brief Loads an embedded texture from the file buffer and uploads it to the GPU.
      * @param buffer The file buffer to read from.
-     * @param tex The texture object to populate with the image data.
+     * @param tex The texture object to populate with the texture data.
      * @param offset The current offset in the file buffer, which will be updated after reading.
-     * @return true if the image was successfully loaded and uploaded, false otherwise.
+     * @return true if the texture was successfully loaded and uploaded, false otherwise.
      *
      * @note The function allocates a 32-bit aligned buffer for the GPU upload and frees it after use.
      */
-    bool loadEmbeddedImage(FileBuffer& buffer, MDL3Texture& tex, size_t& offset);
+    bool loadTexture(FileBuffer& buffer, MDL3Texture& tex, size_t& offset);
 };

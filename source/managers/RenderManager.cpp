@@ -124,7 +124,11 @@ void RenderManager::renderMeshComponent(MDL3Model& model)
     {
         for (const SubList_N& sl : node.subLists)
         {
-            renderDisplayList(sl.displayList, model.textures[sl.texSlot].textureID);
+            // Guard against texture ID's that are out of bounds or corrupted. Use no texture in that case.
+            const int textureID = sl.texSlot >= 0 && static_cast<size_t>(sl.texSlot) < model.textures.size()
+                                      ? model.textures[sl.texSlot].textureID
+                                      : -1;
+            renderDisplayList(sl.displayList, textureID);
         }
     }
 }

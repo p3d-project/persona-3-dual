@@ -52,7 +52,7 @@ bool MeshComponent::loadTextureHeader(FileBuffer& buffer, MDL3Texture& tex, size
 
     tex.width = raw.width;
     tex.height = raw.height;
-    tex.isRGBA = (raw.isRGBA != 0);
+    tex.isRGBA = raw.isRGBA;
 
     memcpy(tex.name, raw.name, 64);
     tex.name[64] = '\0'; // Ensure null-termination
@@ -67,7 +67,7 @@ bool MeshComponent::loadTextureHeader(FileBuffer& buffer, MDL3Texture& tex, size
     return true;
 }
 
-bool MeshComponent::loadEmbeddedImage(FileBuffer& buffer, MDL3Texture& tex, size_t& offset)
+bool MeshComponent::loadTexture(FileBuffer& buffer, MDL3Texture& tex, size_t& offset)
 {
     char imgName[32];
     uint32_t byteLength = 0;
@@ -227,10 +227,10 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
 
     // Skip animation data on static meshes
 
-    //Textures
+    // Textures
     for (uint32_t i = 0; i < model->texCount; ++i)
     {
-        if (!loadEmbeddedImage(buffer, model->textures[i], offset))
+        if (!loadTexture(buffer, model->textures[i], offset))
         {
             model.reset();
             return false;
