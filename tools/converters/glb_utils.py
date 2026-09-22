@@ -409,14 +409,11 @@ def write_mdl_file(output_path, nodes, textures, images, animations=[]):
             )
 
         for node in nodes:
-            # Node Header: s32 pid, s32 px, 32 py, s32 pz, u32 subListCount
+            # Node Header: s32 pid, u32 subListCount
             f.write(
                 struct.pack(
-                    "<iiiiI",
+                    "<iI",
                     node["pid"],
-                    node["px"],
-                    node["py"],
-                    node["pz"],
                     node["subListCount"],
                 )
             )

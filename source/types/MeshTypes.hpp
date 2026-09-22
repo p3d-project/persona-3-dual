@@ -75,7 +75,6 @@ struct SubList_N
 struct Node
 {
     int32_t pid = -1;
-    int32_t px = 0, py = 0, pz = 0;
     etl::vector<SubList_N, 64> subLists;
 };
 
@@ -88,7 +87,6 @@ struct MDL3Model
     uint32_t texCount = 0;
     etl::vector<MDL3Texture, 8> textures;
     etl::vector<Node, 64> nodes;
-    etl::vector<Animation_N*, 32> animations;
 
     MDL3Model() = default;
     ~MDL3Model() = default;
@@ -127,9 +125,6 @@ struct RawModelHeader
 struct RawNodeHeader
 {
     int32_t pid = -1;
-    int32_t posX = 0;
-    int32_t posY = 0;
-    int32_t posZ = 0;
     uint32_t subListCount = 0;
 };
 #pragma pack(pop)

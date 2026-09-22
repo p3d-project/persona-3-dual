@@ -180,9 +180,6 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
         }
 
         model->nodes[i].pid = rawNode.pid;
-        model->nodes[i].px = rawNode.posX;
-        model->nodes[i].py = rawNode.posY;
-        model->nodes[i].pz = rawNode.posZ;
 
         for (uint32_t j = 0; j < rawNode.subListCount; ++j)
         {

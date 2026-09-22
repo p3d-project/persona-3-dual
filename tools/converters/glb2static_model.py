@@ -255,9 +255,6 @@ def parse_mesh(gltf, textures):
     return [
         {
             "pid": -1,
-            "px": 0,
-            "py": 0,
-            "pz": 0,
             "subListCount": len(sub_lists),
             "subLists": sub_lists,
         }
