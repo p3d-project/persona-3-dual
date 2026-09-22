@@ -1,5 +1,4 @@
 #include "ModelComponent.hpp"
-#include <memory>
 
 void ModelComponent::Update(ae::q20_12_t)
 {
