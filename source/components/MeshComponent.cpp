@@ -32,11 +32,6 @@ void MeshComponent::Destroy()
             }
         }
 
-        for (Animation_N* anim : model->animations)
-        {
-            delete anim;
-        }
-
         model.reset();
     }
 }
