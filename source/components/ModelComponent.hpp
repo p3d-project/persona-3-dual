@@ -6,7 +6,6 @@
  */
 
 #pragma once
-#include "components/AnimatorComponent.hpp"
 #include "managers/RenderManager.hpp"
 #include "types/aeTypes.hpp"
 
