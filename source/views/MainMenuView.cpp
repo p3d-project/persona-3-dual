@@ -28,18 +28,6 @@ void MainMenuView::init()
     musicCmpt->registerMusic(
         (fatBasePath + "music/menus/velvetRoom/aria_of_the_soul.qoa").c_str(), ae::q20_12_t{0}, ae::q20_12_t{164.940});
 
-    // transition both screens from black
-    for (int i = -16; i < 0; i++)
-    {
-        setBrightness(3, i);
-
-        // wait a few frames
-        for (int duration = 0; duration <= 2; duration++)
-        {
-            swiWaitForVBlank();
-        }
-    }
-
     // set video mode for 2 text layers and 2 extended rotation layer
     videoSetMode(MODE_5_2D);
     // set sub video mode for 4 text layers
@@ -56,7 +44,7 @@ void MainMenuView::init()
     // enable extended palettes
     bgExtPaletteEnable();
 
-    //setup text engine
+    // setup text engine
     int bgTextSub = bgInitSub(3, BgType_Bmp8, BgSize_B8_256x256, 4, 0);
     uint16_t* textVideoBufferSub = bgGetGfxPtr(bgTextSub);
     bgSetPriority(bgTextSub, 0);
@@ -67,9 +55,6 @@ void MainMenuView::init()
     std::array<UIMenu*, 10> menus = {mainMenuCmpt};
     ae::BroadcastEvent(Event::ConfigureUIMenu{textMenu, menus});
     ae::BroadcastEvent(Event::ShowMenu{mainMenuCmpt});
-
-    // set brightness on bottom screen to completely dark (no visible image)
-    setBrightness(2, -16);
 
     // initialize backgrounds
     // check https://mtheall.com/vram.html to ensure bg fit in vram
@@ -113,125 +98,153 @@ void MainMenuView::init()
     graphics->unloadGraphic(fogBg);
 
     ui.hideBg(bg[2]);
-    bgSetCenter(bg[2], 128, 96); // pivot point on the screen (at the screen's center)
-    bgSetScroll(bg[2], 128, 96); // pivot point on the image (at the image's center)
+    bgSetCenter(bg[2], 128, 96); // pivot point on the screen
+    bgSetScroll(bg[2], 128, 96); // pivot point on the image
 
     // for slide in animation
-    // move camera to the empty right half of the 512px wide background
     bgSetScroll(bg[0], -silhouetteX, -silhouetteY);
     bgUpdate();
 
-    // fade door background in
-    REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG1 | BLEND_DST_BACKDROP;
-    for (int i = 0; i <= 16; i++)
-    {
-        REG_BLDALPHA = i | ((16 - i) << 8);
+    setBrightness(3, -16);
 
-        // wait for duration amount of frames
-        for (int frame = 0; frame <= 6; frame++)
-        {
-            swiWaitForVBlank();
-        }
-    }
+    // Setup door blend initially
+    REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG1 | BLEND_DST_BACKDROP;
+    REG_BLDALPHA = 0 | (16 << 8);
+
+    fadeTimer.start(ae::q20_12_t{0.8});
+    transitionPhase = TransitionPhase::FADING_IN;
 }
 
 ViewState MainMenuView::update()
 {
-    if (isSilhouetteStillMoving)
+    switch (transitionPhase)
     {
-        // skip the animation if the user skipped it
-        if (systemKeysDown != 0)
+    case TransitionPhase::FADING_IN:
+    {
+        if (fadeTimer.isFinished())
         {
-            silhouetteX = 0;
-            silhouetteY = 0;
-            isSilhouetteStillMoving = false;
+            transitionPhase = TransitionPhase::FADING_IN_DOOR;
+            fadeTimer.start(ae::q20_12_t{2.0});
+        }
+        else
+        {
+            int brightness = -16 + (fadeTimer.getProgress().raw_value() >> 8);
+            setBrightness(1, brightness);
+        }
+        break;
+    }
+
+    case TransitionPhase::FADING_IN_DOOR:
+    {
+        if (fadeTimer.isFinished())
+        {
+            transitionPhase = TransitionPhase::IDLE;
+            REG_BLDALPHA = 16 | (0 << 8); // Ensure door is fully visible
+        }
+        else
+        {
+            int fadeVal = fadeTimer.getProgress().raw_value() >> 8; // 0 to 16
+            REG_BLDALPHA = fadeVal | ((16 - fadeVal) << 8);
+        }
+        break;
+    }
+
+    case TransitionPhase::IDLE:
+    {
+        if (isSilhouetteStillMoving)
+        {
+            // skip the animation if the user skipped it
+            if (systemKeysDown != 0)
+            {
+                silhouetteX = 0;
+                silhouetteY = 0;
+                isSilhouetteStillMoving = false;
+            }
+
+            // animate X (moving right towards 0)
+            if (silhouetteX < 0 && frame % 5 == 0)
+            {
+                silhouetteX += (-silhouetteX) / 6 + 1;
+            }
+
+            // animate Y (moving up towards 0)
+            if (silhouetteY > 0 && frame % 5 == 0)
+            {
+                silhouetteY -= (silhouetteY / 6) + 1;
+            }
+
+            if (silhouetteX >= 0)
+            {
+                isSilhouetteStillMoving = false;
+                silhouetteX = 0;
+            }
+            if (silhouetteY <= 0)
+            {
+                isSilhouetteStillMoving = false;
+                silhouetteY = 0;
+                brightness = 0;
+            }
+            bgSetScroll(bg[0], -silhouetteX, -silhouetteY);
+            break;
         }
 
-        // animate X (moving right towards 0)
-        if (silhouetteX < 0 && frame % 5 == 0)
+        // fade in bottom screen text
+        if (brightness < 16 && frame % 4 == 0)
         {
-            silhouetteX += (-silhouetteX) / 6 + 1;
+            brightness++;
+            setBrightness(2, brightness - 16);
         }
 
-        // animate Y (moving up towards 0)
-        if (silhouetteY > 0 && frame % 5 == 0)
+        // setup blending for fog
+        if (!displayFog)
         {
-            silhouetteY -= (silhouetteY / 6) + 1;
+            displayFog = true;
+            REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG2 | BLEND_DST_BACKDROP | BLEND_DST_BG1;
+            ui.showBg(bg[2]);
         }
 
-        if (silhouetteX >= 0)
+        // fade in fog
+        if (displayFog && fogOpacity < 6 && frame % 4 == 0)
         {
-            isSilhouetteStillMoving = false;
-            silhouetteX = 0;
+            fogOpacity++;
+            REG_BLDALPHA = fogOpacity | ((16 - fogOpacity) << 8);
         }
-        if (silhouetteY <= 0)
+
+        // rotate fog
+        if (displayFog && frame % 4 == 0)
         {
-            isSilhouetteStillMoving = false;
-            silhouetteY = 0;
+            waveAngle += 50;
+            int angle = MathManager::GetInstance().sin(static_cast<ae::angle16_t>(waveAngle)).raw_value();
+
+            int rotationSpeed = baseSpeed + ((angle * fluctuation) >> 12);
+            currentRotation += rotationSpeed;
+            bgSetRotateScale(bg[2], currentRotation, 256, 256);
         }
-        bgSetScroll(bg[0], -silhouetteX, -silhouetteY);
-        return ViewState::KEEP_CURRENT;
+
+        break;
     }
 
-    // show mainComponent AFTER checking if the sillouhete is still moving
-    ViewState result = ViewState::KEEP_CURRENT;
-    if (result != ViewState::KEEP_CURRENT)
+    case TransitionPhase::FADING_OUT:
     {
-        musicCmpt->pauseMusic();
-        return result;
+        if (fadeTimer.isFinished())
+        {
+            setBrightness(3, -16);
+            return nextViewState;
+        }
+        else
+        {
+            int fadeVal = fadeTimer.getProgress().raw_value() >> 8;
+            setBrightness(3, -fadeVal);
+        }
+        break;
+    }
     }
 
-    // fade in bottom screen text
-    if (brightness < 16 && frame % 4 == 0)
-    {
-        brightness++;
-        setBrightness(2, brightness - 16);
-    }
-
-    // setup blending for fog
-    if (!displayFog)
-    {
-        displayFog = true;
-        REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG2 | BLEND_DST_BACKDROP | BLEND_DST_BG1;
-        ui.showBg(bg[2]);
-    }
-
-    // fade in fog
-    if (displayFog && fogOpacity < 6 && frame % 4 == 0)
-    {
-        fogOpacity++;
-        REG_BLDALPHA = fogOpacity | ((16 - fogOpacity) << 8);
-    }
-
-    // rotate fog
-    if (displayFog && frame % 4 == 0)
-    {
-        waveAngle += 50;
-        int angle = MathManager::GetInstance().sin(static_cast<ae::angle16_t>(waveAngle)).raw_value();
-
-        int rotationSpeed = baseSpeed + ((angle * fluctuation) >> 12);
-        currentRotation += rotationSpeed;
-        bgSetRotateScale(bg[2], currentRotation, 256, 256);
-    }
-
-    // default state
     return ViewState::KEEP_CURRENT;
 }
 
 void MainMenuView::cleanup()
 {
-    // transition both screens to black
-    for (int i = 0; i > -16; i--)
-    {
-        setBrightness(3, i);
-
-        // wait a few frames
-        for (int duration = 0; duration <= 2; duration++)
-        {
-            swiWaitForVBlank();
-        }
-    }
-
     if (mainMenu != nullptr)
     {
         engine.DestroyEntity(mainMenu);

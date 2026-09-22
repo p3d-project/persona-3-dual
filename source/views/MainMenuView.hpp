@@ -4,13 +4,19 @@
 #include "components/SFXComponent.hpp"
 #include "components/TextComponent.hpp"
 #include "components/menus/MainMenu.hpp"
+#include "core/timer.hpp"
 #include "managers/MathManager.hpp"
 #include "managers/UIManager.hpp"
+#include "types/StateTypes.hpp"
 #include "views/BaseView.hpp"
 
 class MainMenuView : public BaseView
 {
   private:
+    Timer fadeTimer;
+    TransitionPhase transitionPhase = TransitionPhase::FADING_IN;
+    ViewState nextViewState = ViewState::KEEP_CURRENT;
+
     MainMenu* mainMenuCmpt = nullptr;
     int bg[3];
 
