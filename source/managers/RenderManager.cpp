@@ -92,7 +92,6 @@ void RenderManager::cleanup3DView()
     glClearColor(0, 0, 0, 31);
     glClearDepth(0x7FFF);
     glFlush(0);
-    swiWaitForVBlank();
 }
 
 void RenderManager::uploadTexture(int& textureID,
