@@ -1,12 +1,12 @@
-#include "MeshComponent.hpp"
+#include "ModelComponent.hpp"
 #include <memory>
 
-void MeshComponent::Update(ae::q20_12_t)
+void ModelComponent::Update(ae::q20_12_t)
 {
     drawMesh();
 }
 
-void MeshComponent::Destroy()
+void ModelComponent::Destroy()
 {
     isActive = false;
 
@@ -36,7 +36,7 @@ void MeshComponent::Destroy()
     }
 }
 
-bool MeshComponent::loadTextureHeader(FILE* f, MDL3Texture& tex)
+bool ModelComponent::loadTextureHeader(FILE* f, MDL3Texture& tex)
 {
     RawTextureHeader raw;
 
@@ -62,7 +62,7 @@ bool MeshComponent::loadTextureHeader(FILE* f, MDL3Texture& tex)
     return true;
 }
 
-bool MeshComponent::loadTexture(FILE* f, MDL3Texture& tex)
+bool ModelComponent::loadTexture(FILE* f, MDL3Texture& tex)
 {
     char imgName[32];
     uint32_t byteLength = 0;
@@ -111,7 +111,7 @@ bool MeshComponent::loadTexture(FILE* f, MDL3Texture& tex)
     return true;
 }
 
-bool MeshComponent::loadMesh(std::string* meshFilePath)
+bool ModelComponent::loadMesh(std::string* meshFilePath)
 {
     if (meshFilePath == nullptr)
     {
@@ -229,7 +229,7 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
     return true;
 }
 
-void MeshComponent::drawMesh()
+void ModelComponent::drawMesh()
 {
-    render.renderMeshComponent(*model);
+    render.renderModelComponent(*model);
 }

@@ -1,6 +1,6 @@
 /**
- * @file MeshComponent.hpp
- * @brief Orchestrates rendering meshes from a bitmap.
+ * @file ModelComponent.hpp
+ * @brief Orchestrates rendering models from a 3D model file.
  *
  * @author Gregory Munro (ggmini)
  */
@@ -8,17 +8,16 @@
 #pragma once
 #include "managers/IOManager.hpp"
 #include "managers/RenderManager.hpp"
-#include "types/MeshTypes.hpp"
 #include "types/aeTypes.hpp"
 
 #include <aegis/component.hpp>
 #include <memory>
 #include <string>
 
-class MeshComponent : public ae::Component
+class ModelComponent : public ae::Component
 {
   public:
-    static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Mesh);
+    static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Model);
 
     void Init() override
     {

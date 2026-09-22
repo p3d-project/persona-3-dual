@@ -7,7 +7,7 @@
 #pragma once
 #include "managers/MathManager.hpp"
 #include "types/EnvironmentTypes.hpp"
-#include "types/MeshTypes.hpp"
+#include "types/ModelTypes.hpp"
 #include "types/RenderTypes.hpp"
 #include <aegis/manager.hpp>
 
@@ -73,7 +73,7 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
      * @note This function will render the model at the origin (0, 0, 0) with no rotation or scaling applied.
      * It is intended for environment models. There is a separate function for rendering with transformations.
      */
-    void renderMeshComponent(MDL3Model& model);
+    void renderModelComponent(MDL3Model& model);
 
     /**
      * @brief Renders a MDL3 model.
@@ -87,14 +87,14 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
      * @param rotZ The Z rotation of the model.
      * @param scale The scale of the model (default 1).
      */
-    void renderMeshComponent(MDL3Model& model,
-                             ae::q20_12_t posX,
-                             ae::q20_12_t posY,
-                             ae::q20_12_t posZ,
-                             uint32_t rotX,
-                             uint32_t rotY,
-                             uint32_t rotZ,
-                             ae::q20_12_t scale = ae::q20_12_t{1});
+    void renderModelComponent(MDL3Model& model,
+                              ae::q20_12_t posX,
+                              ae::q20_12_t posY,
+                              ae::q20_12_t posZ,
+                              uint32_t rotX,
+                              uint32_t rotY,
+                              uint32_t rotZ,
+                              ae::q20_12_t scale = ae::q20_12_t{1});
 
     /**
      * @brief Renders a textured billboard.

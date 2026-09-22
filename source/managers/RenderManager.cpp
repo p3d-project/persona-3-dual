@@ -118,7 +118,7 @@ bool RenderManager::uploadTexture(int& textureID,
     return glTexImage2D(GL_TEXTURE_2D, 0, texType, textureSizeEnum(sizeX), textureSizeEnum(sizeY), 0, param, texture);
 }
 
-void RenderManager::renderMeshComponent(MDL3Model& model)
+void RenderManager::renderModelComponent(MDL3Model& model)
 {
     for (const Node& node : model.nodes)
     {
@@ -133,14 +133,14 @@ void RenderManager::renderMeshComponent(MDL3Model& model)
     }
 }
 
-void RenderManager::renderMeshComponent(MDL3Model& model,
-                                        ae::q20_12_t posX,
-                                        ae::q20_12_t posY,
-                                        ae::q20_12_t posZ,
-                                        uint32_t rotX,
-                                        uint32_t rotY,
-                                        uint32_t rotZ,
-                                        ae::q20_12_t scale)
+void RenderManager::renderModelComponent(MDL3Model& model,
+                                         ae::q20_12_t posX,
+                                         ae::q20_12_t posY,
+                                         ae::q20_12_t posZ,
+                                         uint32_t rotX,
+                                         uint32_t rotY,
+                                         uint32_t rotZ,
+                                         ae::q20_12_t scale)
 {
     glPushMatrix();
     if (posX.raw_value() || posY.raw_value() || posZ.raw_value())
