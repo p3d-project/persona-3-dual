@@ -99,34 +99,6 @@ class FileBuffer
     }
 
     /**
-     * @brief Reads a section from the file buffer into @p dest.
-     *
-     * @param dest Destination buffer to read into.
-     * @param bytes Number of bytes to read per element.
-     * @param count Number of elements to read.
-     * @param offset Pointer to the current offset in the file buffer. The offset will be updated after reading.
-     * @return Number of elements successfully read. Returns 0 if the read would go out
-     *
-     * @note This function mirrors functionality from std::fread.
-     */
-    size_t read(void* dest, size_t bytes, size_t count, size_t* offset)
-    {
-        // Guard against null pointers
-        if (!dest || !offset)
-        {
-            return 0;
-        }
-
-        if (*offset > size || (bytes != 0 && count > (size - *offset) / bytes))
-        {
-            return 0; // Out of bounds
-        }
-        memcpy(dest, static_cast<const byte*>(data) + *offset, bytes * count);
-        *offset += bytes * count;
-        return count;
-    }
-
-    /**
      * @brief Releases the file data to the caller.
      * @return The previously owned data pointer, or nullptr if empty.
      * @note The caller becomes responsible for releasing the returned pointer.

@@ -36,11 +36,11 @@ void MeshComponent::Destroy()
     }
 }
 
-bool MeshComponent::loadTextureHeader(FileBuffer& buffer, MDL3Texture& tex, size_t& offset)
+bool MeshComponent::loadTextureHeader(FILE* f, MDL3Texture& tex)
 {
     RawTextureHeader raw;
 
-    if (buffer.read(&raw, sizeof(RawTextureHeader), 1, &offset) != 1)
+    if (fread(&raw, sizeof(RawTextureHeader), 1, f) != 1)
     {
         return false;
     }
@@ -62,12 +62,12 @@ bool MeshComponent::loadTextureHeader(FileBuffer& buffer, MDL3Texture& tex, size
     return true;
 }
 
-bool MeshComponent::loadTexture(FileBuffer& buffer, MDL3Texture& tex, size_t& offset)
+bool MeshComponent::loadTexture(FILE* f, MDL3Texture& tex)
 {
     char imgName[32];
     uint32_t byteLength = 0;
 
-    if (buffer.read(imgName, 1, 32, &offset) != 32 || buffer.read(&byteLength, sizeof(uint32_t), 1, &offset) != 1)
+    if (fread(imgName, 1, 32, f) != 32 || fread(&byteLength, sizeof(uint32_t), 1, f) != 1)
     {
         return false;
     }
@@ -84,7 +84,7 @@ bool MeshComponent::loadTexture(FileBuffer& buffer, MDL3Texture& tex, size_t& of
         return false;
     }
 
-    if (buffer.read(alignedBuffer, 1, byteLength, &offset) != static_cast<size_t>(byteLength))
+    if (fread(alignedBuffer, 1, byteLength, f) != static_cast<size_t>(byteLength))
     {
         free(alignedBuffer);
         return false;
@@ -118,26 +118,25 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
         return false;
     }
 
-    model = std::make_unique<MDL3Model>();
-
-    FileBuffer buffer = io.openFileBuffer(*meshFilePath);
-    if (buffer.get() == nullptr)
+    FILE* f = fopen(meshFilePath->c_str(), "rb");
+    if (!f)
     {
-        model.reset();
         return false;
     }
 
-    size_t offset = 0;
+    model = std::make_unique<MDL3Model>();
     RawModelHeader rawHeader;
 
-    if (buffer.read(&rawHeader, sizeof(RawModelHeader), 1, &offset) != 1)
+    if (fread(&rawHeader, sizeof(RawModelHeader), 1, f) != 1)
     {
         model.reset();
+        fclose(f);
         return false;
     }
 
     if (memcmp(rawHeader.magic, "MDL3", 4) != 0)
     {
+        fclose(f);
         model.reset();
         return false;
     }
@@ -147,6 +146,7 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
 
     if (rawHeader.animCount > 0)
     {
+        fclose(f);
         model.reset();
         return false; // Animations not supported for static meshes
     }
@@ -155,8 +155,9 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
     model->textures.resize(model->texCount);
     for (uint32_t i = 0; i < model->texCount; ++i)
     {
-        if (!loadTextureHeader(buffer, model->textures[i], offset))
+        if (!loadTextureHeader(f, model->textures[i]))
         {
+            fclose(f);
             model.reset();
             return false;
         }
@@ -168,8 +169,9 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
     {
         RawNodeHeader rawNode;
 
-        if (buffer.read(&rawNode, sizeof(RawNodeHeader), 1, &offset) != 1)
+        if (fread(&rawNode, sizeof(RawNodeHeader), 1, f) != 1)
         {
+            fclose(f);
             model.reset();
             return false;
         }
@@ -179,32 +181,25 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
         for (uint32_t j = 0; j < rawNode.subListCount; ++j)
         {
             SubList_N sl;
-            if (buffer.read(&sl.texSlot, sizeof(int32_t), 1, &offset) != 1 ||
-                buffer.read(&sl.dlSize, sizeof(uint32_t), 1, &offset) != 1)
+            if (fread(&sl.texSlot, sizeof(int32_t), 1, f) != 1 || fread(&sl.dlSize, sizeof(uint32_t), 1, f) != 1)
             {
+                fclose(f);
                 model.reset();
                 return false;
             }
 
             if (sl.dlSize > 0)
             {
-                const size_t wordCount = sl.dlSize;
-
-                // Out of file bounds check
-                if (offset > buffer.length() || wordCount > (buffer.length() - offset) / sizeof(uint32_t))
+                // Allocate persistent memory for the display list
+                uint32_t* displayList = new uint32_t[sl.dlSize + 1];
+                displayList[0] = sl.dlSize;
+                if (fread(&displayList[1], sizeof(std::uint32_t), sl.dlSize, f) != static_cast<size_t>(sl.dlSize))
                 {
+                    std::fclose(f);
                     model.reset();
                     return false;
                 }
-
-                const size_t rawByteSize = wordCount * sizeof(uint32_t);
-
-                // Allocate persistent memory for the display list
-                uint32_t* displayList = new uint32_t[wordCount + 1];
-                displayList[0] = wordCount;
-                memcpy(&displayList[1], static_cast<const uint8_t*>(buffer.get()) + offset, rawByteSize);
                 sl.displayList = displayList;
-                offset += rawByteSize;
             }
             model->nodes[i].subLists.push_back(std::move(sl));
         }
@@ -222,13 +217,14 @@ bool MeshComponent::loadMesh(std::string* meshFilePath)
     // Textures
     for (uint32_t i = 0; i < model->texCount; ++i)
     {
-        if (!loadTexture(buffer, model->textures[i], offset))
+        if (!loadTexture(f, model->textures[i]))
         {
+            fclose(f);
             model.reset();
             return false;
         }
     }
-
+    fclose(f);
     isActive = true;
     return true;
 }

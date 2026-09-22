@@ -66,18 +66,16 @@ class MeshComponent : public ae::Component
      * @brief Loads a texture header from the file buffer into memory.
      * @param buffer The file buffer to read from.
      * @param tex The texture object to populate with the header data.
-     * @param offset The current offset in the file buffer, which will be updated after reading.
      * @return true if the header was successfully loaded, false otherwise.
      */
-    bool loadTextureHeader(FileBuffer& buffer, MDL3Texture& tex, size_t& offset);
+    bool loadTextureHeader(FILE* f, MDL3Texture& tex);
     /**
      * @brief Loads an embedded texture from the file buffer and uploads it to the GPU.
      * @param buffer The file buffer to read from.
      * @param tex The texture object to populate with the texture data.
-     * @param offset The current offset in the file buffer, which will be updated after reading.
      * @return true if the texture was successfully loaded and uploaded, false otherwise.
      *
      * @note The function allocates a 32-bit aligned buffer for the GPU upload and frees it after use.
      */
-    bool loadTexture(FileBuffer& buffer, MDL3Texture& tex, size_t& offset);
+    bool loadTexture(FILE* f, MDL3Texture& tex);
 };
