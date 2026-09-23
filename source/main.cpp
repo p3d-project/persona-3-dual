@@ -32,7 +32,6 @@ ae::Entity* player;
 
 // variables
 volatile uint32_t frame = 0;
-bool fatalErrorOccurred = false;
 volatile u32 systemKeysDown = 0;
 volatile u32 systemKeysHeld = 0;
 std::string fatBasePath = "";
@@ -151,13 +150,6 @@ int main(int argc, char* argv[])
 
     // load save data
     ae::BroadcastEvent(Event::ReadSave{});
-    if (fatalErrorOccurred)
-    {
-        while (1)
-        {
-            swiWaitForVBlank();
-        }
-    }
 
     // Default is DisclaimerView
     SwitchView(new DisclaimerView());
@@ -168,11 +160,6 @@ int main(int argc, char* argv[])
     while (1)
     {
         swiWaitForVBlank();
-
-        if (fatalErrorOccurred)
-        {
-            continue;
-        }
 
         // Poll Input -> Update Systems -> Update Components -> Process Managers -> Compute
         engine.Tick(dt);

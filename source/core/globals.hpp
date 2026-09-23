@@ -28,7 +28,6 @@
 
 // variables
 extern volatile uint32_t frame;
-extern bool fatalErrorOccurred;
 extern ViewState nextView;
 extern volatile u32 systemKeysDown;
 extern volatile u32 systemKeysHeld;
