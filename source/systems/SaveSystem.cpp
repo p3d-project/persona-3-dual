@@ -3,15 +3,12 @@
 
 void SaveSystem::on_receive(const Event::ReadSave)
 {
-    bool success = io.readFile<Save>(&saveData, "save/save.sav");
+    bool success = io.readFile<Save>(&saveData, "save/save  f.sav");
     if (!success)
     {
         consoleDemoInit();
         printf("Failed to read save data!\n");
-        while (1)
-        {
-            swiWaitForVBlank();
-        }
+        fatalErrorOccurred = true;
     }
 }
 
@@ -22,9 +19,6 @@ void SaveSystem::on_receive(const Event::WriteSave)
     {
         consoleDemoInit();
         printf("Failed to write save data!\n");
-        while (1)
-        {
-            swiWaitForVBlank();
-        }
+        fatalErrorOccurred = true;
     }
 }
