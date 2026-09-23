@@ -568,19 +568,20 @@ ViewState VideoController::update()
 {
     pumpAudio();
 
-    if (!aud)
-    {
-        silentVblanks++;
-    }
-
     if (aud && aud->failed())
     {
         stopInternalAudio();
         silentVblanks = (uint32_t)(((u64)currentFrame * 60) / (uint32_t)fpsInt);
     }
 
+    if (!aud)
+    {
+        silentVblanks++;
+    }
+
     int expected = clockFrame();
 
+    // Drop late frames (bounded so we never stall on a long catch-up).
     int dropBudget = 3;
     while (currentFrame < expected - 1 && framesAvailable > 0 && dropBudget-- > 0)
     {
