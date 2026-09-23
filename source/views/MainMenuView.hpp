@@ -16,6 +16,7 @@ class MainMenuView : public BaseView
     Timer fadeTimer;
     TransitionPhase transitionPhase = TransitionPhase::FADING_IN;
     ViewState nextViewState = ViewState::KEEP_CURRENT;
+    bool doorFadeIn = false;
 
     MainMenu* mainMenuCmpt = nullptr;
     int bg[3];

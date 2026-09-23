@@ -121,30 +121,31 @@ ViewState MainMenuView::update()
     {
     case TransitionPhase::FADING_IN:
     {
-        if (fadeTimer.isFinished())
+        if (!doorFadeIn)
         {
-            transitionPhase = TransitionPhase::FADING_IN_DOOR;
-            fadeTimer.start(ae::q20_12_t{2.0});
+            if (fadeTimer.isFinished())
+            {
+                doorFadeIn = true;
+                fadeTimer.start(ae::q20_12_t{2.0});
+            }
+            else
+            {
+                int brightness = -16 + (fadeTimer.getProgress().raw_value() >> 8);
+                setBrightness(1, brightness);
+            }
         }
         else
         {
-            int brightness = -16 + (fadeTimer.getProgress().raw_value() >> 8);
-            setBrightness(1, brightness);
-        }
-        break;
-    }
-
-    case TransitionPhase::FADING_IN_DOOR:
-    {
-        if (fadeTimer.isFinished())
-        {
-            transitionPhase = TransitionPhase::IDLE;
-            REG_BLDALPHA = 16 | (0 << 8); // Ensure door is fully visible
-        }
-        else
-        {
-            int fadeVal = fadeTimer.getProgress().raw_value() >> 8; // 0 to 16
-            REG_BLDALPHA = fadeVal | ((16 - fadeVal) << 8);
+            if (fadeTimer.isFinished())
+            {
+                transitionPhase = TransitionPhase::IDLE;
+                REG_BLDALPHA = 16 | (0 << 8);
+            }
+            else
+            {
+                int fadeVal = fadeTimer.getProgress().raw_value() >> 8; // 0 to 16
+                REG_BLDALPHA = fadeVal | ((16 - fadeVal) << 8);
+            }
         }
         break;
     }
@@ -223,21 +224,6 @@ ViewState MainMenuView::update()
 
         break;
     }
-
-    case TransitionPhase::FADING_OUT:
-    {
-        if (fadeTimer.isFinished())
-        {
-            setBrightness(3, -16);
-            return nextViewState;
-        }
-        else
-        {
-            int fadeVal = fadeTimer.getProgress().raw_value() >> 8;
-            setBrightness(3, -fadeVal);
-        }
-        break;
-    }
     }
 
     return ViewState::KEEP_CURRENT;
@@ -245,6 +231,19 @@ ViewState MainMenuView::update()
 
 void MainMenuView::cleanup()
 {
+    AudioManager::GetInstance().stopAudio();
+    // transition both screens to black
+    for (int i = 0; i > -16; i--)
+    {
+        setBrightness(3, i);
+
+        // wait a few frames
+        for (int duration = 0; duration <= 2; duration++)
+        {
+            swiWaitForVBlank();
+        }
+    }
+
     if (mainMenu != nullptr)
     {
         engine.DestroyEntity(mainMenu);

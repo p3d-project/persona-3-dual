@@ -15,8 +15,9 @@ class IntroView : public BaseView
 {
   private:
     Timer fadeTimer;
-    TransitionPhase transitionPhase = TransitionPhase::FADING_IN_TOP;
+    TransitionPhase transitionPhase = TransitionPhase::FADING_IN;
     ViewState nextViewState = ViewState::KEEP_CURRENT;
+    bool skyFadeIn = false;
 
     Sprite logoSprite[2];
     // 64

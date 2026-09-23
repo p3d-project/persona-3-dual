@@ -12,12 +12,16 @@ ViewState VideoView::update()
 {
     switch (transitionPhase)
     {
+    case TransitionPhase::FADING_IN:
+    {
+        break;
+    }
     case TransitionPhase::IDLE:
     {
         // Check if user wants to skip
         if ((systemKeysDown & KEY_A) || (systemKeysDown & KEY_START) || (systemKeysDown & KEY_TOUCH))
         {
-            audio.pauseAudio();
+            audio.stopAudio();
             fadeTimer.start(ae::q20_12_t{0.3});
             transitionPhase = TransitionPhase::FADING_OUT;
             break;

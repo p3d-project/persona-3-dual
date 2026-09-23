@@ -175,7 +175,7 @@ void IntroView::init()
     REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG2 | BLEND_DST_BACKDROP;
 
     setBrightness(1, -16);
-    transitionPhase = TransitionPhase::FADING_IN_TOP;
+    transitionPhase = TransitionPhase::FADING_IN;
     fadeTimer.start(ae::q20_12_t{1.1});
 }
 
@@ -183,36 +183,37 @@ ViewState IntroView::update()
 {
     switch (transitionPhase)
     {
-    case TransitionPhase::FADING_IN_TOP:
+    case TransitionPhase::FADING_IN:
     {
-        if (fadeTimer.isFinished())
+        if (!skyFadeIn)
         {
-            transitionPhase = TransitionPhase::FADING_IN_SKY;
-            fadeTimer.start(ae::q20_12_t{2});
+            if (fadeTimer.isFinished())
+            {
+                skyFadeIn = true;
+                fadeTimer.start(ae::q20_12_t{2});
+            }
+            else
+            {
+                int brightness = -16 + (fadeTimer.getProgress().raw_value() >> 8);
+                setBrightness(1, brightness);
+            }
         }
         else
         {
-            int brightness = -16 + (fadeTimer.getProgress().raw_value() >> 8);
-            setBrightness(1, brightness);
+            if (fadeTimer.isFinished())
+            {
+                transitionPhase = TransitionPhase::IDLE;
+                setBrightness(2, 0);
+            }
+            else
+            {
+                int fadeVal = fadeTimer.getProgress().raw_value() >> 8;
+
+                REG_BLDALPHA = fadeVal | ((16 - fadeVal) << 8);
+                setBrightness(2, -16 + fadeVal);
+            }
         }
 
-        break;
-    }
-
-    case TransitionPhase::FADING_IN_SKY:
-    {
-        if (fadeTimer.isFinished())
-        {
-            transitionPhase = TransitionPhase::IDLE;
-            setBrightness(2, 0);
-        }
-        else
-        {
-            int fadeVal = fadeTimer.getProgress().raw_value() >> 8;
-
-            REG_BLDALPHA = fadeVal | ((16 - fadeVal) << 8);
-            setBrightness(2, -16 + fadeVal);
-        }
         break;
     }
 
