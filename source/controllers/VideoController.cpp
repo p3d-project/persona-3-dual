@@ -568,6 +568,7 @@ ViewState VideoController::update()
 {
     pumpAudio();
 
+    // Audio faulted or went silent before the file ended: continue on the vblank clock.
     if (aud && aud->failed())
     {
         stopInternalAudio();
@@ -595,6 +596,7 @@ ViewState VideoController::update()
         return nextState;
     }
 
+    // Display first, so SD reads never delay a due frame.
     if (framesAvailable > 0 && currentFrame <= expected)
     {
         pumpAudio();
@@ -604,6 +606,7 @@ ViewState VideoController::update()
         currentFrame++;
     }
 
+    // Use the remaining time to read ahead; stop early if the next frame is already due.
     for (int r = 0; r < READS_PER_UPDATE; r++)
     {
         if (r > 0 && framesAvailable > 0 && currentFrame <= clockFrame())
