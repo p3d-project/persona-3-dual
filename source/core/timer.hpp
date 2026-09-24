@@ -8,7 +8,7 @@
 #include <aegis/types.hpp>
 #include <cstdint>
 
-extern volatile uint32_t frame;
+extern volatile int32_t frame;
 
 constexpr uint32_t TARGET_FPS = 60;
 

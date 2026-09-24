@@ -189,6 +189,11 @@ ViewState MainMenuView::update()
             break;
         }
 
+    case TransitionPhase::FADING_OUT:
+    {
+        break;
+    }
+
         // fade in bottom screen text
         if (brightness < 16 && frame % 4 == 0)
         {
