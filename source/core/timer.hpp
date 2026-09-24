@@ -46,7 +46,7 @@ class Timer
     /**
      * @brief Gets progress of how much of the time has passed.
      *
-     * @return Progess percentage.
+     * @return Progress percentage.
      */
     ae::q20_12_t getProgress();
 
