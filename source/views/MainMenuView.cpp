@@ -189,11 +189,6 @@ ViewState MainMenuView::update()
             break;
         }
 
-    case TransitionPhase::FADING_OUT:
-    {
-        break;
-    }
-
         // fade in bottom screen text
         if (brightness < 16 && frame % 4 == 0)
         {
@@ -227,6 +222,11 @@ ViewState MainMenuView::update()
             bgSetRotateScale(bg[2], currentRotation, 256, 256);
         }
 
+        break;
+    }
+
+    case TransitionPhase::FADING_OUT:
+    {
         break;
     }
     }
