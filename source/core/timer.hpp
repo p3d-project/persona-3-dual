@@ -1,5 +1,5 @@
 /**
- * @file BattleSystem.hpp
+ * @file timer.hpp
  * @brief Timer util to track if a duration has passed.
  * @author Nolan Kolb (TrueGiles / themoonwalker8692)
  */
