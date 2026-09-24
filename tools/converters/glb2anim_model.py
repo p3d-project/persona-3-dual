@@ -7,7 +7,6 @@ import pygltflib
 from glb_utils import (
     get_prop,
     read_accessor_data,
-    float_to_v16,
     build_nds_display_list,
     construct_texture_table,
     apply_texture_transform,
@@ -264,18 +263,11 @@ def construct_nodes(gltf, node_sub_lists):
                 pid = parent_index
                 break
 
-        translation = get_prop(node, "translation", [0.0, 0.0, 0.0])
-        px, py, pz = (
-            [float_to_v16(v) for v in translation] if translation else (0, 0, 0)
-        )
         sub_lists = node_sub_lists[index]
 
         nodes.append(
             {
                 "pid": pid,
-                "px": px,
-                "py": py,
-                "pz": pz,
                 "subListCount": len(sub_lists),
                 "subLists": sub_lists,
             }
