@@ -378,6 +378,14 @@ ViewState IntroView::update()
             currentRotation += rotationSpeed;
             bgSetRotateScale(bg[3], currentRotation, 256, 256);
         }
+    // setup animated text
+    if (logoOpacity >= 16 && !animateText)
+    {
+        animateText = true;
+        REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;
+        REG_BLDALPHA_SUB = textAlpha | ((16 - textAlpha) << 8);
+        text->drawText("\xFF\x02\x01Press Any Button", 35, 82, TextColor::White);
+    }
 
         // default state
         return ViewState::KEEP_CURRENT;
