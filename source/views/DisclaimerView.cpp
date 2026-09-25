@@ -73,34 +73,57 @@ void DisclaimerView::init()
     graphics->unloadGraphic(bgCaution);
     graphics->unloadGraphic(bgCautionSub);
 
-    // fade caution screens in
-    for (int i = 0; i <= 16; i++)
-    {
-        setBrightness(3, -16 + i);
-
-        // wait for duration amount of frames
-        for (int frame = 0; frame <= 6; frame++)
-            swiWaitForVBlank();
-    }
-
-    // wait for duration amount of frames
-    for (int frame = 0; frame <= 90; frame++)
-        swiWaitForVBlank();
-
-    // fade caution screens out
-    for (int i = 0; i <= 16; i++)
-    {
-        setBrightness(3, -i);
-
-        // wait for duration amount of frames
-        for (int frame = 0; frame <= 6; frame++)
-            swiWaitForVBlank();
-    }
+    fadeTimer.start(ae::q20_12_t{2.0});
+    transitionPhase = TransitionPhase::FADING_IN;
 }
 
 ViewState DisclaimerView::update()
 {
-    return ViewState::INTRO_VIDEO;
+    switch (transitionPhase)
+    {
+    case TransitionPhase::FADING_IN:
+    {
+        if (fadeTimer.isFinished())
+        {
+            setBrightness(3, 0);
+            transitionPhase = TransitionPhase::IDLE;
+            fadeTimer.start(ae::q20_12_t{1.5});
+        }
+        else
+        {
+            int brightness = -16 + (fadeTimer.getProgress().raw_value() >> 8);
+            setBrightness(3, brightness);
+        }
+        break;
+    }
+
+    case TransitionPhase::IDLE:
+    {
+        if (fadeTimer.isFinished())
+        {
+            transitionPhase = TransitionPhase::FADING_OUT;
+            fadeTimer.start(ae::q20_12_t{2.0});
+        }
+        break;
+    }
+
+    case TransitionPhase::FADING_OUT:
+    {
+        if (fadeTimer.isFinished())
+        {
+            setBrightness(3, -16);
+            return ViewState::INTRO_VIDEO;
+        }
+        else
+        {
+            int fadeVal = fadeTimer.getProgress().raw_value() >> 8;
+            setBrightness(3, -fadeVal);
+        }
+        break;
+    }
+    }
+
+    return ViewState::KEEP_CURRENT;
 }
 
 void DisclaimerView::cleanup()

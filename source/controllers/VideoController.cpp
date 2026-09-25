@@ -567,7 +567,6 @@ bool VideoController::refillBuffer()
 ViewState VideoController::update()
 {
     pumpAudio();
-    waitedThisUpdate = false;
 
     // Audio faulted or went silent before the file ended: continue on the vblank clock.
     if (aud && aud->failed())
@@ -578,8 +577,6 @@ ViewState VideoController::update()
 
     if (!aud)
     {
-        swiWaitForVBlank();
-        waitedThisUpdate = true;
         silentVblanks++;
     }
 
@@ -599,22 +596,14 @@ ViewState VideoController::update()
         return nextState;
     }
 
-    bool worked = false;
-
     // Display first, so SD reads never delay a due frame.
     if (framesAvailable > 0 && currentFrame <= expected)
     {
-        if (!waitedThisUpdate)
-        {
-            swiWaitForVBlank();
-            waitedThisUpdate = true;
-        }
         pumpAudio();
         dmaCopy(&ramBuffer[readIndex * frameSize], bgGetGfxPtr(bg), frameSize);
         readIndex = (readIndex + 1) % FRAMES_TO_BUFFER;
         framesAvailable--;
         currentFrame++;
-        worked = true;
     }
 
     // Use the remaining time to read ahead; stop early if the next frame is already due.
@@ -628,14 +617,6 @@ ViewState VideoController::update()
         {
             break;
         }
-        worked = true;
-        pumpAudio();
-    }
-
-    // Nothing to do (waiting for the clock or a full buffer): don't spin.
-    if (!worked && !waitedThisUpdate)
-    {
-        swiWaitForVBlank();
         pumpAudio();
     }
 
