@@ -189,6 +189,7 @@ ViewState IntroView::update()
         {
             if (fadeTimer.isFinished())
             {
+                setBrightness(1, 0);
                 skyFadeIn = true;
                 fadeTimer.start(ae::q20_12_t{2});
             }

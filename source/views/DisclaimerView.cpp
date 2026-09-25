@@ -85,6 +85,7 @@ ViewState DisclaimerView::update()
     {
         if (fadeTimer.isFinished())
         {
+            setBrightness(3, 0);
             transitionPhase = TransitionPhase::IDLE;
             fadeTimer.start(ae::q20_12_t{1.5});
         }

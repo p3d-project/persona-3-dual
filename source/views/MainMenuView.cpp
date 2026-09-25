@@ -125,6 +125,7 @@ ViewState MainMenuView::update()
         {
             if (fadeTimer.isFinished())
             {
+                setBrightness(1, 0);
                 doorFadeIn = true;
                 fadeTimer.start(ae::q20_12_t{2.0});
             }

@@ -102,6 +102,7 @@ ViewState SignContractView::update()
     {
         if (fadeTimer.isFinished())
         {
+            setBrightness(3, 0);
             transitionPhase = TransitionPhase::IDLE;
         }
         else
