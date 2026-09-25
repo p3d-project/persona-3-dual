@@ -38,6 +38,12 @@ void TextComponent::configureText(const TextConfig& config, bool loadDefaultPale
 {
     isActive = true;
 
+    if (font != nullptr)
+    {
+        tm.unloadFont(font);
+        font = nullptr;
+    }
+
     // set video buffer
     if (config.videoBuffer != nullptr)
     {

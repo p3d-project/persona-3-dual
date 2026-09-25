@@ -1,6 +1,8 @@
 #include "RenderManager.hpp"
 #include <nds.h>
 
+static constexpr int32_t ONE_Q12 = 1 << 12;
+
 /**
  * @brief Converts a raw texture dimension in pixels to the corresponding
  *        libnds TEXTURE_SIZE_* enum value.
@@ -89,43 +91,101 @@ void RenderManager::initialize3DView(View3DConfig config)
 
 void RenderManager::cleanup3DView()
 {
+    activeTexture = -1;
     glClearColor(0, 0, 0, 31);
     glClearDepth(0x7FFF);
     glFlush(0);
 }
 
-void RenderManager::uploadTexture(int& textureID,
+bool RenderManager::uploadTexture(int& textureID,
                                   const GL_TEXTURE_TYPE_ENUM texType,
                                   const int sizeX,
                                   const int sizeY,
                                   int param,
                                   const void* texture)
 {
+    if (textureID != -1 && textureID != 0)
+    {
+        glDeleteTextures(1, &textureID);
+        textureID = -1;
+    }
+
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, texType, textureSizeEnum(sizeX), textureSizeEnum(sizeY), 0, param, texture);
+    // glTexImage2D can returns 0 on failure, we can use this to catch out of VRAM errors, etc.
+    return glTexImage2D(GL_TEXTURE_2D, 0, texType, textureSizeEnum(sizeX), textureSizeEnum(sizeY), 0, param, texture);
 }
 
-void RenderManager::renderTexturedModel(const void* displayList, const int texture)
+void RenderManager::renderModelComponent(MDL3Model& model)
 {
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    // Guard against corrupted DL pointers
-    if (displayList)
+    for (const Node& node : model.nodes)
     {
-        glCallList(displayList);
+        for (const SubList_N& sl : node.subLists)
+        {
+            // Guard against texture ID's that are out of bounds or corrupted. Use no texture in that case.
+            const int textureID = sl.texSlot >= 0 && static_cast<size_t>(sl.texSlot) < model.textures.size()
+                                      ? model.textures[sl.texSlot].textureID
+                                      : -1;
+            renderDisplayList(sl.displayList, textureID);
+        }
     }
-    while (GFX_BUSY)
-        ;
+}
+
+void RenderManager::renderModelComponent(MDL3Model& model,
+                                         ae::q20_12_t posX,
+                                         ae::q20_12_t posY,
+                                         ae::q20_12_t posZ,
+                                         uint32_t rotX,
+                                         uint32_t rotY,
+                                         uint32_t rotZ,
+                                         ae::q20_12_t scale)
+{
+    glPushMatrix();
+    if (posX.raw_value() || posY.raw_value() || posZ.raw_value())
+    {
+        glTranslatef32(posX.raw_value(), posY.raw_value(), posZ.raw_value());
+    }
+    if (rotX)
+    {
+        glRotatef32(rotX, 1, 0, 0);
+    }
+    if (rotY)
+    {
+        glRotatef32(rotY, 0, 1, 0);
+    }
+    if (rotZ)
+    {
+        glRotatef32(rotZ, 0, 0, 1);
+    }
+    if (scale.raw_value() != ONE_Q12)
+    {
+        glScalef32(scale.raw_value(), scale.raw_value(), scale.raw_value());
+    }
+
+    for (const Node& node : model.nodes)
+    {
+        for (const SubList_N& sl : node.subLists)
+        {
+            // Guard against texture ID's that are out of bounds or corrupted. Use no texture in that case.
+            const int textureID = sl.texSlot >= 0 && static_cast<size_t>(sl.texSlot) < model.textures.size()
+                                      ? model.textures[sl.texSlot].textureID
+                                      : -1;
+            renderDisplayList(sl.displayList, textureID);
+        }
+    }
+
+    glPopMatrix(1);
 }
 
 void RenderManager::renderTexturedBillboard(
     BillboardData bb, const int texture, bool faceCamera, ae::q20_12_t camX, ae::q20_12_t camY, ae::q20_12_t camZ)
 {
-    while (GFX_BUSY)
-        ;
-    glBindTexture(GL_TEXTURE_2D, texture);
+    if (texture != -1 && texture != activeTexture)
+    {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        activeTexture = texture;
+    }
     glBegin(GL_QUADS);
 
     ae::q4_12_t rX{1}, rY{0}, rZ{0};
@@ -177,13 +237,27 @@ void RenderManager::renderTexturedBillboard(
     glEnd();
 }
 
-void RenderManager::renderDisplayList(const void* list)
+void RenderManager::renderDisplayList(const void* displayList, const int texture)
 {
-    glCallList(list);
+    if (!displayList)
+    {
+        return;
+    }
+
+    if (texture != -1 && texture != activeTexture)
+    {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        activeTexture = texture;
+    }
+
+    glCallList(displayList);
 }
 
 void RenderManager::deleteTexture(int& texture)
 {
-    glDeleteTextures(1, &texture);
-    texture = 0;
+    if (texture != -1)
+    {
+        glDeleteTextures(1, &texture);
+        texture = -1;
+    }
 }

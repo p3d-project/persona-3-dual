@@ -37,5 +37,6 @@ enum class ComponentType : ae::ComponentTypeID
     Graphics,
     Text,
     Music,
-    SFX
+    SFX,
+    Model
 };
