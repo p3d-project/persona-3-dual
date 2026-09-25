@@ -139,7 +139,7 @@ void Environment::draw()
         if (!textureIDs[i])
             continue;
 
-        render.renderTexturedModel(displayLists[i], textureIDs[i]);
+        render.renderDisplayList(displayLists[i], textureIDs[i]);
     }
 }
 
