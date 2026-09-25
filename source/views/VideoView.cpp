@@ -21,7 +21,7 @@ ViewState VideoView::update()
         // Check if user wants to skip
         if ((systemKeysDown & KEY_A) || (systemKeysDown & KEY_START) || (systemKeysDown & KEY_TOUCH))
         {
-            audio.stopAudio();
+            videoCtrl->stopInternalAudio();
             fadeTimer.start(ae::q20_12_t{0.3});
             transitionPhase = TransitionPhase::FADING_OUT;
             break;

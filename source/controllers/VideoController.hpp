@@ -82,6 +82,9 @@ class VideoController
     /** @brief Stops playback and releases the file, audio stream and frame buffer. */
     void cleanup();
 
+    /** @brief Shuts down and frees the internal audio player. */
+    void stopInternalAudio();
+
   private:
     VideoController() = default;
     ~VideoController()
@@ -136,7 +139,4 @@ class VideoController
      * @return Expected frame index from the audio clock, or from the vblank clock if there is no audio.
      */
     int clockFrame() const;
-
-    /** @brief Shuts down and frees the internal audio player. */
-    void stopInternalAudio();
 };
