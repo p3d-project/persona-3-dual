@@ -1,4 +1,5 @@
 #pragma once
+#include "components/AnimationComponent.hpp"
 #include "components/GraphicsComponent.hpp"
 #include "components/screens/UIScreen.hpp"
 
@@ -23,6 +24,9 @@ class DialogueScreen : public UIScreen
 
     // render the specified bust onto the screen
     void renderBust(etl::span<SpritePayload>& bustPayload);
+
+    // slides the textbox up into view; call when dialogue starts
+    void playIntroAnimation();
 
   private:
     DialogueScreen() : UIScreen(false) {};
@@ -49,6 +53,19 @@ class DialogueScreen : public UIScreen
 
     ae::Entity* dialogue = nullptr;
     GraphicsComponent* graphics = nullptr;
+    AnimationComponent* animation = nullptr;
+
+    // extra vertical offset (px) applied to every box sprite; tweened from off-screen to 0 by playIntroAnimation()
+    int slideOffsetY = kSlideOffsetStart;
+
+    // extra vertical offset (px) applied to the currently shown bust; tweened to 0 each time the bust changes
+    int bustOffsetY = 0;
+
+    // oam id of the first sprite in the currently shown bust, or -1 if none is shown
+    int bustSpriteBaseId = -1;
+
+    static constexpr int kSlideOffsetStart = 40;
+    static constexpr int kBustPopOffsetStart = 16;
 
     // ---
     // sprite setup

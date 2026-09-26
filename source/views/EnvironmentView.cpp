@@ -115,6 +115,7 @@ void EnvironmentView::init()
         textSubAlt = engine.CreateComponent<TextComponent>();
         musicCmpt = engine.CreateComponent<MusicComponent>();
         sfxCmpt = engine.CreateComponent<SFXComponent>();
+        animation = engine.CreateComponent<AnimationComponent>();
 
         environment->AddComponent(graphics);
         environment->AddComponent(text);
@@ -122,6 +123,7 @@ void EnvironmentView::init()
         environment->AddComponent(textSubAlt);
         environment->AddComponent(musicCmpt);
         environment->AddComponent(sfxCmpt);
+        environment->AddComponent(animation);
 
         UISystem::GetInstance().SetSFXComponent(sfxCmpt);
     }

@@ -17,6 +17,11 @@ class MenuHUDScreen : public UIScreen
     void renderSprites() override;
     int onTouch(touchPosition* touch) override;
 
+    /**
+     * @brief Per-frame hook for HUD elements that change over time (clock, moon phase, skill level).
+     */
+    void tick();
+
   private:
     MenuHUDScreen() : UIScreen(false) {};
     ~MenuHUDScreen() {};

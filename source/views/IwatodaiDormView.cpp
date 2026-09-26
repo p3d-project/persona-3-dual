@@ -116,15 +116,14 @@ void IwatodaiDormView::setupUI()
 
 void IwatodaiDormView::onEnvironmentUpdate()
 {
-    animator.update(1.0f);
-
     // restart after each full cycle completes
     if (!circleHandle.isValid())
     {
         circleHandle =
-            animator.sequence()
-                .append(animator.animate(triSize).from(10.0f).to(60.0f).duration(500).ease(uiAnimation::Ease::OutBack))
-                .append(animator.animate(triSize).from(60.0f).to(10.0f).duration(400).ease(uiAnimation::Ease::InBack))
+            animation->sequence()
+                .append(
+                    animation->animate(triSize).from(10.0f).to(60.0f).duration(500).ease(uiAnimation::Ease::OutBack))
+                .append(animation->animate(triSize).from(60.0f).to(10.0f).duration(400).ease(uiAnimation::Ease::InBack))
                 .start();
     }
 
@@ -155,6 +154,6 @@ void IwatodaiDormView::onEnvironmentUpdate()
 void IwatodaiDormView::cleanup()
 {
     circleHandle.cancel();
-    animator.cancelAll();
+    animation->cancelAll();
     EnvironmentView::cleanup();
 }

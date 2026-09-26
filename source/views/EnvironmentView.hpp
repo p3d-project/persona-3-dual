@@ -9,6 +9,7 @@
 #include "data/environmentDb.hpp"
 #include "environment/Environment.hpp"
 // components
+#include "components/AnimationComponent.hpp"
 #include "components/DialogueComponent.hpp"
 #include "components/GraphicsComponent.hpp"
 #include "components/MovementComponent.hpp"
@@ -156,6 +157,7 @@ class EnvironmentView : public BaseView
     TextComponent* text = nullptr;
     TextComponent* textSub = nullptr;
     TextComponent* textSubAlt = nullptr;
+    AnimationComponent* animation = nullptr;
 
     AnimationController* animationCtrl = AnimationController::getInstance();
     MusicComponent* musicCmpt = nullptr;

@@ -57,7 +57,7 @@ void DialogueScreen::renderSprites()
         oamSet(oam,
                spriteId++,
                srs.x,
-               srs.y,
+               srs.y + slideOffsetY,
                srs.priority,
                srs.sprite.paletteAlpha,
                srs.sprite.size,
@@ -70,6 +70,32 @@ void DialogueScreen::renderSprites()
                srs.vflip,
                srs.mosaic);
     }
+
+    // re-apply the bust's tweened offset every frame, since its sprites are only drawn once on swap
+    if (prevBust != nullptr && bustSpriteBaseId >= 0)
+    {
+        int bId = bustSpriteBaseId;
+        for (SpritePayload& bsp : *prevBust)
+        {
+            oamSetXY(oam, bId++, bsp.srs.x, bsp.srs.y + bustOffsetY);
+        }
+    }
+}
+
+void DialogueScreen::playIntroAnimation()
+{
+    if (animation == nullptr)
+    {
+        return;
+    }
+
+    animation->cancelAll();
+    animation->animate(slideOffsetY)
+        .from(kSlideOffsetStart)
+        .to(0)
+        .duration(200)
+        .ease(uiAnimation::Ease::OutBack)
+        .start();
 }
 
 void DialogueScreen::load()
@@ -79,7 +105,9 @@ void DialogueScreen::load()
     {
         dialogue = engine.CreateEntity();
         graphics = engine.CreateComponent<GraphicsComponent>();
+        animation = engine.CreateComponent<AnimationComponent>();
         dialogue->AddComponent(graphics);
+        dialogue->AddComponent(animation);
     }
 
     // load sprites
@@ -164,8 +192,20 @@ void DialogueScreen::renderBust(etl::span<SpritePayload>& bustPayload)
     // update to new bust
     prevBust = &bustPayload;
 
+    // pop the new bust in from slightly below its resting position
+    if (animation != nullptr)
+    {
+        animation->animate(bustOffsetY)
+            .from(kBustPopOffsetStart)
+            .to(0)
+            .duration(150)
+            .ease(uiAnimation::Ease::OutBack)
+            .start();
+    }
+
     // draw bust
     int bustId = spriteId;
+    bustSpriteBaseId = spriteId;
     void* bustPalette = nullptr;
     for (SpritePayload& sp : bustPayload)
     {
@@ -189,7 +229,7 @@ void DialogueScreen::renderBust(etl::span<SpritePayload>& bustPayload)
         oamSet(oam,
                bustId++,
                srs.x,
-               srs.y,
+               srs.y + bustOffsetY,
                srs.priority,
                srs.sprite.paletteAlpha,
                srs.sprite.size,

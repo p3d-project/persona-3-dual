@@ -164,6 +164,11 @@ void DialogueComponent::start(Dialogue* firstLine)
     prevKeys = systemKeysHeld;
     isActive = true;
     renderBust = true;
+
+    if (screen != nullptr)
+    {
+        screen->playIntroAnimation();
+    }
 }
 
 void DialogueComponent::end()

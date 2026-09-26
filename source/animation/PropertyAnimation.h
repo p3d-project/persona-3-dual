@@ -3,7 +3,7 @@
 #include "animation/Animation.h"
 #include "animation/AnimationHandle.h"
 #include "animation/Easing.h"
-#include "core/geometry.h"
+#include "core/geometry.hpp"
 #include <algorithm>
 #include <memory>
 

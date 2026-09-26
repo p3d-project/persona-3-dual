@@ -31,8 +31,8 @@ class MathManager : public ae::Manager, public ae::Singleton<MathManager>
     /**
      * @brief Computes the angle (in radians) between the positive x-axis and (x, y).
      *
-     * @details Calls BlocksDS's native fixed-point atan2_f32, which operates
-     * directly on 20.12 fixed-point values with no float conversion.
+     * @details libnds has no fixed-point atan2 lookup table, so this converts to
+     * float, calls newlib's atan2f, and converts back to Q20.12.
      *
      * @param y Y Point 2.
      * @param x X Point 1.
@@ -43,8 +43,7 @@ class MathManager : public ae::Manager, public ae::Singleton<MathManager>
     /**
      * @brief Computes the arctangent of a single ratio.
      *
-     * @details Implemented as atan2(y, 1), per BlocksDS's documented
-     * approach for deriving atan from atan2_f32.
+     * @details Implemented as atan2(y, 1).
      *
      * @param y Ratio in Q20.12.
      * @return The angle in radians, as Q20.12.
