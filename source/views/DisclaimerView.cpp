@@ -1,7 +1,6 @@
-#include "DisclaimerView.h"
-#include "core/globals.h"
+#include "DisclaimerView.hpp"
+#include "core/globals.hpp"
 #include <nds.h>
-#include <stdio.h>
 
 void DisclaimerView::init()
 {
@@ -106,14 +105,8 @@ ViewState DisclaimerView::update()
 
 void DisclaimerView::cleanup()
 {
-    if (graphics != nullptr)
-    {
-        graphics->unloadAll();
-    }
-
     if (disclaimer != nullptr)
     {
-        disclaimer->RemoveComponent<GraphicsComponent>();
         engine.DestroyEntity(disclaimer);
 
         disclaimer = nullptr;

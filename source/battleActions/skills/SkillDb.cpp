@@ -1,4 +1,4 @@
-#include "SkillDb.h"
+#include "SkillDb.hpp"
 
 Skill SkillDb::agi;
 Skill SkillDb::bash;

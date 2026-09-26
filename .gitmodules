@@ -4,3 +4,9 @@
 [submodule "libs/doxygen-awesome-css"]
 	path = libs/doxygen-awesome-css
 	url = https://github.com/jothepro/doxygen-awesome-css.git
+[submodule "libs/googletest"]
+	path = libs/googletest
+	url = https://github.com/google/googletest
+[submodule "libs/p3d-qoa"]
+	path = libs/p3d-qoa
+	url = https://github.com/p3d-project/p3d-qoa.git

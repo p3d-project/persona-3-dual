@@ -1,12 +1,13 @@
 #include "DialogueComponent.hpp"
-#include "core/globals.h"
+#include "core/globals.hpp"
+#include "types/UITypes.hpp"
 
 void DialogueComponent::Init()
 {
     isActive = false;
 }
 
-void DialogueComponent::Update(ae::fixed_t)
+void DialogueComponent::Update(ae::q20_12_t)
 {
     if (!isActive || current == nullptr)
     {
@@ -19,10 +20,14 @@ void DialogueComponent::Update(ae::fixed_t)
     {
         /// swap the background exactly once per dialogue line, on the first
         /// frame, and only if the image has actually changed
-        if (bgLoader && current->imageId != loadedImageId)
+        if (renderBust)
         {
-            bgLoader(current->imageId);
-            loadedImageId = current->imageId;
+            if (screen != nullptr)
+            {
+                screen->renderBust(current->spritePayload);
+            }
+
+            renderBust = false;
         }
         else
         {
@@ -55,6 +60,12 @@ void DialogueComponent::Update(ae::fixed_t)
     {
         if (text->appearTextDone())
         {
+            // switch palette to green
+            if (screen != nullptr)
+            {
+                screen->triggerAction(UIAction::SwitchToPalette1);
+            }
+
             // selection dialogue
             if (pressed & KEY_DOWN)
             {
@@ -80,6 +91,13 @@ void DialogueComponent::Update(ae::fixed_t)
                 end();
                 return;
             }
+
+            // switch palette to blue
+            if (screen != nullptr)
+            {
+                screen->triggerAction(UIAction::SwitchToPalette0);
+            }
+
             advanceTo(next);
         }
     }
@@ -126,17 +144,26 @@ void DialogueComponent::Destroy()
 
 void DialogueComponent::configureDialogue(const DialogueConfig& config)
 {
-    bgLoader = config.loader;
     text = config.text;
-    loadedImageId = -1; // force a bg load for the very first line
+    textAlt = config.textAlt;
+    screen = config.screen;
     prevKeys = 0;
-    advanceTo(config.firstLine);
+
+    // load busts into memory
+    if (screen != nullptr)
+    {
+        screen->loadBusts(config.spritePayloads);
+    }
 }
 
-void DialogueComponent::start()
+void DialogueComponent::start(Dialogue* firstLine)
 {
+    // point to first line
+    advanceTo(firstLine);
+
     prevKeys = systemKeysHeld;
     isActive = true;
+    renderBust = true;
 }
 
 void DialogueComponent::end()
@@ -151,28 +178,34 @@ void DialogueComponent::advanceTo(Dialogue* next)
     doRenderOptions = false;
     optionCount = 0;
     selectedOption = 0;
+    renderBust = true;
     text->clearScreen();
     renderAnimFrame();
 }
 
 void DialogueComponent::renderAnimFrame()
 {
-    text->drawText(current->characterName, 32, 115, TextColor::White);
-    text->appearText(current->text, 0, 130, TextColor::White);
+    textAlt->drawText("\xFF\x02\x01" + current->name, 8, 128, TextColor::RichBlue);
+    text->appearText(current->text, 8, 154, TextColor::Black);
 }
 
 void DialogueComponent::renderOptions()
 {
     /// reprint the complete line then list choices below it
     text->clearScreen();
-    text->drawText(current->characterName, 32, 115, TextColor::White);
-    text->drawText(current->text, 0, 130, TextColor::White);
+    textAlt->drawText("\xFF\x02\x01" + current->name, 8, 128, TextColor::DualGreen);
+    text->drawText(current->text, 8, 154, TextColor::Black);
     //TODO: The options are currently drawn outside the textbox, do we want to add an extra overlay for them similar to the actual game?
+    int textSize = text->getFontSize();
     for (int i = 0; i < optionCount; i++)
     {
         if (i == selectedOption)
-            text->drawText(current->selections[i].text, 128, 50 + i * 8, TextColor::Blue);
+        {
+            text->drawText(current->selections[i].text, 128, 50 + textSize * i, TextColor::Blue);
+        }
         else
-            text->drawText(current->selections[i].text, 128, 50 + i * 8, TextColor::White);
+        {
+            text->drawText(current->selections[i].text, 128, 50 + textSize * i, TextColor::White);
+        }
     }
 }

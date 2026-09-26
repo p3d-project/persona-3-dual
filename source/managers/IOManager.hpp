@@ -8,7 +8,113 @@
 
 #pragma once
 #include <aegis/manager.hpp>
+#include <cstdlib>
 #include <nds.h>
+
+/**
+ * @brief Owns a heap-allocated file buffer and its length.
+ *
+ * FileBuffer releases its data when destroyed. It is move-only so ownership
+ * cannot be accidentally shared or double-freed.
+ */
+class FileBuffer
+{
+  public:
+    /**
+     * @brief Constructs an empty file buffer.
+     */
+    FileBuffer() = default;
+
+    /**
+     * @brief Constructs a file buffer that takes ownership of @p data.
+     * @param data Heap-allocated file data owned by this object.
+     * @param size Size of @p data in bytes.
+     */
+    FileBuffer(void* data, u32 size) : data(data), size(size)
+    {
+    }
+
+    /**
+     * @brief Releases the owned file data.
+     */
+    ~FileBuffer()
+    {
+        std::free(data);
+    }
+
+    /**
+     * @brief Copy construction is disabled to preserve unique ownership.
+     */
+    FileBuffer(const FileBuffer&) = delete;
+
+    /**
+     * @brief Copy assignment is disabled to preserve unique ownership.
+     */
+    FileBuffer& operator=(const FileBuffer&) = delete;
+
+    /**
+     * @brief Transfers ownership from another file buffer.
+     * @param other Buffer whose data ownership is transferred.
+     */
+    FileBuffer(FileBuffer&& other) noexcept : data(other.data), size(other.size)
+    {
+        other.data = nullptr;
+        other.size = 0;
+    }
+
+    /**
+     * @brief Releases current data and transfers ownership from another buffer.
+     * @param other Buffer whose data ownership is transferred.
+     * @return This buffer after ownership has been transferred.
+     */
+    FileBuffer& operator=(FileBuffer&& other) noexcept
+    {
+        if (this != &other)
+        {
+            std::free(data);
+            data = other.data;
+            size = other.size;
+            other.data = nullptr;
+            other.size = 0;
+        }
+        return *this;
+    }
+
+    /**
+     * @brief Gets the owned file data without transferring ownership.
+     * @return Pointer to the file data, or nullptr if the buffer is empty.
+     */
+    void* get() const
+    {
+        return data;
+    }
+
+    /**
+     * @brief Gets the file data length.
+     * @return Size of the file data in bytes.
+     */
+    u32 length() const
+    {
+        return size;
+    }
+
+    /**
+     * @brief Releases the file data to the caller.
+     * @return The previously owned data pointer, or nullptr if empty.
+     * @note The caller becomes responsible for releasing the returned pointer.
+     */
+    void* release()
+    {
+        void* result = data;
+        data = nullptr;
+        size = 0;
+        return result;
+    }
+
+  private:
+    void* data = nullptr;
+    u32 size = 0;
+};
 
 class IOManager : public ae::Manager, public ae::Singleton<IOManager>
 {
@@ -110,6 +216,8 @@ class IOManager : public ae::Manager, public ae::Singleton<IOManager>
      * @note This function is useful when you need to know the size of the file being opened.
      */
     void* openFile(const std::string& path, u32& size);
+
+    FileBuffer openFileBuffer(const std::string& path);
 
     /**
      * @brief Resolves the on-disk path for an asset, allowing it to be stored either

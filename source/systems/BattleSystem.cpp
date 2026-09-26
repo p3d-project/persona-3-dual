@@ -1,18 +1,21 @@
 #include "BattleSystem.hpp"
-#include "./battleActions/skills/BattleCalcs.h"
+#include "battleActions/skills/BattleCalcs.hpp"
+#include "managers/MathManager.hpp"
 
-#include "./helpers/random.h"
-#include "core/globals.h"
+#include "core/globals.hpp"
 #include <cstdlib>
 #include <ctime>
 
 void BattleSystem::on_receive(const Event::ExecuteBattle& msg)
 {
     isActive = true;
+    battleMenuCmpt = BattleMenu::getInstance();
 
-    std::string path =
-        fatBasePath + "music/battle/" + (saveData.femcMode ? "wiping_all_out.pcm" : "mass_destruction.pcm");
-    musicCtrl->init(path.c_str(), 0.0f, -1.0f);
+    std::string path = fatBasePath + "music/battle/" + "mass_destruction.qoa";
+    if (musicCmpt != nullptr)
+    {
+        musicCmpt->registerMusic(path, ae::q20_12_t{0}, ae::q20_12_t{-1});
+    }
 
     this->player = new Player(msg.player);
     battleParticipants.push_back(this->player);
@@ -57,7 +60,7 @@ void BattleSystem::Init()
     isActive = false;
 }
 
-void BattleSystem::Update(ae::fixed_t)
+void BattleSystem::Update(ae::q20_12_t)
 {
     switch (phase)
     {
@@ -343,7 +346,10 @@ void BattleSystem::Update(ae::fixed_t)
 
 void BattleSystem::Shutdown()
 {
-    musicCtrl->pause();
+    if (musicCmpt != nullptr)
+    {
+        musicCmpt->stopMusic();
+    }
 
     isActive = false;
 
@@ -371,6 +377,11 @@ void BattleSystem::Shutdown()
     partyMembers.clear();
     enemies.clear();
     player = nullptr;
+}
+
+void BattleSystem::SetMusicComponent(MusicComponent* music)
+{
+    musicCmpt = music;
 }
 
 void BattleSystem::applyResult(const TurnResult& turnResult, BattleParticipant* target)
@@ -474,7 +485,7 @@ void BattleSystem::setNextPhase(BattlePhase nextPhase)
 void BattleSystem::calculateTurnOrder()
 {
     // random boost from 1.2 to 1.4 that priorizes party
-    float boost = 1.2f + (randf() * 0.2f);
+    ae::q20_12_t boost = ae::q20_12_t{1.2} + MathManager::GetInstance().randFrac() * ae::q20_12_t{0.2};
 
     for (BattleParticipant* battleParticipant : battleParticipants)
     {

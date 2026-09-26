@@ -1,4 +1,4 @@
-#include "ShoeDb.h"
+#include "ShoeDb.hpp"
 
 Shoe ShoeDb::rubberSole;
 Shoe ShoeDb::enemyShoe;

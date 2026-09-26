@@ -4,10 +4,10 @@
  * @author Nolan Kolb (theMoonWalker8692 / TrueGiles)
  */
 
-#include "EnemyProfileDb.h"
-#include "../armours/ArmourDb.h"
-#include "../shoes/ShoeDb.h"
-#include "../skills/SkillDb.h"
+#include "EnemyProfileDb.hpp"
+#include "../armours/ArmourDb.hpp"
+#include "../shoes/ShoeDb.hpp"
+#include "../skills/SkillDb.hpp"
 
 EnemyProfile EnemyProfileDb::mercilessMaya;
 EnemyProfile EnemyProfileDb::cowardlyMaya;

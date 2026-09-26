@@ -5,7 +5,9 @@
  */
 
 #pragma once
-#include "core/enums.h"
+
+#include "types/aeTypes.hpp"
+
 #include <aegis/aegis.hpp>
 
 namespace Event

@@ -5,7 +5,7 @@
  */
 
 #pragma once
-#include "core/structs.h"
+#include "types/TextTypes.hpp"
 #include <aegis/manager.hpp>
 
 #include "managers/IOManager.hpp"
@@ -34,6 +34,8 @@ class TextManager : public ae::Manager, public ae::Singleton<TextManager>
      * @warning This function will halt the program if the regular font fails to load. If the bold font fails to load, it will simply set the boldLoaded flag to false and continue.
      */
     Font* loadFont(std::string* name, int size);
+
+    void unloadFont(Font* font);
 
     /**
      * @brief Loads the predefined default palette.

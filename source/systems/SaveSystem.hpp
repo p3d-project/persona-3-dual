@@ -7,11 +7,14 @@
 
 #pragma once
 
-#include "core/enums.h"
 #include "core/routerIDs.hpp"
 #include "events/SaveEvents.hpp"
 #include "managers/IOManager.hpp"
+#include "types/SaveTypes.hpp"
+
+#include <aegis/ndsTypes.hpp>
 #include <aegis/system.hpp>
+#include <aegis/types.hpp>
 
 class SaveSystem : public ae::SystemRouter<SaveSystem, Event::ReadSave, Event::WriteSave>,
                    public ae::Singleton<SaveSystem>
@@ -25,7 +28,7 @@ class SaveSystem : public ae::SystemRouter<SaveSystem, Event::ReadSave, Event::W
     {
     }
 
-    void Update(ae::fixed_t /*dt*/) override
+    void Update(ae::q20_12_t /*dt*/) override
     {
     }
 

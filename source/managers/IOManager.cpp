@@ -139,3 +139,9 @@ void* IOManager::openFile(const std::string& filePath, u32& size)
 
     return buffer;
 }
+
+FileBuffer IOManager::openFileBuffer(const std::string& filePath)
+{
+    u32 size = 0;
+    return FileBuffer(openFile(filePath, size), size);
+}

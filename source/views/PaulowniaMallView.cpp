@@ -1,16 +1,30 @@
-#include "PaulowniaMallView.h"
+#include "PaulowniaMallView.hpp"
+#include "core/globals.hpp"
+#include "events/UIEvents.hpp"
 
 PaulowniaMallView::PaulowniaMallView()
 {
 }
 
-void PaulowniaMallView::setMusic()
+void PaulowniaMallView::setupMusic()
 {
-    musicCtrl->init(
-        (fatBasePath + "music/locations/paulowniaMall/overworld/color_your_night.pcm").c_str(), 2.050f, 204.191f);
+    musicCmpt->registerMusic((fatBasePath + "music/locations/paulowniaMall/overworld/color_your_night.qoa").c_str(),
+                             ae::q20_12_t{2.05},
+                             ae::q20_12_t{204.191});
 }
 
-void PaulowniaMallView::setMovementConfig()
+void PaulowniaMallView::setupCamera()
+{
+    camConfig.mode = CameraMode::Follow;
+    camConfig.initialAngle = ae::q20_12_t{1.5708 * 2};
+    camConfig.distance = ae::q20_12_t{1};
+    camConfig.height = height + ae::q20_12_t{0.4};
+    camConfig.lookAhead = ae::q20_12_t{0.2};
+    camConfig.angleIncrement = ae::q20_12_t{0.05};
+    camConfig.isRotationLocked = true;
+}
+
+void PaulowniaMallView::setupMovement()
 {
     movement->configureMovement(MovementConfig(PAULOWNIA_MALL_MAP_WIDTH,
                                                PAULOWNIA_MALL_MAP_HEIGHT,
@@ -31,10 +45,16 @@ ViewState PaulowniaMallView::onTileCheck(TileType tile, u32 pressed)
     {
     // left
     case TileType::SCENE_0:
+    {
         return ViewState::IWATODAI_STREETS;
+    }
+
     // right
     case TileType::SCENE_1:
+    {
         return ViewState::IWATODAI_DORM;
+    }
+
     // middle
     case TileType::SCENE_2:
     case TileType::SCENE_3:
@@ -44,31 +64,35 @@ ViewState PaulowniaMallView::onTileCheck(TileType tile, u32 pressed)
     case TileType::SCENE_7:
     case TileType::SCENE_8:
     case TileType::SCENE_9:
+    {
         return ViewState::STATION;
+    }
     default:
+    {
         break;
+    }
     }
 
     return ViewState::KEEP_CURRENT;
 }
 
-void PaulowniaMallView::setTextConfig()
+void PaulowniaMallView::setupText()
 {
-    text->configureText(TextConfig(textVideoBuffer, &FONT_NAME, FONT_SIZE));
-    textSub->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
+    text->configureText(TextConfig(textVideoBuffer, &fontName, fontSize));
+    textSub->configureText(TextConfig(textVideoBufferSub, &fontName, fontSize));
 }
 
 void PaulowniaMallView::setupUI()
 {
-    textMenu->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
+    textSub->configureText(TextConfig(textVideoBufferSub, &fontName, fontSize));
 
-    pauseMenuCmpt = PauseMenuComponent::getInstance();
+    pauseMenuCmpt = PauseMenu::getInstance();
 
     menuHUDScreen = MenuHUDScreen::getInstance();
 
-    std::array<UIScreen*, 7> screens = {menuHUDScreen};
+    std::array<UIScreen*, 5> screens = {menuHUDScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt};
 
     ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, screens});
-    ae::BroadcastEvent(Event::ConfigureUIMenu{textMenu, menus});
+    ae::BroadcastEvent(Event::ConfigureUIMenu{textSub, menus});
 }

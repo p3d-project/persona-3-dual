@@ -1,9 +1,9 @@
-#include "CharacterProfileDb.h"
-#include "../armours/ArmourDb.h"
-#include "../personas/PersonaDb.h"
-#include "../shoes/ShoeDb.h"
-#include "../skills/SkillDb.h"
-#include "../weapons/WeaponDb.h"
+#include "CharacterProfileDb.hpp"
+#include "../armours/ArmourDb.hpp"
+#include "../personas/PersonaDb.hpp"
+#include "../shoes/ShoeDb.hpp"
+#include "../skills/SkillDb.hpp"
+#include "../weapons/WeaponDb.hpp"
 
 CharacterProfile CharacterProfileDb::player;
 CharacterProfile CharacterProfileDb::yukari;

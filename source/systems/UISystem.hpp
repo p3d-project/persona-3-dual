@@ -7,18 +7,20 @@
 
 #pragma once
 
-#include "core/enums.h"
+#include <aegis/system.hpp>
+
 #include "core/routerIDs.hpp"
 #include "events/UIEvents.hpp"
-#include "soundbank.h"
-#include <aegis/system.hpp>
 
 #include "events/GenericEvents.hpp"
 
-#include "components/menu/UIMenu.h"
-#include "components/ui/UIScreen.h"
-#include "controllers/MusicController.h"
-#include "managers/RenderManager.hpp"
+#include "components/MusicComponent.hpp"
+#include "components/SFXComponent.hpp"
+#include "components/TextComponent.hpp"
+#include "components/menus/UIMenu.hpp"
+#include "components/screens/UIScreen.hpp"
+
+#include "managers/UIManager.hpp"
 
 // TODO: add a way to indicate reduced # of bg slots
 class UISystem : public ae::SystemRouter<UISystem,
@@ -28,21 +30,34 @@ class UISystem : public ae::SystemRouter<UISystem,
                                          Event::HideAllMenus,
                                          Event::ShowScreen,
                                          Event::HideAllScreens,
-                                         Event::SwitchView>,
+                                         Event::SwitchView,
+                                         Event::RenderUIText,
+                                         Event::ResetUIResources>,
                  public ae::Singleton<UISystem>
 {
   public:
     void Init() override;
 
     /**
+     * @brief Performs menu navigation logic
+     */
+    void Update(ae::q20_12_t /*dt*/) override;
+
+    /**
      * @brief Unloads and cleans up all registered screens. Wrapper for cleanup
      */
     void Shutdown() override;
 
-    void Update(ae::fixed_t /*dt*/) override;
+    // TODO: replace with ae dependancy injection
+    void SetSFXComponent(SFXComponent* sfx);
 
     // TODO: move out of UISystem. Only here as a temporary fix
     void on_receive(const Event::SwitchView& msg);
+
+    /**
+     * @brief ETL message handler to cleanup UISystem resources
+     */
+    void on_receive(const Event::ResetUIResources& /*msg*/);
 
     /**
      * @brief ETL message handler to configure UIScreens
@@ -85,8 +100,6 @@ class UISystem : public ae::SystemRouter<UISystem,
 
     /**
      * @brief ETL message handler to hide all menus
-     *
-     * @param msg The event trigger.
      */
     void on_receive(const Event::HideAllMenus& /*msg*/);
 
@@ -109,6 +122,11 @@ class UISystem : public ae::SystemRouter<UISystem,
      * Wrapper for hideAllScreens
      */
     void on_receive(const Event::HideAllScreens& /*msg*/);
+
+    /**
+     * @brief ETL message handler to render UI text.
+     */
+    void on_receive(const Event::RenderUIText& /*msg*/);
 
     /**
      * @brief Fallback handler for unhandled ETL messages.
@@ -171,33 +189,35 @@ class UISystem : public ae::SystemRouter<UISystem,
      */
     void cancelSFX();
 
-    RenderManager& render = RenderManager::GetInstance();
+    /**
+     * @brief Cleans up UISystem related resources
+     */
+    void resetUIResources();
+
+    UIManager& ui = UIManager::GetInstance();
 
     OamState* oamSub = nullptr;
     OamState* oamMain = nullptr;
 
     /// background ids. The order of the arrays matter. Front = least recently updated, back = last updated
-    std::array<int, 4> lruBgSub = {0, 0, 0, 0};
-    std::array<int, 3> lruBgMain = {0, 0, 0};
+    std::array<int, 3> lruBgSub = {0, 0, 0};
+    std::array<int, 2> lruBgMain = {0, 0};
 
     /// original background ids (order doesn't change)
-    std::array<int, 4> hwBgSub = {0, 0, 0, 0};
-    std::array<int, 3> hwBgMain = {0, 0, 0};
+    std::array<int, 3> hwBgSub = {0, 0, 0};
+    std::array<int, 2> hwBgMain = {0, 0};
 
-    /// currently loaded screens (max 4 sub, 3 main)
+    /// currently loaded screens (max 3 sub, 2 main)
     int screenMainCount = 0;
     int screenSubCount = 0;
-    std::array<UIScreen*, 4> loadedSub{nullptr, nullptr, nullptr, nullptr};
-    std::array<UIScreen*, 3> loadedMain = {nullptr, nullptr, nullptr};
+    std::array<UIScreen*, 3> loadedSub{nullptr, nullptr, nullptr};
+    std::array<UIScreen*, 2> loadedMain = {nullptr, nullptr};
 
     // menu
     std::array<UIMenu*, 10> menus = {};
     UIMenu* activeMenu = nullptr;
     TextComponent* text = nullptr;
-    MusicController* musicCtrl = MusicController::getInstance();
+    SFXComponent* sfxCmpt = nullptr;
 
-    // menu sfx
-    mm_sfxhand sfxMenuHandle;
-    mm_sfxhand sfxSelectHandle;
-    mm_sfxhand sfxCancelHandle;
+    bool renderUIText = false;
 };

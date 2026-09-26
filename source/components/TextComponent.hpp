@@ -7,13 +7,12 @@
  */
 
 #pragma once
-
-#include "core/enums.h"
-#include "core/structs.h"
-#include <aegis/component.hpp>
-
 #include "managers/TextManager.hpp"
 #include "systems/TextSystem.hpp"
+#include "types/TextTypes.hpp"
+#include "types/aeTypes.hpp"
+
+#include <aegis/component.hpp>
 
 class TextComponent : public ae::Component
 {
@@ -28,7 +27,7 @@ class TextComponent : public ae::Component
      */
     void Destroy() override;
 
-    void Update(ae::fixed_t /*dt*/) override;
+    void Update(ae::q20_12_t /*dt*/) override;
 
     ae::ComponentTypeID GetType() const override
     {
@@ -73,6 +72,11 @@ class TextComponent : public ae::Component
     void appearTextSkip();
 
     /**
+     * @brief Stops the appearText animation immediately and clears the state.
+     */
+    void appearTextStop();
+
+    /**
      * @brief A wrapper for appearTextDone in TextSystem. Check if the text being rendered with appearText has finished appearing.
      * @return true if the text has finished appearing, false otherwise.
      * @see appearTextDone
@@ -115,6 +119,42 @@ class TextComponent : public ae::Component
      */
     int getFontSize();
 
+    /**
+     * @brief A getter to return the line spacing
+     * @return The line spacing
+     */
+    int getLineSpacing();
+
+    /**
+     * @brief A getter to return the letter spacing
+     * @return The letter spacing
+     */
+    int getLetterSpacing();
+
+    /**
+     * @brief A getter to return the space width (width of a ' ' character)
+     * @return The space width
+     */
+    int getSpaceWidth();
+
+    /**
+     * @brief Manually override the auto-calculated letter spacing.
+     * @param value Pixels of horizontal space to add after each glyph.
+     */
+    void setLetterSpacing(int value);
+
+    /**
+     * @brief Manually override the auto-calculated line spacing.
+     * @param value Pixels of vertical space to add after each line, on top of the font's line height.
+     */
+    void setLineSpacing(int value);
+
+    /**
+     * @brief Manually override the auto-calculated space width.
+     * @param value Pixels of horizontal space a ' ' character takes up.
+     */
+    void setSpaceWidth(int value);
+
   protected:
     void SubmitToManager() override
     {
@@ -128,6 +168,11 @@ class TextComponent : public ae::Component
     Font* font = nullptr;
     uint16_t* videoBuffer = nullptr;
     int fontSize = 0;
+
+    /// Auto-derived from fontSize in configureText(); can be overridden manually via the setters above.
+    int letterSpacing = 1;
+    int lineSpacing = 2;
+    int spaceWidth = 2;
 
     /**
      * @brief A wrapper for testBitmap in TextSystem

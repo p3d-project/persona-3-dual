@@ -5,7 +5,11 @@
  */
 
 #pragma once
-#include "core/structs.h"
+
+#include "types/MovementTypes.hpp"
+#include "types/StateTypes.hpp"
+#include "types/aeTypes.hpp"
+
 #include <aegis/aegis.hpp>
 
 namespace Event
@@ -30,5 +34,12 @@ struct SwitchView : public etl::message<EventID::SwitchView>
     SwitchView(ViewState iView) : view(iView)
     {
     }
+};
+
+/**
+ * @brief Event payload to release resources owned by the current view.
+ */
+struct ResetUIResources : public etl::message<EventID::ResetUIResources>
+{
 };
 } // namespace Event

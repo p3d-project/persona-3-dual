@@ -1,18 +1,17 @@
-#include "SignContractView.h"
-#include "core/enums.h"
-#include "core/globals.h"
-#include "events/SaveEvents.hpp"
-#include <nds.h>
-#include <stdio.h>
+#include "SignContractView.hpp"
 
-// sfx
-#include "soundbank.h"
+#include "core/globals.hpp"
+#include "events/SaveEvents.hpp"
+#include "systems/UISystem.hpp"
+
+#include <cstring>
+#include <nds.h>
+#include <nds/arm9/keyboard.h>
+#include <stdio.h>
 
 void SignContractView::cancelSFX()
 {
-    musicCtrl->stopSFX(sfxMenuHandle);
-    musicCtrl->stopSFX(sfxSelectHandle);
-    musicCtrl->stopSFX(sfxCancelHandle);
+    sfxCmpt->stopSFX();
 }
 
 void SignContractView::init()
@@ -21,20 +20,28 @@ void SignContractView::init()
     {
         signContract = engine.CreateEntity();
         graphics = engine.CreateComponent<GraphicsComponent>();
+        text = engine.CreateComponent<TextComponent>();
+        musicCmpt = engine.CreateComponent<MusicComponent>();
+        sfxCmpt = engine.CreateComponent<SFXComponent>();
+
         signContract->AddComponent(graphics);
+        signContract->AddComponent(text);
+        signContract->AddComponent(musicCmpt);
+        signContract->AddComponent(sfxCmpt);
     }
 
     // set both screens to black
     setBrightness(3, -16);
 
     // setup music
-    musicCtrl->loadSFX(SFX_MENU);
-    musicCtrl->loadSFX(SFX_SELECT);
-    musicCtrl->loadSFX(SFX_CANCEL);
-    musicCtrl->init((fatBasePath + "music/menus/contract/mistic.pcm").c_str(), 1.998f, 49.959f);
+    sfxCmpt->registerSFX(SFX::SFX_1);
+    sfxCmpt->registerSFX(SFX::SFX_2);
+    sfxCmpt->registerSFX(SFX::SFX_0);
+    musicCmpt->registerMusic(
+        (fatBasePath + "music/menus/contract/mistic.qoa").c_str(), ae::q20_12_t{1.998}, ae::q20_12_t{49.959});
 
     videoSetMode(MODE_5_2D);
-    videoSetModeSub(MODE_0_2D);
+    videoSetModeSub(MODE_3_2D | DISPLAY_BG3_ACTIVE);
 
     // map vram banks to main engine background
     vramSetBankA(VRAM_A_MAIN_BG_0x06000000);
@@ -53,38 +60,35 @@ void SignContractView::init()
     GraphicAsset contractBg = graphics->loadGraphic("graphics/SignContractView/backgrounds/contract/contract");
 
     dmaFillHalfWords(0, bgGetMapPtr(bg[0]), 8192);
-    if (contractBg.tiles)
-        dmaCopy(contractBg.tiles, bgGetGfxPtr(bg[0]), contractBg.tilesLen);
-    if (contractBg.map)
-        dmaCopy(contractBg.map, bgGetMapPtr(bg[0]), contractBg.mapLen);
+    dmaCopy(contractBg.tiles, bgGetGfxPtr(bg[0]), contractBg.tilesLen);
+    dmaCopy(contractBg.map, bgGetMapPtr(bg[0]), contractBg.mapLen);
 
     vramSetBankE(VRAM_E_LCD);
-    if (contractBg.pal)
-        dmaCopy(contractBg.pal, &VRAM_E_EXT_PALETTE[0][0], contractBg.palLen);
+    dmaCopy(contractBg.pal, &VRAM_E_EXT_PALETTE[0][0], contractBg.palLen);
     vramSetBankE(VRAM_E_BG_EXT_PALETTE);
 
     graphics->unloadGraphic(contractBg);
 
-    // setup console
-    consoleInit(&animatedConsole, 0, BgType_Text4bpp, BgSize_T_256x256, 5, 3, false, true);
-    consoleInit(&console, 1, BgType_Text4bpp, BgSize_T_256x256, 2, 0, false, true);
+    // setup text
+    int bgTextSub = bgInitSub(3, BgType_Bmp8, BgSize_B8_256x256, 4, 0);
+    uint16_t* textVideoBufferSub = bgGetGfxPtr(bgTextSub);
+    text->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
 
     keyboardInit(keyboardGetDefault(), 2, BgType_Text4bpp, BgSize_T_256x512, 3, 1, false, true);
 
-    bgSetPriority(animatedConsole.bgId, 0);
-    bgSetPriority(console.bgId, 1);
+    bgSetPriority(bgTextSub, 0);
     bgSetPriority(keyboardGetDefault()->background, 2);
 
     keyboardShow();
 
-    consoleSelect(&animatedConsole);
-    printf("\x1b[11;6HEnter your last name");
-    printf("\x1b[0;0H%s", saveData.lastName);
-    consoleSelect(&console);
+    animText = "Enter your last name";
+    displayText = saveData.lastName;
 
-    // setup animated text
-    REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG0 | BLEND_DST_BACKDROP;
-    REG_BLDALPHA_SUB = textAlpha | ((16 - textAlpha) << 8);
+    firstNameIndex = std::strlen(saveData.firstName);
+    lastNameIndex = std::strlen(saveData.lastName);
+
+    text->drawText(displayText, 0, 0);
+    text->drawText(animText, 0, 96);
 
     // transition both screens from black
     for (int i = -16; i < 0; i++)
@@ -95,7 +99,6 @@ void SignContractView::init()
         for (int duration = 0; duration <= 2; duration++)
         {
             swiWaitForVBlank();
-            musicCtrl->update();
         }
     }
 }
@@ -109,7 +112,7 @@ ViewState SignContractView::update()
     {
         key = 8;
         cancelSFX();
-        sfxCancelHandle = musicCtrl->playSFX(SFX_CANCEL, 255, 128);
+        sfxCmpt->playSFX(SFX::SFX_0, 255, 128);
 
         if (isLastName)
         {
@@ -117,7 +120,9 @@ ViewState SignContractView::update()
             {
                 saveData.lastName[lastNameIndex - 1] = '\0';
                 lastNameIndex--;
-                printf("%c", key);
+
+                text->clearArea(0, 0, 256, FONT_SIZE);
+                displayText = saveData.lastName;
             }
         }
         else if (!isLastName && !isNameConfirmed)
@@ -125,35 +130,24 @@ ViewState SignContractView::update()
             if (saveData.firstName[0] == '\0')
             {
                 isLastName = true;
-                consoleSelect(&console);
-                consoleClear();
-
-                consoleSelect(&animatedConsole);
-                consoleClear();
-                printf("\x1b[11;6HEnter your last name");
-
-                consoleSelect(&console);
-                printf("\x1b[0;0H%s", saveData.lastName);
+                animText = "Enter your last name";
+                displayText = saveData.lastName;
             }
             else
             {
                 saveData.firstName[firstNameIndex - 1] = '\0';
                 firstNameIndex--;
-                printf("%c", key);
+                text->clearArea(0, 0, 256, FONT_SIZE);
+                displayText = saveData.firstName;
             }
         }
         else
         {
             isNameConfirmed = false;
-            consoleSelect(&console);
-            consoleClear();
+            text->clearScreen();
 
-            consoleSelect(&animatedConsole);
-            consoleClear();
-            printf("\x1b[11;6HEnter your first name");
-
-            consoleSelect(&console);
-            printf("\x1b[0;0H%s", saveData.firstName);
+            animText = "Enter your first name";
+            displayText = saveData.firstName;
         }
     }
     // Return (10) or "A"
@@ -161,35 +155,23 @@ ViewState SignContractView::update()
     {
         key = 10;
         cancelSFX();
-        sfxSelectHandle = musicCtrl->playSFX(SFX_SELECT, 255, 128);
+        sfxCmpt->playSFX(SFX::SFX_2, 255, 128);
 
         if (isLastName)
         {
             isLastName = false;
-            consoleSelect(&console);
-            consoleClear();
-
-            consoleSelect(&animatedConsole);
-            consoleClear();
-            printf("\x1b[11;5HEnter your first name");
-
-            consoleSelect(&console);
-            printf("\x1b[0;0H%s", saveData.firstName);
+            text->clearScreen();
+            animText = "Enter your first name";
+            displayText = saveData.firstName;
         }
         else if (!isNameConfirmed)
         {
             isNameConfirmed = true;
-            consoleSelect(&console);
-            consoleClear();
+            text->clearScreen();
+            animText = "Confirm your name?";
 
-            consoleSelect(&animatedConsole);
-            consoleClear();
-            printf("\x1b[11;7HConfirm your name?");
-
-            consoleSelect(&console);
-
-            printf("\x1b[0;0H%s,", saveData.lastName);
-            printf("\x1b[1;0H%s", saveData.firstName);
+            std::string op = "\n";
+            displayText = saveData.lastName + op + saveData.firstName;
         }
         else
         {
@@ -203,10 +185,9 @@ ViewState SignContractView::update()
                 for (int duration = 0; duration <= 2; duration++)
                 {
                     swiWaitForVBlank();
-                    musicCtrl->update();
                 }
             }
-            musicCtrl->pause();
+            musicCmpt->pauseMusic();
 
             return ViewState::CUTSCENE_2;
         }
@@ -215,70 +196,58 @@ ViewState SignContractView::update()
     else if (key > 0)
     {
         cancelSFX();
-        sfxMenuHandle = musicCtrl->playSFX(SFX_MENU, 255, 128);
+        sfxCmpt->playSFX(SFX::SFX_1, 255, 128);
 
         if (isLastName && (lastNameIndex < 31))
         {
             saveData.lastName[lastNameIndex] = key;
             saveData.lastName[lastNameIndex + 1] = '\0';
             lastNameIndex++;
+            displayText = saveData.lastName;
         }
         else if (!isLastName && !isNameConfirmed && (firstNameIndex < 31))
         {
             saveData.firstName[firstNameIndex] = key;
             saveData.firstName[firstNameIndex + 1] = '\0';
             firstNameIndex++;
+            displayText = saveData.firstName;
         }
-
-        printf("%c", key);
     }
 
-    // animate text
-    durationCounter++;
-    if (durationCounter >= duration)
+    // draw text
+    text->drawText(displayText, 0, 0);
+
+    // blink text
+    if (animText.length() != 0)
     {
-        durationCounter = 0;
-        textAlpha += textAlphaDirection;
-
-        // start fading out
-        if (textAlpha >= 16)
+        if (frame % 120 < 60)
         {
-            textAlpha = 16;
-            textAlphaDirection = -1;
+            text->drawText(animText, 0, 96);
         }
-        // start fading in
-        else if (textAlpha <= 0)
+        else
         {
-            textAlpha = 0;
-            textAlphaDirection = 1;
+            text->clearArea(0, 96, 256, FONT_SIZE + text->getLineSpacing());
         }
-
-        REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG0 | BLEND_DST_BACKDROP;
-        REG_BLDALPHA_SUB = textAlpha | ((16 - textAlpha) << 8);
     }
 
-    musicCtrl->update();
     return ViewState::KEEP_CURRENT;
 }
 
 void SignContractView::cleanup()
 {
-    if (graphics != nullptr)
-    {
-        graphics->unloadAll();
-    }
-
     if (signContract != nullptr)
     {
-        signContract->RemoveComponent<GraphicsComponent>();
         engine.DestroyEntity(signContract);
 
         signContract = nullptr;
         graphics = nullptr;
+        text = nullptr;
+        musicCmpt = nullptr;
+        sfxCmpt = nullptr;
     }
 
     // update save data (names)
     ae::BroadcastEvent(Event::WriteSave{});
-    musicCtrl->cleanup();
+    keyboardHide();
     BaseView::cleanup();
 }

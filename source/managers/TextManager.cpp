@@ -59,7 +59,7 @@ Font* TextManager::loadFont(std::string* name, int size)
     if (!font->bitmapBold || !loadFontMetadata(&fontMetadataBoldPath, font, true))
     {
         font->boldLoaded = false;
-        delete font->bitmapBold;
+        free(font->bitmapBold);
         font->bitmapBold = nullptr;
     }
     else
@@ -68,6 +68,16 @@ Font* TextManager::loadFont(std::string* name, int size)
     }
 
     return font;
+}
+
+void TextManager::unloadFont(Font* font)
+{
+    if (font == nullptr)
+        return;
+
+    free(font->bitmap);
+    free(font->bitmapBold);
+    delete font;
 }
 
 void TextManager::loadDefaultPalette()
@@ -83,13 +93,13 @@ bool TextManager::loadPalette(std::string* path, bool sub)
         haltOnError("TextManager::loadPalette(std::string* path, bool sub) : path cannot be nullptr");
     }
 
-    void* buffer = io.openFile(*path);
-    if (buffer == nullptr)
+    FileBuffer buffer = io.openFileBuffer(*path);
+    if (buffer.get() == nullptr)
     {
         return false;
     }
 
-    std::uint16_t* fontPalette = reinterpret_cast<std::uint16_t*>(buffer);
+    std::uint16_t* fontPalette = reinterpret_cast<std::uint16_t*>(buffer.get());
     if (sub)
     {
         dmaCopy(fontPalette, BG_PALETTE_SUB, 256 * sizeof(uint16_t));
@@ -115,14 +125,13 @@ std::uint8_t* TextManager::loadFontBitmap(std::string* path)
         haltOnError("TextManager::loadFontBitmap(std::string* path) : path cannot be nullptr");
     }
 
-    void* buffer = io.openFile(*path);
-    if (buffer == nullptr)
+    FileBuffer buffer = io.openFileBuffer(*path);
+    if (buffer.get() == nullptr)
     {
         return nullptr;
     }
 
-    std::uint8_t* fontBitmap = reinterpret_cast<std::uint8_t*>(buffer);
-    return fontBitmap;
+    return reinterpret_cast<std::uint8_t*>(buffer.release());
 }
 
 bool TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBitmap)
@@ -133,15 +142,13 @@ bool TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBi
                     "nullptr");
     }
 
-    u32 size;
-    void* buffer = io.openFile(*path, size);
-    if (buffer == nullptr)
+    FileBuffer buffer = io.openFileBuffer(*path);
+    if (buffer.get() == nullptr)
     {
         return false;
     }
 
-    std::string content(reinterpret_cast<char*>(buffer), size);
-    free(buffer);
+    std::string content(reinterpret_cast<char*>(buffer.get()), buffer.length());
 
     std::istringstream iss(content);
     std::string line;

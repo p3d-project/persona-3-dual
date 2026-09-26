@@ -7,8 +7,10 @@
 #pragma once
 
 #include "components/TextComponent.hpp"
-#include "core/enums.h"
-#include "core/structs.h"
+#include "components/screens/DialogueScreen.hpp"
+#include "types/DialogueTypes.hpp"
+#include "types/aeTypes.hpp"
+
 #include <aegis/component.hpp>
 
 class DialogueComponent : public ae::Component
@@ -24,7 +26,7 @@ class DialogueComponent : public ae::Component
      *
      * @param dt Fixed-point delta time passed from the aegis engine loop (currently unused).
      */
-    void Update(ae::fixed_t /*dt*/) override;
+    void Update(ae::q20_12_t /*dt*/) override;
 
     ae::ComponentTypeID GetType() const override
     {
@@ -43,9 +45,11 @@ class DialogueComponent : public ae::Component
     /**
      * @brief Start the currently loaded dialogue
      *
-     * Dialogue must be set by configureDialogue() before start() can be called
+     * @note Dialogue must be set by configureDialogue() before start() can be called
+     *
+     * @param firstLine the first dialogue line
      */
-    void start();
+    void start(Dialogue* firstLine);
 
     /**
      * @brief End the dialogue display
@@ -58,8 +62,6 @@ class DialogueComponent : public ae::Component
     }
 
   private:
-    DialogueConfig config;
-
     /**
      * @brief Transition to a new Dialogue node and reset animation state
      *
@@ -84,12 +86,12 @@ class DialogueComponent : public ae::Component
     int selectedOption = 0;
     bool doRenderOptions = false;
 
-    /// track the currently loaded imageId
-    int loadedImageId = -1;
-
-    void (*bgLoader)(int bgIndex) = nullptr;
+    /// track the currently loaded bust
+    bool renderBust = true;
 
     u32 prevKeys = 0;
 
     TextComponent* text;
+    TextComponent* textAlt;
+    DialogueScreen* screen;
 };

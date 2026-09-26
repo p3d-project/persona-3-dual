@@ -5,23 +5,26 @@
  */
 
 #pragma once
-#include "components/ui/UIScreen.h"
-#include "core/enums.h"
-#include "core/structs.h"
+
+#include "components/TextComponent.hpp"
+#include "components/menus/UIMenu.hpp"
+#include "components/screens/UIScreen.hpp"
+#include "types/aeTypes.hpp"
+
 #include <aegis/aegis.hpp>
 
 namespace Event
 {
 /**
- * @brief All parameters needed to configure the UISystem in one call.
+ * @brief All parameters needed to configure UIScreens
  */
 struct ConfigureUIScreen : public etl::message<EventID::ConfigureUIScreen>
 {
     /// Array of sub screen background ids
-    std::array<int, 4> bgSub;
+    std::array<int, 3> bgSub;
 
     /// Array of main screen background ids
-    std::array<int, 3> bgMain;
+    std::array<int, 2> bgMain;
 
     /// Pointer to sub OAM
     OamState* oamSub;
@@ -30,19 +33,21 @@ struct ConfigureUIScreen : public etl::message<EventID::ConfigureUIScreen>
     OamState* oamMain;
 
     /// The screens to register
-    std::array<UIScreen*, 7> screens;
+    std::array<UIScreen*, 5> screens;
 
-    ConfigureUIScreen(std::array<int, 4> iBgSub,
-                      std::array<int, 3> iBgMain,
+    ConfigureUIScreen(std::array<int, 3> iBgSub,
+                      std::array<int, 2> iBgMain,
                       OamState* iOamSub,
                       OamState* iOamMain,
-                      std::array<UIScreen*, 7> iScreens)
+                      std::array<UIScreen*, 5> iScreens)
         : bgSub(iBgSub), bgMain(iBgMain), oamSub(iOamSub), oamMain(iOamMain), screens(iScreens)
     {
     }
 };
 
-// TODO: add doxygen docs
+/**
+ * @brief All parameters needed to configure UIMenus
+ */
 struct ConfigureUIMenu : public etl::message<EventID::ConfigureUIMenu>
 {
     TextComponent* text = nullptr;
@@ -53,7 +58,9 @@ struct ConfigureUIMenu : public etl::message<EventID::ConfigureUIMenu>
     }
 };
 
-// TODO: add doxygen docs
+/**
+ * @brief Event to show specified menu
+ */
 struct ShowMenu : public etl::message<EventID::ShowMenu>
 {
     UIMenu* menu;
@@ -62,7 +69,9 @@ struct ShowMenu : public etl::message<EventID::ShowMenu>
     }
 };
 
-// TODO: add doxygen docs
+/**
+ * @brief Event to hide all menus
+ */
 struct HideAllMenus : public etl::message<EventID::HideAllMenus>
 {
 };
@@ -84,6 +93,13 @@ struct ShowScreen : public etl::message<EventID::ShowScreen>
  * @brief Event to trigger hiding all UIScreens
  */
 struct HideAllScreens : public etl::message<EventID::HideAllScreens>
+{
+};
+
+/**
+ * @brief Event to trigger rendering UI text
+ */
+struct RenderUIText : public etl::message<EventID::RenderUIText>
 {
 };
 } // namespace Event

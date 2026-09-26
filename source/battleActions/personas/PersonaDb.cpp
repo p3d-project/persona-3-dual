@@ -1,5 +1,5 @@
-#include "PersonaDb.h"
-#include "../skills/SkillDb.h"
+#include "PersonaDb.hpp"
+#include "../skills/SkillDb.hpp"
 
 PersonaBase PersonaDb::orpheus;
 PersonaBase PersonaDb::forneus;

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "core/routerIDs.hpp"
-#include "core/structs.h"
+#include "types/TextTypes.hpp"
 #include <aegis/system.hpp>
 
 class TextSystem : public ae::System, public ae::Singleton<TextSystem>
@@ -21,7 +21,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
     {
     }
 
-    void Update(ae::fixed_t /*dt*/) override
+    void Update(ae::q20_12_t /*dt*/) override
     {
     }
 
@@ -33,8 +33,19 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param x The x-coordinate to start drawing the text.
      * @param y The y-coordinate to start drawing the text.
      * @param color The color to use for the text.
+     * @param letterSpacing Pixels of horizontal space to add after each glyph.
+     * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
+     * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
      */
-    void drawText(const std::string& text, Font* font, uint16_t* videoBuffer, int x, int y, int color);
+    void drawText(const std::string& text,
+                  Font* font,
+                  uint16_t* videoBuffer,
+                  int x,
+                  int y,
+                  int color,
+                  int letterSpacing,
+                  int lineSpacing,
+                  int spaceWidth);
 
     /**
      * @brief Create a Text object and renders each character with a delay to simulate typing effect.
@@ -45,9 +56,20 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param x The x-coordinate to start drawing the text.
      * @param y The y-coordinate to start drawing the text.
      * @param color The color to use for the text.
+     * @param letterSpacing Pixels of horizontal space to add after each glyph.
+     * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
+     * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
      */
-    void appearText(
-        Text*& appearingText, const std::string& text, Font* font, uint16_t* videoBuffer, int x, int y, int color);
+    void appearText(Text*& appearingText,
+                    const std::string& text,
+                    Font* font,
+                    uint16_t* videoBuffer,
+                    int x,
+                    int y,
+                    int color,
+                    int letterSpacing,
+                    int lineSpacing,
+                    int spaceWidth);
 
     /**
      * @brief If a text is currently being rendered with appearText, this function will immediately render the rest of the text without delay.
@@ -99,9 +121,6 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
     friend class TextComponent;
 
     int APPEAR_DELAY = 2;
-    int LETTER_SPACING = 1;
-    int LINE_SPACING = 2;
-    int SPACE_WIDTH = 2;
     /// 128 = 1 pixel shift every 2 rows, 64 = 1 pixel shift every 4 rows
     int SLANT_FACTOR = 64;
 
@@ -119,9 +138,20 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param startX The x-coordinate to start drawing the text.
      * @param startY The y-coordinate to start drawing the text.
      * @param color The color to use for the text.
+     * @param letterSpacing Pixels of horizontal space to add after each glyph.
+     * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
+     * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
      * @return Pointer to the newly created Text object.
      */
-    Text* createText(const std::string& text, Font* font, uint16_t* videoBuffer, int startX, int startY, int color);
+    Text* createText(const std::string& text,
+                     Font* font,
+                     uint16_t* videoBuffer,
+                     int startX,
+                     int startY,
+                     int color,
+                     int letterSpacing,
+                     int lineSpacing,
+                     int spaceWidth);
 
     /**
      * @brief Get the next character from a given Text object.
@@ -153,9 +183,10 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param font Pointer to the font to use for rendering.
      * @param startX The starting x-coordinate for rendering the text.
      * @param bold Whether the bitmap is using bold text
+     * @param letterSpacing Pixels of horizontal space to add after each glyph.
      * @return true if the text will exceed the screen width, false otherwise.
      */
-    bool checkWordWrap(const std::string& text, Font* font, int startX, bool bold);
+    bool checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing);
 
     /**
      * @brief Underline a specificed area.

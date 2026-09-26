@@ -1,4 +1,4 @@
-#include "WeaponDb.h"
+#include "WeaponDb.hpp"
 Weapon WeaponDb::shortSword;
 Weapon WeaponDb::imitationKatana;
 Weapon WeaponDb::practiceBow;

@@ -7,14 +7,13 @@
 #pragma once
 
 #include "components/TextComponent.hpp"
-#include "core/enums.h"
 #include "core/routerIDs.hpp"
 #include "events/BattleEvents.hpp"
 #include "events/GenericEvents.hpp"
 #include <aegis/system.hpp>
 
-#include "components/menu/BattleMenuComponent.h"
-#include "controllers/MusicController.h"
+#include "components/MusicComponent.hpp"
+#include "components/menus/BattleMenu.hpp"
 
 #include <algorithm>
 #include <array>
@@ -22,28 +21,26 @@
 #include <nds.h>
 #include <string>
 
-#include "./battleActions/actions/AttackAction.h"
-#include "./battleActions/actions/Guard.h"
-#include "./battleActions/actions/PersonaAction.h"
-#include "./battleActions/actions/SwitchPersona.h"
+#include "battleActions/actions/AttackAction.hpp"
+#include "battleActions/actions/Guard.hpp"
+#include "battleActions/actions/PersonaAction.hpp"
+#include "battleActions/actions/SwitchPersona.hpp"
 
-#include "./battleActions/BattleParticipant.h"
-#include "./battleActions/BattlePhase.h"
-#include "./battleActions/BattleStartCondition.h"
-#include "./battleActions/TurnResult.h"
-#include "./battleActions/enemies/Enemy.h"
-#include "./battleActions/enemies/EnemyProfileDb.h"
-#include "./battleActions/party/CharacterProfileDb.h"
-#include "./battleActions/party/PartyMember.h"
-#include "./battleActions/party/Player.h"
+#include "battleActions/BattleParticipant.hpp"
+#include "battleActions/BattlePhase.hpp"
+#include "battleActions/BattleStartCondition.hpp"
+#include "battleActions/TurnResult.hpp"
+#include "battleActions/enemies/Enemy.hpp"
+#include "battleActions/enemies/EnemyProfileDb.hpp"
+#include "battleActions/party/CharacterProfileDb.hpp"
+#include "battleActions/party/PartyMember.hpp"
+#include "battleActions/party/Player.hpp"
 
 // TODO: check for dead code/unfeasible paths
 class BattleSystem : public ae::SystemRouter<BattleSystem, Event::ExecuteBattle>, public ae::Singleton<BattleSystem>
 {
   public:
     void Init() override;
-
-    void Shutdown() override;
 
     /**
      * @brief Core update loop that processes the battle state machine and turn resolution.
@@ -63,7 +60,12 @@ class BattleSystem : public ae::SystemRouter<BattleSystem, Event::ExecuteBattle>
      *
      * @param dt Fixed-point delta time passed from the aegis engine loop (currently unused).
      */
-    void Update(ae::fixed_t /*dt*/) override;
+    void Update(ae::q20_12_t /*dt*/) override;
+
+    void Shutdown() override;
+
+    // TODO: replace with ae dependancy injection
+    void SetMusicComponent(MusicComponent* music);
 
     /**
      * @brief ETL message handler that initializes and starts a new battle.
@@ -74,8 +76,7 @@ class BattleSystem : public ae::SystemRouter<BattleSystem, Event::ExecuteBattle>
      * This function dynamically allocates the active combat entities (Player,
      * PartyMember, and Enemy objects) based on the profiles provided in the
      * message payload. It then resets all internal state machine variables, clears
-     * any pending UI alerts, and evaluates the save data to load the appropriate
-     * background music (e.g., FEMC mode track selection).
+     * any pending UI alerts
      *
      * Finally, it calculates the initial turn order based on the battleStartCondition
      * and advances the state machine to the first participant's initial phase.
@@ -237,6 +238,6 @@ class BattleSystem : public ae::SystemRouter<BattleSystem, Event::ExecuteBattle>
         return a->currentTurnOrderAgility > b->currentTurnOrderAgility;
     }
 
-    MusicController* musicCtrl = MusicController::getInstance();
-    BattleMenuComponent* battleMenuCmpt = BattleMenuComponent::getInstance();
+    MusicComponent* musicCmpt = nullptr;
+    BattleMenu* battleMenuCmpt = nullptr;
 };

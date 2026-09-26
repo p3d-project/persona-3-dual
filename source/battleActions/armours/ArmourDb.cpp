@@ -1,4 +1,4 @@
-#include "ArmourDb.h"
+#include "ArmourDb.hpp"
 
 Armour ArmourDb::plainShirt;
 Armour ArmourDb::rashGuard;

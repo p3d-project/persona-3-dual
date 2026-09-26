@@ -2,9 +2,17 @@
 
 constexpr char INSTRUCTION_BIT = 0xFF; /// Special value used to indicate that the next byte is an instruction
 
-void TextSystem::drawText(const std::string& text, Font* font, uint16_t* videoBuffer, int startX, int startY, int color)
+void TextSystem::drawText(const std::string& text,
+                          Font* font,
+                          uint16_t* videoBuffer,
+                          int startX,
+                          int startY,
+                          int color,
+                          int letterSpacing,
+                          int lineSpacing,
+                          int spaceWidth)
 {
-    Text* textObj = createText(text, font, videoBuffer, startX, startY, color);
+    Text* textObj = createText(text, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
 
     while (textObj->cursorPos < (int)textObj->content.size())
     {
@@ -20,11 +28,15 @@ void TextSystem::appearText(Text*& appearingText,
                             uint16_t* videoBuffer,
                             int startX,
                             int startY,
-                            int color)
+                            int color,
+                            int letterSpacing,
+                            int lineSpacing,
+                            int spaceWidth)
 {
     if (appearingText != nullptr)
         delete appearingText;
-    appearingText = createText(content, font, videoBuffer, startX, startY, color);
+    appearingText =
+        createText(content, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
 }
 
 void TextSystem::appearTextSkip(Text*& appearingText)
@@ -118,7 +130,7 @@ void TextSystem::drawNextFromText(Text*& text)
     if (c == '\n')
     {
         text->cursorX = text->startX;
-        text->cursorY += text->font->lineHeight + LINE_SPACING;
+        text->cursorY += text->font->lineHeight + text->lineSpacing;
     }
     else if (c == ' ')
     {
@@ -127,10 +139,10 @@ void TextSystem::drawNextFromText(Text*& text)
             return; /// Don't add a space at the beginning of a line
         }
         std::string nextWord = getNextWord(text->content.substr(text->cursorPos + 1));
-        if (checkWordWrap(nextWord, text->font, text->cursorX, text->bold))
+        if (checkWordWrap(nextWord, text->font, text->cursorX, text->bold, text->letterSpacing))
         {
             text->cursorX = text->startX;
-            text->cursorY += text->font->lineHeight + LINE_SPACING;
+            text->cursorY += text->font->lineHeight + text->lineSpacing;
         }
         else
         {
@@ -138,11 +150,11 @@ void TextSystem::drawNextFromText(Text*& text)
             {
                 underlineGap(text->cursorX,
                              text->cursorY + text->font->lineHeight - 2,
-                             SPACE_WIDTH,
+                             text->spaceWidth,
                              text->videoBuffer,
                              text->activeColor);
             }
-            text->cursorX += SPACE_WIDTH;
+            text->cursorX += text->spaceWidth;
         }
     }
     else if (c == INSTRUCTION_BIT) /// Handle special instructions for text formatting
@@ -176,7 +188,7 @@ void TextSystem::drawNextFromText(Text*& text)
         }
     }
     else if (text->font->glyphs[c].width == 0)
-        text->cursorX += SPACE_WIDTH; /// If the glyph width is 0, skip it (char has not been defined in the font)
+        text->cursorX += text->spaceWidth; /// If the glyph width is 0, skip it (char has not been defined in the font)
     else
     {
         Glyph g = text->bold ? text->font->boldGlyphs[c] : text->font->glyphs[c];
@@ -193,16 +205,23 @@ void TextSystem::drawNextFromText(Text*& text)
         {
             underlineGap(text->cursorX + g.width,
                          text->cursorY + text->font->lineHeight - 2,
-                         LETTER_SPACING,
+                         text->letterSpacing,
                          text->videoBuffer,
                          text->activeColor);
         }
-        text->cursorX += g.width + LETTER_SPACING;
+        text->cursorX += g.width + text->letterSpacing;
     }
 }
 
-Text* TextSystem::createText(
-    const std::string& text, Font* font, uint16_t* videoBuffer, int startX, int startY, int color)
+Text* TextSystem::createText(const std::string& text,
+                             Font* font,
+                             uint16_t* videoBuffer,
+                             int startX,
+                             int startY,
+                             int color,
+                             int letterSpacing,
+                             int lineSpacing,
+                             int spaceWidth)
 {
     Text* newText = new Text();
     newText->cursorX = startX;
@@ -218,6 +237,9 @@ Text* TextSystem::createText(
     newText->bold = false;
     newText->italic = false;
     newText->underline = false;
+    newText->letterSpacing = letterSpacing;
+    newText->lineSpacing = lineSpacing;
+    newText->spaceWidth = spaceWidth;
     return newText;
 }
 
@@ -250,13 +272,13 @@ std::string TextSystem::getNextWord(const std::string& text)
     return nextWord;
 }
 
-bool TextSystem::checkWordWrap(const std::string& text, Font* font, int startX, bool bold)
+bool TextSystem::checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing)
 {
     int cursorX = startX;
     for (char c : text)
     {
         Glyph g = bold ? font->boldGlyphs[static_cast<unsigned char>(c)] : font->glyphs[static_cast<unsigned char>(c)];
-        cursorX += g.width + LETTER_SPACING;
+        cursorX += g.width + letterSpacing;
     }
     if (cursorX > 256)
         return true; // Word exceeds screen width

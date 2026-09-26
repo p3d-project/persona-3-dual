@@ -1,10 +1,13 @@
-#include "BaseView.h"
-#include "core/globals.h"
+#include "BaseView.hpp"
+#include "core/globals.hpp"
+#include "events/GenericEvents.hpp"
 
 // TODO: recieve and handle etl message Event::SwitchView
 
 void BaseView::cleanup()
 {
+    ae::BroadcastEvent(Event::ResetUIResources{});
+
     // clear screen
     setBrightness(3, 0);
 

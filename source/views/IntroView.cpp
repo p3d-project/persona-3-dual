@@ -1,12 +1,10 @@
-#include "IntroView.h"
-#include "core/globals.h"
+#include "IntroView.hpp"
+#include "core/globals.hpp"
+#include "systems/UISystem.hpp"
+
 #include <maxmod9.h>
 #include <nds.h>
-#include <stdio.h>
 #include <string>
-
-// sfx
-#include "soundbank.h"
 
 void IntroView::init()
 {
@@ -15,9 +13,13 @@ void IntroView::init()
         intro = engine.CreateEntity();
         graphics = engine.CreateComponent<GraphicsComponent>();
         text = engine.CreateComponent<TextComponent>();
+        musicCmpt = engine.CreateComponent<MusicComponent>();
+        sfxCmpt = engine.CreateComponent<SFXComponent>();
 
         intro->AddComponent(graphics);
         intro->AddComponent(text);
+        intro->AddComponent(musicCmpt);
+        intro->AddComponent(sfxCmpt);
     }
 
     // set video mode for 3 text layers and 1 extended rotation layer
@@ -73,17 +75,14 @@ void IntroView::init()
     dmaFillHalfWords(0, bgGetMapPtr(bgSubLogo), 2048);
     dmaFillHalfWords(0, bgGetMapPtr(bgSubSky), 2048);
 
-    bool femc = saveData.femcMode;
     std::string bgPath = "graphics/IntroView/backgrounds/";
     std::string spritePath = "graphics/IntroView/sprites/";
-    std::string suffix = femc ? "FEMC" : "";
 
-    GraphicAsset silhouette =
-        graphics->loadGraphic(bgPath + "silhouetteBackground" + suffix + "/silhouetteBackground" + suffix);
-    GraphicAsset room = graphics->loadGraphic(bgPath + "roomBackground" + suffix + "/roomBackground" + suffix);
-    GraphicAsset sky = graphics->loadGraphic(bgPath + "skyBackground" + suffix + "/skyBackground" + suffix);
-    GraphicAsset overlay = graphics->loadGraphic(bgPath + "overlayBackground" + suffix + "/overlayBackground" + suffix);
-    GraphicAsset skySub = graphics->loadGraphic(bgPath + "skyBackgroundSub" + suffix + "/skyBackgroundSub" + suffix);
+    GraphicAsset silhouette = graphics->loadGraphic(bgPath + "silhouetteBackground/silhouetteBackground");
+    GraphicAsset room = graphics->loadGraphic(bgPath + "roomBackground/roomBackground");
+    GraphicAsset sky = graphics->loadGraphic(bgPath + "skyBackground/skyBackground");
+    GraphicAsset overlay = graphics->loadGraphic(bgPath + "overlayBackground/overlayBackground");
+    GraphicAsset skySub = graphics->loadGraphic(bgPath + "skyBackgroundSub/skyBackgroundSub");
 
     GraphicAsset attribution = graphics->loadGraphic(bgPath + "attributionBackground/attributionBackground");
     GraphicAsset logoLeft = graphics->loadGraphic(spritePath + "logoSpriteLeft/logoSpriteLeft");
@@ -124,13 +123,13 @@ void IntroView::init()
     vramSetBankE(VRAM_E_BG_EXT_PALETTE);
     vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE);
 
-    render.hideBg(bg[3]);         // hide overlay
+    ui.hideBg(bg[3]);             // hide overlay
     bgSetCenter(bg[3], 128, 96);  // pivot point on the screen (at the screen's center)
     bgSetScroll(bg[3], 256, 256); // pivot point on the image (at the image's center)
 
     // showing logo as sprite
-    logoSprite[0] = {0, SpriteSize_64x64, SpriteColorFormat_256Color, 0, 15, -25, 100};
-    logoSprite[1] = {0, SpriteSize_64x64, SpriteColorFormat_256Color, 0, 15, 39, 100};
+    logoSprite[0] = {SpriteSize_64x64, SpriteColorFormat_256Color, 15};
+    logoSprite[1] = {SpriteSize_64x64, SpriteColorFormat_256Color, 15};
 
     // initialize sub sprite engine with 1D mapping, 128 byte boundry, no external palette support
     oamInit(&oamMain, SpriteMapping_1D_128, false);
@@ -139,15 +138,12 @@ void IntroView::init()
     logoSprite[0].gfx = oamAllocateGfx(&oamMain, SpriteSize_64x64, SpriteColorFormat_256Color);
     logoSprite[1].gfx = oamAllocateGfx(&oamMain, SpriteSize_64x64, SpriteColorFormat_256Color);
 
-    if (logoLeft.tiles)
-        dmaCopy(logoLeft.tiles, logoSprite[0].gfx, logoLeft.tilesLen);
-    if (logoRight.tiles)
-        dmaCopy(logoRight.tiles, logoSprite[1].gfx, logoRight.tilesLen);
+    dmaCopy(logoLeft.tiles, logoSprite[0].gfx, logoLeft.tilesLen);
+    dmaCopy(logoRight.tiles, logoSprite[1].gfx, logoRight.tilesLen);
 
     // NOTE: left and right will use the same palette. Just ensure that the order of colours when indexed
     // is THE SAME for both images!
-    if (logoRight.pal)
-        dmaCopy(logoRight.pal, SPRITE_PALETTE, logoRight.palLen);
+    dmaCopy(logoRight.pal, SPRITE_PALETTE, logoRight.palLen);
 
     // for slide in animation
     // move camera to the empty right half of the 512px wide background
@@ -165,8 +161,10 @@ void IntroView::init()
     graphics->unloadGraphic(logoRight);
 
     // point to music
-    musicCtrl->loadSFX(SFX_SELECT);
-    musicCtrl->init((fatBasePath + "music/menus/title/tightrope.pcm").c_str(), 17.962f, 66.082f);
+    sfxCmpt->registerSFX(SFX::SFX_0);
+    sfxCmpt->registerSFX(SFX::SFX_2);
+    musicCmpt->registerMusic(
+        (fatBasePath + "music/menus/title/tightrope.qoa").c_str(), ae::q20_12_t{17.962}, ae::q20_12_t{66.082});
 
     // hide sub screen text and attribution text layer
     REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_SRC_BG0 | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;
@@ -184,7 +182,6 @@ void IntroView::init()
         // wait for duration amount of frames
         for (int frame = 0; frame <= 3; frame++)
         {
-            musicCtrl->update();
             swiWaitForVBlank();
         }
     }
@@ -200,7 +197,6 @@ void IntroView::init()
         // wait for duration amount of frames
         for (int frame = 0; frame <= 6; frame++)
         {
-            musicCtrl->update();
             swiWaitForVBlank();
         }
     }
@@ -208,13 +204,11 @@ void IntroView::init()
 
 ViewState IntroView::update()
 {
-    musicCtrl->update();
-
     // transition to menu state on any input
     if ((systemKeysDown & KEY_A) || (systemKeysDown & KEY_START) || (systemKeysDown & KEY_TOUCH))
     {
-        musicCtrl->playSFX(SFX_SELECT, 255, 128);
-        musicCtrl->pause();
+        sfxCmpt->playSFX(SFX::SFX_2, 255, 128);
+        musicCmpt->pauseMusic();
         // transition both screens to black
         for (int i = 0; i <= 16; i++)
         {
@@ -223,7 +217,6 @@ ViewState IntroView::update()
             // wait a few frames
             for (int duration = 0; duration <= 2; duration++)
             {
-                musicCtrl->update();
                 swiWaitForVBlank();
             }
         }
@@ -231,8 +224,8 @@ ViewState IntroView::update()
     }
     else if (systemKeysDown & KEY_B)
     {
-        musicCtrl->playSFX(SFX_CANCEL, 255, 128);
-        musicCtrl->pause();
+        sfxCmpt->playSFX(SFX::SFX_0, 255, 128);
+        musicCmpt->pauseMusic();
         // transition both screens to black
         for (int i = 0; i <= 16; i++)
         {
@@ -241,7 +234,6 @@ ViewState IntroView::update()
             // wait a few frames
             for (int duration = 0; duration <= 2; duration++)
             {
-                musicCtrl->update();
                 swiWaitForVBlank();
             }
         }
@@ -275,8 +267,6 @@ ViewState IntroView::update()
 
     if (animateText)
     {
-        text->drawText("Press Any Button", 80, 88, TextColor::White);
-
         durationCounter++;
 
         if (durationCounter >= duration)
@@ -304,27 +294,26 @@ ViewState IntroView::update()
     if (!displayLogo)
     {
         displayLogo = true;
-
-        for (int i = 0; i < 2; i++)
+        int spriteId = 0;
+        for (SpriteRenderState& srs : spriteRenderStates)
         {
-            oamSet(&oamMain, // main display (OamState)
-                   i,        // oam entry to set (id)
-                   logoSprite[i].x,
-                   logoSprite[i].y,            // position
-                   0,                          // priority
-                   logoSprite[i].paletteAlpha, // palette for 16 color sprite or alpha for bmp sprite
-                   logoSprite[i].size,
-                   logoSprite[i].format,
-                   logoSprite[i].gfx,
-                   logoSprite[i].rotationIndex,
-                   true,  // double the size of rotated sprites
-                   false, // don't hide the sprite
-                   false,
-                   false, // vflip, hflip
-                   false  // apply mosaic
-            );
+            oamSet(&oamMain,
+                   spriteId++,
+                   srs.x,
+                   srs.y,
+                   srs.priority,
+                   srs.sprite.paletteAlpha,
+                   srs.sprite.size,
+                   srs.sprite.format,
+                   srs.sprite.gfx,
+                   srs.affineIndex,
+                   srs.sizeDouble,
+                   srs.hide,
+                   srs.hflip,
+                   srs.vflip,
+                   srs.mosaic);
 
-            oamMain.oamMemory[i].attribute[0] |= ATTR0_TYPE_BLENDED;
+            oamMain.oamMemory[spriteId].attribute[0] |= ATTR0_TYPE_BLENDED;
         }
 
         // setup fade for main screen sprites
@@ -358,6 +347,7 @@ ViewState IntroView::update()
         animateText = true;
         REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;
         REG_BLDALPHA_SUB = textAlpha | ((16 - textAlpha) << 8);
+        text->drawText("\xFF\x02\x01Press Any Button", 35, 82, TextColor::White);
     }
 
     // setup blending for overlay
@@ -366,7 +356,7 @@ ViewState IntroView::update()
         displayOverlay = true;
         REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_DST_BG2;
         REG_BLDALPHA = 0 | (16 << 8);
-        render.showBg(bg[3]);
+        ui.showBg(bg[3]);
     }
 
     // fade in overlay
@@ -380,8 +370,7 @@ ViewState IntroView::update()
     if (frame % 4 == 0)
     {
         waveAngle += 50;
-        // NOTE: since DS does not have floating point numbers, sin (which uses sinLerp) returns value from -4096 -> 4096, which is why we divide by 4096 (shift >> 12)
-        int angle = math.sin(waveAngle);
+        int angle = MathManager::GetInstance().sin(static_cast<ae::angle16_t>(waveAngle)).raw_value();
         int rotationSpeed = baseSpeed + ((angle * fluctuation) >> 12);
         currentRotation += rotationSpeed;
         bgSetRotateScale(bg[3], currentRotation, 256, 256);
@@ -393,34 +382,29 @@ ViewState IntroView::update()
 
 void IntroView::cleanup()
 {
-    if (graphics != nullptr)
-    {
-        graphics->unloadAll();
-    }
-
     if (intro != nullptr)
     {
-        intro->RemoveComponent<GraphicsComponent>();
-        intro->RemoveComponent<TextComponent>();
         engine.DestroyEntity(intro);
 
         intro = nullptr;
         graphics = nullptr;
         text = nullptr;
+        musicCmpt = nullptr;
+        sfxCmpt = nullptr;
     }
-
-    musicCtrl->cleanup();
-    BaseView::cleanup();
 
     // clear all sprites from oam
     oamClear(&oamMain, 0, 0);
 
     // free allocated sprite vram
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 2; ++i)
     {
-        if (logoSprite[i].gfx != NULL)
+        if (logoSprite[i].gfx != nullptr)
         {
             oamFreeGfx(&oamMain, logoSprite[i].gfx);
+            logoSprite[i].gfx = nullptr;
         }
     }
+
+    BaseView::cleanup();
 }

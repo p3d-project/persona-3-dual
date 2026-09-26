@@ -1,78 +1,44 @@
-#include <dirent.h>
-#include <fat.h>
-#include <filesystem.h>
-#include <maxmod9.h>
-#include <nds.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <memory>
 #include <string>
 
-#include "core/enums.h"
+#include <fat.h>
+#include <maxmod9.h>
+#include <nds.h>
 
 // states
-#include "views/BaseView.h"
-#include "views/DisclaimerView.h"
-#include "views/IntroView.h"
-#include "views/IwatodaiDormView.h"
-#include "views/IwatodaiStreetsView.h"
-#include "views/MainMenuView.h"
-#include "views/PaulowniaMallView.h"
-#include "views/SignContractView.h"
-#include "views/StationView.h"
-#include "views/VideoView.h"
-
-// components
-#include "components/ui/MenuHUDScreen.h"
-
-// sfx
-#include "soundbank_bin.h"
-
-// character models
-#include "models/kotone.h"
-#include "models/makoto.h"
+#include "views/BaseView.hpp"
+#include "views/DisclaimerView.hpp"
+#include "views/IntroView.hpp"
+#include "views/IwatodaiDormView.hpp"
+#include "views/IwatodaiStreetsView.hpp"
+#include "views/MainMenuView.hpp"
+#include "views/PaulowniaMallView.hpp"
+#include "views/SignContractView.hpp"
+#include "views/StationView.hpp"
+#include "views/VideoView.hpp"
 
 // DBs
-#include "battleActions/armours/ArmourDb.h"
-#include "battleActions/enemies/EnemyProfileDb.h"
-#include "battleActions/party/CharacterProfileDb.h"
-#include "battleActions/personas/PersonaDb.h"
-#include "battleActions/shoes/ShoeDb.h"
-#include "battleActions/skills/SkillDb.h"
-#include "battleActions/weapons/WeaponDb.h"
+#include "battleActions/armours/ArmourDb.hpp"
+#include "battleActions/enemies/EnemyProfileDb.hpp"
+#include "battleActions/party/CharacterProfileDb.hpp"
+#include "battleActions/personas/PersonaDb.hpp"
+#include "battleActions/shoes/ShoeDb.hpp"
+#include "battleActions/skills/SkillDb.hpp"
+#include "battleActions/weapons/WeaponDb.hpp"
 
 // game engine
 GameEngine engine;
 ae::Entity* player;
-ae::Entity* generic;
-GraphicsComponent* genericGraphics;
 
 // variables
 volatile int frame = 0;
 volatile u32 systemKeysDown = 0;
 volatile u32 systemKeysHeld = 0;
-int fps = 0;
-int fpsTimer = 0;
 std::string fatBasePath = "";
 Save saveData;
 ViewState nextView = ViewState::DEFAULT;
 
-BaseView* currentView = nullptr;
-bool prevFemcMode;
-
-// models
-unsigned int** bitmapsCharacter = nullptr;
-
-static unsigned int* bitmapsKotone[MODEL_KOTONE_TEX_COUNT] = {nullptr};
-static unsigned int* bitmapsMakoto[MODEL_MAKOTO_TEX_COUNT] = {nullptr};
-
-// TODO: figure out a way to unload after being copied to ram
-static unsigned int* loadCharacterTexture(const std::string& name, bool isFemc)
-{
-    std::string basePath = fatBasePath + "models/" + (isFemc ? "kotone/" : "makoto/");
-    GraphicAsset asset = genericGraphics->loadGraphic(basePath + name);
-    unsigned int* tiles = reinterpret_cast<unsigned int*>(asset.tiles);
-    return tiles;
-}
+std::unique_ptr<BaseView> currentView;
 
 void SwitchView(BaseView* newView)
 {
@@ -80,13 +46,10 @@ void SwitchView(BaseView* newView)
     if (currentView != nullptr)
     {
         currentView->cleanup();
-
-        // free memory
-        delete currentView;
     }
 
     // load new view
-    currentView = newView;
+    currentView.reset(newView);
     if (currentView != nullptr)
     {
         currentView->init();
@@ -97,32 +60,6 @@ void SwitchView(BaseView* newView)
 void Vblank()
 {
     frame = frame + 1;
-}
-
-void loadModels(bool isFemc)
-{
-    // Kotone
-    if (isFemc)
-    {
-        bitmapsKotone[MODEL_KOTONE_TEX_KOTONE_TEXTURE_0] = loadCharacterTexture("kotone_texture_0", true);
-        bitmapsKotone[MODEL_KOTONE_TEX_KOTONE_TEXTURE_1] = loadCharacterTexture("kotone_texture_1", true);
-        bitmapsKotone[MODEL_KOTONE_TEX_KOTONE_TEXTURE_2] = loadCharacterTexture("kotone_texture_2", true);
-        bitmapsKotone[MODEL_KOTONE_TEX_KOTONE_TEXTURE_3] = loadCharacterTexture("kotone_texture_3", true);
-        bitmapsKotone[MODEL_KOTONE_TEX_KOTONE_TEXTURE_4] = loadCharacterTexture("kotone_texture_4", true);
-
-        bitmapsCharacter = bitmapsKotone;
-    }
-    // Makoto
-    else
-    {
-        bitmapsMakoto[MODEL_MAKOTO_TEX_MAKOTO_TEXTURE_0] = loadCharacterTexture("makoto_texture_0", false);
-        bitmapsMakoto[MODEL_MAKOTO_TEX_MAKOTO_TEXTURE_1] = loadCharacterTexture("makoto_texture_1", false);
-        bitmapsMakoto[MODEL_MAKOTO_TEX_MAKOTO_TEXTURE_2] = loadCharacterTexture("makoto_texture_2", false);
-        bitmapsMakoto[MODEL_MAKOTO_TEX_MAKOTO_TEXTURE_3] = loadCharacterTexture("makoto_texture_3", false);
-        bitmapsMakoto[MODEL_MAKOTO_TEX_MAKOTO_TEXTURE_4] = loadCharacterTexture("makoto_texture_4", false);
-
-        bitmapsCharacter = bitmapsMakoto;
-    }
 }
 
 // TODO: add doxyen docs
@@ -149,7 +86,9 @@ int main(int argc, char* argv[])
         consoleDemoInit();
         printf("FAT initialization failed!\nPlease ensure the SD card is inserted.\n");
         while (1)
+        {
             swiWaitForVBlank();
+        }
     }
 
     // dynamically resolve runtime path using argv[0]
@@ -163,16 +102,6 @@ int main(int argc, char* argv[])
             fatBasePath = execPath.substr(0, lastSlash + 1) + "data/";
         }
     }
-
-    // initialize maxmod (for audio)
-    mm_ds_system sys;
-    sys.mod_count = 0;
-    sys.samp_count = 0;
-    sys.mem_bank = 0;
-    mmInit(&sys);
-
-    // initialize maxmod (for sfx)
-    mmInitDefaultMem((mm_addr)soundbank_bin);
 
     // setup db's. DO NOT CHANGE order
     WeaponDb::Initialize();
@@ -209,7 +138,8 @@ int main(int argc, char* argv[])
     engine.RegisterManager(&MathManager::GetInstance());
     engine.RegisterManager(&IOManager::GetInstance());
     engine.RegisterManager(&TextManager::GetInstance());
-    engine.RegisterManager(&RenderManager::GetInstance());
+    engine.RegisterManager(&UIManager::GetInstance());
+    engine.RegisterManager(&AudioManager::GetInstance());
 
     // initialize engine
     engine.InitAll();
@@ -218,21 +148,14 @@ int main(int argc, char* argv[])
     // create entity
     player = engine.CreateEntity();
 
-    // TODO: replace this temporary workaround for graphics
-    generic = engine.CreateEntity();
-    genericGraphics = engine.CreateComponent<GraphicsComponent>();
-    generic->AddComponent(genericGraphics);
-
     // load save data
     ae::BroadcastEvent(Event::ReadSave{});
-    prevFemcMode = saveData.femcMode;
-    loadModels(saveData.femcMode);
 
     // Default is DisclaimerView
     SwitchView(new DisclaimerView());
 
     // TODO: set to constant tied to VBlank
-    const ae::fixed_t dt = ae::fixed_t(1) / 60;
+    const ae::q20_12_t dt = MathManager::GetInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
 
     while (1)
     {
@@ -240,12 +163,6 @@ int main(int argc, char* argv[])
 
         // Poll Input -> Update Systems -> Update Components -> Process Managers -> Compute
         engine.Tick(dt);
-
-        if (saveData.femcMode != prevFemcMode)
-        {
-            loadModels(saveData.femcMode);
-            prevFemcMode = saveData.femcMode;
-        }
 
         // check state of currentView
         if (currentView != nullptr)
@@ -264,51 +181,75 @@ int main(int argc, char* argv[])
             switch (nextState)
             {
             case ViewState::INTRO:
+            {
                 SwitchView(new IntroView());
                 break;
+            }
 
             case ViewState::MAIN_MENU:
+            {
                 SwitchView(new MainMenuView());
                 break;
+            }
 
             case ViewState::IWATODAI_DORM:
+            {
                 SwitchView(new IwatodaiDormView());
                 break;
+            }
 
             case ViewState::IWATODAI_STREETS:
+            {
                 SwitchView(new IwatodaiStreetsView());
                 break;
+            }
 
             case ViewState::DISCLAIMER:
+            {
                 SwitchView(new DisclaimerView());
                 break;
+            }
 
             case ViewState::INTRO_VIDEO:
-                SwitchView(new VideoView(saveData.introVideoPath, ViewState::INTRO));
+            {
+                SwitchView(new VideoView("intro.vid", ViewState::INTRO));
                 break;
+            }
 
             case ViewState::CUTSCENE_1:
+            {
                 SwitchView(new VideoView("cutscene-1.vid", ViewState::SIGN_CONTRACT));
                 break;
+            }
 
             case ViewState::SIGN_CONTRACT:
+            {
                 SwitchView(new SignContractView());
                 break;
+            }
 
             case ViewState::CUTSCENE_2:
+            {
                 SwitchView(new VideoView("cutscene-2.vid", ViewState::IWATODAI_DORM));
                 break;
+            }
 
             case ViewState::STATION:
+            {
                 SwitchView(new StationView());
                 break;
+            }
 
             case ViewState::PAULOWNIA_MALL:
+            {
                 SwitchView(new PaulowniaMallView());
                 break;
+            }
 
             default:
+            {
                 break;
+            }
             }
         }
         bgUpdate();

@@ -103,7 +103,7 @@ def to_header(rows, height, width, stem):
 
     # CRITICAL FIX: Changed uint8_t to uint16_t to support tile IDs > 255
     lines.append(
-        f"static uint16_t {stem}_map[{define_prefix}_MAP_HEIGHT][{define_prefix}_MAP_WIDTH] = {{"
+        f"[[maybe_unused]] static uint16_t {stem}_map[{define_prefix}_MAP_HEIGHT][{define_prefix}_MAP_WIDTH] = {{"
     )
     for r, row in enumerate(rows):
         comma = "," if r < height - 1 else ""
@@ -138,9 +138,11 @@ def convert(input_file: str, output_file: str, config: dict) -> None:
     jmap_path = Path(input_file)
     out_path = Path(output_file)
 
-    # If the caller passed a directory, derive the .h filename automatically
+    # Always generate .hpp for this project’s map headers.
     if out_path.is_dir() or (not out_path.suffix):
-        out_path = out_path / (jmap_path.stem + ".h")
+        out_path = out_path / (jmap_path.stem + ".hpp")
+    elif out_path.suffix.lower() in {".h", ".hh", ".hxx"}:
+        out_path = out_path.with_suffix(".hpp")
 
     stem = jmap_path.stem
 
@@ -160,10 +162,10 @@ def convert(input_file: str, output_file: str, config: dict) -> None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Convert a .jmap collision map to a C header file."
+        description="Convert a .jmap collision map to a hpp header file."
     )
     parser.add_argument("input", help="Input .jmap file")
-    parser.add_argument("output", help="Output .h file (or directory)")
+    parser.add_argument("output", help="Output .hpp file (or directory)")
     args = parser.parse_args()
 
     convert(args.input, args.output, {})

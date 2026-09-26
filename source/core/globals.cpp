@@ -1,4 +1,4 @@
-#include "globals.h"
+#include "globals.hpp"
 
 bool Globals::enableBillboards = true;
 bool Globals::enableDebugPrint = false;

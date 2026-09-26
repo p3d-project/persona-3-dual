@@ -7,9 +7,11 @@
 
 #pragma once
 
-#include "core/enums.h"
-#include "core/structs.h"
+#include "data/spriteDb.hpp"
 #include "managers/IOManager.hpp"
+#include "types/GraphicsTypes.hpp"
+#include "types/aeTypes.hpp"
+
 #include <aegis/component.hpp>
 #include <etl/vector.h>
 
@@ -23,7 +25,7 @@ class GraphicsComponent : public ae::Component
 
     void Destroy() override;
 
-    void Update(ae::fixed_t /*dt*/) override
+    void Update(ae::q20_12_t /*dt*/) override
     {
     }
 

@@ -1,4 +1,4 @@
-#include "Guard.h"
+#include "Guard.hpp"
 
 TurnResult Guard::resolve(PartyMember* user, BattleParticipant* /*target*/, Skill* /*skill*/)
 {

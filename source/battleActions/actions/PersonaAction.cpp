@@ -1,5 +1,5 @@
-#include "PersonaAction.h"
-#include "./battleActions/skills/BattleCalcs.h"
+#include "PersonaAction.hpp"
+#include "battleActions/skills/BattleCalcs.hpp"
 #include <stdlib.h>
 
 TurnResult PersonaAction::resolve(PartyMember* user, BattleParticipant* target, Skill* skill)
@@ -9,8 +9,7 @@ TurnResult PersonaAction::resolve(PartyMember* user, BattleParticipant* target, 
     {
         Enemy* enemy = static_cast<Enemy*>(target);
 
-        u32 accuracy = BattleCalcs::hitrate(*user, *target, *skill);
-        bool hit = accuracy > u32(rand() % 100);
+        bool hit = BattleCalcs::hit(*user, *target, *skill);
 
         if (!hit)
             return {false, 0, false, "Miss"};
