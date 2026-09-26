@@ -28,7 +28,6 @@ class MainMenu : public UIMenu
     MainMenu() {};
     virtual ~MainMenu() = default;
     static MainMenu* instance;
-    static char versionLabel[16];
 
     MenuOption mainMenuOptions[3] = {
         {"Load Game", -1, MENU_BIND(MainMenu, mainMenuOptionSelected)},
@@ -61,6 +60,7 @@ class MainMenu : public UIMenu
     void updateSave();
 
   public:
+    static char versionLabel[16];
     static void create();
     static void destroy();
     static MainMenu* getInstance();

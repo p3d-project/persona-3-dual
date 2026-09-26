@@ -12,11 +12,6 @@ void MainMenu::create()
     if (instance == nullptr)
     {
         instance = new MainMenu();
-        snprintf(versionLabel,
-                 sizeof(versionLabel),
-                 "v%u.%u",
-                 (unsigned)saveData.majorVersion,
-                 (unsigned)saveData.minorVersion);
     }
 }
 
