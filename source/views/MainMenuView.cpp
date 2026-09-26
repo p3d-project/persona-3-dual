@@ -62,6 +62,14 @@ void MainMenuView::init()
     bgSetPriority(bgTextSub, 0);
     textMenu->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
 
+    //populate version label
+    snprintf(MainMenu::versionLabel,
+             sizeof(MainMenu::versionLabel),
+             "v%u.%u.%u",
+             (unsigned)saveData.majorVersion,
+             (unsigned)saveData.minorVersion,
+             (unsigned)saveData.patchVersion);
+
     // setup main menu
     mainMenuCmpt = MainMenu::getInstance();
     std::array<UIMenu*, 10> menus = {mainMenuCmpt};

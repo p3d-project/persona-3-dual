@@ -5,6 +5,7 @@
 #include <string>
 
 MainMenu* MainMenu::instance = nullptr;
+char MainMenu::versionLabel[16] = {};
 
 void MainMenu::create()
 {
