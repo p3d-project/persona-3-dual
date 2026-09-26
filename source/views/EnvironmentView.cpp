@@ -255,6 +255,8 @@ ViewState EnvironmentView::update()
     bgUpdate();
     if (menuHUDScreen != nullptr && menuHUDScreen->isLoaded)
         menuHUDScreen->tick();
+    if (dialogueScreen != nullptr && dialogueScreen->isLoaded)
+        dialogueScreen->tick();
     oamUpdate(&oamSub);
 
     switch (phase)

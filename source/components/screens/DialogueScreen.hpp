@@ -19,6 +19,14 @@ class DialogueScreen : public UIScreen
     void triggerAction(UIAction action) override;
     void renderSprites() override;
 
+    /**
+     * @brief Per-frame hook that re-applies the box/bust slide offsets to already-drawn sprites.
+     *
+     * @note renderSprites() only runs once when the screen is shown, so without this the running
+     *       intro/outro/bust-pop tweens would update slideOffsetY/bustOffsetY but never reach the OAM.
+     */
+    void tick();
+
     // load all busts into ram
     void loadBusts(etl::array<etl::span<SpritePayload>, 10>* bustPayloads);
 
@@ -27,6 +35,12 @@ class DialogueScreen : public UIScreen
 
     // slides the textbox up into view; call when dialogue starts
     void playIntroAnimation();
+
+    // slides the textbox back down out of view; call when dialogue ends
+    void playOutroAnimation();
+
+    // duration (ms) of both playIntroAnimation() and playOutroAnimation(), exposed so callers can time a delay
+    static constexpr int kSlideDurationMs = 200;
 
   private:
     DialogueScreen() : UIScreen(false) {};

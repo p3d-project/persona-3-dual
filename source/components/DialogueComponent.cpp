@@ -9,6 +9,28 @@ void DialogueComponent::Init()
 
 void DialogueComponent::Update(ae::q20_12_t)
 {
+    if (closing)
+    {
+        if (--slideDelayFrames <= 0)
+        {
+            closing = false;
+            isActive = false;
+        }
+        return;
+    }
+
+    if (opening)
+    {
+        if (--slideDelayFrames <= 0)
+        {
+            opening = false;
+            advanceTo(pendingFirstLine);
+            pendingFirstLine = nullptr;
+            renderBust = true;
+        }
+        return;
+    }
+
     if (!isActive || current == nullptr)
     {
         isActive = false;
@@ -140,6 +162,8 @@ void DialogueComponent::Update(ae::q20_12_t)
 void DialogueComponent::Destroy()
 {
     isActive = false;
+    closing = false;
+    opening = false;
 }
 
 void DialogueComponent::configureDialogue(const DialogueConfig& config)
@@ -158,12 +182,13 @@ void DialogueComponent::configureDialogue(const DialogueConfig& config)
 
 void DialogueComponent::start(Dialogue* firstLine)
 {
-    // point to first line
-    advanceTo(firstLine);
+    pendingFirstLine = firstLine;
 
     prevKeys = systemKeysHeld;
     isActive = true;
-    renderBust = true;
+    closing = false;
+    opening = true;
+    slideDelayFrames = kSlideDelayFrames;
 
     if (screen != nullptr)
     {
@@ -173,8 +198,24 @@ void DialogueComponent::start(Dialogue* firstLine)
 
 void DialogueComponent::end()
 {
+    if (closing)
+    {
+        return;
+    }
+
+    // cancel a pending open (e.g. START pressed before the intro slide finished)
+    opening = false;
+    pendingFirstLine = nullptr;
+
     text->clearScreen();
-    isActive = false;
+
+    if (screen != nullptr)
+    {
+        screen->playOutroAnimation();
+    }
+
+    closing = true;
+    slideDelayFrames = kSlideDelayFrames;
 }
 
 void DialogueComponent::advanceTo(Dialogue* next)

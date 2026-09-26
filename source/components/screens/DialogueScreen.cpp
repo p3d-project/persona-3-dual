@@ -70,8 +70,16 @@ void DialogueScreen::renderSprites()
                srs.vflip,
                srs.mosaic);
     }
+}
 
-    // re-apply the bust's tweened offset every frame, since its sprites are only drawn once on swap
+void DialogueScreen::tick()
+{
+    int i = 0;
+    for (SpritePayload& sp : spritePayloads)
+    {
+        oamSetXY(oam, i++, sp.srs.x, sp.srs.y + slideOffsetY);
+    }
+
     if (prevBust != nullptr && bustSpriteBaseId >= 0)
     {
         int bId = bustSpriteBaseId;
@@ -93,8 +101,24 @@ void DialogueScreen::playIntroAnimation()
     animation->animate(slideOffsetY)
         .from(kSlideOffsetStart)
         .to(0)
-        .duration(200)
+        .duration(kSlideDurationMs)
         .ease(uiAnimation::Ease::OutBack)
+        .start();
+}
+
+void DialogueScreen::playOutroAnimation()
+{
+    if (animation == nullptr)
+    {
+        return;
+    }
+
+    animation->cancelAll();
+    animation->animate(slideOffsetY)
+        .from(0)
+        .to(kSlideOffsetStart)
+        .duration(kSlideDurationMs)
+        .ease(uiAnimation::Ease::InBack)
         .start();
 }
 
