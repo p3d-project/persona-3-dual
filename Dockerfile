@@ -9,7 +9,7 @@
 # ==========================================
 
 # Use the dev-latest because it contains the source code of blocksds, so we can step in on the debugger
-FROM skylyrac/blocksds:dev-v1.22.2 AS base
+FROM skylyrac/blocksds:dev-v1.23.0 AS base
 
 LABEL maintainer="The P3D Project"
 LABEL description="Full build environment for Persona 3 Dual (NDS homebrew)"

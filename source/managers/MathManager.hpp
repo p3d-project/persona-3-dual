@@ -29,44 +29,27 @@ class MathManager : public ae::Manager, public ae::Singleton<MathManager>
     }
 
     /**
-    * @brief DEPRECITATED, will be replaced with coming Libnds version
-    *  Computes the tangent from an angles using an approximation.
-    *
-    * @details Function courtesy of https://yal.cc/fast-atan2/.
-    *
-    * @param x The angle in radians.
-    * @return The tangent of the angle.
-    * @todo Replace with tanLerp?
-    *
-    * @author Vadym Diachenko (yellowafterlife)
-    */
-    float tanDepreciated(float r);
-
-    // TODO: replace with native atan2 solution in upcoming BlocksDS update
-    /**
-     * @brief Computes the arctangent from two angles using an approximation.
-     *
-     * @details Function courtesy of https://yal.cc/fast-atan2/.
-     * @note Does not handle infinities or NaNs. Has a limited input range (±45deg).
-     *
-     * @param y Point 2.
-     * @param x Point 1.
-     * @return The arctangent angle of the two points.
-     *
-     * @author Vadym Diachenko (yellowafterlife)
-     */
-    float atan2(float y, float x);
-    /**
      * @brief Computes the angle (in radians) between the positive x-axis and (x, y).
      *
-     * @note Internally calls the depreciated float-based atan2.
-     * float conversion happens at this boundary until atan2 itself is ported.
+     * @details Calls BlocksDS's native fixed-point atan2_f32, which operates
+     * directly on 20.12 fixed-point values with no float conversion.
      *
      * @param y Y Point 2.
      * @param x X Point 1.
      * @return The angle in radians, as Q20.12.
      */
     ae::q20_12_t atan2(ae::q20_12_t y, ae::q20_12_t x);
+
+    /**
+     * @brief Computes the arctangent of a single ratio.
+     *
+     * @details Implemented as atan2(y, 1), per BlocksDS's documented
+     * approach for deriving atan from atan2_f32.
+     *
+     * @param y Ratio in Q20.12.
+     * @return The angle in radians, as Q20.12.
+     */
+    ae::q20_12_t atan(ae::q20_12_t y);
 
     /**
      * @brief Divides two Q20.12 values.
