@@ -1,5 +1,7 @@
 #pragma once
 #include "core/globals.hpp"
+#include "core/timer.hpp"
+#include "types/StateTypes.hpp"
 #include "views/BaseView.hpp"
 #include <nds.h>
 
@@ -8,6 +10,9 @@
 class DisclaimerView : public BaseView
 {
   private:
+    Timer fadeTimer;
+    TransitionPhase transitionPhase = TransitionPhase::FADING_IN;
+
     int bg[2];
 
     ae::Entity* disclaimer = nullptr;

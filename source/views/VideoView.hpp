@@ -1,6 +1,8 @@
 #pragma once
 #include "controllers/VideoController.hpp"
+#include "core/timer.hpp"
 #include "managers/AudioManager.hpp"
+#include "types/StateTypes.hpp"
 #include "views/BaseView.hpp"
 
 class VideoView : public BaseView
@@ -21,4 +23,7 @@ class VideoView : public BaseView
     const ViewState nextView;
     VideoController* videoCtrl = VideoController::getInstance();
     AudioManager& audio = AudioManager::GetInstance();
+
+    Timer fadeTimer;
+    TransitionPhase transitionPhase = TransitionPhase::IDLE;
 };

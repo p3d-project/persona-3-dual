@@ -3,8 +3,10 @@
 #include "components/MusicComponent.hpp"
 #include "components/SFXComponent.hpp"
 #include "components/TextComponent.hpp"
+#include "core/timer.hpp"
 #include "managers/MathManager.hpp"
 #include "managers/UIManager.hpp"
+#include "types/StateTypes.hpp"
 #include "views/BaseView.hpp"
 
 #include <etl/array.h>
@@ -12,6 +14,11 @@
 class IntroView : public BaseView
 {
   private:
+    Timer fadeTimer;
+    TransitionPhase transitionPhase = TransitionPhase::FADING_IN;
+    ViewState nextViewState = ViewState::KEEP_CURRENT;
+    bool skyFadeIn = false;
+
     Sprite logoSprite[2];
     // 64
     SpriteRenderState srs0 = {logoSprite[0], 5, 128};
