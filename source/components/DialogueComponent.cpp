@@ -203,7 +203,6 @@ void DialogueComponent::end()
         return;
     }
 
-    // cancel a pending open (e.g. START pressed before the intro slide finished)
     opening = false;
     pendingFirstLine = nullptr;
 

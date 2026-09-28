@@ -34,7 +34,7 @@ class IwatodaiDormView : public EnvironmentView
     std::string fontNameAlt = "noto-sans-jp-black";
     int fontSizeAlt = 16;
 
-    // decorative demo triangle (dorm sign) tweened via the shared AnimationComponent
+    // demo triangle
     float triSize = 10.0f;
     uiAnimation::AnimationHandle circleHandle;
 };

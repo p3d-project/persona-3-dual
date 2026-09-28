@@ -125,7 +125,7 @@ int MenuHUDScreen::onTouch(touchPosition* touch)
 
 void MenuHUDScreen::tick()
 {
-    // TODO: advance clock/moon-phase/skill-level sprites once that game state exists
+    // TODO! anims for icons
 }
 
 void MenuHUDScreen::load()

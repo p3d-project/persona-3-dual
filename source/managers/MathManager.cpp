@@ -102,9 +102,8 @@ ae::q20_12_t MathManager::atan2(ae::q20_12_t y, ae::q20_12_t x)
 {
     if (y.raw_value() == 0 && x.raw_value() == 0)
     {
-        return ae::q20_12_t{0}; // undefined direction, avoid passing (0,0) to atan2f
+        return ae::q20_12_t{0};
     }
-    // libnds has no fixed-point atan2 LUT; fall back to newlib's software atan2f
     return ae::q20_12_t{atan2f(static_cast<float>(y), static_cast<float>(x))};
 }
 
