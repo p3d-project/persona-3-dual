@@ -90,144 +90,162 @@ void SignContractView::init()
     text->drawText(displayText, 0, 0);
     text->drawText(animText, 0, 96);
 
-    // transition both screens from black
-    for (int i = -16; i < 0; i++)
-    {
-        setBrightness(3, i);
-
-        // wait a few frames
-        for (int duration = 0; duration <= 2; duration++)
-        {
-            swiWaitForVBlank();
-        }
-    }
+    fadeTimer.start(ae::q20_12_t{0.8});
+    transitionPhase = TransitionPhase::FADING_IN;
 }
 
 ViewState SignContractView::update()
 {
-    int key = keyboardUpdate();
-
-    // Bksp (8) or "B"
-    if ((key == 8) || (systemKeysDown & KEY_B))
+    switch (transitionPhase)
     {
-        key = 8;
-        cancelSFX();
-        sfxCmpt->playSFX(SFX::SFX_0, 255, 128);
-
-        if (isLastName)
+    case TransitionPhase::FADING_IN:
+    {
+        if (fadeTimer.isFinished())
         {
-            if (saveData.lastName[0] != '\0')
-            {
-                saveData.lastName[lastNameIndex - 1] = '\0';
-                lastNameIndex--;
-
-                text->clearArea(0, 0, 256, FONT_SIZE);
-                displayText = saveData.lastName;
-            }
+            setBrightness(3, 0);
+            transitionPhase = TransitionPhase::IDLE;
         }
-        else if (!isLastName && !isNameConfirmed)
+        else
         {
-            if (saveData.firstName[0] == '\0')
+            int brightness = -16 + (fadeTimer.getProgress().raw_value() >> 8);
+            setBrightness(3, brightness);
+        }
+        break;
+    }
+
+    case TransitionPhase::IDLE:
+    {
+        int key = keyboardUpdate();
+
+        // Bksp (8) or "B"
+        if ((key == 8) || (systemKeysDown & KEY_B))
+        {
+            key = 8;
+            cancelSFX();
+            sfxCmpt->playSFX(SFX::SFX_0, 255, 128);
+
+            if (isLastName)
             {
-                isLastName = true;
-                animText = "Enter your last name";
-                displayText = saveData.lastName;
+                if (saveData.lastName[0] != '\0')
+                {
+                    saveData.lastName[lastNameIndex - 1] = '\0';
+                    lastNameIndex--;
+
+                    text->clearArea(0, 0, 256, FONT_SIZE);
+                    displayText = saveData.lastName;
+                }
+            }
+            else if (!isLastName && !isNameConfirmed)
+            {
+                if (saveData.firstName[0] == '\0')
+                {
+                    isLastName = true;
+                    animText = "Enter your last name";
+                    displayText = saveData.lastName;
+                }
+                else
+                {
+                    saveData.firstName[firstNameIndex - 1] = '\0';
+                    firstNameIndex--;
+                    text->clearArea(0, 0, 256, FONT_SIZE);
+                    displayText = saveData.firstName;
+                }
             }
             else
             {
-                saveData.firstName[firstNameIndex - 1] = '\0';
-                firstNameIndex--;
-                text->clearArea(0, 0, 256, FONT_SIZE);
+                isNameConfirmed = false;
+                text->clearScreen();
+
+                animText = "Enter your first name";
                 displayText = saveData.firstName;
             }
         }
-        else
+        // Return (10) or "A"
+        else if ((key == 10) || (systemKeysDown & KEY_A))
         {
-            isNameConfirmed = false;
-            text->clearScreen();
+            key = 10;
+            cancelSFX();
+            sfxCmpt->playSFX(SFX::SFX_2, 255, 128);
 
-            animText = "Enter your first name";
-            displayText = saveData.firstName;
-        }
-    }
-    // Return (10) or "A"
-    else if ((key == 10) || (systemKeysDown & KEY_A))
-    {
-        key = 10;
-        cancelSFX();
-        sfxCmpt->playSFX(SFX::SFX_2, 255, 128);
+            if (isLastName)
+            {
+                isLastName = false;
+                text->clearScreen();
+                animText = "Enter your first name";
+                displayText = saveData.firstName;
+            }
+            else if (!isNameConfirmed)
+            {
+                isNameConfirmed = true;
+                text->clearScreen();
+                animText = "Confirm your name?";
 
-        if (isLastName)
-        {
-            isLastName = false;
-            text->clearScreen();
-            animText = "Enter your first name";
-            displayText = saveData.firstName;
+                std::string op = "\n";
+                displayText = saveData.lastName + op + saveData.firstName;
+            }
+            else
+            {
+                cancelSFX();
+                musicCmpt->pauseMusic();
+                fadeTimer.start(ae::q20_12_t{0.85});
+                transitionPhase = TransitionPhase::FADING_OUT;
+                break;
+            }
         }
-        else if (!isNameConfirmed)
-        {
-            isNameConfirmed = true;
-            text->clearScreen();
-            animText = "Confirm your name?";
-
-            std::string op = "\n";
-            displayText = saveData.lastName + op + saveData.firstName;
-        }
-        else
+        // on any other keyboard entry
+        else if (key > 0)
         {
             cancelSFX();
-            // transition both screens to black
-            for (int i = 0; i <= 16; i++)
+            sfxCmpt->playSFX(SFX::SFX_1, 255, 128);
+
+            if (isLastName && (lastNameIndex < 31))
             {
-                setBrightness(3, -i);
-
-                // wait a few frames
-                for (int duration = 0; duration <= 2; duration++)
-                {
-                    swiWaitForVBlank();
-                }
+                saveData.lastName[lastNameIndex] = key;
+                saveData.lastName[lastNameIndex + 1] = '\0';
+                lastNameIndex++;
+                displayText = saveData.lastName;
             }
-            musicCmpt->pauseMusic();
+            else if (!isLastName && !isNameConfirmed && (firstNameIndex < 31))
+            {
+                saveData.firstName[firstNameIndex] = key;
+                saveData.firstName[firstNameIndex + 1] = '\0';
+                firstNameIndex++;
+                displayText = saveData.firstName;
+            }
+        }
 
+        // draw text
+        text->drawText(displayText, 0, 0);
+
+        // blink text
+        if (animText.length() != 0)
+        {
+            if (frame % 120 < 60)
+            {
+                text->drawText(animText, 0, 96);
+            }
+            else
+            {
+                text->clearArea(0, 96, 256, FONT_SIZE + text->getLineSpacing());
+            }
+        }
+        break;
+    }
+
+    case TransitionPhase::FADING_OUT:
+    {
+        if (fadeTimer.isFinished())
+        {
+            setBrightness(3, -16);
             return ViewState::CUTSCENE_2;
-        }
-    }
-    // on any other keyboard entry
-    else if (key > 0)
-    {
-        cancelSFX();
-        sfxCmpt->playSFX(SFX::SFX_1, 255, 128);
-
-        if (isLastName && (lastNameIndex < 31))
-        {
-            saveData.lastName[lastNameIndex] = key;
-            saveData.lastName[lastNameIndex + 1] = '\0';
-            lastNameIndex++;
-            displayText = saveData.lastName;
-        }
-        else if (!isLastName && !isNameConfirmed && (firstNameIndex < 31))
-        {
-            saveData.firstName[firstNameIndex] = key;
-            saveData.firstName[firstNameIndex + 1] = '\0';
-            firstNameIndex++;
-            displayText = saveData.firstName;
-        }
-    }
-
-    // draw text
-    text->drawText(displayText, 0, 0);
-
-    // blink text
-    if (animText.length() != 0)
-    {
-        if (frame % 120 < 60)
-        {
-            text->drawText(animText, 0, 96);
         }
         else
         {
-            text->clearArea(0, 96, 256, FONT_SIZE + text->getLineSpacing());
+            int fadeVal = fadeTimer.getProgress().raw_value() >> 8;
+            setBrightness(3, -fadeVal);
         }
+        break;
+    }
     }
 
     return ViewState::KEEP_CURRENT;
