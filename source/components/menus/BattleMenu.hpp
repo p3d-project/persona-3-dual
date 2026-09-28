@@ -34,7 +34,7 @@ class BattleMenu : public UIMenu
     bool isCancelled = false;
 
     etl::vector<MenuOption, 10> battleOptions;
-    int alertStartFrame = 0;
+    int32_t alertStartFrame = 0;
     bool messagePrinted = false;
 
     void resetHook() override;
