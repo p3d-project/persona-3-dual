@@ -63,15 +63,16 @@ void MainMenuView::init()
     textMenu->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
 
     //populate version label
-    snprintf(MainMenu::versionLabel,
-             sizeof(MainMenu::versionLabel),
-             "v%u.%u.%u",
-             (unsigned)saveData.majorVersion,
-             (unsigned)saveData.minorVersion,
-             (unsigned)saveData.patchVersion);
 
     // setup main menu
     mainMenuCmpt = MainMenu::getInstance();
+    snprintf(mainMenuCmpt->versionLabel,
+             sizeof(mainMenuCmpt->versionLabel),
+             "v%u.%u.%u",
+             (unsigned)gameVersion.majorVersion,
+             (unsigned)gameVersion.minorVersion,
+             (unsigned)gameVersion.patchVersion);
+
     std::array<UIMenu*, 10> menus = {mainMenuCmpt};
     ae::BroadcastEvent(Event::ConfigureUIMenu{textMenu, menus});
     ae::BroadcastEvent(Event::ShowMenu{mainMenuCmpt});

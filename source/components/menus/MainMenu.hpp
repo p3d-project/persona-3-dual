@@ -60,7 +60,7 @@ class MainMenu : public UIMenu
     void updateSave();
 
   public:
-    static char versionLabel[16];
+    char versionLabel[16]{};
     static void create();
     static void destroy();
     static MainMenu* getInstance();
