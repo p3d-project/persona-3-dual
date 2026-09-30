@@ -16,9 +16,7 @@ void SaveSystem::on_receive(const Event::ReadSave)
 
     // down the line, do checksum validation to ensure save file is not corrupted
 
-    if (saveData.header.version.majorVersion != gameVersion.majorVersion ||
-        saveData.header.version.minorVersion != gameVersion.minorVersion ||
-        saveData.header.version.patchVersion != gameVersion.patchVersion)
+    if (saveData.header.version != gameVersion)
     {
         bool res = migrate_save_version(&saveData);
         if (!res)
