@@ -1,6 +1,9 @@
 #include "data/spriteDb.hpp"
 
 static const SpriteDBEntry SPRITE_DB_ENTRY[] = {
+    {SpriteType::ICON, static_cast<int>(IconSprite::ICON_A), "icon-A"},
+    {SpriteType::ICON, static_cast<int>(IconSprite::ICON_B), "icon-B"},
+
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_0), "moon-0"},
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_1), "moon-1"},
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_2), "moon-2"},
@@ -31,6 +34,11 @@ static const SpriteDBEntry SPRITE_DB_ENTRY[] = {
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_27), "moon-27"},
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_28), "moon-28"},
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_29), "moon-29"},
+
+    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_GREAT), "status-great"},
+    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_GOOD), "status-good"},
+    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_TIRED), "status-tired"},
+    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_SICK), "status-sick"},
 
     {SpriteType::DAY_OF_WEEK, static_cast<int>(DayOfWeekSprite::SUNDAY), "sunday"},
     {SpriteType::DAY_OF_WEEK, static_cast<int>(DayOfWeekSprite::MONDAY), "monday"},
