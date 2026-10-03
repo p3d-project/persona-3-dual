@@ -123,6 +123,11 @@ int MenuHUDScreen::onTouch(touchPosition* touch)
     return -1;
 }
 
+void MenuHUDScreen::tick()
+{
+    // TODO! anims for icons
+}
+
 void MenuHUDScreen::load()
 {
     // create relevant entities, components

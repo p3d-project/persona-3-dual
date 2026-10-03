@@ -113,3 +113,47 @@ void IwatodaiDormView::setupUI()
     ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, screens});
     ae::BroadcastEvent(Event::ConfigureUIMenu{textSub, menus});
 }
+
+void IwatodaiDormView::onEnvironmentUpdate()
+{
+    // restart after each full cycle completes
+    if (!circleHandle.isValid())
+    {
+        circleHandle =
+            animation->sequence()
+                .append(
+                    animation->animate(triSize).from(10.0f).to(60.0f).duration(500).ease(uiAnimation::Ease::OutBack))
+                .append(animation->animate(triSize).from(60.0f).to(10.0f).duration(400).ease(uiAnimation::Ease::InBack))
+                .start();
+    }
+
+    static constexpr float Z = 0.101f;
+    static constexpr float S = 5.47e-4f;
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_FOG);
+    glPolyFmt(POLY_ALPHA(31) | POLY_CULL_NONE | POLY_ID(2));
+    glColor3b(0, 200, 220);
+
+    glBegin(GL_TRIANGLES);
+    glVertex3f(0, triSize * S, -Z);
+    glVertex3f(-triSize * 0.866f * S, -triSize * 0.5f * S, -Z);
+    glVertex3f(+triSize * 0.866f * S, -triSize * 0.5f * S, -Z);
+    glEnd();
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_FOG);
+
+    glPopMatrix(1);
+}
+
+void IwatodaiDormView::cleanup()
+{
+    circleHandle.cancel();
+    animation->cancelAll();
+    EnvironmentView::cleanup();
+}
