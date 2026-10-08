@@ -1,12 +1,10 @@
 #include "SignContractView.hpp"
 
 #include "core/globals.hpp"
-#include "events/SaveEvents.hpp"
 #include "systems/UISystem.hpp"
 
 #include <cstring>
 #include <nds.h>
-#include <nds/arm9/keyboard.h>
 #include <stdio.h>
 
 void SignContractView::cancelSFX()
@@ -20,12 +18,10 @@ void SignContractView::init()
     {
         signContract = engine.CreateEntity();
         graphics = engine.CreateComponent<GraphicsComponent>();
-        text = engine.CreateComponent<TextComponent>();
         musicCmpt = engine.CreateComponent<MusicComponent>();
         sfxCmpt = engine.CreateComponent<SFXComponent>();
 
         signContract->AddComponent(graphics);
-        signContract->AddComponent(text);
         signContract->AddComponent(musicCmpt);
         signContract->AddComponent(sfxCmpt);
     }
@@ -51,17 +47,19 @@ void SignContractView::init()
 
     // enable extended palettes
     bgExtPaletteEnable();
+    bgExtPaletteEnableSub();
 
     // initialize backgrounds
-    bg[0] = bgInit(0, BgType_Text8bpp, BgSize_T_256x256, 9, 2);
-    bgSetPriority(bg[0], 0);
+    bg = bgInit(0, BgType_Text8bpp, BgSize_T_256x256, 9, 2);
+    bgSetPriority(bg, 0);
+    int bgSubId = bgInitSub(0, BgType_Text8bpp, BgSize_T_256x256, 3, 0);
 
     // load contract background from runtime assets
     GraphicAsset contractBg = graphics->loadGraphic("graphics/SignContractView/backgrounds/contract/contract");
 
-    dmaFillHalfWords(0, bgGetMapPtr(bg[0]), 8192);
-    dmaCopy(contractBg.tiles, bgGetGfxPtr(bg[0]), contractBg.tilesLen);
-    dmaCopy(contractBg.map, bgGetMapPtr(bg[0]), contractBg.mapLen);
+    dmaFillHalfWords(0, bgGetMapPtr(bg), 8192);
+    dmaCopy(contractBg.tiles, bgGetGfxPtr(bg), contractBg.tilesLen);
+    dmaCopy(contractBg.map, bgGetMapPtr(bg), contractBg.mapLen);
 
     vramSetBankE(VRAM_E_LCD);
     dmaCopy(contractBg.pal, &VRAM_E_EXT_PALETTE[0][0], contractBg.palLen);
@@ -69,26 +67,10 @@ void SignContractView::init()
 
     graphics->unloadGraphic(contractBg);
 
-    // setup text
-    int bgTextSub = bgInitSub(3, BgType_Bmp8, BgSize_B8_256x256, 4, 0);
-    uint16_t* textVideoBufferSub = bgGetGfxPtr(bgTextSub);
-    text->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
-
-    keyboardInit(keyboardGetDefault(), 2, BgType_Text4bpp, BgSize_T_256x512, 3, 1, false, true);
-
-    bgSetPriority(bgTextSub, 0);
-    bgSetPriority(keyboardGetDefault()->background, 2);
-
-    keyboardShow();
-
-    animText = "Enter your last name";
-    displayText = saveData.lastName;
-
-    firstNameIndex = std::strlen(saveData.firstName);
-    lastNameIndex = std::strlen(saveData.lastName);
-
-    text->drawText(displayText, 0, 0);
-    text->drawText(animText, 0, 96);
+    signContractScreen = SignContractScreen::getInstance();
+    bgSub[0] = bgSubId;
+    ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, {signContractScreen}});
+    ae::BroadcastEvent(Event::ShowScreen{signContractScreen});
 
     // transition both screens from black
     for (int i = -16; i < 0; i++)
@@ -105,128 +87,13 @@ void SignContractView::init()
 
 ViewState SignContractView::update()
 {
-    int key = keyboardUpdate();
-
-    // Bksp (8) or "B"
-    if ((key == 8) || (systemKeysDown & KEY_B))
+    if (systemKeysDown & KEY_TOUCH)
     {
-        key = 8;
-        cancelSFX();
-        sfxCmpt->playSFX(SFX::SFX_0, 255, 128);
+        touchRead(&touch);
 
-        if (isLastName)
+        if (signContractScreen->onTouch(&touch) == 1)
         {
-            if (saveData.lastName[0] != '\0')
-            {
-                saveData.lastName[lastNameIndex - 1] = '\0';
-                lastNameIndex--;
-
-                text->clearArea(0, 0, 256, FONT_SIZE);
-                displayText = saveData.lastName;
-            }
-        }
-        else if (!isLastName && !isNameConfirmed)
-        {
-            if (saveData.firstName[0] == '\0')
-            {
-                isLastName = true;
-                animText = "Enter your last name";
-                displayText = saveData.lastName;
-            }
-            else
-            {
-                saveData.firstName[firstNameIndex - 1] = '\0';
-                firstNameIndex--;
-                text->clearArea(0, 0, 256, FONT_SIZE);
-                displayText = saveData.firstName;
-            }
-        }
-        else
-        {
-            isNameConfirmed = false;
-            text->clearScreen();
-
-            animText = "Enter your first name";
-            displayText = saveData.firstName;
-        }
-    }
-    // Return (10) or "A"
-    else if ((key == 10) || (systemKeysDown & KEY_A))
-    {
-        key = 10;
-        cancelSFX();
-        sfxCmpt->playSFX(SFX::SFX_2, 255, 128);
-
-        if (isLastName)
-        {
-            isLastName = false;
-            text->clearScreen();
-            animText = "Enter your first name";
-            displayText = saveData.firstName;
-        }
-        else if (!isNameConfirmed)
-        {
-            isNameConfirmed = true;
-            text->clearScreen();
-            animText = "Confirm your name?";
-
-            std::string op = "\n";
-            displayText = saveData.lastName + op + saveData.firstName;
-        }
-        else
-        {
-            cancelSFX();
-            // transition both screens to black
-            for (int i = 0; i <= 16; i++)
-            {
-                setBrightness(3, -i);
-
-                // wait a few frames
-                for (int duration = 0; duration <= 2; duration++)
-                {
-                    swiWaitForVBlank();
-                }
-            }
-            musicCmpt->pauseMusic();
-
             return ViewState::CUTSCENE_2;
-        }
-    }
-    // on any other keyboard entry
-    else if (key > 0)
-    {
-        cancelSFX();
-        sfxCmpt->playSFX(SFX::SFX_1, 255, 128);
-
-        if (isLastName && (lastNameIndex < 31))
-        {
-            saveData.lastName[lastNameIndex] = key;
-            saveData.lastName[lastNameIndex + 1] = '\0';
-            lastNameIndex++;
-            displayText = saveData.lastName;
-        }
-        else if (!isLastName && !isNameConfirmed && (firstNameIndex < 31))
-        {
-            saveData.firstName[firstNameIndex] = key;
-            saveData.firstName[firstNameIndex + 1] = '\0';
-            firstNameIndex++;
-            displayText = saveData.firstName;
-        }
-    }
-
-    // draw text
-    text->drawText(displayText, 0, 0);
-
-    // blink text
-    if (animText.length() != 0)
-    {
-        if (frame % 120 < 60)
-        {
-            text->drawText(animText, 0, 96);
-        }
-        else
-        {
-            text->clearArea(0, 96, 256, FONT_SIZE + text->getLineSpacing());
         }
     }
 
@@ -241,13 +108,10 @@ void SignContractView::cleanup()
 
         signContract = nullptr;
         graphics = nullptr;
-        text = nullptr;
+        signContractScreen = nullptr;
         musicCmpt = nullptr;
         sfxCmpt = nullptr;
     }
 
-    // update save data (names)
-    ae::BroadcastEvent(Event::WriteSave{});
-    keyboardHide();
     BaseView::cleanup();
 }

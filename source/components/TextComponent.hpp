@@ -98,6 +98,11 @@ class TextComponent : public ae::Component
         const Glyph& glyph, int x, int y, int color, bool bold = false, bool italic = false, bool underline = false);
 
     /**
+     * @brief Returns the Glyph struct for a given character. Useful for when drawing single characters from outside the text component.
+     */
+    Glyph* getGlyph(const char& c, bool bold = false);
+
+    /**
       * @brief A wrapper for clearArea in TextSystem. Clear a rectangular area of the text video buffer.
       * @param x The x-coordinate of the top-left corner of the area to clear.
       * @param y The y-coordinate of the top-left corner of the area to clear.
