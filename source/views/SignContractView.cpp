@@ -49,7 +49,7 @@ void SignContractView::init()
     bgExtPaletteEnableSub();
 
     // initialize backgrounds
-    int bgSubId = bgInitSub(0, BgType_Text8bpp, BgSize_T_256x256, 3, 0);
+    int bgSubId = bgInitSub(0, BgType_Text8bpp, BgSize_T_256x256, 8, 0);
 
     signContractScreen = SignContractScreen::getInstance();
     bgSub[0] = bgSubId;
