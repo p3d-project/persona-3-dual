@@ -45,9 +45,6 @@ void SignContractView::init()
     // map vram to sub screen
     vramSetBankC(VRAM_C_SUB_BG);
 
-    // enable extended palettes
-    bgExtPaletteEnableSub();
-
     // initialize backgrounds
     int bgSubId = bgInitSub(0, BgType_Text8bpp, BgSize_T_256x256, 8, 0);
 

@@ -55,9 +55,7 @@ void SignContractScreen::renderSprites()
 void SignContractScreen::renderBackground()
 {
     // load palettes
-    vramSetBankH(VRAM_H_LCD);
-    dmaCopy(bgUI[0].pal, &VRAM_H_EXT_PALETTE[bgId % 4][0], bgUI[0].palLen);
-    vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE);
+    dmaCopy(bgUI[0].pal, BG_PALETTE_SUB, bgUI[0].palLen);
 
     // draw background (copy into vram)
     dmaFillHalfWords(0, bgGetMapPtr(bgId), 2048);
