@@ -102,11 +102,16 @@ int SignContractScreen::onTouch(touchPosition* touch)
         }
         else
         {
-            firstName[--index - 10] = ' ';
-            if (index == 9)
+            if (index != 10)
             {
+                firstName[--index - 10] = ' ';
+            }
+            else
+            {
+                index--;
                 isLastName = true;
                 updateStatus("Enter your last name");
+                lastName[9] = ' ';
             }
         }
         renderName();
@@ -189,7 +194,7 @@ void SignContractScreen::updateStatus(std::string status)
 
 void SignContractScreen::renderName()
 {
-    text->clearArea(65, 35, 125, 30);
+    text->clearArea(65, 31, 125, 30);
     for (int i = 0; i < 10; i++)
     {
         if (lastName[i] == '\0' || lastName[i] == ' ')
