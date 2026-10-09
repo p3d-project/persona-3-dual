@@ -46,26 +46,10 @@ void SignContractView::init()
     vramSetBankC(VRAM_C_SUB_BG);
 
     // enable extended palettes
-    bgExtPaletteEnable();
     bgExtPaletteEnableSub();
 
     // initialize backgrounds
-    bg = bgInit(0, BgType_Text8bpp, BgSize_T_256x256, 9, 2);
-    bgSetPriority(bg, 0);
     int bgSubId = bgInitSub(0, BgType_Text8bpp, BgSize_T_256x256, 3, 0);
-
-    // load contract background from runtime assets
-    GraphicAsset contractBg = graphics->loadGraphic("graphics/SignContractView/backgrounds/contract/contract");
-
-    dmaFillHalfWords(0, bgGetMapPtr(bg), 8192);
-    dmaCopy(contractBg.tiles, bgGetGfxPtr(bg), contractBg.tilesLen);
-    dmaCopy(contractBg.map, bgGetMapPtr(bg), contractBg.mapLen);
-
-    vramSetBankE(VRAM_E_LCD);
-    dmaCopy(contractBg.pal, &VRAM_E_EXT_PALETTE[0][0], contractBg.palLen);
-    vramSetBankE(VRAM_E_BG_EXT_PALETTE);
-
-    graphics->unloadGraphic(contractBg);
 
     signContractScreen = SignContractScreen::getInstance();
     bgSub[0] = bgSubId;
