@@ -120,9 +120,9 @@ Glyph* TextComponent::getGlyph(const char& c, bool bold)
     }
     if (bold)
     {
-        return &font->boldGlyphs[c];
+        return &font->boldGlyphs[static_cast<unsigned char>(c)];
     }
-    return &font->glyphs[c];
+    return &font->glyphs[static_cast<unsigned char>(c)];
 }
 
 void TextComponent::clearArea(int x, int y, int width, int height)
