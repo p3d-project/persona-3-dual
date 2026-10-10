@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
     ae::BroadcastEvent(Event::ReadSave{});
 
     // Default is DisclaimerView
-    SwitchView(new DisclaimerView());
+    SwitchView(new IwatodaiDormView());
 
     // TODO: set to constant tied to VBlank
     const ae::q20_12_t dt = MathManager::GetInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});

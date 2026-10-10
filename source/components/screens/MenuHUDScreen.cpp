@@ -111,11 +111,19 @@ void MenuHUDScreen::renderSprites()
 
     // draw background
     renderBackground();
+
+    // draw text
+    renderText();
 }
 
 int MenuHUDScreen::onTouch(touchPosition* touch)
 {
-    if (touch->px >= 193 && touch->px <= 250 && touch->py >= 166 && touch->py <= 184)
+    int xPos = 207;
+    int yPos = 173;
+    int width = 41;
+    int height = 14;
+
+    if (touch->px >= xPos && touch->px <= (xPos + width) && touch->py >= yPos && touch->py <= (yPos + height))
     {
         return 1;
     }
@@ -195,4 +203,32 @@ void MenuHUDScreen::unload()
         menuHUD = nullptr;
         graphics = nullptr;
     }
+}
+
+void MenuHUDScreen::setTextComponent(TextComponent* text)
+{
+    this->text = text;
+}
+
+void MenuHUDScreen::setTextContent(std::string textContent, TextColor textColor)
+{
+    this->textContent = textContent;
+    this->textColor = textColor;
+    renderText();
+}
+
+void MenuHUDScreen::renderText()
+{
+    // place
+    text->clearArea(3, 3, 134, 19);
+    text->drawText(textContent.c_str(), 5, 6, textColor);
+
+    // date
+    text->drawText("12/31", 208, 5, TextColor::White);
+
+    // day
+    text->drawText("Sa", 243, 5, TextColor::White);
+
+    // days until full moon
+    text->drawText("30", 243, 64, TextColor::White);
 }
