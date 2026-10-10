@@ -30,7 +30,7 @@ class PauseMenuHUDScreen : public UIScreen
     GraphicsComponent* graphics = nullptr;
 
     // background
-    const std::string bgPath = "graphics/MenuHUD/backgrounds/";
+    const std::string bgPath = "graphics/PauseMenuHUD/backgrounds/";
 
     GraphicAsset bgHUD = {};
 

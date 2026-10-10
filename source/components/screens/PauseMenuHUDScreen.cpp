@@ -32,15 +32,13 @@ PauseMenuHUDScreen* PauseMenuHUDScreen::getInstance()
 void PauseMenuHUDScreen::loadBackground()
 {
     // load background into ram
-    bgHUD = graphics->loadGraphic(bgPath + "menuHUD/menuHUD");
+    bgHUD = graphics->loadGraphic(bgPath + "pause/pause");
 }
 
 void PauseMenuHUDScreen::renderBackground()
 {
-    // load palettes
-    vramSetBankH(VRAM_H_LCD);
-    dmaCopy(bgHUD.pal, &VRAM_H_EXT_PALETTE[bgId % 4][0], bgHUD.palLen);
-    vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE);
+    // load palette
+    dmaCopy(bgHUD.pal, BG_PALETTE_SUB, bgHUD.palLen);
 
     // draw background (copy into vram)
     dmaCopy(bgHUD.tiles, bgGetGfxPtr(bgId), bgHUD.tilesLen);

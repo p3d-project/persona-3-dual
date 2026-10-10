@@ -172,9 +172,9 @@ void EnvironmentView::init()
 
     // setup sub screen
     // https://mtheall.com/vram.html#SUB=1&T0=1&NT0=512&MB0=2&TB0=1&S0=0&T1=3&NT1=128&MB1=5&TB1=0&T2=1&NT2=512&MB2=3&TB2=3&S2=0&T3=1&NT3=512&MB3=4&TB3=5&S3=0
-    bgSharedSub1 = bgInitSub(0, BgType_Text8bpp, BgSize_T_256x256, 0, 1);
-    bgSharedSub2 = bgInitSub(2, BgType_Text8bpp, BgSize_T_256x256, 2, 2);
-    bgSharedSub3 = bgInitSub(1, BgType_Text8bpp, BgSize_T_256x256, 4, 3);
+    bgSharedSub1 = bgInitSub(0, BgType_Text4bpp, BgSize_T_256x256, 0, 1);
+    bgSharedSub2 = bgInitSub(2, BgType_Text4bpp, BgSize_T_256x256, 2, 2);
+    bgSharedSub3 = bgInitSub(1, BgType_Text4bpp, BgSize_T_256x256, 4, 3);
 
     dmaFillHalfWords(0, bgGetMapPtr(bgSharedSub1), 2048);
     dmaFillHalfWords(0, bgGetMapPtr(bgSharedSub2), 2048);
