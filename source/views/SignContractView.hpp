@@ -4,6 +4,8 @@
 #include "components/SFXComponent.hpp"
 #include "components/TextComponent.hpp"
 #include "components/screens/SignContractScreen.hpp"
+#include "core/timer.hpp"
+#include "types/StateTypes.hpp"
 #include "views/BaseView.hpp"
 
 #include <maxmod9.h>
@@ -11,6 +13,9 @@
 class SignContractView : public BaseView
 {
   private:
+    Timer fadeTimer;
+    TransitionPhase transitionPhase = TransitionPhase::FADING_IN;
+
     int bg;
 
     ae::Entity* signContract = nullptr;

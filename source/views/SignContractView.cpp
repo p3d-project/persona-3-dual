@@ -53,29 +53,65 @@ void SignContractView::init()
     ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, {signContractScreen}});
     ae::BroadcastEvent(Event::ShowScreen{signContractScreen});
 
-    // transition both screens from black
-    for (int i = -16; i < 0; i++)
-    {
-        setBrightness(3, i);
-
-        // wait a few frames
-        for (int duration = 0; duration <= 2; duration++)
-        {
-            swiWaitForVBlank();
-        }
-    }
+    fadeTimer.start(ae::q20_12_t{0.8});
+    transitionPhase = TransitionPhase::FADING_IN;
 }
 
 ViewState SignContractView::update()
 {
-    if (systemKeysDown & KEY_TOUCH)
+    switch (transitionPhase)
     {
-        touchRead(&touch);
-
-        if (signContractScreen->onTouch(&touch) == 1)
+    case TransitionPhase::FADING_IN:
+    {
+        if (fadeTimer.isFinished())
         {
+            setBrightness(3, 0);
+            transitionPhase = TransitionPhase::IDLE;
+        }
+        else
+        {
+            int brightness = -16 + (fadeTimer.getProgress().raw_value() >> 8);
+            setBrightness(3, brightness);
+        }
+        break;
+    }
+
+    case TransitionPhase::IDLE:
+    {
+        if (systemKeysDown & KEY_TOUCH)
+        {
+            touchRead(&touch);
+
+            if (signContractScreen->onTouch(&touch) == 1)
+            {
+                cancelSFX();
+                musicCmpt->pauseMusic();
+                fadeTimer.start(ae::q20_12_t{0.85});
+                transitionPhase = TransitionPhase::FADING_OUT;
+            }
+            else
+            {
+                cancelSFX();
+                sfxCmpt->playSFX(SFX::SFX_1, 255, 128);
+            }
+        }
+        break;
+    }
+
+    case TransitionPhase::FADING_OUT:
+    {
+        if (fadeTimer.isFinished())
+        {
+            setBrightness(3, -16);
             return ViewState::CUTSCENE_2;
         }
+        else
+        {
+            int fadeVal = fadeTimer.getProgress().raw_value() >> 8;
+            setBrightness(3, -fadeVal);
+        }
+        break;
+    }
     }
 
     return ViewState::KEEP_CURRENT;
