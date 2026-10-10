@@ -260,10 +260,19 @@ void SignContractScreen::renderCursor()
 {
     // Clear old cursor first
     // Clear both lines to be safe (then we don't need to store the old cursor position)
-    text->clearArea(65, 42, 125, 1);
-    text->clearArea(65, 59, 125, 1);
+    text->clearArea(65, 42, 126, 1);
+    text->clearArea(65, 59, 126, 1);
+    if (index == 19)
+    {
+        text->clearArea(197, 48 - lineSpacing, 30, 10);
+    }
 
     // Draw new cursor
+    if (index >= 20)
+    {
+        text->drawText("End", 197, 48 - lineSpacing);
+        return;
+    }
     int y = isLastName ? 42 : 59;
     int x = 65 + (13 * (isLastName ? index : index - 10));
     for (int i = 0; i < 9; i++)
