@@ -252,7 +252,6 @@ int main(int argc, char* argv[])
             }
             }
         }
-
         bgUpdate();
         oamUpdate(&oamMain);
     }

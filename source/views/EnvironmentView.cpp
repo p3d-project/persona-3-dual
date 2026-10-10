@@ -115,6 +115,7 @@ void EnvironmentView::init()
         textSubAlt = engine.CreateComponent<TextComponent>();
         musicCmpt = engine.CreateComponent<MusicComponent>();
         sfxCmpt = engine.CreateComponent<SFXComponent>();
+        animation = engine.CreateComponent<AnimationComponent>();
 
         environment->AddComponent(graphics);
         environment->AddComponent(text);
@@ -122,6 +123,7 @@ void EnvironmentView::init()
         environment->AddComponent(textSubAlt);
         environment->AddComponent(musicCmpt);
         environment->AddComponent(sfxCmpt);
+        environment->AddComponent(animation);
 
         UISystem::GetInstance().SetSFXComponent(sfxCmpt);
     }
@@ -251,6 +253,10 @@ ViewState EnvironmentView::update()
     glLoadIdentity();
 
     bgUpdate();
+    if (menuHUDScreen != nullptr && menuHUDScreen->isLoaded)
+        menuHUDScreen->tick();
+    if (dialogueScreen != nullptr && dialogueScreen->isLoaded)
+        dialogueScreen->tick();
     oamUpdate(&oamSub);
 
     switch (phase)
@@ -431,6 +437,7 @@ ViewState EnvironmentView::update()
         animationCtrl->render();
         glPopMatrix(1);
 
+        onEnvironmentUpdate();
         glFlush(0);
 
         if (Globals::enableDebugPrint)

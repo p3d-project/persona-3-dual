@@ -57,7 +57,7 @@ void DialogueScreen::renderSprites()
         oamSet(oam,
                spriteId++,
                srs.x,
-               srs.y,
+               srs.y + slideOffsetY,
                srs.priority,
                srs.sprite.paletteAlpha,
                srs.sprite.size,
@@ -72,6 +72,56 @@ void DialogueScreen::renderSprites()
     }
 }
 
+void DialogueScreen::tick()
+{
+    int i = 0;
+    for (SpritePayload& sp : spritePayloads)
+    {
+        oamSetXY(oam, i++, sp.srs.x, sp.srs.y + slideOffsetY);
+    }
+
+    if (prevBust != nullptr && bustSpriteBaseId >= 0)
+    {
+        int bId = bustSpriteBaseId;
+        for (SpritePayload& bsp : *prevBust)
+        {
+            oamSetXY(oam, bId++, bsp.srs.x, bsp.srs.y + bustOffsetY);
+        }
+    }
+}
+
+void DialogueScreen::playIntroAnimation()
+{
+    if (animation == nullptr)
+    {
+        return;
+    }
+
+    animation->cancelAll();
+    animation->animate(slideOffsetY)
+        .from(kSlideOffsetStart)
+        .to(0)
+        .duration(kSlideDurationMs)
+        .ease(uiAnimation::Ease::OutBack)
+        .start();
+}
+
+void DialogueScreen::playOutroAnimation()
+{
+    if (animation == nullptr)
+    {
+        return;
+    }
+
+    animation->cancelAll();
+    animation->animate(slideOffsetY)
+        .from(0)
+        .to(kSlideOffsetStart)
+        .duration(kSlideDurationMs)
+        .ease(uiAnimation::Ease::InBack)
+        .start();
+}
+
 void DialogueScreen::load()
 {
     // create relevant entities, components
@@ -79,7 +129,9 @@ void DialogueScreen::load()
     {
         dialogue = engine.CreateEntity();
         graphics = engine.CreateComponent<GraphicsComponent>();
+        animation = engine.CreateComponent<AnimationComponent>();
         dialogue->AddComponent(graphics);
+        dialogue->AddComponent(animation);
     }
 
     // load sprites
@@ -164,8 +216,20 @@ void DialogueScreen::renderBust(etl::span<SpritePayload>& bustPayload)
     // update to new bust
     prevBust = &bustPayload;
 
+    // pop the new bust in from slightly below its resting position
+    if (animation != nullptr)
+    {
+        animation->animate(bustOffsetY)
+            .from(kBustPopOffsetStart)
+            .to(0)
+            .duration(150)
+            .ease(uiAnimation::Ease::OutBack)
+            .start();
+    }
+
     // draw bust
     int bustId = spriteId;
+    bustSpriteBaseId = spriteId;
     void* bustPalette = nullptr;
     for (SpritePayload& sp : bustPayload)
     {
@@ -189,7 +253,7 @@ void DialogueScreen::renderBust(etl::span<SpritePayload>& bustPayload)
         oamSet(oam,
                bustId++,
                srs.x,
-               srs.y,
+               srs.y + bustOffsetY,
                srs.priority,
                srs.sprite.paletteAlpha,
                srs.sprite.size,
@@ -284,6 +348,7 @@ void DialogueScreen::unload()
 
         dialogue = nullptr;
         graphics = nullptr;
+        animation = nullptr;
     }
 }
 

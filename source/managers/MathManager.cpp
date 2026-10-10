@@ -102,9 +102,9 @@ ae::q20_12_t MathManager::atan2(ae::q20_12_t y, ae::q20_12_t x)
 {
     if (y.raw_value() == 0 && x.raw_value() == 0)
     {
-        return ae::q20_12_t{0}; // undefined direction, avoid UB in atan2_f32
+        return ae::q20_12_t{0};
     }
-    return ae::q20_12_t::from_raw_value(atan2_f32(y.raw_value(), x.raw_value()));
+    return ae::q20_12_t{atan2f(static_cast<float>(y), static_cast<float>(x))};
 }
 
 ae::q20_12_t MathManager::atan(ae::q20_12_t y)

@@ -53,6 +53,9 @@ class DialogueComponent : public ae::Component
 
     /**
      * @brief End the dialogue display
+     *
+     * @note isActive stays true until the panel's outro animation finishes, so
+     *       IsActive() keeps reporting true while it slides out.
      */
     void end();
 
@@ -88,6 +91,18 @@ class DialogueComponent : public ae::Component
 
     /// track the currently loaded bust
     bool renderBust = true;
+
+    /// true while the panel's intro animation is playing; text/bust reveal is held until it finishes
+    bool opening = false;
+    /// the line to reveal once the intro animation finishes
+    Dialogue* pendingFirstLine = nullptr;
+
+    /// true while the panel's outro animation is playing, delaying the real end()
+    bool closing = false;
+    int slideDelayFrames = 0;
+
+    // number of frames the intro/outro slide animation needs to finish, at the engine's fixed 60fps tick
+    static constexpr int kSlideDelayFrames = DialogueScreen::kSlideDurationMs * 60 / 1000;
 
     u32 prevKeys = 0;
 
