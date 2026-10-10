@@ -32,6 +32,7 @@ set(P3D_SOURCE_OUTPUTS
     ${P3D_MAP_OUTPUTS}
     ${P3D_MODEL_OUTPUTS}
     ${P3D_DIALOGUE_OUTPUTS}
+    "${P3D_SOURCE_DIR}/source/data/environmentDb.cpp"
 )
 if(P3D_SOURCE_OUTPUTS)
     file(REMOVE ${P3D_SOURCE_OUTPUTS})
@@ -50,10 +51,6 @@ if(EXISTS "${P3D_SOURCE_DIR}/sdcard.img")
 endif()
 if(EXISTS "${P3D_SOURCE_DIR}/sdcard.img.idx")
     file(REMOVE "${P3D_SOURCE_DIR}/sdcard.img.idx")
-endif()
-
-if(EXISTS "${P3D_SOURCE_DIR}/build")
-    file(REMOVE_RECURSE "${P3D_SOURCE_DIR}/build")
 endif()
 
 message(STATUS "Generated asset outputs cleaned")

@@ -161,6 +161,7 @@ foreach(env_dir IN LISTS P3D_ASSET_ENV_DIRS)
         list(APPEND P3D_ADDITIONAL_CLEAN "${CMAKE_SOURCE_DIR}/data/environments/${env_name}")
     endif()
 endforeach()
+list(APPEND P3D_ADDITIONAL_CLEAN "${CMAKE_SOURCE_DIR}/source/data/environmentDb.cpp")
 
 file(GLOB P3D_ASSET_MODEL_DIRS LIST_DIRECTORIES true "${CMAKE_SOURCE_DIR}/assets/models/*")
 foreach(model_dir IN LISTS P3D_ASSET_MODEL_DIRS)
