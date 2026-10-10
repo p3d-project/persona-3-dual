@@ -1,4 +1,6 @@
--g -gt -gB8
--m -mR8
+-gt
+-gB4
+-m
+-mR4
 -p
-
+-pn16
