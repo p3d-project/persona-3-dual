@@ -26,6 +26,6 @@ struct SaveHeader
 struct Save
 {
     SaveHeader header;
-    char lastName[32];
-    char firstName[32];
+    char lastName[10];
+    char firstName[10];
 } __attribute__((packed));

@@ -9,28 +9,28 @@
  */
 enum TextColor
 {
-    Transparent = 0,
-    Black = 1,
-    White = 2,
-    DualGreen = 3,
-    DualGreen2 = 4,
-    DarkGreen = 5,
-    DarkerGreen = 6,
-    DarkestGreen = 7,
-    LightBlue = 8,
-    RichBlue = 9,
-    DarkBlue = 10,
-    NavyBlue = 11,
-    DarkestBlue = 12,
-    LightOrange = 13,
-    LightPurple = 14,
-    Red = 15,
-    Green = 16,
-    Blue = 17,
-    Yellow = 18,
-    Magenta = 19,
-    Cyan = 20,
-    Gray = 21
+    Transparent = 0, // 8bpp uses palette index 0 as transparent
+    Black = 235,
+    White = 236,
+    DualGreen = 237,
+    DualGreen2 = 238,
+    DarkGreen = 239,
+    DarkerGreen = 240,
+    DarkestGreen = 241,
+    LightBlue = 242,
+    RichBlue = 243,
+    DarkBlue = 244,
+    NavyBlue = 245,
+    DarkestBlue = 246,
+    LightOrange = 247,
+    LightPurple = 248,
+    Red = 249,
+    Green = 250,
+    Blue = 251,
+    Yellow = 252,
+    Magenta = 253,
+    Cyan = 254,
+    Gray = 255
 };
 
 /**

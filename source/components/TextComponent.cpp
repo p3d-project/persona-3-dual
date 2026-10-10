@@ -112,6 +112,19 @@ void TextComponent::drawGlyph(const Glyph& glyph, int x, int y, int color, bool 
     ts.drawGlyph(glyph, font, videoBuffer, x, y, color, bold, italic, underline);
 }
 
+Glyph* TextComponent::getGlyph(const char& c, bool bold)
+{
+    if (font == nullptr)
+    {
+        return nullptr;
+    }
+    if (bold)
+    {
+        return &font->boldGlyphs[static_cast<unsigned char>(c)];
+    }
+    return &font->glyphs[static_cast<unsigned char>(c)];
+}
+
 void TextComponent::clearArea(int x, int y, int width, int height)
 {
     ts.clearArea(videoBuffer, x, y, width, height);
