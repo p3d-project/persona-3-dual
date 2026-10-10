@@ -38,16 +38,16 @@ class PauseMenuHUDScreen : public UIScreen
     const std::string spritePath = "graphics/PauseMenuHUD/sprites/";
 
     // status sprite
-    Sprite statusSprite = {SpriteSize_32x32, SpriteColorFormat_256Color, 0};
+    Sprite statusSprite = {SpriteSize_32x32, SpriteColorFormat_16Color, 0};
     GraphicAsset statusGraphic = {};
     SpriteRenderState srs0 = {statusSprite, 202, -15, 1, 0, false, false, false, true};
     SpritePayload sp0 = {srs0, spritePath, statusGraphic, SpriteType::STATUS, (int)StatusSprite::STATUS_GREAT};
 
     // selected option sprites
-    Sprite selectedOptionSprites[4] = {{SpriteSize_32x16, SpriteColorFormat_256Color, 1},
-                                       {SpriteSize_32x16, SpriteColorFormat_256Color, 1},
-                                       {SpriteSize_32x16, SpriteColorFormat_256Color, 1},
-                                       {SpriteSize_32x16, SpriteColorFormat_256Color, 1}};
+    Sprite selectedOptionSprites[4] = {{SpriteSize_32x16, SpriteColorFormat_16Color, 0},
+                                       {SpriteSize_32x16, SpriteColorFormat_16Color, 0},
+                                       {SpriteSize_32x16, SpriteColorFormat_16Color, 0},
+                                       {SpriteSize_32x16, SpriteColorFormat_16Color, 0}};
     GraphicAsset selectedOptionGraphics[4] = {};
 
     SpriteRenderState srs1 = {selectedOptionSprites[0], 165, -5, 1, 0, false, false, false, true};
@@ -79,8 +79,6 @@ class PauseMenuHUDScreen : public UIScreen
                          (int)SelectedOptionSprite::SELECTED_OPTION_3};
 
     // data groups
-    etl::array<GraphicAsset*, 2> spritePalettes = {&statusGraphic, &selectedOptionGraphics[0]};
-
     etl::array<SpritePayload, 5> spritePayloads = {sp0, sp1, sp2, sp3, sp4};
 
     etl::array<SpriteTransform, 0> spriteTransforms = {};

@@ -56,21 +56,9 @@ void PauseMenuHUDScreen::unloadBackground()
 
 void PauseMenuHUDScreen::renderSprites()
 {
-    // NOTE: we are currently assuming that the sprite extended palette will be set on VRAM bank I
-    // TODO: remove extended palette, and use normal palette sprites
-
     // load palettes
-    int k = 0;
-    vramSetBankI(VRAM_I_LCD);
-    for (GraphicAsset*& ga : spritePalettes)
-    {
-        if (ga != nullptr)
-        {
-            dmaCopy(ga->pal, &VRAM_I_EXT_SPR_PALETTE[k][0], ga->palLen);
-        }
-        k++;
-    }
-    vramSetBankI(VRAM_I_SUB_SPRITE_EXT_PALETTE);
+    // dmaCopy(bgHUD.pal, SPRITE_PALETTE_SUB, bgHUD.palLen);
+    dmaCopy(statusGraphic.pal, SPRITE_PALETTE_SUB, statusGraphic.palLen);
 
     // perform transformations
     /// index -1 is reserved for vflip/hflip, 0 is reserved for no transform
