@@ -35,10 +35,15 @@ static const SpriteDBEntry SPRITE_DB_ENTRY[] = {
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_28), "moon-28"},
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_29), "moon-29"},
 
-    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_GREAT), "status-great"},
-    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_GOOD), "status-good"},
-    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_TIRED), "status-tired"},
-    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_SICK), "status-sick"},
+    {SpriteType::SELECTED_OPTION, static_cast<int>(SelectedOptionSprite::SELECTED_OPTION_0), "selected-0"},
+    {SpriteType::SELECTED_OPTION, static_cast<int>(SelectedOptionSprite::SELECTED_OPTION_1), "selected-1"},
+    {SpriteType::SELECTED_OPTION, static_cast<int>(SelectedOptionSprite::SELECTED_OPTION_2), "selected-2"},
+    {SpriteType::SELECTED_OPTION, static_cast<int>(SelectedOptionSprite::SELECTED_OPTION_3), "selected-3"},
+
+    {SpriteType::SELECTED_OPTION, static_cast<int>(StatusSprite::STATUS_GREAT), "status-great"},
+    {SpriteType::SELECTED_OPTION, static_cast<int>(StatusSprite::STATUS_GOOD), "status-good"},
+    {SpriteType::SELECTED_OPTION, static_cast<int>(StatusSprite::STATUS_TIRED), "status-tired"},
+    {SpriteType::SELECTED_OPTION, static_cast<int>(StatusSprite::STATUS_SICK), "status-sick"},
 
     {SpriteType::DAY_OF_WEEK, static_cast<int>(DayOfWeekSprite::SUNDAY), "sunday"},
     {SpriteType::DAY_OF_WEEK, static_cast<int>(DayOfWeekSprite::MONDAY), "monday"},

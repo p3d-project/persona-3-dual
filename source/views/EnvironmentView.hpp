@@ -18,6 +18,7 @@
 #include "components/menus/PauseMenu.hpp"
 #include "components/screens/DialogueScreen.hpp"
 #include "components/screens/MenuHUDScreen.hpp"
+#include "components/screens/PauseMenuHUDScreen.hpp"
 // controllers
 #include "controllers/AnimationController.hpp"
 // managers
@@ -161,6 +162,7 @@ class EnvironmentView : public BaseView
     // UI
     DialogueScreen* dialogueScreen = nullptr;
     MenuHUDScreen* menuHUDScreen = nullptr;
+    PauseMenuHUDScreen* pauseMenuHUDScreen = nullptr;
 
     BattleMenu* battleMenuCmpt = nullptr;
     PauseMenu* pauseMenuCmpt = nullptr;

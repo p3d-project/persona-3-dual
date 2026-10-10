@@ -8,6 +8,7 @@ enum class SpriteType
     ICON,
     MOON,
     STATUS,
+    SELECTED_OPTION,
     DAY_OF_WEEK,
     DIGIT,
     TIME,
@@ -64,6 +65,14 @@ enum class StatusSprite
     STATUS_GOOD,
     STATUS_TIRED,
     STATUS_SICK
+};
+
+enum class SelectedOptionSprite
+{
+    SELECTED_OPTION_0 = 0,
+    SELECTED_OPTION_1,
+    SELECTED_OPTION_2,
+    SELECTED_OPTION_3,
 };
 
 enum class IconSprite
