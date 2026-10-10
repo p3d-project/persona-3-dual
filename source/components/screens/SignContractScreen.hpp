@@ -33,7 +33,8 @@ class SignContractScreen : public UIScreen
 
     void loadSaveDataName();
     void loadBackgrounds();
-    void renderBackground();
+    void switchBackground();
+    void renderBackground(int bgIndex = 0);
     void unloadBackgrounds();
 
     int evaluateInput(char c);
@@ -61,4 +62,7 @@ class SignContractScreen : public UIScreen
     int index = 0;
     char firstName[10] = "         ";
     char lastName[10] = "         ";
+
+    bool isShift = false;
+    bool isCapsLock = false;
 };

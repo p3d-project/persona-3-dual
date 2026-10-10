@@ -52,15 +52,29 @@ void SignContractScreen::renderSprites()
     updateStatus("Enter your last name");
 }
 
-void SignContractScreen::renderBackground()
+void SignContractScreen::renderBackground(int bgIndex)
 {
     // load palettes
-    dmaCopy(bgUI[0].pal, BG_PALETTE_SUB, bgUI[0].palLen);
+    dmaCopy(bgUI[bgIndex].pal, BG_PALETTE_SUB, bgUI[bgIndex].palLen);
 
     // draw background (copy into vram)
     dmaFillHalfWords(0, bgGetMapPtr(bgId), 2048);
-    dmaCopy(bgUI[0].tiles, bgGetGfxPtr(bgId), bgUI[0].tilesLen);
-    dmaCopy(bgUI[0].map, bgGetMapPtr(bgId), bgUI[0].mapLen);
+    dmaCopy(bgUI[bgIndex].tiles, bgGetGfxPtr(bgId), bgUI[bgIndex].tilesLen);
+    dmaCopy(bgUI[bgIndex].map, bgGetMapPtr(bgId), bgUI[bgIndex].mapLen);
+}
+
+void SignContractScreen::switchBackground()
+{
+    int index = 0;
+    if (isShift || isCapsLock)
+    {
+        index = 1;
+    }
+    else
+    {
+        index = 0;
+    }
+    renderBackground(index);
 }
 
 void SignContractScreen::unloadBackgrounds()
@@ -80,12 +94,14 @@ int SignContractScreen::onTouch(touchPosition* touch)
     {
     case KEYCODES::CAPSLOCK:
     {
-        //TODO: switch image
+        isCapsLock = !isCapsLock;
+        switchBackground();
         break;
     }
     case KEYCODES::SHIFT:
     {
-        //TODO: switch image
+        isShift = !isShift;
+        switchBackground();
         break;
     }
     case KEYCODES::BACKSPACE:
@@ -163,6 +179,11 @@ int SignContractScreen::onTouch(touchPosition* touch)
 
 void SignContractScreen::writeCharacter(char c)
 {
+    if (isShift)
+    {
+        isShift = false;
+        switchBackground();
+    }
     if (index < 10)
     {
         lastName[index] = c;
