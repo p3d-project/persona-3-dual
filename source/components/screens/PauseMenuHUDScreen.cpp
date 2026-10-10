@@ -1,17 +1,17 @@
-#include "MenuHUDScreen.hpp"
+#include "PauseMenuHUDScreen.hpp"
 #include "core/globals.hpp"
 
-MenuHUDScreen* MenuHUDScreen::instance = nullptr;
+PauseMenuHUDScreen* PauseMenuHUDScreen::instance = nullptr;
 
-void MenuHUDScreen::create()
+void PauseMenuHUDScreen::create()
 {
     if (instance == nullptr)
     {
-        instance = new MenuHUDScreen();
+        instance = new PauseMenuHUDScreen();
     }
 }
 
-void MenuHUDScreen::destroy()
+void PauseMenuHUDScreen::destroy()
 {
     if (instance != nullptr)
     {
@@ -20,22 +20,22 @@ void MenuHUDScreen::destroy()
     }
 }
 
-MenuHUDScreen* MenuHUDScreen::getInstance()
+PauseMenuHUDScreen* PauseMenuHUDScreen::getInstance()
 {
     if (instance == nullptr)
     {
-        instance = new MenuHUDScreen();
+        instance = new PauseMenuHUDScreen();
     }
     return instance;
 }
 
-void MenuHUDScreen::loadBackground()
+void PauseMenuHUDScreen::loadBackground()
 {
     // load background into ram
-    bgHUD = graphics->loadGraphic(bgPath + "menuHUD/menuHUD");
+    bgHUD = graphics->loadGraphic(bgPath + "pause/pause");
 }
 
-void MenuHUDScreen::renderBackground()
+void PauseMenuHUDScreen::renderBackground()
 {
     // load palette
     dmaCopy(bgHUD.pal, BG_PALETTE_SUB, bgHUD.palLen);
@@ -45,30 +45,18 @@ void MenuHUDScreen::renderBackground()
     dmaCopy(bgHUD.map, bgGetMapPtr(bgId), bgHUD.mapLen);
 }
 
-void MenuHUDScreen::unloadBackground()
+void PauseMenuHUDScreen::unloadBackground()
 {
     // unload background from ram
     graphics->unloadGraphic(bgHUD);
     bgHUD = {};
 }
 
-void MenuHUDScreen::renderSprites()
+void PauseMenuHUDScreen::renderSprites()
 {
-    // NOTE: we are currently assuming that the sprite extended palette will be set on VRAM bank I
-    // TODO: remove extended palette, and use normal palette sprites
-
     // load palettes
-    int k = 0;
-    vramSetBankI(VRAM_I_LCD);
-    for (GraphicAsset*& ga : spritePalettes)
-    {
-        if (ga != nullptr)
-        {
-            dmaCopy(ga->pal, &VRAM_I_EXT_SPR_PALETTE[k][0], ga->palLen);
-        }
-        k++;
-    }
-    vramSetBankI(VRAM_I_SUB_SPRITE_EXT_PALETTE);
+    // dmaCopy(bgHUD.pal, SPRITE_PALETTE_SUB, bgHUD.palLen);
+    dmaCopy(statusGraphic.pal, SPRITE_PALETTE_SUB, statusGraphic.palLen);
 
     // perform transformations
     /// index -1 is reserved for vflip/hflip, 0 is reserved for no transform
@@ -111,7 +99,7 @@ void MenuHUDScreen::renderSprites()
     renderBackground();
 }
 
-int MenuHUDScreen::onTouch(touchPosition* touch)
+int PauseMenuHUDScreen::onTouch(touchPosition* touch)
 {
     if (touch->px >= 193 && touch->px <= 250 && touch->py >= 166 && touch->py <= 184)
     {
@@ -121,14 +109,14 @@ int MenuHUDScreen::onTouch(touchPosition* touch)
     return -1;
 }
 
-void MenuHUDScreen::load()
+void PauseMenuHUDScreen::load()
 {
     // create relevant entities, components
-    if (menuHUD == nullptr)
+    if (pauseMenuHUD == nullptr)
     {
-        menuHUD = engine.CreateEntity();
+        pauseMenuHUD = engine.CreateEntity();
         graphics = engine.CreateComponent<GraphicsComponent>();
-        menuHUD->AddComponent(graphics);
+        pauseMenuHUD->AddComponent(graphics);
     }
 
     // load sprites
@@ -153,7 +141,7 @@ void MenuHUDScreen::load()
     loadBackground();
 };
 
-void MenuHUDScreen::unload()
+void PauseMenuHUDScreen::unload()
 {
     // hide sprites
     removeSprites();
@@ -186,11 +174,11 @@ void MenuHUDScreen::unload()
     // unload background
     unloadBackground();
 
-    if (menuHUD != nullptr)
+    if (pauseMenuHUD != nullptr)
     {
-        engine.DestroyEntity(menuHUD);
+        engine.DestroyEntity(pauseMenuHUD);
 
-        menuHUD = nullptr;
+        pauseMenuHUD = nullptr;
         graphics = nullptr;
     }
 }
