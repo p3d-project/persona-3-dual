@@ -1,9 +1,9 @@
 #pragma once
 #include "animation/Animation.h"
 #include "animation/AnimationHandle.h"
+#include <etl/vector.h>
 #include <memory>
 #include <type_traits>
-#include <vector>
 
 namespace uiAnimation
 {
@@ -13,11 +13,20 @@ class Animator;
 class SequenceAnimation : public Animation
 {
   public:
-    using Group = std::vector<std::shared_ptr<Animation>>;
+    static constexpr std::size_t MAX_STEPS = 8;
+    static constexpr std::size_t MAX_ANIMATIONS_PER_STEP = 4;
+    using Group = etl::vector<std::shared_ptr<Animation>, MAX_ANIMATIONS_PER_STEP>;
 
     void appendGroup(std::shared_ptr<Animation> anim)
     {
-        steps.push_back({std::move(anim)});
+        if (steps.full())
+        {
+            return;
+        }
+
+        Group group;
+        group.push_back(std::move(anim));
+        steps.push_back(std::move(group));
     }
 
     void joinGroup(std::shared_ptr<Animation> anim)
@@ -27,7 +36,11 @@ class SequenceAnimation : public Animation
             appendGroup(std::move(anim));
             return;
         }
-        steps.back().push_back(std::move(anim));
+
+        if (!steps.back().full())
+        {
+            steps.back().push_back(std::move(anim));
+        }
     }
 
   protected:
@@ -50,7 +63,7 @@ class SequenceAnimation : public Animation
     }
 
   private:
-    std::vector<Group> steps;
+    etl::vector<Group, MAX_STEPS> steps;
     int currentStep = 0;
 };
 

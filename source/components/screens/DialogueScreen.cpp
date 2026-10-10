@@ -348,6 +348,7 @@ void DialogueScreen::unload()
 
         dialogue = nullptr;
         graphics = nullptr;
+        animation = nullptr;
     }
 }
 

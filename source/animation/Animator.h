@@ -6,10 +6,9 @@
 #include "animation/DelayAnimation.h"
 #include "animation/PropertyAnimation.h"
 #include "animation/SequenceAnimation.h"
-#include <algorithm>
+#include <etl/vector.h>
 #include <functional>
 #include <memory>
-#include <vector>
 
 namespace uiAnimation
 {
@@ -17,6 +16,8 @@ namespace uiAnimation
 class Animator
 {
   public:
+    static constexpr std::size_t MAX_ACTIVE_ANIMATIONS = 8;
+
     template <typename T> PropertyAnimationBuilder<T> animate(T& target)
     {
         return PropertyAnimationBuilder<T>(target, this);
@@ -34,6 +35,11 @@ class Animator
 
     AnimationHandle play(std::shared_ptr<Animation> anim)
     {
+        if (anim == nullptr || active.full())
+        {
+            return AnimationHandle();
+        }
+
         active.push_back(anim);
         return AnimationHandle(std::move(anim));
     }
@@ -50,10 +56,17 @@ class Animator
 
     void update(float dt)
     {
-        active.erase(std::remove_if(active.begin(),
-                                    active.end(),
-                                    [dt](const std::shared_ptr<Animation>& a) { return a->tick(dt); }),
-                     active.end());
+        for (auto it = active.begin(); it != active.end();)
+        {
+            if ((*it)->tick(dt))
+            {
+                it = active.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
     }
 
     void cancelAll()
@@ -64,7 +77,7 @@ class Animator
     }
 
   private:
-    std::vector<std::shared_ptr<Animation>> active;
+    etl::vector<std::shared_ptr<Animation>, MAX_ACTIVE_ANIMATIONS> active;
 };
 
 template <typename T> AnimationHandle PropertyAnimationBuilder<T>::start()
