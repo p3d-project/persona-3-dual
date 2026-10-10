@@ -79,6 +79,10 @@ void SignContractScreen::switchBackground()
 
 void SignContractScreen::unloadBackgrounds()
 {
+    // clear vram
+    dmaFillHalfWords(0, bgGetMapPtr(bgId), 2048);
+    dmaFillHalfWords(0, BG_PALETTE_SUB, bgUI[0].palLen);
+
     // unload backgrounds from ram
     graphics->unloadGraphic(bgUI[0]);
     graphics->unloadGraphic(bgUI[1]);
@@ -196,9 +200,9 @@ void SignContractScreen::writeCharacter(char c)
     }
     else
     {
-        firstName[index - 10] = c;
-        if (index != 19)
+        if (index < 20)
         {
+            firstName[index - 10] = c;
             index++;
         }
     }
