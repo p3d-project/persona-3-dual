@@ -64,7 +64,7 @@ void PauseMenuHUDScreen::renderSprites()
     vramSetBankI(VRAM_I_LCD);
     for (GraphicAsset*& ga : spritePalettes)
     {
-        if (ga != nullptr && k == 0)
+        if (ga != nullptr)
         {
             dmaCopy(ga->pal, &VRAM_I_EXT_SPR_PALETTE[k][0], ga->palLen);
         }
