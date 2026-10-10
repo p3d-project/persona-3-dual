@@ -29,48 +29,20 @@ MenuHUDScreen* MenuHUDScreen::getInstance()
     return instance;
 }
 
-void MenuHUDScreen::loadBackground()
-{
-    // load background into ram
-    bgHUD = graphics->loadGraphic(bgPath + "menuHUD/menuHUD");
-}
-
 void MenuHUDScreen::renderBackground()
 {
-    // load palettes
-    vramSetBankH(VRAM_H_LCD);
-    dmaCopy(bgHUD.pal, &VRAM_H_EXT_PALETTE[bgId % 4][0], bgHUD.palLen);
-    vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE);
+    // load palette
+    dmaCopy(bgHUD.pal, BG_PALETTE_SUB, bgHUD.palLen);
 
     // draw background (copy into vram)
     dmaCopy(bgHUD.tiles, bgGetGfxPtr(bgId), bgHUD.tilesLen);
     dmaCopy(bgHUD.map, bgGetMapPtr(bgId), bgHUD.mapLen);
 }
 
-void MenuHUDScreen::unloadBackground()
-{
-    // unload background from ram
-    graphics->unloadGraphic(bgHUD);
-    bgHUD = {};
-}
-
 void MenuHUDScreen::renderSprites()
 {
-    // NOTE: we are currently assuming that the sprite extended palette will be set on VRAM bank I
-    // TODO: remove extended palette, and use normal palette sprites
-
     // load palettes
-    int k = 0;
-    vramSetBankI(VRAM_I_LCD);
-    for (GraphicAsset*& ga : spritePalettes)
-    {
-        if (ga != nullptr)
-        {
-            dmaCopy(ga->pal, &VRAM_I_EXT_SPR_PALETTE[k][0], ga->palLen);
-        }
-        k++;
-    }
-    vramSetBankI(VRAM_I_SUB_SPRITE_EXT_PALETTE);
+    dmaCopy(bgHUD.pal, SPRITE_PALETTE_SUB, bgHUD.palLen);
 
     // perform transformations
     /// index -1 is reserved for vflip/hflip, 0 is reserved for no transform
@@ -159,8 +131,8 @@ void MenuHUDScreen::load()
         }
     }
 
-    // load background
-    loadBackground();
+    // load background into ram
+    bgHUD = graphics->loadGraphic(bgPath + "menuHUD/menuHUD");
 };
 
 void MenuHUDScreen::unload()
@@ -193,8 +165,9 @@ void MenuHUDScreen::unload()
         }
     }
 
-    // unload background
-    unloadBackground();
+    // unload background from ram
+    graphics->unloadGraphic(bgHUD);
+    bgHUD = {};
 
     if (menuHUD != nullptr)
     {
