@@ -42,10 +42,13 @@ class SignContractScreen : public UIScreen
 
     void updateStatus(std::string status);
     void renderName();
+    void renderCursor();
 
     ae::Entity* signContractUI = nullptr;
     GraphicsComponent* graphics = nullptr;
     TextComponent* text = nullptr;
+
+    uint16_t* bgTextBufferSub = nullptr;
 
     Keyboard_N keyboard;
 

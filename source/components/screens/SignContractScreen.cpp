@@ -1,6 +1,16 @@
 #include "SignContractScreen.hpp"
 #include "core/globals.hpp"
 
+static void drawPixel(uint16_t* videoBuffer, int x, int y, int paletteValue)
+{
+    int wordIndex = (y * 256 + x) / 2;
+    u16 currentWord = videoBuffer[wordIndex];
+    if (x % 2 == 0) //Clear the lower 8 bits, then inject our 8-bit color index
+        videoBuffer[wordIndex] = (currentWord & 0xFF00) | (paletteValue & 0xFF);
+    else //Clear the upper 8 bits, then inject our 8-bit color index shifted up
+        videoBuffer[wordIndex] = (currentWord & 0x00FF) | ((paletteValue & 0xFF) << 8);
+}
+
 SignContractScreen* SignContractScreen::instance = nullptr;
 
 void SignContractScreen::create()
@@ -37,6 +47,7 @@ void SignContractScreen::loadSaveDataName()
         firstName[i] = saveData.firstName[i];
     }
     renderName();
+    renderCursor();
 }
 
 void SignContractScreen::loadBackgrounds()
@@ -56,6 +67,7 @@ void SignContractScreen::renderBackground(int bgIndex)
 {
     // load palettes
     dmaCopy(bgUI[bgIndex].pal, BG_PALETTE_SUB, bgUI[bgIndex].palLen);
+    TextManager::GetInstance().loadDefaultPalette(); // prevent this from being ovberwritten
 
     // draw background (copy into vram)
     dmaFillHalfWords(0, bgGetMapPtr(bgId), 2048);
@@ -133,6 +145,7 @@ int SignContractScreen::onTouch(touchPosition* touch)
             }
         }
         renderName();
+        renderCursor();
         break;
     }
     case KEYCODES::LEFT:
@@ -146,6 +159,7 @@ int SignContractScreen::onTouch(touchPosition* touch)
                 updateStatus("Enter your last name");
             }
         }
+        renderCursor();
         break;
     }
     case KEYCODES::RIGHT:
@@ -159,6 +173,7 @@ int SignContractScreen::onTouch(touchPosition* touch)
                 updateStatus("Enter your first name");
             }
         }
+        renderCursor();
         break;
     }
     case KEYCODES::CONFIRM:
@@ -175,6 +190,7 @@ int SignContractScreen::onTouch(touchPosition* touch)
         {
             writeCharacter(c);
         }
+        renderCursor();
         break;
     }
     }
@@ -240,6 +256,22 @@ void SignContractScreen::renderName()
     }
 }
 
+void SignContractScreen::renderCursor()
+{
+    // Clear old cursor first
+    // Clear both lines to be safe (then we don't need to store the old cursor position)
+    text->clearArea(65, 42, 125, 1);
+    text->clearArea(65, 59, 125, 1);
+
+    // Draw new cursor
+    int y = isLastName ? 42 : 59;
+    int x = 65 + (13 * (isLastName ? index : index - 10));
+    for (int i = 0; i < 9; i++)
+    {
+        drawPixel(bgTextBufferSub, x + i, y, TextColor::RichBlue);
+    }
+}
+
 void SignContractScreen::load()
 {
     if (signContractUI == nullptr)
@@ -249,13 +281,15 @@ void SignContractScreen::load()
         signContractUI->AddComponent(graphics);
     }
 
+    setBackdropColor(ARGB16(1, 0, 0, 4));
+
     text = engine.CreateComponent<TextComponent>();
     signContractUI->AddComponent(text);
     int bgTextSub = bgInitSub(3, BgType_Bmp8, BgSize_B8_256x256, 4, 0);
-    uint16_t* textVideoBufferSub = bgGetGfxPtr(bgTextSub);
+    bgTextBufferSub = bgGetGfxPtr(bgTextSub);
     bgSetPriority(bgTextSub, 0);
     bgSetPriority(bgId, 1);
-    text->configureText(TextConfig{textVideoBufferSub, &FONT_NAME, FONT_SIZE});
+    text->configureText(TextConfig{bgTextBufferSub, &FONT_NAME, FONT_SIZE});
     lineSpacing = text->getLineSpacing(); // get it now so we don't waste time at runtime
 
     loadBackgrounds();
