@@ -54,6 +54,29 @@ function(p3d_run)
     endif()
 endfunction()
 
+function(p3d_grit_flags_for_png png out_var)
+    set(grit_flags -ftb)
+    get_filename_component(png_dir "${png}" DIRECTORY)
+    get_filename_component(png_stem "${png}" NAME_WE)
+    set(grit_file "${png_dir}/${png_stem}.grit")
+
+    if(EXISTS "${grit_file}")
+        set(grit_flags)
+        file(STRINGS "${grit_file}" grit_lines)
+        foreach(grit_line IN LISTS grit_lines)
+            string(STRIP "${grit_line}" grit_line)
+            if(grit_line STREQUAL "")
+                continue()
+            endif()
+
+            separate_arguments(grit_line_flags UNIX_COMMAND "${grit_line}")
+            list(APPEND grit_flags ${grit_line_flags})
+        endforeach()
+    endif()
+
+    set(${out_var} ${grit_flags} PARENT_SCOPE)
+endfunction()
+
 p3d_group_enabled(dialogue P3D_RUN_DIALOGUE)
 
 if(P3D_RUN_DIALOGUE)
@@ -205,10 +228,11 @@ if(P3D_RUN_GRAPHICS)
         set(out_dir "${DATA_DIR}/${rel_dir}/${stem}")
         set(out_base "${out_dir}/${stem}")
         file(MAKE_DIRECTORY "${out_dir}")
+        p3d_grit_flags_for_png("${png}" grit_flags)
 
         p3d_run(
             WORKING_DIRECTORY "${P3D_SOURCE_DIR}"
-            COMMAND "${P3D_GRIT_EXECUTABLE}" "${png}" -ftb -fh! -o "${out_base}"
+            COMMAND "${P3D_GRIT_EXECUTABLE}" "${png}" ${grit_flags} -fh! -o "${out_base}"
         )
     endforeach()
 
@@ -226,10 +250,11 @@ if(P3D_RUN_GRAPHICS)
         set(out_dir "${DATA_DIR}/${rel_dir}/${stem}")
         set(out_base "${out_dir}/${stem}")
         file(MAKE_DIRECTORY "${out_dir}")
+        p3d_grit_flags_for_png("${png}" grit_flags)
 
         p3d_run(
             WORKING_DIRECTORY "${P3D_SOURCE_DIR}"
-            COMMAND "${P3D_GRIT_EXECUTABLE}" "${png}" -ftb -fh! -o "${out_base}"
+            COMMAND "${P3D_GRIT_EXECUTABLE}" "${png}" ${grit_flags} -fh! -o "${out_base}"
         )
     endforeach()
 endif()
