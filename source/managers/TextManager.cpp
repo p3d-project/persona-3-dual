@@ -4,30 +4,29 @@
 // Helper macro to convert 8 bit RGB values to 5 bit RGB values for the Nintendo DS
 #define NDS_RGB(r, g, b) (uint16_t)((r) >> 3) | (((g) >> 3) << 5) | (((b) >> 3) << 10) | BIT(15)
 
-static const uint16_t customPalette[256] = {
-    ARGB16(0, 0, 0, 0),     // Transparent   0
-    ARGB16(1, 0, 0, 0),     // Black         1
-    ARGB16(1, 31, 31, 31),  // White         2
-    NDS_RGB(0, 202, 105),   // Dual Green    3
-    NDS_RGB(18, 168, 88),   // Dual Green 2  4
-    NDS_RGB(28, 118, 55),   // Dark Green    5
-    NDS_RGB(0, 69, 40),     // Darker Green  6
-    NDS_RGB(4, 34, 18),     // Darkest Green 7
-    NDS_RGB(121, 206, 255), // Light Blue    8
-    NDS_RGB(9, 137, 253),   // Rich Blue     9
-    NDS_RGB(0, 104, 208),   // Dark Blue     10
-    NDS_RGB(0, 44, 208),    // Navy Blue     11
-    NDS_RGB(0, 0, 36),      // Darkest Blue  12
-    NDS_RGB(245, 198, 164), // Light Orange  13
-    NDS_RGB(198, 164, 245), // Light Purple  14
+static const uint16_t customPalette[21] = {
+    ARGB16(1, 0, 0, 0),     // Black         235
+    ARGB16(1, 31, 31, 31),  // White         236
+    NDS_RGB(0, 202, 105),   // Dual Green    237
+    NDS_RGB(18, 168, 88),   // Dual Green 2  238
+    NDS_RGB(28, 118, 55),   // Dark Green    239
+    NDS_RGB(0, 69, 40),     // Darker Green  240
+    NDS_RGB(4, 34, 18),     // Darkest Green 241
+    NDS_RGB(121, 206, 255), // Light Blue    242
+    NDS_RGB(9, 137, 253),   // Rich Blue     243
+    NDS_RGB(0, 104, 208),   // Dark Blue     244
+    NDS_RGB(0, 44, 208),    // Navy Blue     245
+    NDS_RGB(0, 0, 36),      // Darkest Blue  246
+    NDS_RGB(245, 198, 164), // Light Orange  247
+    NDS_RGB(198, 164, 245), // Light Purple  248
     //Defaults
-    ARGB16(1, 31, 0, 0),   // Red           15
-    ARGB16(1, 0, 31, 0),   // Green         16
-    ARGB16(1, 0, 0, 31),   // Blue          17
-    ARGB16(1, 31, 31, 0),  // Yellow        18
-    ARGB16(1, 31, 0, 31),  // Magenta       19
-    ARGB16(1, 0, 31, 31),  // Cyan          20
-    ARGB16(1, 15, 15, 15), // Gray          21
+    ARGB16(1, 31, 0, 0),   // Red           249
+    ARGB16(1, 0, 31, 0),   // Green         250
+    ARGB16(1, 0, 0, 31),   // Blue          251
+    ARGB16(1, 31, 31, 0),  // Yellow        252
+    ARGB16(1, 31, 0, 31),  // Magenta       253
+    ARGB16(1, 0, 31, 31),  // Cyan          254
+    ARGB16(1, 15, 15, 15), // Gray          255
 };
 
 Font* TextManager::loadFont(std::string* name, int size)
@@ -82,8 +81,8 @@ void TextManager::unloadFont(Font* font)
 
 void TextManager::loadDefaultPalette()
 {
-    dmaCopy(customPalette, BG_PALETTE, 256 * sizeof(uint16_t));
-    dmaCopy(customPalette, BG_PALETTE_SUB, 256 * sizeof(uint16_t));
+    dmaCopy(customPalette, BG_PALETTE + 235, 21 * sizeof(uint16_t));
+    dmaCopy(customPalette, BG_PALETTE_SUB + 235, 21 * sizeof(uint16_t));
 }
 
 bool TextManager::loadPalette(std::string* path, bool sub)
