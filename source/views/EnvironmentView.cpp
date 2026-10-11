@@ -299,14 +299,7 @@ ViewState EnvironmentView::update()
 
             prevPauseState = true;
 
-            if (pauseMenuHUDScreen != nullptr)
-            {
-                ae::BroadcastEvent(Event::ShowScreen{pauseMenuHUDScreen});
-            }
-            else
-            {
-                ae::BroadcastEvent(Event::HideAllScreens{});
-            }
+            ae::BroadcastEvent(Event::ShowScreen{pauseMenuHUDScreen});
             ae::BroadcastEvent(Event::ShowMenu{pauseMenuCmpt});
         }
 
@@ -316,6 +309,7 @@ ViewState EnvironmentView::update()
             textSub->clearScreen();
 
             ae::BroadcastEvent(Event::HideAllMenus{});
+            ae::BroadcastEvent(Event::ShowScreen{menuHUDScreen});
 
             prevEnvironmentState = false;
 
@@ -377,12 +371,6 @@ ViewState EnvironmentView::update()
         {
             textSub->clearScreen();
             prevEnvironmentState = false;
-
-            //for testing, but probably not necessary
-            if (menuHUDScreen != nullptr)
-            {
-                menuHUDScreen->unload();
-            }
 
             movement->stop();
             ae::BroadcastEvent(Event::StopCamera{});

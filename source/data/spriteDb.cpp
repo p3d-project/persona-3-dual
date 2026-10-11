@@ -40,10 +40,10 @@ static const SpriteDBEntry SPRITE_DB_ENTRY[] = {
     {SpriteType::SELECTED_OPTION, static_cast<int>(SelectedOptionSprite::SELECTED_OPTION_2), "selected-2"},
     {SpriteType::SELECTED_OPTION, static_cast<int>(SelectedOptionSprite::SELECTED_OPTION_3), "selected-3"},
 
-    {SpriteType::SELECTED_OPTION, static_cast<int>(StatusSprite::STATUS_GREAT), "status-great"},
-    {SpriteType::SELECTED_OPTION, static_cast<int>(StatusSprite::STATUS_GOOD), "status-good"},
-    {SpriteType::SELECTED_OPTION, static_cast<int>(StatusSprite::STATUS_TIRED), "status-tired"},
-    {SpriteType::SELECTED_OPTION, static_cast<int>(StatusSprite::STATUS_SICK), "status-sick"},
+    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_GREAT), "status-great"},
+    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_GOOD), "status-good"},
+    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_TIRED), "status-tired"},
+    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_SICK), "status-sick"},
 
     {SpriteType::DAY_OF_WEEK, static_cast<int>(DayOfWeekSprite::SUNDAY), "sunday"},
     {SpriteType::DAY_OF_WEEK, static_cast<int>(DayOfWeekSprite::MONDAY), "monday"},
