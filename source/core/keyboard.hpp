@@ -12,7 +12,7 @@
 /**
  * @brief Collection of keycodes for special keys on the keyboard
  */
-enum KEYCODES
+enum class KEYCODES
 {
     /// Zero is reserved for not touching the keyboard
     CAPSLOCK = 1,
@@ -88,6 +88,11 @@ class OnScreenKeyboard
      * @return int Character corresponding to the touch input, or 0 if no key was hit
      */
     int evaluateInput(touchPosition* touch);
+
+    /**
+     * @brief Resets all internal variables to their defaults.
+     */
+    void reset();
 
   private:
     bool isCapsLock = false;

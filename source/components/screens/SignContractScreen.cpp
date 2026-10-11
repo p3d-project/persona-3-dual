@@ -16,10 +16,16 @@ static void drawPixel(uint16_t* videoBuffer, int x, int y, int paletteValue)
 {
     int wordIndex = (y * 256 + x) / 2;
     u16 currentWord = videoBuffer[wordIndex];
-    if (x % 2 == 0) //Clear the lower 8 bits, then inject our 8-bit color index
+    if (x % 2 == 0)
+    {
+        //Clear the lower 8 bits, then inject our 8-bit color index
         videoBuffer[wordIndex] = (currentWord & 0xFF00) | (paletteValue & 0xFF);
-    else //Clear the upper 8 bits, then inject our 8-bit color index shifted up
+    }
+    else
+    {
+        //Clear the upper 8 bits, then inject our 8-bit color index shifted up
         videoBuffer[wordIndex] = (currentWord & 0x00FF) | ((paletteValue & 0xFF) << 8);
+    }
 }
 
 SignContractScreen* SignContractScreen::instance = nullptr;
@@ -116,22 +122,23 @@ void SignContractScreen::unloadBackgrounds()
 int SignContractScreen::onTouch(touchPosition* touch)
 {
     char c = keyboard.evaluateInput(touch);
+    const unsigned char input = static_cast<unsigned char>(c);
 
-    switch (c)
+    switch (input)
     {
-    case KEYCODES::CAPSLOCK:
+    case static_cast<unsigned char>(KEYCODES::CAPSLOCK):
     {
         isCapsLock = !isCapsLock;
         switchBackground();
         break;
     }
-    case KEYCODES::SHIFT:
+    case static_cast<unsigned char>(KEYCODES::SHIFT):
     {
         isShift = !isShift;
         switchBackground();
         break;
     }
-    case KEYCODES::BACKSPACE:
+    case static_cast<unsigned char>(KEYCODES::BACKSPACE):
     {
         if (index == 0)
         {
@@ -159,7 +166,7 @@ int SignContractScreen::onTouch(touchPosition* touch)
         renderCursor();
         break;
     }
-    case KEYCODES::LEFT:
+    case static_cast<unsigned char>(KEYCODES::LEFT):
     {
         if (index > 0)
         {
@@ -173,7 +180,7 @@ int SignContractScreen::onTouch(touchPosition* touch)
         renderCursor();
         break;
     }
-    case KEYCODES::RIGHT:
+    case static_cast<unsigned char>(KEYCODES::RIGHT):
     {
         if (index < 19)
         {
@@ -187,7 +194,7 @@ int SignContractScreen::onTouch(touchPosition* touch)
         renderCursor();
         break;
     }
-    case KEYCODES::CONFIRM:
+    case static_cast<unsigned char>(KEYCODES::CONFIRM):
     {
         return 1; // TODO: implement confirm action
     }
@@ -311,6 +318,13 @@ void SignContractScreen::load()
     bgSetPriority(bgId, 1);
     text->configureText(TextConfig{bgTextBufferSub, &FONT_NAME, FONT_SIZE});
     lineSpacing = text->getLineSpacing(); // get it now so we don't waste time at runtime
+
+    // Reset variables
+    index = 0;
+    keyboard.reset();
+    isLastName = true;
+    isShift = false;
+    isCapsLock = false;
 
     loadBackgrounds();
     loadSaveDataName();

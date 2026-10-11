@@ -8,15 +8,16 @@ int OnScreenKeyboard::evaluateInput(touchPosition* touch)
         if (touch->py >= row.topY && touch->py <= row.bottomY)
         {
             char c = row.checkRow(touch->px);
-            if (c == KEYCODES::CAPSLOCK)
+            if (c == static_cast<char>(KEYCODES::CAPSLOCK))
             {
                 isCapsLock = !isCapsLock;
-                return KEYCODES::CAPSLOCK; // currently returning this so the screen image can be changed
+                return static_cast<char>(
+                    KEYCODES::CAPSLOCK); // currently returning this so the screen image can be changed
             }
-            else if (c == KEYCODES::SHIFT)
+            else if (c == static_cast<char>(KEYCODES::SHIFT))
             {
                 isShift = !isShift;
-                return KEYCODES::SHIFT;
+                return static_cast<int>(KEYCODES::SHIFT);
             }
             if (isShift)
             {
@@ -31,4 +32,10 @@ int OnScreenKeyboard::evaluateInput(touchPosition* touch)
         }
     }
     return 0;
+}
+
+void OnScreenKeyboard::reset()
+{
+    isShift = false;
+    isCapsLock = false;
 }
