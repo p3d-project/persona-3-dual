@@ -102,7 +102,7 @@ target_compile_options(p3d_game PUBLIC
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_options(p3d_game PUBLIC -O0 -ggdb -Wno-psabi)
+    target_compile_options(p3d_game PUBLIC -O2 -ggdb -Wno-psabi)
 else()
     target_compile_options(p3d_game PUBLIC -O2)
 endif()
