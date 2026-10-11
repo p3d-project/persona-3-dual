@@ -1,7 +1,7 @@
 #include "keyboard.hpp"
 #include <string>
 
-int Keyboard_N::evaluateInput(touchPosition* touch)
+int OnScreenKeyboard::evaluateInput(touchPosition* touch)
 {
     for (KeyRow& row : keyboardRows)
     {

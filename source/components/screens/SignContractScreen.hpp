@@ -50,7 +50,7 @@ class SignContractScreen : public UIScreen
 
     uint16_t* bgTextBufferSub = nullptr;
 
-    Keyboard_N keyboard;
+    OnScreenKeyboard keyboard;
 
     std::string FONT_NAME = "cosmetica";
     int FONT_SIZE = 10;

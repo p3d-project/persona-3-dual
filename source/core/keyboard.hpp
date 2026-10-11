@@ -46,7 +46,6 @@ struct Key
 
 /**
  * @brief Stores a row of keys on a keyboard and their associated y boundaries.
- *
  */
 struct KeyRow
 {
@@ -72,16 +71,15 @@ struct KeyRow
     }
 };
 
-// TODO: rename
 /**
  * @brief On-Screen keyboard
  * @details This class represents an on-screen keyboard that converts touch inputs into characters.
  */
-class Keyboard_N
+class OnScreenKeyboard
 {
   public:
-    Keyboard_N() = default;
-    ~Keyboard_N() = default;
+    OnScreenKeyboard() = default;
+    ~OnScreenKeyboard() = default;
 
     /**
      * @brief Checks a touch input against the keyboard positions and returns pressed charcater
