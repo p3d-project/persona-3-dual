@@ -61,7 +61,6 @@ function(p3d_grit_flags_for_png png out_var)
     set(grit_file "${png_dir}/${png_stem}.grit")
 
     if(EXISTS "${grit_file}")
-        set(grit_flags)
         file(STRINGS "${grit_file}" grit_lines)
         foreach(grit_line IN LISTS grit_lines)
             string(STRIP "${grit_line}" grit_line)
@@ -234,15 +233,15 @@ if(P3D_RUN_GRAPHICS)
         get_filename_component(stem "${png}" NAME_WE)
 
         set(out_dir "${DATA_DIR}/${rel_dir}/${stem}")
-        set(out_base "${out_dir}/${stem}")
         file(MAKE_DIRECTORY "${out_dir}")
         p3d_grit_flags_for_png("${png}" grit_flags)
 
-        # grit writes a multi-file bundle (.img/.map/.pal) when map/palette data is enabled,
-        # so target the asset directory directly instead of forcing a single output basename.
+        # grit writes a multi-file bundle (.img/.map/.pal) when map/palette data is enabled.
+        # Running from the destination directory lets grit derive the source basename for
+        # every output without combining multiple files into one -o target.
         p3d_run(
-            WORKING_DIRECTORY "${P3D_SOURCE_DIR}"
-            COMMAND "${P3D_GRIT_EXECUTABLE}" "${png}" ${grit_flags} -fh! -D "${out_dir}"
+            WORKING_DIRECTORY "${out_dir}"
+            COMMAND "${P3D_GRIT_EXECUTABLE}" "${png}" ${grit_flags} -fh!
         )
     endforeach()
 
@@ -258,13 +257,12 @@ if(P3D_RUN_GRAPHICS)
         get_filename_component(stem "${png}" NAME_WE)
 
         set(out_dir "${DATA_DIR}/${rel_dir}/${stem}")
-        set(out_base "${out_dir}/${stem}")
         file(MAKE_DIRECTORY "${out_dir}")
         p3d_grit_flags_for_png("${png}" grit_flags)
 
         p3d_run(
-            WORKING_DIRECTORY "${P3D_SOURCE_DIR}"
-            COMMAND "${P3D_GRIT_EXECUTABLE}" "${png}" ${grit_flags} -fh! -D "${out_dir}"
+            WORKING_DIRECTORY "${out_dir}"
+            COMMAND "${P3D_GRIT_EXECUTABLE}" "${png}" ${grit_flags} -fh!
         )
     endforeach()
 endif()
