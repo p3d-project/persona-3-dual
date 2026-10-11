@@ -18,7 +18,7 @@ class MenuHUDScreen : public UIScreen
     void renderSprites() override;
     int onTouch(touchPosition* touch) override;
 
-    // TODO: replace with ae dependancy injection
+    // TODO: replace with ae dependency injection
     void setTextComponent(TextComponent* text);
     void setTextContent(std::string textContent, TextColor textColor);
 
