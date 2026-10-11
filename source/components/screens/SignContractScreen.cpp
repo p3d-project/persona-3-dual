@@ -84,7 +84,7 @@ void SignContractScreen::renderBackground(int bgIndex)
 {
     // load palettes
     dmaCopy(bgUI[bgIndex].pal, BG_PALETTE_SUB, bgUI[bgIndex].palLen);
-    TextManager::GetInstance().loadDefaultPalette(); // prevent this from being ovberwritten
+    TextManager::GetInstance().loadDefaultPalette(); // prevent this from being overwritten
 
     // draw background (copy into vram)
     dmaFillHalfWords(0, bgGetMapPtr(bgId), 2048);

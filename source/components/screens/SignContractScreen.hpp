@@ -113,7 +113,7 @@ class SignContractScreen : public UIScreen
     char firstName[10] = "         ";
     char lastName[10] = "         ";
 
-    // TODO: move these variabkes into keyboard class once that gets a proper implementation
+    // TODO: move these variables into keyboard class once that gets a proper implementation
     // Currently we need them to handle the background switching
     bool isShift = false;
     bool isCapsLock = false;
