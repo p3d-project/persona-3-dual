@@ -1,5 +1,5 @@
 #pragma once
-#include "components/AnimationComponent.hpp"
+#include "animation/Animator.h"
 #include "components/GraphicsComponent.hpp"
 #include "components/screens/UIScreen.hpp"
 
@@ -19,28 +19,15 @@ class DialogueScreen : public UIScreen
     void triggerAction(UIAction action) override;
     void renderSprites() override;
 
-    /**
-     * @brief Per-frame hook that re-applies the box/bust slide offsets to already-drawn sprites.
-     *
-     * @note renderSprites() only runs once when the screen is shown, so without this the running
-     *       intro/outro/bust-pop tweens would update slideOffsetY/bustOffsetY but never reach the OAM.
-     */
-    void tick();
-
     // load all busts into ram
     void loadBusts(etl::array<etl::span<SpritePayload>, 10>* bustPayloads);
 
     // render the specified bust onto the screen
     void renderBust(etl::span<SpritePayload>& bustPayload);
-
-    // slides the textbox up into view; call when dialogue starts
-    void playIntroAnimation();
-
-    // slides the textbox back down out of view; call when dialogue ends
-    void playOutroAnimation();
-
-    // duration (ms) of both playIntroAnimation() and playOutroAnimation(), exposed so callers can time a delay
-    static constexpr int kSlideDurationMs = 200;
+    void showAnimated();
+    void hideAnimated();
+    void updateAnimation();
+    bool isAnimating() const;
 
   private:
     DialogueScreen() : UIScreen(false) {};
@@ -64,22 +51,18 @@ class DialogueScreen : public UIScreen
     void* palette1 = nullptr;
 
     int spriteId = 0;
+    int panelOffset = 40;
+    int bustOffsetX = 0;
+    etl::span<SpritePayload>* activeBust = nullptr;
+    uiAnimation::Animator panelAnimator;
+    uiAnimation::Animator bustAnimator;
+    uiAnimation::AnimationHandle panelAnimation;
+    uiAnimation::AnimationHandle bustAnimation;
+
+    void updateBustPositions();
 
     ae::Entity* dialogue = nullptr;
     GraphicsComponent* graphics = nullptr;
-    AnimationComponent* animation = nullptr;
-
-    // extra vertical offset (px) applied to every box sprite; tweened from off-screen to 0 by playIntroAnimation()
-    int slideOffsetY = kSlideOffsetStart;
-
-    // extra vertical offset (px) applied to the currently shown bust; tweened to 0 each time the bust changes
-    int bustOffsetY = 0;
-
-    // oam id of the first sprite in the currently shown bust, or -1 if none is shown
-    int bustSpriteBaseId = -1;
-
-    static constexpr int kSlideOffsetStart = 40;
-    static constexpr int kBustPopOffsetStart = 16;
 
     // ---
     // sprite setup

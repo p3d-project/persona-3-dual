@@ -45,6 +45,7 @@ void SwitchView(BaseView* newView)
     // cleanup any existing view
     if (currentView != nullptr)
     {
+        setBrightness(3, -16);
         currentView->cleanup();
     }
 
@@ -53,6 +54,7 @@ void SwitchView(BaseView* newView)
     if (currentView != nullptr)
     {
         currentView->init();
+        currentView->startFadeIn();
     }
 }
 
@@ -167,6 +169,7 @@ int main(int argc, char* argv[])
         // check state of currentView
         if (currentView != nullptr)
         {
+            currentView->updateFadeIn();
             ViewState nextState;
             if (nextView != ViewState::DEFAULT)
             {
@@ -252,6 +255,7 @@ int main(int argc, char* argv[])
             }
             }
         }
+
         bgUpdate();
         oamUpdate(&oamMain);
     }

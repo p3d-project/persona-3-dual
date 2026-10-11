@@ -33,6 +33,7 @@ extern ViewState nextView;
 extern volatile u32 systemKeysDown;
 extern volatile u32 systemKeysHeld;
 extern std::string fatBasePath;
+extern inline constexpr GameVersion gameVersion{2, 0, 0};
 extern Save saveData;
 
 class Globals

@@ -18,8 +18,6 @@ class IwatodaiDormView : public EnvironmentView
     void setupCamera() override;
     void setupText() override;
     void setupUI() override;
-    void onEnvironmentUpdate() override;
-    void cleanup() override;
 
   private:
     // movement and camera
@@ -33,8 +31,4 @@ class IwatodaiDormView : public EnvironmentView
 
     std::string fontNameAlt = "noto-sans-jp-black";
     int fontSizeAlt = 16;
-
-    // demo triangle
-    float triSize = 10.0f;
-    uiAnimation::AnimationHandle circleHandle;
 };

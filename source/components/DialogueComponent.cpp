@@ -11,7 +11,7 @@ void DialogueComponent::Update(ae::q20_12_t)
 {
     if (closing)
     {
-        if (--slideDelayFrames <= 0)
+        if (screen == nullptr || !screen->isAnimating())
         {
             closing = false;
             isActive = false;
@@ -19,21 +19,20 @@ void DialogueComponent::Update(ae::q20_12_t)
         return;
     }
 
-    if (opening)
-    {
-        if (--slideDelayFrames <= 0)
-        {
-            opening = false;
-            advanceTo(pendingFirstLine);
-            pendingFirstLine = nullptr;
-            renderBust = true;
-        }
-        return;
-    }
-
     if (!isActive || current == nullptr)
     {
         isActive = false;
+        return;
+    }
+
+    if (opening)
+    {
+        if (screen != nullptr && screen->isAnimating())
+        {
+            return;
+        }
+        opening = false;
+        advanceTo(current);
         return;
     }
 
@@ -162,8 +161,6 @@ void DialogueComponent::Update(ae::q20_12_t)
 void DialogueComponent::Destroy()
 {
     isActive = false;
-    closing = false;
-    opening = false;
 }
 
 void DialogueComponent::configureDialogue(const DialogueConfig& config)
@@ -182,39 +179,33 @@ void DialogueComponent::configureDialogue(const DialogueConfig& config)
 
 void DialogueComponent::start(Dialogue* firstLine)
 {
-    pendingFirstLine = firstLine;
+    current = firstLine;
+    optionCount = 0;
+    selectedOption = 0;
+    doRenderOptions = false;
+    text->clearScreen();
+    opening = true;
+    closing = false;
+    if (screen != nullptr)
+    {
+        screen->showAnimated();
+    }
 
     prevKeys = systemKeysHeld;
     isActive = true;
-    closing = false;
-    opening = true;
-    slideDelayFrames = kSlideDelayFrames;
-
-    if (screen != nullptr)
-    {
-        screen->playIntroAnimation();
-    }
+    renderBust = true;
 }
 
 void DialogueComponent::end()
 {
-    if (closing)
-    {
-        return;
-    }
-
-    opening = false;
-    pendingFirstLine = nullptr;
-
     text->clearScreen();
-
     if (screen != nullptr)
     {
-        screen->playOutroAnimation();
+        screen->hideAnimated();
+        closing = true;
+        return;
     }
-
-    closing = true;
-    slideDelayFrames = kSlideDelayFrames;
+    isActive = false;
 }
 
 void DialogueComponent::advanceTo(Dialogue* next)

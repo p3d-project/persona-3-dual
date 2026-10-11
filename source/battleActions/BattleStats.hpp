@@ -27,7 +27,7 @@ struct BattleStats
         Repel
     };
 
-    Affinity affinities[10] = {
+    Affinity affinities[11] = {
         Neutral,
         Neutral,
         Neutral,
@@ -37,7 +37,8 @@ struct BattleStats
         Neutral,
         Neutral,
         Neutral,
-        Neutral // almighty
+        Neutral,
+        Neutral //Almighty
     };
 
     BattleStats* getBattleStats()

@@ -17,11 +17,6 @@ class MenuHUDScreen : public UIScreen
     void renderSprites() override;
     int onTouch(touchPosition* touch) override;
 
-    /**
-     * @brief Per-frame hook for HUD elements that change on tick.
-     */
-    void tick();
-
   private:
     MenuHUDScreen() : UIScreen(false) {};
     ~MenuHUDScreen() {};

@@ -1,5 +1,7 @@
 #include "UIMenu.hpp"
 
+#include "animation/Easing.h"
+
 void UIMenu::resetMenu()
 {
     options = {};
@@ -7,6 +9,8 @@ void UIMenu::resetMenu()
     startIndex = 0;
     isActive = false;
     nextViewState = ViewState::KEEP_CURRENT;
+    selectionX = 0;
+    animator.cancelAll();
 
     if (text != nullptr)
     {
@@ -19,6 +23,23 @@ void UIMenu::resetMenu()
     {
         prevOptions.pop();
     }
+}
+
+void UIMenu::updateAnimation()
+{
+    animator.update(1.0f);
+}
+
+int UIMenu::selectionOffset() const
+{
+    return selectionX;
+}
+
+void UIMenu::animateSelection()
+{
+    animator.cancelAll();
+    selectionX = -8;
+    animator.animate(selectionX).from(-8).to(0).duration(140).ease(uiAnimation::Ease::OutBack).start();
 }
 
 ViewState UIMenu::changeMenu(etl::span<MenuOption> newOptions)
