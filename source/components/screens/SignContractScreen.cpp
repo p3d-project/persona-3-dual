@@ -1,6 +1,17 @@
 #include "SignContractScreen.hpp"
 #include "core/globals.hpp"
 
+// TODO: remove this function
+// Maybe replace with a draw pixel function in the UI Manager or let the keyboard handle this
+/**
+ * @brief Draws a pixel to the specified videobuffer
+ * @param videoBuffer The video buffer to draw the pixel to
+ * @param x X location of the pixel to draw
+ * @param y Y location of the pixel to draw
+ * @param paletteValue Index of the palette color to draw the pixel
+ *
+ * @warning This function will be removed in the future
+ */
 static void drawPixel(uint16_t* videoBuffer, int x, int y, int paletteValue)
 {
     int wordIndex = (y * 256 + x) / 2;
