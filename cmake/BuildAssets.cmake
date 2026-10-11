@@ -65,6 +65,14 @@ function(p3d_grit_flags_for_png png out_var)
         file(STRINGS "${grit_file}" grit_lines)
         foreach(grit_line IN LISTS grit_lines)
             string(STRIP "${grit_line}" grit_line)
+            if(grit_line STREQUAL "" OR grit_line MATCHES "^#")
+                continue()
+            endif()
+
+            # .grit files use comments to document settings; strip inline comments before
+            # converting the remaining text into grit arguments.
+            string(REGEX REPLACE "[ 	]+#.*$" "" grit_line "${grit_line}")
+            string(STRIP "${grit_line}" grit_line)
             if(grit_line STREQUAL "")
                 continue()
             endif()
@@ -230,9 +238,11 @@ if(P3D_RUN_GRAPHICS)
         file(MAKE_DIRECTORY "${out_dir}")
         p3d_grit_flags_for_png("${png}" grit_flags)
 
+        # grit writes a multi-file bundle (.img/.map/.pal) when map/palette data is enabled,
+        # so target the asset directory directly instead of forcing a single output basename.
         p3d_run(
             WORKING_DIRECTORY "${P3D_SOURCE_DIR}"
-            COMMAND "${P3D_GRIT_EXECUTABLE}" "${png}" ${grit_flags} -fh! -o "${out_base}"
+            COMMAND "${P3D_GRIT_EXECUTABLE}" "${png}" ${grit_flags} -fh! -D "${out_dir}"
         )
     endforeach()
 
@@ -254,7 +264,7 @@ if(P3D_RUN_GRAPHICS)
 
         p3d_run(
             WORKING_DIRECTORY "${P3D_SOURCE_DIR}"
-            COMMAND "${P3D_GRIT_EXECUTABLE}" "${png}" ${grit_flags} -fh! -o "${out_base}"
+            COMMAND "${P3D_GRIT_EXECUTABLE}" "${png}" ${grit_flags} -fh! -D "${out_dir}"
         )
     endforeach()
 endif()
