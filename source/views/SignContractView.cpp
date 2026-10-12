@@ -78,6 +78,14 @@ ViewState SignContractView::update()
 
     case TransitionPhase::IDLE:
     {
+        if (signContractScreen->update() == 1)
+        {
+            cancelSFX();
+            musicCmpt->pauseMusic();
+            fadeTimer.start(ae::q20_12_t{0.85});
+            transitionPhase = TransitionPhase::FADING_OUT;
+        }
+
         if (systemKeysDown & KEY_TOUCH)
         {
             touchRead(&touch);
