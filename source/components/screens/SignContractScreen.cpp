@@ -330,7 +330,6 @@ void SignContractScreen::renderName()
 void SignContractScreen::renderCursor()
 {
     // Clear old cursor first
-    // Clear both lines to be safe (then we don't need to store the old cursor position)
     clearCursor();
 
     // If end was written clear it too
