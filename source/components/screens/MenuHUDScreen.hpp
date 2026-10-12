@@ -1,3 +1,9 @@
+/**
+ * @file MenuHUDScreen.hpp
+ * @brief Handles the rendering & logic for the menu HUD UI
+ * @author Taha Rashid (TheBossT910 / thebosst)
+ */
+
 #pragma once
 #include "components/GraphicsComponent.hpp"
 #include "components/TextComponent.hpp"
@@ -15,11 +21,36 @@ class MenuHUDScreen : public UIScreen
 
     void load();
     void unload();
+
+    /**
+     * @brief Renders the background and sprites text to the screen
+     */
     void renderSprites() override;
+
+    /**
+     * @brief Handles touch input
+     * @param touch Touch input variable
+     * @return int Touch input return code indicating what area of the screen was touched
+     */
     int onTouch(touchPosition* touch) override;
 
     // TODO: replace with ae dependency injection
+    /**
+     * @brief Set the Text Component object
+     * @param text The TextComponent pointer to set
+     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
+     */
     void setTextComponent(TextComponent* text);
+
+    // TODO: replace with ae dependency injection
+    /**
+     * @brief Set the Text Content object
+     *
+     * @param textContent The text to print
+     * @param textColor The text colour to render the textContent in
+     *
+     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
+     */
     void setTextContent(std::string textContent, TextColor textColor);
 
   private:
@@ -27,7 +58,14 @@ class MenuHUDScreen : public UIScreen
     ~MenuHUDScreen() {};
     static MenuHUDScreen* instance;
 
+    /**
+     * @brief Pushes background data into VRAM so that it is rendered on screen
+     */
     void renderBackground();
+
+    /**
+     * @brief Prints the text to render on screen
+     */
     void renderText();
 
     ae::Entity* menuHUD = nullptr;
