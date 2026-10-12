@@ -24,6 +24,11 @@ class SignContractScreen : public UIScreen
     void load();
     void unload();
 
+    /**
+     * @brief Frame update function for the SignContractScreen. Handles cursor blinking and button presses.
+     *
+     * @return int Returns code to indicate if the game should proceed to the next view. 0 = no action, 1 = proceed to next view
+     */
     int update();
 
     /**
@@ -94,10 +99,23 @@ class SignContractScreen : public UIScreen
      */
     void renderCursor();
 
+    /**
+     * @brief Clears the previously rendered cursor from the screen
+     */
     void clearCursor();
 
+    /**
+     * @brief Handles the logic for when the user presses the confirm button
+     * @return int Return code to indicate if the game should proceed to the next view
+     */
     int confirmAction();
+    /**
+     * @brief Moves the cursor to the left in the name input area
+     */
     void moveCursorLeft();
+    /**
+     * @brief Moves the cursor to the right in the name input area
+     */
     void moveCursorRight();
 
     ae::Entity* signContractUI = nullptr;
