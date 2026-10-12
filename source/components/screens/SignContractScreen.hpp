@@ -24,6 +24,8 @@ class SignContractScreen : public UIScreen
     void load();
     void unload();
 
+    int update();
+
     /**
      * @brief Renders the background and status text to the screen
      */
@@ -92,6 +94,12 @@ class SignContractScreen : public UIScreen
      */
     void renderCursor();
 
+    void clearCursor();
+
+    int confirmAction();
+    void moveCursorLeft();
+    void moveCursorRight();
+
     ae::Entity* signContractUI = nullptr;
     GraphicsComponent* graphics = nullptr;
     TextComponent* text = nullptr;
@@ -103,6 +111,8 @@ class SignContractScreen : public UIScreen
     std::string FONT_NAME = "cosmetica";
     int FONT_SIZE = 10;
     int lineSpacing = 0;
+
+    bool cursorRendered = false;
 
     // backgrounds
     const std::string bgPath = "graphics/SignContractView/backgrounds/";
