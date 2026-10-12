@@ -37,10 +37,8 @@ void MenuHUDScreen::loadBackground()
 
 void MenuHUDScreen::renderBackground()
 {
-    // load palettes
-    vramSetBankH(VRAM_H_LCD);
-    dmaCopy(bgHUD.pal, &VRAM_H_EXT_PALETTE[bgId % 4][0], bgHUD.palLen);
-    vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE);
+    // load palette
+    dmaCopy(bgHUD.pal, BG_PALETTE_SUB, bgHUD.palLen);
 
     // draw background (copy into vram)
     dmaCopy(bgHUD.tiles, bgGetGfxPtr(bgId), bgHUD.tilesLen);
@@ -147,7 +145,7 @@ void MenuHUDScreen::load()
             sprite.gfx = oamAllocateGfx(oam, sprite.size, sprite.format);
 
             // load sprite into ram
-            graphic = graphics->loadSpriteGraphic(sp.spritePath, sp.spriteType, sp.spriteVariant);
+            graphic = graphics->loadSpriteGraphic(std::string(sp.spritePath), sp.spriteType, sp.spriteVariant);
         }
     }
 

@@ -35,8 +35,7 @@ class MenuHUDScreen : public UIScreen
 
     // ---
     // sprite setup
-    // TODO: make const!
-    std::string spritePath = "graphics/MenuHUD/sprites/";
+    const std::string spritePath = "graphics/MenuHUD/sprites/";
 
     // moon sprite
     Sprite moonSprite = {SpriteSize_32x32, SpriteColorFormat_256Color, 0};

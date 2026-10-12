@@ -67,7 +67,7 @@ struct SpritePayload
     SpriteRenderState& srs;
     // SpriteTransform spriteTransform; // TODO: remove? This is an operation *on* a sprite, not dealing with lifecyle of a sprite
 
-    std::string& spritePath;
+    std::string_view spritePath;
     GraphicAsset& ga;
 
     SpriteType spriteType;
