@@ -40,7 +40,7 @@ class PauseMenuHUDScreen : public UIScreen
     // status sprite
     Sprite statusSprite = {SpriteSize_32x32, SpriteColorFormat_16Color, 0};
     GraphicAsset statusGraphic = {};
-    SpriteRenderState srs0 = {statusSprite, 202, -15, 1, 0, false, false, false, true};
+    SpriteRenderState srs0 = {statusSprite, 222, 138, 1, 0, false, false, false, false};
     SpritePayload sp0 = {srs0, spritePath, statusGraphic, SpriteType::STATUS, (int)StatusSprite::STATUS_GREAT};
 
     // selected option sprites
