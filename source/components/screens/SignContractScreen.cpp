@@ -115,7 +115,14 @@ void SignContractScreen::loadBackgrounds()
 void SignContractScreen::renderSprites()
 {
     renderBackground();
-    updateStatus("Enter your last name");
+    if (!isLastName)
+    {
+        updateStatus("Enter your first name");
+    }
+    else
+    {
+        updateStatus("Enter your last name");
+    }
 }
 
 void SignContractScreen::renderBackground(int bgIndex)
