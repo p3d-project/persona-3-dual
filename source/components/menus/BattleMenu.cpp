@@ -213,7 +213,7 @@ ViewState BattleMenu::updateHook()
         {
             text->clearScreen();
             messagePrinted = true;
-            text->drawText(pauseMessage, 0, 0, 2);
+            text->drawText(pauseMessage, 0, 0, TextColor::White);
         }
         return ViewState::KEEP_CURRENT;
     }

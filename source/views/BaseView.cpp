@@ -23,6 +23,10 @@ void BaseView::cleanup()
     REG_BLDALPHA = 0;
     REG_BLDALPHA_SUB = 0;
 
+    // set bg color to black
+    setBackdropColor(RGB15(0, 0, 0));
+    setBackdropColorSub(RGB15(0, 0, 0));
+
     // reset sprites
     oamClear(&oamMain, 0, 0);
     oamClear(&oamSub, 0, 0);

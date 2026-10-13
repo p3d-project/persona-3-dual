@@ -62,7 +62,7 @@ ViewState IwatodaiDormView::onTileCheck(TileType tile, u32 pressed)
         // start dialogue
         if (!promptDrawn)
         {
-            textSub->drawText("\xFF\x02\x01Talk", 0, 0, TextColor::Black);
+            menuHUDScreen->setTextContent("\xFF\x02\x01Talk", TextColor::DualGreen);
             promptDrawn = true;
         }
         if (pressed & KEY_A)
@@ -77,7 +77,7 @@ ViewState IwatodaiDormView::onTileCheck(TileType tile, u32 pressed)
     {
         if (promptDrawn)
         {
-            textSub->clearScreen();
+            menuHUDScreen->setTextContent("Dorm", TextColor::White);
             promptDrawn = false;
         }
         break;
@@ -106,6 +106,9 @@ void IwatodaiDormView::setupUI()
 
     menuHUDScreen = MenuHUDScreen::getInstance();
     dialogueScreen = DialogueScreen::getInstance();
+
+    menuHUDScreen->setTextComponent(textSub);
+    menuHUDScreen->setTextContent("Dorm", TextColor::White);
 
     std::array<UIScreen*, 5> screens = {menuHUDScreen, dialogueScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt};
