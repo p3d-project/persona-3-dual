@@ -88,7 +88,7 @@ ViewState IwatodaiStreetsView::onTileCheck(TileType tile, u32 pressed)
     {
         if (!promptDrawn)
         {
-            textSub->drawText("\xFF\x02\x01 Battle Zone", 0, 0, TextColor::Black);
+            menuHUDScreen->setTextContent("\xFF\x02\x01 Battle Zone", TextColor::DualGreen);
             promptDrawn = true;
         }
         if (pressed & KEY_A)
@@ -104,7 +104,7 @@ ViewState IwatodaiStreetsView::onTileCheck(TileType tile, u32 pressed)
     {
         if (promptDrawn)
         {
-            textSub->clearScreen();
+            menuHUDScreen->setTextContent("Streets", TextColor::White);
             promptDrawn = false;
         }
         break;
@@ -128,6 +128,9 @@ void IwatodaiStreetsView::setupUI()
     pauseMenuCmpt = PauseMenu::getInstance();
 
     menuHUDScreen = MenuHUDScreen::getInstance();
+
+    menuHUDScreen->setTextComponent(textSub);
+    menuHUDScreen->setTextContent("Streets", TextColor::White);
 
     std::array<UIScreen*, 5> screens = {menuHUDScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt, battleMenuCmpt};
