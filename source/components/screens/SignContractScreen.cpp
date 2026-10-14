@@ -185,6 +185,10 @@ int SignContractScreen::update()
     {
         return confirmAction();
     }
+    if (systemKeysDown & KEY_B)
+    {
+        backSpaceAction();
+    }
     if (systemKeysDown & KEY_L)
     {
         moveCursorLeft();
@@ -218,30 +222,7 @@ int SignContractScreen::onTouch(touchPosition* touch)
     }
     case static_cast<unsigned char>(KEYCODES::BACKSPACE):
     {
-        if (index == 0)
-        {
-            lastName[0] = ' ';
-        }
-        else if (isLastName)
-        {
-            lastName[--index] = ' ';
-        }
-        else
-        {
-            if (index != 10)
-            {
-                firstName[--index - 10] = ' ';
-            }
-            else
-            {
-                index--;
-                isLastName = true;
-                updateStatus("Enter your last name");
-                lastName[9] = ' ';
-            }
-        }
-        renderName();
-        renderCursor();
+        backSpaceAction();
         break;
     }
     case static_cast<unsigned char>(KEYCODES::LEFT):
@@ -381,6 +362,34 @@ int SignContractScreen::confirmAction()
         // TODO: implement confirm prompt
         return 1;
     }
+}
+
+void SignContractScreen::backSpaceAction()
+{
+    if (index == 0)
+    {
+        lastName[0] = ' ';
+    }
+    else if (isLastName)
+    {
+        lastName[--index] = ' ';
+    }
+    else
+    {
+        if (index != 10)
+        {
+            firstName[--index - 10] = ' ';
+        }
+        else
+        {
+            index--;
+            isLastName = true;
+            updateStatus("Enter your last name");
+            lastName[9] = ' ';
+        }
+    }
+    renderName();
+    renderCursor();
 }
 
 void SignContractScreen::moveCursorLeft()

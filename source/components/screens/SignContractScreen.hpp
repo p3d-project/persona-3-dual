@@ -110,6 +110,10 @@ class SignContractScreen : public UIScreen
      */
     int confirmAction();
     /**
+     * @brief Handles logic for when user presses the backspace button.
+     */
+    void backSpaceAction();
+    /**
      * @brief Moves the cursor to the left in the name input area
      */
     void moveCursorLeft();
