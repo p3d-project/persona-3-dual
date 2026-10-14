@@ -45,9 +45,6 @@ void SignContractView::init()
     // map vram to sub screen
     vramSetBankC(VRAM_C_SUB_BG);
 
-    // enable extended palettes
-    bgExtPaletteEnable();
-
     // initialize backgrounds
     bg = bgInit(0, BgType_Text8bpp, BgSize_T_256x256, 9, 2);
     bgSetPriority(bg, 0);
@@ -60,10 +57,7 @@ void SignContractView::init()
     dmaCopy(contractBg.tiles, bgGetGfxPtr(bg), contractBg.tilesLen);
     dmaCopy(contractBg.map, bgGetMapPtr(bg), contractBg.mapLen);
 
-    // This image requires the extended palette
-    vramSetBankE(VRAM_E_LCD);
-    dmaCopy(contractBg.pal, &VRAM_E_EXT_PALETTE[0][0], contractBg.palLen);
-    vramSetBankE(VRAM_E_BG_EXT_PALETTE);
+    dmaCopy(contractBg.pal, BG_PALETTE, contractBg.palLen);
 
     graphics->unloadGraphic(contractBg);
 
