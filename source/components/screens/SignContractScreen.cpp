@@ -412,7 +412,6 @@ void SignContractScreen::moveCursorLeft()
                 if (lastName[i] != ' ' && lastName[i] != '\0')
                 {
                     endFound = true;
-                    isLastName = true;
                     index = i + 1; // put cursor after the last character in the last name
                 }
             }
