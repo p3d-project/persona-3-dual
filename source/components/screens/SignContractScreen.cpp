@@ -58,11 +58,49 @@ SignContractScreen* SignContractScreen::getInstance()
 
 void SignContractScreen::loadSaveDataName()
 {
+    // Copy name into local variables
     for (int i = 0; i < 10; ++i)
     {
         lastName[i] = saveData.lastName[i];
         firstName[i] = saveData.firstName[i];
     }
+
+    // Set cursor to the end of the name
+    // Check if first name first
+    bool endFound = false;
+    for (int i = 9; i >= 0; --i)
+    {
+        if (endFound)
+        {
+            break;
+        }
+
+        if (firstName[i] != ' ' && firstName[i] != '\0')
+        {
+            endFound = true;
+            index = i + 11; // +10 for first name offset
+            isLastName = false;
+        }
+    }
+    // If first name is empty, check last name
+    if (!endFound)
+    {
+        for (int i = 9; i >= 0; --i)
+        {
+            if (endFound)
+            {
+                break;
+            }
+
+            if (lastName[i] != ' ' && lastName[i] != '\0')
+            {
+                endFound = true;
+                isLastName = true;
+                index = i + 1; // put cursor after the last character in the last name
+            }
+        }
+    }
+
     renderName();
     renderCursor();
 }
@@ -77,7 +115,14 @@ void SignContractScreen::loadBackgrounds()
 void SignContractScreen::renderSprites()
 {
     renderBackground();
-    updateStatus("Enter your last name");
+    if (!isLastName)
+    {
+        updateStatus("Enter your first name");
+    }
+    else
+    {
+        updateStatus("Enter your last name");
+    }
 }
 
 void SignContractScreen::renderBackground(int bgIndex)
@@ -119,6 +164,43 @@ void SignContractScreen::unloadBackgrounds()
     bgUI[1] = {};
 }
 
+int SignContractScreen::update()
+{
+    // Only update every 60 frames
+    if (frame % 60 == 30)
+    {
+        if (cursorRendered)
+        {
+            clearCursor();
+            cursorRendered = false;
+        }
+        else
+        {
+            renderCursor();
+            cursorRendered = true;
+        }
+    }
+
+    if (systemKeysDown & KEY_A)
+    {
+        return confirmAction();
+    }
+    if (systemKeysDown & KEY_B)
+    {
+        backSpaceAction();
+    }
+    if (systemKeysDown & KEY_L)
+    {
+        moveCursorLeft();
+    }
+    if (systemKeysDown & KEY_R)
+    {
+        moveCursorRight();
+    }
+
+    return 0;
+}
+
 int SignContractScreen::onTouch(touchPosition* touch)
 {
     char c = keyboard.evaluateInput(touch);
@@ -140,63 +222,22 @@ int SignContractScreen::onTouch(touchPosition* touch)
     }
     case static_cast<unsigned char>(KEYCODES::BACKSPACE):
     {
-        if (index == 0)
-        {
-            lastName[0] = ' ';
-        }
-        else if (isLastName)
-        {
-            lastName[--index] = ' ';
-        }
-        else
-        {
-            if (index != 10)
-            {
-                firstName[--index - 10] = ' ';
-            }
-            else
-            {
-                index--;
-                isLastName = true;
-                updateStatus("Enter your last name");
-                lastName[9] = ' ';
-            }
-        }
-        renderName();
-        renderCursor();
+        backSpaceAction();
         break;
     }
     case static_cast<unsigned char>(KEYCODES::LEFT):
     {
-        if (index > 0)
-        {
-            index--;
-            if (index == 9)
-            {
-                isLastName = true;
-                updateStatus("Enter your last name");
-            }
-        }
-        renderCursor();
+        moveCursorLeft();
         break;
     }
     case static_cast<unsigned char>(KEYCODES::RIGHT):
     {
-        if (index < 19)
-        {
-            index++;
-            if (index == 10)
-            {
-                isLastName = false;
-                updateStatus("Enter your first name");
-            }
-        }
-        renderCursor();
+        moveCursorRight();
         break;
     }
     case static_cast<unsigned char>(KEYCODES::CONFIRM):
     {
-        return 1; // TODO: implement confirm action
+        return confirmAction();
     }
     case 0:
     {
@@ -277,9 +318,9 @@ void SignContractScreen::renderName()
 void SignContractScreen::renderCursor()
 {
     // Clear old cursor first
-    // Clear both lines to be safe (then we don't need to store the old cursor position)
-    text->clearArea(65, 42, 126, 1);
-    text->clearArea(65, 59, 126, 1);
+    clearCursor();
+
+    // If end was written clear it too
     if (index == 19)
     {
         text->clearArea(197, 48 - lineSpacing, 30, 10);
@@ -297,6 +338,100 @@ void SignContractScreen::renderCursor()
     {
         drawPixel(bgTextBufferSub, x + i, y, TextColor::RichBlue);
     }
+}
+
+void SignContractScreen::clearCursor()
+{
+    // Clear both lines to be safe (then we don't need to store the old cursor position)
+    text->clearArea(65, 42, 126, 1);
+    text->clearArea(65, 59, 126, 1);
+}
+
+int SignContractScreen::confirmAction()
+{
+    if (isLastName)
+    {
+        isLastName = false;
+        index = 10;
+        updateStatus("Enter your first name");
+        renderCursor();
+        return 0;
+    }
+    else
+    {
+        // TODO: implement confirm prompt
+        return 1;
+    }
+}
+
+void SignContractScreen::backSpaceAction()
+{
+    if (index == 0)
+    {
+        lastName[0] = ' ';
+    }
+    else if (isLastName)
+    {
+        lastName[--index] = ' ';
+    }
+    else
+    {
+        if (index != 10)
+        {
+            firstName[--index - 10] = ' ';
+        }
+        else
+        {
+            index--;
+            isLastName = true;
+            updateStatus("Enter your last name");
+            lastName[9] = ' ';
+        }
+    }
+    renderName();
+    renderCursor();
+}
+
+void SignContractScreen::moveCursorLeft()
+{
+    if (index > 0)
+    {
+        index--;
+        if (index == 9)
+        {
+            isLastName = true;
+            updateStatus("Enter your last name");
+            bool endFound = false;
+            for (int i = 9; i >= 0; --i)
+            {
+                if (endFound)
+                {
+                    break;
+                }
+
+                if (lastName[i] != ' ' && lastName[i] != '\0')
+                {
+                    endFound = true;
+                    index = i + 1; // put cursor after the last character in the last name
+                }
+            }
+        }
+    }
+    renderCursor();
+}
+
+void SignContractScreen::moveCursorRight()
+{
+    if (index < 19)
+    {
+        index++;
+        if (index == 10)
+        {
+            isLastName = false;
+            updateStatus("Enter your first name");
+        }
+    }
+    renderCursor();
 }
 
 void SignContractScreen::load()
