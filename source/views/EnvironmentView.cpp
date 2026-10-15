@@ -299,8 +299,15 @@ ViewState EnvironmentView::update()
 
             prevPauseState = true;
 
-            ae::BroadcastEvent(Event::ShowScreen{pauseMenuHUDScreen});
+            // ShowMenu clears textSub, so show the screen after it to keep the text displayed
             ae::BroadcastEvent(Event::ShowMenu{pauseMenuCmpt});
+            ae::BroadcastEvent(Event::ShowScreen{pauseMenuHUDScreen});
+        }
+
+        // menu clears textSub when navigating,so a redraw is required
+        if (systemKeysDown & (KEY_A | KEY_B | KEY_UP | KEY_DOWN))
+        {
+            pauseMenuHUDScreen->renderText();
         }
 
         if ((systemKeysDown & KEY_START) || pauseMenuCmpt->isClosed)

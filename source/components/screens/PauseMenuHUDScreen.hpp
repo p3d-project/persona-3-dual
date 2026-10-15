@@ -44,6 +44,12 @@ class PauseMenuHUDScreen : public UIScreen
                           const std::string& level,
                           TextColor color);
 
+    /**
+     * @brief Draws the text
+     * @note Must be re-called after anything clears the shared text component (e.g. menu navigation)
+     */
+    void renderText();
+
   private:
     PauseMenuHUDScreen() : UIScreen(false) {};
     ~PauseMenuHUDScreen() {};
@@ -52,8 +58,6 @@ class PauseMenuHUDScreen : public UIScreen
     void loadBackground();
     void renderBackground();
     void unloadBackground();
-
-    void renderText();
 
     ae::Entity* pauseMenuHUD = nullptr;
     GraphicsComponent* graphics = nullptr;
