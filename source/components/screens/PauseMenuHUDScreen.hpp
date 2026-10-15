@@ -1,5 +1,6 @@
 #pragma once
 #include "components/GraphicsComponent.hpp"
+#include "components/TextComponent.hpp"
 #include "components/screens/UIScreen.hpp"
 
 #include <etl/array.h>
@@ -17,6 +18,32 @@ class PauseMenuHUDScreen : public UIScreen
     void renderSprites() override;
     int onTouch(touchPosition* touch) override;
 
+    // TODO: replace with ae dependency injection
+    /**
+     * @brief Set the Text Component object
+     * @param text The TextComponent pointer to set
+     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
+     */
+    void setTextComponent(TextComponent* text);
+
+    // TODO: replace with ae dependency injection
+    /**
+     * @brief Set the Info Panel Text object
+     *
+     * @param yen The yen amount string
+     * @param persona The persona name string
+     * @param arcana The arcana name string
+     * @param level The level string
+     * @param color The text colour to render the panel in
+     *
+     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
+     */
+    void setInfoPanelText(const std::string& yen,
+                          const std::string& persona,
+                          const std::string& arcana,
+                          const std::string& level,
+                          TextColor color);
+
   private:
     PauseMenuHUDScreen() : UIScreen(false) {};
     ~PauseMenuHUDScreen() {};
@@ -26,8 +53,18 @@ class PauseMenuHUDScreen : public UIScreen
     void renderBackground();
     void unloadBackground();
 
+    void renderText();
+
     ae::Entity* pauseMenuHUD = nullptr;
     GraphicsComponent* graphics = nullptr;
+    TextComponent* text = nullptr;
+
+    //Menu texts
+    std::string yenText = "";
+    std::string personaText = "";
+    std::string arcanaText = "";
+    std::string levelText = "";
+    TextColor textColor = TextColor::DarkestBlue;
 
     // background
     const std::string bgPath = "graphics/PauseMenuHUD/backgrounds/";

@@ -29,6 +29,19 @@ PauseMenuHUDScreen* PauseMenuHUDScreen::getInstance()
     return instance;
 }
 
+void PauseMenuHUDScreen::setInfoPanelText(const std::string& yen,
+                                          const std::string& persona,
+                                          const std::string& arcana,
+                                          const std::string& level,
+                                          TextColor color)
+{
+    yenText = yen;
+    personaText = persona;
+    arcanaText = arcana;
+    levelText = level;
+    textColor = color;
+}
+
 void PauseMenuHUDScreen::loadBackground()
 {
     // load background into ram
@@ -50,6 +63,23 @@ void PauseMenuHUDScreen::unloadBackground()
     // unload background from ram
     graphics->unloadGraphic(bgHUD);
     bgHUD = {};
+}
+
+void PauseMenuHUDScreen::renderText()
+{
+    text->clearArea(138, 92, 82, 70);
+
+    // yen
+    text->drawText(yenText, 138, 92, textColor);
+
+    //  active persona name
+    text->drawText(personaText, 138, 117, textColor);
+
+    // active persona arcana
+    text->drawText(arcanaText, 138, 136, textColor);
+
+    // active persona level
+    text->drawText(levelText, 138, 155, textColor);
 }
 
 void PauseMenuHUDScreen::renderSprites()
@@ -97,6 +127,9 @@ void PauseMenuHUDScreen::renderSprites()
 
     // draw background
     renderBackground();
+
+    // draw text
+    renderText();
 }
 
 int PauseMenuHUDScreen::onTouch(touchPosition* touch)
@@ -107,6 +140,11 @@ int PauseMenuHUDScreen::onTouch(touchPosition* touch)
     }
 
     return -1;
+}
+
+void PauseMenuHUDScreen::setTextComponent(TextComponent* text)
+{
+    this->text = text;
 }
 
 void PauseMenuHUDScreen::load()
