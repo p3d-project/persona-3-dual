@@ -1,6 +1,8 @@
 #include "DialogueScreen.hpp"
 #include "core/globals.hpp"
 
+#include "animation/Easing.h"
+
 DialogueScreen* DialogueScreen::instance = nullptr;
 
 void DialogueScreen::create()
@@ -57,7 +59,7 @@ void DialogueScreen::renderSprites()
         oamSet(oam,
                spriteId++,
                srs.x,
-               srs.y,
+               srs.y + panelOffset,
                srs.priority,
                srs.sprite.paletteAlpha,
                srs.sprite.size,
@@ -70,6 +72,44 @@ void DialogueScreen::renderSprites()
                srs.vflip,
                srs.mosaic);
     }
+}
+
+void DialogueScreen::showAnimated()
+{
+    panelAnimator.cancelAll();
+    panelOffset = 40;
+    panelAnimation =
+        panelAnimator.animate(panelOffset).from(40).to(0).duration(220).ease(uiAnimation::Ease::OutCubic).start();
+}
+
+void DialogueScreen::hideAnimated()
+{
+    panelAnimator.cancelAll();
+    panelAnimation = panelAnimator.animate(panelOffset)
+                         .from(panelOffset)
+                         .to(40)
+                         .duration(180)
+                         .ease(uiAnimation::Ease::InCubic)
+                         .start();
+}
+
+void DialogueScreen::updateAnimation()
+{
+    bool panelWasAnimating = panelAnimation.isPlaying();
+    bool bustWasAnimating = bustAnimation.isPlaying();
+    panelAnimator.update(1.0f);
+    bustAnimator.update(1.0f);
+
+    if (isLoaded && (panelWasAnimating || bustWasAnimating || panelAnimation.isPlaying() || bustAnimation.isPlaying()))
+    {
+        renderSprites();
+        updateBustPositions();
+    }
+}
+
+bool DialogueScreen::isAnimating() const
+{
+    return panelAnimation.isPlaying();
 }
 
 void DialogueScreen::load()
@@ -163,6 +203,14 @@ void DialogueScreen::renderBust(etl::span<SpritePayload>& bustPayload)
 
     // update to new bust
     prevBust = &bustPayload;
+    activeBust = &bustPayload;
+    bustAnimator.cancelAll();
+    bustOffsetX = 0;
+    auto focus = bustAnimator.sequence();
+    focus.append(bustAnimator.animate(bustOffsetX).from(0).to(-3).duration(50).ease(uiAnimation::Ease::OutQuad));
+    focus.append(bustAnimator.animate(bustOffsetX).from(-3).to(3).duration(90).ease(uiAnimation::Ease::InOutQuad));
+    focus.append(bustAnimator.animate(bustOffsetX).from(3).to(0).duration(70).ease(uiAnimation::Ease::OutQuad));
+    bustAnimation = focus.start();
 
     // draw bust
     int bustId = spriteId;
@@ -188,7 +236,7 @@ void DialogueScreen::renderBust(etl::span<SpritePayload>& bustPayload)
 
         oamSet(oam,
                bustId++,
-               srs.x,
+               srs.x + bustOffsetX,
                srs.y,
                srs.priority,
                srs.sprite.paletteAlpha,
@@ -205,6 +253,25 @@ void DialogueScreen::renderBust(etl::span<SpritePayload>& bustPayload)
 
     // setup bust palette
     dmaCopy(bustPalette, SPRITE_PALETTE_SUB + (bustPaletteId * 16), 16 * sizeof(u16));
+}
+
+void DialogueScreen::updateBustPositions()
+{
+    if (activeBust == nullptr)
+    {
+        return;
+    }
+
+    int bustId = spriteId;
+    for (SpritePayload& sp : *activeBust)
+    {
+        Sprite& sprite = sp.srs.sprite;
+        if (sprite.gfx == nullptr || sp.ga.id <= -1)
+        {
+            continue;
+        }
+        oamSetXY(oam, bustId++, sp.srs.x + bustOffsetX, sp.srs.y);
+    }
 }
 
 void DialogueScreen::unloadBust(etl::span<SpritePayload>& bustPayload)

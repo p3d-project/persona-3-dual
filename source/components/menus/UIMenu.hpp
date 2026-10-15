@@ -8,6 +8,7 @@
 #include <nds.h>
 #include <string>
 
+#include "animation/Animator.h"
 #include "components/TextComponent.hpp"
 #include "types/UITypes.hpp"
 
@@ -39,6 +40,10 @@ class UIMenu
     int visibleOptions = 0;
     etl::stack<MenuState, 5> prevOptions;
     ViewState nextViewState = ViewState::KEEP_CURRENT;
+    int selectionX = 0;
+    uiAnimation::Animator animator;
+
+    void animateSelection();
 
     /**
      * @brief Changes the current options to the previous options
@@ -69,4 +74,7 @@ class UIMenu
      * Can override the return from the standard update loop
      */
     virtual ViewState updateHook();
+
+    void updateAnimation();
+    int selectionOffset() const;
 };

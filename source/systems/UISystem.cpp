@@ -23,6 +23,13 @@ void UISystem::Update(ae::q20_12_t dt)
         return;
     }
 
+    bool selectionWasMoving = activeMenu->selectionOffset() != 0;
+    activeMenu->updateAnimation();
+    if (selectionWasMoving || activeMenu->selectionOffset() != 0)
+    {
+        renderUIText = true;
+    }
+
     // run the hook
     ViewState updateHookState = activeMenu->updateHook();
     if (updateHookState != ViewState::DEFAULT)
@@ -39,6 +46,7 @@ void UISystem::Update(ae::q20_12_t dt)
             sfxCmpt->playSFX(SFX::SFX_1, 255, 128);
         }
         activeMenu->selectedOption = (activeMenu->selectedOption + 1) % activeMenu->options.size();
+        activeMenu->animateSelection();
         renderUIText = true;
     }
     else if (systemKeysDown & KEY_UP)
@@ -49,6 +57,7 @@ void UISystem::Update(ae::q20_12_t dt)
         }
         activeMenu->selectedOption =
             (activeMenu->selectedOption + activeMenu->options.size() - 1) % activeMenu->options.size();
+        activeMenu->animateSelection();
         renderUIText = true;
     }
 
@@ -105,6 +114,11 @@ void UISystem::Update(ae::q20_12_t dt)
     }
 
     // blink the "Pause" text
+    if (renderUIText)
+    {
+        text->clearScreen();
+    }
+
     if (activeMenu->pauseMessage.length() != 0)
     {
         if (frame % 60 < 30)
@@ -127,7 +141,8 @@ void UISystem::Update(ae::q20_12_t dt)
         {
             int option = activeMenu->startIndex + i;
             TextColor color = option == activeMenu->selectedOption ? TextColor::Blue : TextColor::White;
-            text->drawText(activeMenu->options[option].name, 10, textSize + textSize * i, color);
+            int x = option == activeMenu->selectedOption ? 10 + activeMenu->selectionOffset() : 10;
+            text->drawText(activeMenu->options[option].name, x, textSize + textSize * i, color);
         }
     }
 

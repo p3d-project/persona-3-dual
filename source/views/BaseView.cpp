@@ -1,6 +1,7 @@
 #include "BaseView.hpp"
 #include "core/globals.hpp"
 #include "events/GenericEvents.hpp"
+#include <nds.h>
 
 // TODO: recieve and handle etl message Event::SwitchView
 
@@ -44,4 +45,21 @@ void BaseView::cleanup()
     dmaFillHalfWords(0, VRAM_E, 0x10000); // 64 KB
     dmaFillHalfWords(0, VRAM_H, 0x08000); // 32 KB
     dmaFillHalfWords(0, VRAM_I, 0x04000); // 16 KB
+}
+
+void BaseView::startFadeIn()
+{
+    fadeBrightness = -16;
+    setBrightness(3, fadeBrightness);
+}
+
+void BaseView::updateFadeIn()
+{
+    if (fadeBrightness >= 0)
+    {
+        return;
+    }
+
+    fadeBrightness += 2;
+    setBrightness(3, fadeBrightness);
 }

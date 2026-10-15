@@ -1,4 +1,5 @@
 #pragma once
+#include "animation/Animator.h"
 #include "components/GraphicsComponent.hpp"
 #include "components/screens/UIScreen.hpp"
 
@@ -23,6 +24,10 @@ class DialogueScreen : public UIScreen
 
     // render the specified bust onto the screen
     void renderBust(etl::span<SpritePayload>& bustPayload);
+    void showAnimated();
+    void hideAnimated();
+    void updateAnimation();
+    bool isAnimating() const;
 
   private:
     DialogueScreen() : UIScreen(false) {};
@@ -46,6 +51,15 @@ class DialogueScreen : public UIScreen
     void* palette1 = nullptr;
 
     int spriteId = 0;
+    int panelOffset = 40;
+    int bustOffsetX = 0;
+    etl::span<SpritePayload>* activeBust = nullptr;
+    uiAnimation::Animator panelAnimator;
+    uiAnimation::Animator bustAnimator;
+    uiAnimation::AnimationHandle panelAnimation;
+    uiAnimation::AnimationHandle bustAnimation;
+
+    void updateBustPositions();
 
     ae::Entity* dialogue = nullptr;
     GraphicsComponent* graphics = nullptr;
