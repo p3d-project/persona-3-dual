@@ -401,6 +401,21 @@ void SignContractScreen::moveCursorLeft()
         {
             isLastName = true;
             updateStatus("Enter your last name");
+            bool endFound = false;
+            for (int i = 9; i >= 0; --i)
+            {
+                if (endFound)
+                {
+                    break;
+                }
+
+                if (lastName[i] != ' ' && lastName[i] != '\0')
+                {
+                    endFound = true;
+                    isLastName = true;
+                    index = i + 1; // put cursor after the last character in the last name
+                }
+            }
         }
     }
     renderCursor();
