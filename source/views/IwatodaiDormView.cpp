@@ -110,6 +110,7 @@ void IwatodaiDormView::setupUI()
 
     pauseMenuHUDScreen->setTextComponent(textSub);
     pauseMenuHUDScreen->setInfoPanelText("9,999,999 Yen", "Ara Mitama", "Chariot", "Level 99", TextColor::DarkestBlue);
+    pauseMenuHUDScreen->setDescriptionText("View Social Link details", TextColor::White);
 
     std::array<UIScreen*, 5> screens = {menuHUDScreen, dialogueScreen, pauseMenuHUDScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt};

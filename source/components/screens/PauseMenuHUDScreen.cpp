@@ -42,6 +42,12 @@ void PauseMenuHUDScreen::setInfoPanelText(const std::string& yen,
     textColor = color;
 }
 
+void PauseMenuHUDScreen::setDescriptionText(const std::string& description, TextColor color)
+{
+    descriptionText = description;
+    descriptionColor = color;
+}
+
 void PauseMenuHUDScreen::loadBackground()
 {
     // load background into ram
@@ -67,6 +73,10 @@ void PauseMenuHUDScreen::unloadBackground()
 
 void PauseMenuHUDScreen::renderText()
 {
+    // description (top bar)
+    text->clearArea(82, 5, 166, 14);
+    text->drawText(descriptionText, 72, 8, descriptionColor);
+
     text->clearArea(138, 92, 82, 70);
 
     // yen

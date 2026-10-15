@@ -44,6 +44,17 @@ class PauseMenuHUDScreen : public UIScreen
                           const std::string& level,
                           TextColor color);
 
+    // TODO: replace with ae dependency injection
+    /**
+     * @brief Set the Description Text object (top bar)
+     *
+     * @param description The description string
+     * @param color The text colour to render the description in
+     *
+     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
+     */
+    void setDescriptionText(const std::string& description, TextColor color);
+
     /**
      * @brief Draws the text
      * @note Must be re-called after anything clears the shared text component (e.g. menu navigation)
@@ -69,6 +80,9 @@ class PauseMenuHUDScreen : public UIScreen
     std::string arcanaText = "";
     std::string levelText = "";
     TextColor textColor = TextColor::DarkestBlue;
+
+    std::string descriptionText = "";
+    TextColor descriptionColor = TextColor::White;
 
     // background
     const std::string bgPath = "graphics/PauseMenuHUD/backgrounds/";
