@@ -69,4 +69,14 @@ class UIMenu
      * Can override the return from the standard update loop
      */
     virtual ViewState updateHook();
+
+    int getSelectedOption() const
+    {
+        return selectedOption;
+    }
+
+    int getStartIndex() const
+    {
+        return startIndex;
+    }
 };

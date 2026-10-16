@@ -301,6 +301,7 @@ ViewState EnvironmentView::update()
 
             // ShowMenu clears textSub, so show the screen after it to keep the text displayed
             ae::BroadcastEvent(Event::ShowMenu{pauseMenuCmpt});
+            pauseMenuHUDScreen->setSelectedRow(0);
             ae::BroadcastEvent(Event::ShowScreen{pauseMenuHUDScreen});
         }
 
@@ -308,6 +309,7 @@ ViewState EnvironmentView::update()
         if (systemKeysDown & (KEY_A | KEY_B | KEY_UP | KEY_DOWN))
         {
             pauseMenuHUDScreen->renderText();
+            pauseMenuHUDScreen->setSelectedRow(pauseMenuCmpt->getSelectedOption() - pauseMenuCmpt->getStartIndex());
         }
 
         if ((systemKeysDown & KEY_START) || pauseMenuCmpt->isClosed)

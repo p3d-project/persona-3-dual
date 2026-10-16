@@ -92,11 +92,26 @@ void PauseMenuHUDScreen::renderText()
     text->drawText(levelText, 138, 155, textColor);
 }
 
+void PauseMenuHUDScreen::setSelectedRow(int row)
+{
+    int fontSize = text->getFontSize();
+    int y = fontSize + fontSize * row + selectedBarYOffset;
+
+    etl::array<SpriteRenderState*, 4> barPieces = {&srs1, &srs2, &srs3, &srs4};
+    for (int i = 0; i < 4; i++)
+    {
+        barPieces[i]->y = y;
+        if (isLoaded)
+        {
+            moveSprite(i + 1, barPieces[i]->x, y);
+        }
+    }
+}
+
 void PauseMenuHUDScreen::renderSprites()
 {
     // load palettes
-    // dmaCopy(bgHUD.pal, SPRITE_PALETTE_SUB, bgHUD.palLen);
-    dmaCopy(statusGraphic.pal, SPRITE_PALETTE_SUB, statusGraphic.palLen);
+    dmaCopy(bgHUD.pal, SPRITE_PALETTE_SUB, bgHUD.palLen);
 
     // perform transformations
     /// index -1 is reserved for vflip/hflip, 0 is reserved for no transform

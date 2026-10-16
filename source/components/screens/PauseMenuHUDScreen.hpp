@@ -61,6 +61,13 @@ class PauseMenuHUDScreen : public UIScreen
      */
     void renderText();
 
+    /**
+     * @brief Moves the selection bar to the given visible menu row
+     *
+     * @param row The row to move the selection bar to
+     */
+    void setSelectedRow(int row);
+
   private:
     PauseMenuHUDScreen() : UIScreen(false) {};
     ~PauseMenuHUDScreen() {};
@@ -105,28 +112,35 @@ class PauseMenuHUDScreen : public UIScreen
                                        {SpriteSize_32x16, SpriteColorFormat_16Color, 0}};
     GraphicAsset selectedOptionGraphics[4] = {};
 
-    SpriteRenderState srs1 = {selectedOptionSprites[0], 165, -5, 1, 0, false, false, false, true};
+    const int selectedBarX = 8;
+    const int selectedBarPieceWidth = 32;
+    const int selectedBarYOffset = -2;
+
+    SpriteRenderState srs1 = {selectedOptionSprites[0], selectedBarX, 0, 1, -1, false, false, false, false};
     SpritePayload sp1 = {srs1,
                          spritePath,
                          selectedOptionGraphics[0],
                          SpriteType::SELECTED_OPTION,
                          (int)SelectedOptionSprite::SELECTED_OPTION_0};
 
-    SpriteRenderState srs2 = {selectedOptionSprites[1], -11, 141, 1, 0, false, false, false, true};
+    SpriteRenderState srs2 = {
+        selectedOptionSprites[1], selectedBarX + selectedBarPieceWidth, 0, 1, -1, false, false, false, false};
     SpritePayload sp2 = {srs2,
                          spritePath,
                          selectedOptionGraphics[1],
                          SpriteType::SELECTED_OPTION,
                          (int)SelectedOptionSprite::SELECTED_OPTION_1};
 
-    SpriteRenderState srs3 = {selectedOptionSprites[2], 15, 141, 1, 0, false, false, false, true};
+    SpriteRenderState srs3 = {
+        selectedOptionSprites[2], selectedBarX + selectedBarPieceWidth * 2, 0, 1, -1, false, false, false, false};
     SpritePayload sp3 = {srs3,
                          spritePath,
                          selectedOptionGraphics[2],
                          SpriteType::SELECTED_OPTION,
                          (int)SelectedOptionSprite::SELECTED_OPTION_2};
 
-    SpriteRenderState srs4 = {selectedOptionSprites[3], 54, 141, 1, 0, false, false, false, true};
+    SpriteRenderState srs4 = {
+        selectedOptionSprites[3], selectedBarX + selectedBarPieceWidth * 3, 0, 1, -1, false, false, false, false};
     SpritePayload sp4 = {srs4,
                          spritePath,
                          selectedOptionGraphics[3],
