@@ -123,7 +123,7 @@ void UISystem::Update(ae::q20_12_t dt)
     {
         if (frame % 60 < 30)
         {
-            text->drawText(activeMenu->pauseMessage, 0, 0, 2);
+            text->drawText(activeMenu->pauseMessage, 0, 0, TextColor::White);
         }
         else
         {
