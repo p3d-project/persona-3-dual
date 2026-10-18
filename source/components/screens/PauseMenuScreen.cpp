@@ -1,17 +1,17 @@
-#include "PauseMenuHUDScreen.hpp"
+#include "PauseMenuScreen.hpp"
 #include "core/globals.hpp"
 
-PauseMenuHUDScreen* PauseMenuHUDScreen::instance = nullptr;
+PauseMenuScreen* PauseMenuScreen::instance = nullptr;
 
-void PauseMenuHUDScreen::create()
+void PauseMenuScreen::create()
 {
     if (instance == nullptr)
     {
-        instance = new PauseMenuHUDScreen();
+        instance = new PauseMenuScreen();
     }
 }
 
-void PauseMenuHUDScreen::destroy()
+void PauseMenuScreen::destroy()
 {
     if (instance != nullptr)
     {
@@ -20,16 +20,16 @@ void PauseMenuHUDScreen::destroy()
     }
 }
 
-PauseMenuHUDScreen* PauseMenuHUDScreen::getInstance()
+PauseMenuScreen* PauseMenuScreen::getInstance()
 {
     if (instance == nullptr)
     {
-        instance = new PauseMenuHUDScreen();
+        instance = new PauseMenuScreen();
     }
     return instance;
 }
 
-void PauseMenuHUDScreen::setInfoPanelText(const std::string& yen,
+void PauseMenuScreen::setInfoPanelText(const std::string& yen,
                                           const std::string& persona,
                                           const std::string& arcana,
                                           const std::string& level,
@@ -42,36 +42,36 @@ void PauseMenuHUDScreen::setInfoPanelText(const std::string& yen,
     textColor = color;
 }
 
-void PauseMenuHUDScreen::setDescriptionText(const std::string& description, TextColor color)
+void PauseMenuScreen::setDescriptionText(const std::string& description, TextColor color)
 {
     descriptionText = description;
     descriptionColor = color;
 }
 
-void PauseMenuHUDScreen::loadBackground()
+void PauseMenuScreen::loadBackground()
 {
     // load background into ram
-    bgHUD = graphics->loadGraphic(bgPath + "pause/pause");
+    bgPauseMenu = graphics->loadGraphic(bgPath + "pause/pause");
 }
 
-void PauseMenuHUDScreen::renderBackground()
+void PauseMenuScreen::renderBackground()
 {
     // load palette
-    dmaCopy(bgHUD.pal, BG_PALETTE_SUB, bgHUD.palLen);
+    dmaCopy(bgPauseMenu.pal, BG_PALETTE_SUB, bgPauseMenu.palLen);
 
     // draw background (copy into vram)
-    dmaCopy(bgHUD.tiles, bgGetGfxPtr(bgId), bgHUD.tilesLen);
-    dmaCopy(bgHUD.map, bgGetMapPtr(bgId), bgHUD.mapLen);
+    dmaCopy(bgPauseMenu.tiles, bgGetGfxPtr(bgId), bgPauseMenu.tilesLen);
+    dmaCopy(bgPauseMenu.map, bgGetMapPtr(bgId), bgPauseMenu.mapLen);
 }
 
-void PauseMenuHUDScreen::unloadBackground()
+void PauseMenuScreen::unloadBackground()
 {
     // unload background from ram
-    graphics->unloadGraphic(bgHUD);
-    bgHUD = {};
+    graphics->unloadGraphic(bgPauseMenu);
+    bgPauseMenu = {};
 }
 
-void PauseMenuHUDScreen::renderText()
+void PauseMenuScreen::renderText()
 {
     // description (top bar)
     text->clearArea(82, 5, 166, 14);
@@ -94,7 +94,7 @@ void PauseMenuHUDScreen::renderText()
     renderOptions();
 }
 
-void PauseMenuHUDScreen::renderOptions()
+void PauseMenuScreen::renderOptions()
 {
     etl::span<MenuOption> options = menu->getOptions();
     int startIndex = menu->getStartIndex();
@@ -120,10 +120,10 @@ void PauseMenuHUDScreen::renderOptions()
     }
 }
 
-void PauseMenuHUDScreen::renderSprites()
+void PauseMenuScreen::renderSprites()
 {
     // load palettes
-    dmaCopy(bgHUD.pal, SPRITE_PALETTE_SUB, bgHUD.palLen);
+    dmaCopy(bgPauseMenu.pal, SPRITE_PALETTE_SUB, bgPauseMenu.palLen);
 
     // perform transformations
     /// index -1 is reserved for vflip/hflip, 0 is reserved for no transform
@@ -169,7 +169,7 @@ void PauseMenuHUDScreen::renderSprites()
     renderText();
 }
 
-int PauseMenuHUDScreen::onTouch(touchPosition* touch)
+int PauseMenuScreen::onTouch(touchPosition* touch)
 {
     if (touch->px >= 193 && touch->px <= 250 && touch->py >= 166 && touch->py <= 184)
     {
@@ -179,29 +179,29 @@ int PauseMenuHUDScreen::onTouch(touchPosition* touch)
     return -1;
 }
 
-void PauseMenuHUDScreen::setTextComponent(TextComponent* text)
+void PauseMenuScreen::setTextComponent(TextComponent* text)
 {
     this->text = text;
 }
 
-void PauseMenuHUDScreen::setMenu(const UIMenu* menu)
+void PauseMenuScreen::setMenu(const UIMenu* menu)
 {
     this->menu = menu;
 }
 
-int PauseMenuHUDScreen::getVisibleOptions()
+int PauseMenuScreen::getVisibleOptions()
 {
     return visibleOptions;
 }
 
-void PauseMenuHUDScreen::load()
+void PauseMenuScreen::load()
 {
     // create relevant entities, components
-    if (pauseMenuHUD == nullptr)
+    if (pauseMenu == nullptr)
     {
-        pauseMenuHUD = engine.CreateEntity();
+        pauseMenu = engine.CreateEntity();
         graphics = engine.CreateComponent<GraphicsComponent>();
-        pauseMenuHUD->AddComponent(graphics);
+        pauseMenu->AddComponent(graphics);
     }
 
     // load sprites
@@ -226,7 +226,7 @@ void PauseMenuHUDScreen::load()
     loadBackground();
 };
 
-void PauseMenuHUDScreen::unload()
+void PauseMenuScreen::unload()
 {
     // hide sprites
     removeSprites();
@@ -259,11 +259,11 @@ void PauseMenuHUDScreen::unload()
     // unload background
     unloadBackground();
 
-    if (pauseMenuHUD != nullptr)
+    if (pauseMenu != nullptr)
     {
-        engine.DestroyEntity(pauseMenuHUD);
+        engine.DestroyEntity(pauseMenu);
 
-        pauseMenuHUD = nullptr;
+        pauseMenu = nullptr;
         graphics = nullptr;
     }
 }

@@ -132,7 +132,7 @@ void IwatodaiStreetsView::setupUI()
     menuHUDScreen->setTextComponent(textSub);
     menuHUDScreen->setTextContent("Streets", TextColor::White);
 
-    std::array<UIScreen*, 5> screens = {menuHUDScreen, pauseMenuHUDScreen};
+    std::array<UIScreen*, 5> screens = {menuHUDScreen, pauseMenuScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt, battleMenuCmpt};
 
     ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, screens});

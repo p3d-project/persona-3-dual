@@ -7,12 +7,12 @@
 #include <etl/array.h>
 #include <nds.h>
 
-class PauseMenuHUDScreen : public UIScreen
+class PauseMenuScreen : public UIScreen
 {
   public:
     static void create();
     static void destroy();
-    static PauseMenuHUDScreen* getInstance();
+    static PauseMenuScreen* getInstance();
 
     void load();
     void unload();
@@ -78,9 +78,9 @@ class PauseMenuHUDScreen : public UIScreen
     int getVisibleOptions();
 
   private:
-    PauseMenuHUDScreen() : UIScreen(false) {};
-    ~PauseMenuHUDScreen() {};
-    static PauseMenuHUDScreen* instance;
+    PauseMenuScreen() : UIScreen(false) {};
+    ~PauseMenuScreen() {};
+    static PauseMenuScreen* instance;
 
     void loadBackground();
     void renderBackground();
@@ -91,7 +91,7 @@ class PauseMenuHUDScreen : public UIScreen
      */
     void renderOptions();
 
-    ae::Entity* pauseMenuHUD = nullptr;
+    ae::Entity* pauseMenu = nullptr;
     GraphicsComponent* graphics = nullptr;
     TextComponent* text = nullptr;
     const UIMenu* menu = nullptr;
@@ -115,12 +115,12 @@ class PauseMenuHUDScreen : public UIScreen
     TextColor descriptionColor = TextColor::White;
 
     // background
-    const std::string bgPath = "graphics/PauseMenuHUD/backgrounds/";
+    const std::string bgPath = "graphics/PauseMenu/backgrounds/";
 
-    GraphicAsset bgHUD = {};
+    GraphicAsset bgPauseMenu = {};
 
     // sprite setup
-    const std::string spritePath = "graphics/PauseMenuHUD/sprites/";
+    const std::string spritePath = "graphics/PauseMenu/sprites/";
 
     // status sprite
     Sprite statusSprite = {SpriteSize_32x32, SpriteColorFormat_16Color, 0};

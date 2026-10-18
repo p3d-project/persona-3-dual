@@ -93,7 +93,7 @@ void PaulowniaMallView::setupUI()
     menuHUDScreen->setTextComponent(textSub);
     menuHUDScreen->setTextContent("Paulownia Mall", TextColor::White);
 
-    std::array<UIScreen*, 5> screens = {menuHUDScreen, pauseMenuHUDScreen};
+    std::array<UIScreen*, 5> screens = {menuHUDScreen, pauseMenuScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt};
 
     ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, screens});

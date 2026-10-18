@@ -109,7 +109,7 @@ void IwatodaiDormView::setupUI()
     menuHUDScreen->setTextComponent(textSub);
     menuHUDScreen->setTextContent("Dorm", TextColor::White);
 
-    std::array<UIScreen*, 5> screens = {menuHUDScreen, dialogueScreen, pauseMenuHUDScreen};
+    std::array<UIScreen*, 5> screens = {menuHUDScreen, dialogueScreen, pauseMenuScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt};
 
     ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, screens});

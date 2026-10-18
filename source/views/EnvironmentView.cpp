@@ -301,13 +301,13 @@ ViewState EnvironmentView::update()
 
             // ShowMenu clears textSub, so show the screen after it to keep the text displayed
             ae::BroadcastEvent(Event::ShowMenu{pauseMenuCmpt});
-            ae::BroadcastEvent(Event::ShowScreen{pauseMenuHUDScreen});
+            ae::BroadcastEvent(Event::ShowScreen{pauseMenuScreen});
         }
 
         // menu clears textSub when navigating,so a redraw is required
         if (systemKeysDown & (KEY_A | KEY_B | KEY_UP | KEY_DOWN))
         {
-            pauseMenuHUDScreen->renderText();
+            pauseMenuScreen->renderText();
         }
 
         if ((systemKeysDown & KEY_START) || pauseMenuCmpt->isClosed)
@@ -513,7 +513,7 @@ void EnvironmentView::cleanup()
 
     dialogueScreen = nullptr;
     menuHUDScreen = nullptr;
-    pauseMenuHUDScreen = nullptr;
+    pauseMenuScreen = nullptr;
     battleMenuCmpt = nullptr;
     pauseMenuCmpt = nullptr;
 
@@ -532,11 +532,11 @@ void EnvironmentView::cleanup()
 void EnvironmentView::setupPauseMenu()
 {
     pauseMenuCmpt = PauseMenu::getInstance();
-    pauseMenuHUDScreen = PauseMenuHUDScreen::getInstance();
+    pauseMenuScreen = PauseMenuScreen::getInstance();
 
-    pauseMenuHUDScreen->setTextComponent(textSub);
-    pauseMenuHUDScreen->setMenu(pauseMenuCmpt);
-    pauseMenuCmpt->setVisibleOptions(pauseMenuHUDScreen->getVisibleOptions());
-    pauseMenuHUDScreen->setInfoPanelText("9,999,999 Yen", "Ara Mitama", "Chariot", "Level 99", TextColor::DarkestBlue);
-    pauseMenuHUDScreen->setDescriptionText("View Social Link details", TextColor::White);
+    pauseMenuScreen->setTextComponent(textSub);
+    pauseMenuScreen->setMenu(pauseMenuCmpt);
+    pauseMenuCmpt->setVisibleOptions(pauseMenuScreen->getVisibleOptions());
+    pauseMenuScreen->setInfoPanelText("9,999,999 Yen", "Ara Mitama", "Chariot", "Level 99", TextColor::DarkestBlue);
+    pauseMenuScreen->setDescriptionText("View Social Link details", TextColor::White);
 }
