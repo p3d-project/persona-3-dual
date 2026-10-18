@@ -85,20 +85,7 @@ void SignContractScreen::loadSaveDataName()
     // If first name is empty, check last name
     if (!endFound)
     {
-        for (int i = 9; i >= 0; --i)
-        {
-            if (endFound)
-            {
-                break;
-            }
-
-            if (lastName[i] != ' ' && lastName[i] != '\0')
-            {
-                endFound = true;
-                isLastName = true;
-                index = i + 1; // put cursor after the last character in the last name
-            }
-        }
+        sendCursorToEndOfLastName();
     }
 
     renderName();
@@ -386,6 +373,7 @@ void SignContractScreen::backSpaceAction()
             isLastName = true;
             updateStatus("Enter your last name");
             lastName[9] = ' ';
+            sendCursorToEndOfLastName();
         }
     }
     renderName();
@@ -401,20 +389,7 @@ void SignContractScreen::moveCursorLeft()
         {
             isLastName = true;
             updateStatus("Enter your last name");
-            bool endFound = false;
-            for (int i = 9; i >= 0; --i)
-            {
-                if (endFound)
-                {
-                    break;
-                }
-
-                if (lastName[i] != ' ' && lastName[i] != '\0')
-                {
-                    endFound = true;
-                    index = i + 1; // put cursor after the last character in the last name
-                }
-            }
+            sendCursorToEndOfLastName();
         }
     }
     renderCursor();
@@ -432,6 +407,24 @@ void SignContractScreen::moveCursorRight()
         }
     }
     renderCursor();
+}
+
+void SignContractScreen::sendCursorToEndOfLastName()
+{
+    bool endFound = false;
+    for (int i = 9; i >= 0; --i)
+    {
+        if (endFound)
+        {
+            break;
+        }
+
+        if (lastName[i] != ' ' && lastName[i] != '\0')
+        {
+            endFound = true;
+            index = i + 1; // put cursor after the last character in the last name
+        }
+    }
 }
 
 void SignContractScreen::load()

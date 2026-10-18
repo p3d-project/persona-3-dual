@@ -122,6 +122,11 @@ class SignContractScreen : public UIScreen
      */
     void moveCursorRight();
 
+    /**
+     * @brief Helper function to set the cursor index to the end of the last name, if any characters have been written to the last name buffer. If no characters have been written, the cursor will be set to the start of the last name buffer.
+     */
+    void sendCursorToEndOfLastName();
+
     ae::Entity* signContractUI = nullptr;
     GraphicsComponent* graphics = nullptr;
     TextComponent* text = nullptr;
