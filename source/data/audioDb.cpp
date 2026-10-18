@@ -48,11 +48,21 @@ static const AudioDBEntry AUDIO_DB_ENTRY[] = {
      ae::q20_12_t{-1.000}},
 
     // other
-    {AudioType::OTHER, static_cast<int>(OtherAudio::AFTER_THE_BATTLE), "other/after_the_battle"},
-    {AudioType::OTHER, static_cast<int>(OtherAudio::BECAUSE_I_WILL_PROTECT_YOU), "other/because_i_will_protect_you"},
+    {AudioType::OTHER,
+     static_cast<int>(OtherAudio::AFTER_THE_BATTLE),
+     "other/after_the_battle",
+     ae::q20_12_t{24.000},
+     ae::q20_12_t{-1.000}},
+    {AudioType::OTHER,
+     static_cast<int>(OtherAudio::BECAUSE_I_WILL_PROTECT_YOU),
+     "other/because_i_will_protect_you",
+     ae::q20_12_t{.000},
+     ae::q20_12_t{-1.000}},
     {AudioType::OTHER,
      static_cast<int>(OtherAudio::CLUB_ESCAPADE_NOUVEAU_METALMOTH_REMIX),
-     "other/club_escapade_nouveau_metalmoth_remix"},
+     "other/club_escapade_nouveau_metalmoth_remix",
+     ae::q20_12_t{0.000},
+     ae::q20_12_t{-1.000}}, // TODO: get correct looping points
 };
 
 static const int AUDIO_DB_ENTRY_LEN = sizeof(AUDIO_DB_ENTRY) / sizeof(AUDIO_DB_ENTRY[0]);
