@@ -105,7 +105,7 @@ void UISystem::Update(ae::q20_12_t dt)
     }
 
     // blink the "Pause" text
-    if (activeMenu->pauseMessage.length() != 0)
+    if (!activeMenu->customRender && activeMenu->pauseMessage.length() != 0)
     {
         if (frame % 60 < 30)
         {
@@ -119,15 +119,19 @@ void UISystem::Update(ae::q20_12_t dt)
 
     // display options
     int textSize = text->getFontSize();
-    if (renderUIText && !activeMenu->customRender)
+    if (renderUIText)
     {
         renderUIText = false;
-        for (int i = 0; i < activeMenu->visibleOptions && activeMenu->startIndex + i < int(activeMenu->options.size());
-             i++)
+        if (!activeMenu->customRender)
         {
-            int option = activeMenu->startIndex + i;
-            TextColor color = option == activeMenu->selectedOption ? TextColor::Blue : TextColor::White;
-            text->drawText(activeMenu->options[option].name, 10, textSize + textSize * i, color);
+            for (int i = 0;
+                 i < activeMenu->visibleOptions && activeMenu->startIndex + i < int(activeMenu->options.size());
+                 i++)
+            {
+                int option = activeMenu->startIndex + i;
+                TextColor color = option == activeMenu->selectedOption ? TextColor::Blue : TextColor::White;
+                text->drawText(activeMenu->options[option].name, 10, textSize + textSize * i, color);
+            }
         }
     }
 

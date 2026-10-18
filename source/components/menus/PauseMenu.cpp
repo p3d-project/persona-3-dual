@@ -33,8 +33,6 @@ PauseMenu* PauseMenu::getInstance()
 
 void PauseMenu::resetHook()
 {
-    // Would draw over the description text
-    pauseMessage = "";
     options = menuOptions;
     isClosed = false;
 }
