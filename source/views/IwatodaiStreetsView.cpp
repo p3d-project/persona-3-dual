@@ -1,8 +1,9 @@
 #include "IwatodaiStreetsView.hpp"
-#include "core/globals.hpp"
+#include "data/audioDb.hpp"
 #include "events/BattleEvents.hpp"
 #include "events/GenericEvents.hpp"
 #include "events/UIEvents.hpp"
+#include "systems/BattleSystem.hpp"
 
 IwatodaiStreetsView::IwatodaiStreetsView()
 {
@@ -57,9 +58,7 @@ void IwatodaiStreetsView::setupMovement()
 
 void IwatodaiStreetsView::setupMusic()
 {
-    musicCmpt->registerMusic((fatBasePath + "music/locations/iwatodaiStreets/changing_seasons.qoa").c_str(),
-                             ae::q20_12_t{31},
-                             ae::q20_12_t{177.587});
+    musicCmpt->registerMusic(AudioType::LOCATION, LocationAudio::CHANGING_SEASONS);
 }
 
 ViewState IwatodaiStreetsView::onTileCheck(TileType tile, u32 pressed)

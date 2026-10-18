@@ -1,8 +1,8 @@
 #include "IwatodaiDormView.hpp"
-#include "core/globals.hpp"
 #include "events/UIEvents.hpp"
 #include "types/CameraTypes.hpp"
 
+#include "data/audioDb.hpp"
 #include "data/environmentDb.hpp"
 #include "demo/demo_dialogue.hpp"
 #include "maps/iwatodai_dorm_floor_1.hpp"
@@ -24,8 +24,7 @@ void IwatodaiDormView::setupCamera()
 
 void IwatodaiDormView::setupMusic()
 {
-    musicCmpt->registerMusic(
-        (fatBasePath + "music/locations/iwatodaiDorm/iwatodai_dorm.qoa").c_str(), ae::q20_12_t{1.3}, ae::q20_12_t{-1});
+    musicCmpt->registerMusic(AudioType::LOCATION, LocationAudio::IWATODAI_DORM);
 }
 
 void IwatodaiDormView::setupMovement()
