@@ -8,22 +8,32 @@
 
 enum class DebugOption
 {
-    DISCLAIMER_VIEW = 0,
-    INTRO_VIEW,
-    MAIN_MENU_VIEW,
-    IWATODAI_DORM_VIEW,
-    IWATODAI_STREETS_VIEW,
-    STATION_VIEW,
-    SIGN_CONTRACT_VIEW,
-    PAULOWNIA_MALL_VIEW,
-    INTRO_VIDEO,
-    CUTSCENE_1,
-    CUTSCENE_2,
+    SWITCH_VIEW = 0,
+    PLAY_CUTSCENE,
     TOGGLE_BILLBOARDS,
     TOGGLE_DEBUG_PRINT,
     PLAY_MUSIC,
     PLAY_CHARACTER_ANIM,
     CYCLE_CAMERA_MODE
+};
+
+enum class ViewOption
+{
+    DISCLAIMER = 0,
+    INTRO,
+    MAIN_MENU,
+    IWATODAI_DORM,
+    IWATODAI_STREETS,
+    STATION,
+    SIGN_CONTRACT,
+    PAULOWNIA_MALL
+};
+
+enum class CutsceneOption
+{
+    INTRO_VIDEO = 0,
+    CUTSCENE_1,
+    CUTSCENE_2
 };
 
 class PauseMenu : public UIMenu
@@ -50,23 +60,31 @@ class PauseMenu : public UIMenu
         {"System", -1, MENU_BIND(PauseMenu, openSystemMenu)},
     };
 
-    etl::array<MenuOption, 16> debugOptions = {
-        MenuOption{"DisclaimerView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"IntroView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"MainMenuView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"IwatodaiDormView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"IwatodaiStreetView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"StationView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"SignContractView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"PaulowniaMallView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"IntroVideo", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"Cutscene1", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"Cutscene2", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+    etl::array<MenuOption, 7> debugOptions = {
+        MenuOption{"Switch View", -1, MENU_BIND(PauseMenu, openViewMenu)},
+        {"Play Cutscene", -1, MENU_BIND(PauseMenu, openCutsceneMenu)},
         {"Toggle Billboards", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
         {"Toggle Debug Print", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
         {"Play Music", -1, MENU_BIND(PauseMenu, openMusicMenu)},
         {"Play Character Animations", -1, MENU_BIND(PauseMenu, openCharacterAnimMenu)},
         {"Cycle Camera Mode", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+    };
+
+    etl::array<MenuOption, 8> viewOptions = {
+        MenuOption{"DisclaimerView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"IntroView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"MainMenuView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"IwatodaiDormView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"IwatodaiStreetView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"StationView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"SignContractView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"PaulowniaMallView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+    };
+
+    etl::array<MenuOption, 3> cutsceneOptions = {
+        MenuOption{"IntroVideo", -1, MENU_BIND(PauseMenu, cutsceneOptionSelected)},
+        {"Cutscene1", -1, MENU_BIND(PauseMenu, cutsceneOptionSelected)},
+        {"Cutscene2", -1, MENU_BIND(PauseMenu, cutsceneOptionSelected)},
     };
 
     etl::array<MenuOption, 4> musicOptions = {
@@ -206,6 +224,8 @@ class PauseMenu : public UIMenu
     ViewState openSLinkMenu();
     ViewState openSystemMenu();
     ViewState openCharacterAnimMenu();
+    ViewState openViewMenu();
+    ViewState openCutsceneMenu();
     ViewState openMusicMenu();
     ViewState openBattleMusicMenu();
     ViewState openLocationMusicMenu();
@@ -214,6 +234,8 @@ class PauseMenu : public UIMenu
 
     // selection handlers
     ViewState debugOptionSelected();
+    ViewState viewOptionSelected();
+    ViewState cutsceneOptionSelected();
     ViewState skillOptionSelected();
     ViewState itemOptionSelected();
     ViewState equipOptionSelected();
