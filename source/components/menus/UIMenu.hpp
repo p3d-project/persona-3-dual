@@ -37,6 +37,7 @@ class UIMenu
     // options
     /// @note visibleOptions is set via the UISystem via the ConfigureUIMenu event handler
     int visibleOptions = 0;
+    const bool customRender;
     etl::stack<MenuState, 5> prevOptions;
     ViewState nextViewState = ViewState::KEEP_CURRENT;
 
@@ -59,6 +60,15 @@ class UIMenu
 
   public:
     /**
+     * @brief Construct a new UIMenu
+     *
+     * @param iCustomRender if a custom render is used, the UISystem doesn't draw the options, instead the UIScreen does
+     */
+    UIMenu(bool iCustomRender = false) : customRender(iCustomRender)
+    {
+    }
+
+    /**
      * @brief Resets the menu to its initial state.
      */
     virtual void resetMenu();
@@ -70,13 +80,43 @@ class UIMenu
      */
     virtual ViewState updateHook();
 
+    /**
+     * @brief Gets the index of the selected option
+     *
+     * @return int the selected option index
+     */
     int getSelectedOption() const
     {
         return selectedOption;
     }
 
+    /**
+     * @brief Gets the index of the first visible option
+     *
+     * @return int the start index
+     */
     int getStartIndex() const
     {
         return startIndex;
+    }
+
+    /**
+     * @brief Gets the options of the active menu
+     *
+     * @return etl::span<MenuOption> the active options
+     */
+    etl::span<MenuOption> getOptions() const
+    {
+        return options;
+    }
+
+    /**
+     * @brief Overrides the default visible option count set by UISystem
+     *
+     * @param count the number of options visible at once
+     */
+    void setVisibleOptions(int count)
+    {
+        visibleOptions = count;
     }
 };

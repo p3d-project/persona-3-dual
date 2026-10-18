@@ -119,7 +119,7 @@ void UISystem::Update(ae::q20_12_t dt)
 
     // display options
     int textSize = text->getFontSize();
-    if (renderUIText)
+    if (renderUIText && !activeMenu->customRender)
     {
         renderUIText = false;
         for (int i = 0; i < activeMenu->visibleOptions && activeMenu->startIndex + i < int(activeMenu->options.size());
@@ -208,7 +208,10 @@ void UISystem::on_receive(const Event::ConfigureUIMenu& config)
         menu->isActive = false;
         menu->text = text;
         /// @note 192px is the screen height. 1 row is reserved for the flashing text. Each line takes the font size height
-        menu->visibleOptions = (192 / textSize) - 1;
+        if (menu->visibleOptions == 0)
+        {
+            menu->visibleOptions = (192 / textSize) - 1;
+        }
     }
 }
 

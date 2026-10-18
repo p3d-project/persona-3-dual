@@ -27,7 +27,7 @@ enum class DebugOption
 class PauseMenu : public UIMenu
 {
   private:
-    PauseMenu() {};
+    PauseMenu() : UIMenu(true) {};
     virtual ~PauseMenu() = default;
     static PauseMenu* instance;
 

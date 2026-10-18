@@ -1,6 +1,7 @@
 #pragma once
 #include "components/GraphicsComponent.hpp"
 #include "components/TextComponent.hpp"
+#include "components/menus/UIMenu.hpp"
 #include "components/screens/UIScreen.hpp"
 
 #include <etl/array.h>
@@ -61,12 +62,20 @@ class PauseMenuHUDScreen : public UIScreen
      */
     void renderText();
 
+    // TODO: replace with ae dependency injection
     /**
-     * @brief Moves the selection bar to the given visible menu row
-     *
-     * @param row The row to move the selection bar to
+     * @brief Set the menu whose options are drawn on this screen
+     * @param menu The UIMenu pointer to set
+     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
      */
-    void setSelectedRow(int row);
+    void setMenu(const UIMenu* menu);
+
+    /**
+     * @brief Gets how many option rows the screen shows
+     *
+     * @return int the number of visible options
+     */
+    int getVisibleOptions();
 
   private:
     PauseMenuHUDScreen() : UIScreen(false) {};
@@ -77,9 +86,23 @@ class PauseMenuHUDScreen : public UIScreen
     void renderBackground();
     void unloadBackground();
 
+    /**
+     * @brief Draws the visible options of the active menu and moves the selection bar to the selected one
+     */
+    void renderOptions();
+
     ae::Entity* pauseMenuHUD = nullptr;
     GraphicsComponent* graphics = nullptr;
     TextComponent* text = nullptr;
+    const UIMenu* menu = nullptr;
+
+    // menu options
+    const int visibleOptions = 7;
+    const int optionsStartX = 26;
+    const int optionsStartY = 60;
+    const int optionsRowHeight = 19;
+    TextColor optionColor = TextColor::RichBlue;
+    TextColor selectedOptionColor = TextColor::DarkestBlue;
 
     //Menu texts
     std::string yenText = "";
@@ -112,19 +135,17 @@ class PauseMenuHUDScreen : public UIScreen
                                        {SpriteSize_32x16, SpriteColorFormat_16Color, 0}};
     GraphicAsset selectedOptionGraphics[4] = {};
 
-    const int selectedBarX = 8;
     const int selectedBarPieceWidth = 32;
     const int selectedBarYOffset = -2;
 
-    SpriteRenderState srs1 = {selectedOptionSprites[0], selectedBarX, 0, 1, -1, false, false, false, false};
+    SpriteRenderState srs1 = {selectedOptionSprites[0], 0, 0, 1, -1, false, false, false, false};
     SpritePayload sp1 = {srs1,
                          spritePath,
                          selectedOptionGraphics[0],
                          SpriteType::SELECTED_OPTION,
                          (int)SelectedOptionSprite::SELECTED_OPTION_0};
 
-    SpriteRenderState srs2 = {
-        selectedOptionSprites[1], selectedBarX + selectedBarPieceWidth, 0, 1, -1, false, false, false, false};
+    SpriteRenderState srs2 = {selectedOptionSprites[1], selectedBarPieceWidth, 0, 1, -1, false, false, false, false};
     SpritePayload sp2 = {srs2,
                          spritePath,
                          selectedOptionGraphics[1],
@@ -132,7 +153,7 @@ class PauseMenuHUDScreen : public UIScreen
                          (int)SelectedOptionSprite::SELECTED_OPTION_1};
 
     SpriteRenderState srs3 = {
-        selectedOptionSprites[2], selectedBarX + selectedBarPieceWidth * 2, 0, 1, -1, false, false, false, false};
+        selectedOptionSprites[2], selectedBarPieceWidth * 2, 0, 1, -1, false, false, false, false};
     SpritePayload sp3 = {srs3,
                          spritePath,
                          selectedOptionGraphics[2],
@@ -140,7 +161,7 @@ class PauseMenuHUDScreen : public UIScreen
                          (int)SelectedOptionSprite::SELECTED_OPTION_2};
 
     SpriteRenderState srs4 = {
-        selectedOptionSprites[3], selectedBarX + selectedBarPieceWidth * 3, 0, 1, -1, false, false, false, false};
+        selectedOptionSprites[3], selectedBarPieceWidth * 3, 0, 1, -1, false, false, false, false};
     SpritePayload sp4 = {srs4,
                          spritePath,
                          selectedOptionGraphics[3],

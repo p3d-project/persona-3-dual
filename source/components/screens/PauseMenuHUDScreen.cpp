@@ -90,12 +90,24 @@ void PauseMenuHUDScreen::renderText()
 
     // active persona level
     text->drawText(levelText, 138, 155, textColor);
+
+    renderOptions();
 }
 
-void PauseMenuHUDScreen::setSelectedRow(int row)
+void PauseMenuHUDScreen::renderOptions()
 {
-    int fontSize = text->getFontSize();
-    int y = fontSize + fontSize * row + selectedBarYOffset;
+    etl::span<MenuOption> options = menu->getOptions();
+    int startIndex = menu->getStartIndex();
+    int selectedOption = menu->getSelectedOption();
+
+    for (int i = 0; i < visibleOptions && startIndex + i < int(options.size()); i++)
+    {
+        int option = startIndex + i;
+        TextColor color = option == selectedOption ? selectedOptionColor : optionColor;
+        text->drawText(options[option].name, optionsStartX, optionsStartY + optionsRowHeight * i, color);
+    }
+
+    int y = optionsStartY + optionsRowHeight * (selectedOption - startIndex) + selectedBarYOffset;
 
     etl::array<SpriteRenderState*, 4> barPieces = {&srs1, &srs2, &srs3, &srs4};
     for (int i = 0; i < 4; i++)
@@ -170,6 +182,16 @@ int PauseMenuHUDScreen::onTouch(touchPosition* touch)
 void PauseMenuHUDScreen::setTextComponent(TextComponent* text)
 {
     this->text = text;
+}
+
+void PauseMenuHUDScreen::setMenu(const UIMenu* menu)
+{
+    this->menu = menu;
+}
+
+int PauseMenuHUDScreen::getVisibleOptions()
+{
+    return visibleOptions;
 }
 
 void PauseMenuHUDScreen::load()
