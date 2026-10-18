@@ -145,7 +145,7 @@ void MenuHUDScreen::load()
             sprite.gfx = oamAllocateGfx(oam, sprite.size, sprite.format);
 
             // load sprite into ram
-            graphic = graphics->loadSpriteGraphic(std::string(sp.spritePath), sp.spriteType, sp.spriteVariant);
+            graphic = graphics->loadSpriteGraphic(sp.spritePath, sp.spriteType, sp.spriteVariant);
         }
     }
 
