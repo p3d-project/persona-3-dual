@@ -9,6 +9,7 @@
 #include "core/routerIDs.hpp"
 #include "types/TextTypes.hpp"
 #include <aegis/system.hpp>
+#include <memory>
 
 class TextSystem : public ae::System, public ae::Singleton<TextSystem>
 {
@@ -60,7 +61,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
      * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
      */
-    void appearText(Text*& appearingText,
+    void appearText(std::unique_ptr<Text>& appearingText,
                     const std::string& text,
                     Font* font,
                     uint16_t* videoBuffer,
@@ -75,14 +76,14 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @brief If a text is currently being rendered with appearText, this function will immediately render the rest of the text without delay.
      * @param appearingText The current apperance of the text
      */
-    void appearTextSkip(Text*& appearingText);
+    void appearTextSkip(Text* appearingText);
 
     /**
      * @brief Check if the text being rendered with appearText has finished appearing.
      * @param appearingText The current apperance of the text
      * @return true if the text has finished appearing, false otherwise.
      */
-    bool appearTextDone(Text*& appearingText);
+    bool appearTextDone(Text* appearingText);
 
     /**
      * @brief Draw a single glyph to the screen.
@@ -128,7 +129,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @brief Draw the next character from the text struct to the screen.
      * @note Used to draw text which appears character by character.
      */
-    void drawNextFromText(Text*& text);
+    void drawNextFromText(Text* text);
 
     /**
      * @brief Create a Text object and initialize its properties.
@@ -141,17 +142,17 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param letterSpacing Pixels of horizontal space to add after each glyph.
      * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
      * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
-     * @return Pointer to the newly created Text object.
+     * @return Owning pointer to the newly created Text object.
      */
-    Text* createText(const std::string& text,
-                     Font* font,
-                     uint16_t* videoBuffer,
-                     int startX,
-                     int startY,
-                     int color,
-                     int letterSpacing,
-                     int lineSpacing,
-                     int spaceWidth);
+    std::unique_ptr<Text> createText(const std::string& text,
+                                     Font* font,
+                                     uint16_t* videoBuffer,
+                                     int startX,
+                                     int startY,
+                                     int color,
+                                     int letterSpacing,
+                                     int lineSpacing,
+                                     int spaceWidth);
 
     /**
      * @brief Get the next character from a given Text object.

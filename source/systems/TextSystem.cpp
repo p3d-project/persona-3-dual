@@ -12,17 +12,16 @@ void TextSystem::drawText(const std::string& text,
                           int lineSpacing,
                           int spaceWidth)
 {
-    Text* textObj = createText(text, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
+    auto textObj = createText(text, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
 
     while (textObj->cursorPos < (int)textObj->content.size())
     {
-        drawNextFromText(textObj);
+        drawNextFromText(textObj.get());
         textObj->cursorPos++;
     }
-    delete textObj;
 }
 
-void TextSystem::appearText(Text*& appearingText,
+void TextSystem::appearText(std::unique_ptr<Text>& appearingText,
                             const std::string& content,
                             Font* font,
                             uint16_t* videoBuffer,
@@ -33,13 +32,12 @@ void TextSystem::appearText(Text*& appearingText,
                             int lineSpacing,
                             int spaceWidth)
 {
-    if (appearingText != nullptr)
-        delete appearingText;
+    appearingText.reset();
     appearingText =
         createText(content, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
 }
 
-void TextSystem::appearTextSkip(Text*& appearingText)
+void TextSystem::appearTextSkip(Text* appearingText)
 {
     if (appearingText != nullptr)
     {
@@ -51,7 +49,7 @@ void TextSystem::appearTextSkip(Text*& appearingText)
     }
 }
 
-bool TextSystem::appearTextDone(Text*& appearingText)
+bool TextSystem::appearTextDone(Text* appearingText)
 {
     if (appearingText == nullptr)
         return true;
@@ -122,7 +120,7 @@ void TextSystem::clearArea(uint16_t* videoBuffer, int x, int y, int width, int h
     }
 }
 
-void TextSystem::drawNextFromText(Text*& text)
+void TextSystem::drawNextFromText(Text* text)
 {
     unsigned char c = text->content[text->cursorPos];
 
@@ -213,17 +211,17 @@ void TextSystem::drawNextFromText(Text*& text)
     }
 }
 
-Text* TextSystem::createText(const std::string& text,
-                             Font* font,
-                             uint16_t* videoBuffer,
-                             int startX,
-                             int startY,
-                             int color,
-                             int letterSpacing,
-                             int lineSpacing,
-                             int spaceWidth)
+std::unique_ptr<Text> TextSystem::createText(const std::string& text,
+                                             Font* font,
+                                             uint16_t* videoBuffer,
+                                             int startX,
+                                             int startY,
+                                             int color,
+                                             int letterSpacing,
+                                             int lineSpacing,
+                                             int spaceWidth)
 {
-    Text* newText = new Text();
+    auto newText = std::make_unique<Text>();
     newText->cursorX = startX;
     newText->cursorY = startY;
     newText->startX = startX;
