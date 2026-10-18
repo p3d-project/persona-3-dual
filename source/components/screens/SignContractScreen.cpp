@@ -355,15 +355,15 @@ void SignContractScreen::backSpaceAction()
 {
     if (index == 0)
     {
-        lastName[0] = ' ';
+        return;
     }
-    else if (isLastName)
+    if (isLastName)
     {
         lastName[--index] = ' ';
     }
     else
     {
-        if (index != 10)
+        if (index != 10) // index is at start of the second line
         {
             firstName[--index - 10] = ' ';
         }
