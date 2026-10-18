@@ -316,7 +316,6 @@ ViewState EnvironmentView::update()
             textSub->clearScreen();
 
             ae::BroadcastEvent(Event::HideAllMenus{});
-            ae::BroadcastEvent(Event::ShowScreen{menuHUDScreen});
 
             prevEnvironmentState = false;
 
