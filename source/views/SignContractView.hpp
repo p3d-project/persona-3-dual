@@ -3,6 +3,7 @@
 #include "components/MusicComponent.hpp"
 #include "components/SFXComponent.hpp"
 #include "components/TextComponent.hpp"
+#include "components/screens/SignContractScreen.hpp"
 #include "core/timer.hpp"
 #include "types/StateTypes.hpp"
 #include "views/BaseView.hpp"
@@ -15,26 +16,22 @@ class SignContractView : public BaseView
     Timer fadeTimer;
     TransitionPhase transitionPhase = TransitionPhase::FADING_IN;
 
-    int bg[3];
-    bool isLastName = true;
-    bool isNameConfirmed = false;
-    int lastNameIndex = 0;
-    int firstNameIndex = 0;
-
-    // text
-    std::string FONT_NAME = "cosmetica";
-    int FONT_SIZE = 12;
-    std::string animText;
-    std::string displayText;
+    int bg;
 
     ae::Entity* signContract = nullptr;
+
+    SignContractScreen* signContractScreen = nullptr;
     GraphicsComponent* graphics = nullptr;
-    TextComponent* text = nullptr;
 
     MusicComponent* musicCmpt = nullptr;
     SFXComponent* sfxCmpt = nullptr;
 
+    std::array<int, 2> bgMain;
+    std::array<int, 3> bgSub;
+
     void cancelSFX();
+
+    touchPosition touch;
 
   public:
     void init() override;

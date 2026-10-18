@@ -24,10 +24,6 @@ void MainMenuView::init()
         UISystem::GetInstance().SetSFXComponent(sfxCmpt);
     }
 
-    // setup music
-    musicCmpt->registerMusic(
-        (fatBasePath + "music/menus/velvetRoom/aria_of_the_soul.qoa").c_str(), ae::q20_12_t{0}, ae::q20_12_t{164.940});
-
     // set video mode for 2 text layers and 2 extended rotation layer
     videoSetMode(MODE_5_2D);
     // set sub video mode for 4 text layers
@@ -122,6 +118,10 @@ void MainMenuView::init()
 
     fadeTimer.start(ae::q20_12_t{0.8});
     transitionPhase = TransitionPhase::FADING_IN;
+
+    //setup music before returning, don't do it earlier
+    musicCmpt->registerMusic(
+        (fatBasePath + "music/menus/velvetRoom/aria_of_the_soul.qoa").c_str(), ae::q20_12_t{0}, ae::q20_12_t{164.940});
 }
 
 ViewState MainMenuView::update()

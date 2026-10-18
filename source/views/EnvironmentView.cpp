@@ -443,7 +443,7 @@ ViewState EnvironmentView::update()
 
         if (Globals::enableDebugPrint)
         {
-            if (frame % 60 == 30) // restricting this 2Hz otherwise it tanks performance
+            if (frame % 60 == 30) // restricting this 1Hz otherwise it tanks performance
             {
                 textSub->clearArea(1, 120, 128, 72);
                 char buf[128];

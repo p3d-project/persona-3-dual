@@ -15,7 +15,7 @@ A Nintendo DS demake of **Persona 3**, developed in C++. Based on the **Persona 
 
 [![Discord](https://img.shields.io/discord/1498850477545357482?label=Discord&logo=discord&style=flat-square&color=5865F2)](https://discord.gg/CQnkc5gS6a)
 
-[![IMAGE ALT TEXT](http://img.youtube.com/vi/4RW8ppcPK6o/0.jpg)](http://www.youtube.com/watch?v=4RW8ppcPK6o "Persona 3 Dual (First Look)")
+[![TheP3DProject YouTube Channel](https://github.com/user-attachments/assets/7f05b858-06bc-420c-b3f6-cd7b5681b514)](https://www.youtube.com/@TheP3DProject)
 
 ---
 
