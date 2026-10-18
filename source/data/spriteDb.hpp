@@ -5,7 +5,6 @@
 enum class SpriteType
 {
     NONE = 0,
-    ICON,
     MOON,
     STATUS,
     SELECTED_OPTION,
@@ -51,12 +50,6 @@ enum class SelectedOptionSprite
     SELECTED_OPTION_1,
     SELECTED_OPTION_2,
     SELECTED_OPTION_3,
-};
-
-enum class IconSprite
-{
-    ICON_A = 0,
-    ICON_B,
 };
 
 enum class TimeSprite

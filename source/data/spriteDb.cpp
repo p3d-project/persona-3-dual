@@ -1,9 +1,6 @@
 #include "data/spriteDb.hpp"
 
 static const SpriteDBEntry SPRITE_DB_ENTRY[] = {
-    {SpriteType::ICON, static_cast<int>(IconSprite::ICON_A), "icon-A"},
-    {SpriteType::ICON, static_cast<int>(IconSprite::ICON_B), "icon-B"},
-
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_0), "moon-0"},
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_1), "moon-1"},
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_2), "moon-2"},
