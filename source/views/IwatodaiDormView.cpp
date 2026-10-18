@@ -27,20 +27,38 @@ void IwatodaiDormView::setupMusic()
     musicCmpt->registerMusic(
         (fatBasePath + "music/locations/iwatodaiDorm/iwatodai_dorm.qoa").c_str(), ae::q20_12_t{1.3}, ae::q20_12_t{-1});
 }
-
 void IwatodaiDormView::setupMovement()
 {
-    movement->configureMovement(MovementConfig(IWATODAI_DORM_FLOOR_1_MAP_WIDTH,
-                                               IWATODAI_DORM_FLOOR_1_MAP_HEIGHT,
-                                               &iwatodai_dorm_floor_1_map[0][0],
-                                               tileSize,
-                                               dbEntry->worldOffsetX,
-                                               dbEntry->worldOffsetZ,
-                                               characterSize,
-                                               speed,
-                                               height,
-                                               characterTranslate,
-                                               characterFacingAngle));
+    using q = ae::q20_12_t;
+    static const StairSegment stairs[] = {//first flight, including its initial bend
+                                          {q{0}, q{-2.872}, q{-0.897}, q{-3.051}, q{0.24}, q{0}, q{0.157}},
+
+                                          {q{-0.897}, q{-3.051}, q{-1.526}, q{-3.051}, q{0.27}, q{0.157}, q{0.503}},
+
+                                          //second flight, after the landing
+                                          {q{-1.840}, q{-2.782}, q{-1.840}, q{-1.885}, q{0.28}, q{0.503}, q{1.041}}};
+
+    static const HeightRegion landings[] = {//landing between the two flights
+                                            {q{-2.154}, q{-1.526}, q{-3.410}, q{-2.782}, q{0.503}}};
+    MovementConfig cfg(IWATODAI_DORM_FLOOR_1_MAP_WIDTH,
+                       IWATODAI_DORM_FLOOR_1_MAP_HEIGHT,
+                       &iwatodai_dorm_floor_1_map[0][0],
+                       tileSize,
+                       dbEntry->worldOffsetX,
+                       dbEntry->worldOffsetZ,
+                       characterSize,
+                       speed,
+                       height,
+                       characterTranslate,
+                       characterFacingAngle);
+
+    cfg.stairs = stairs;
+    cfg.stairCount = 3;
+
+    cfg.landings = landings;
+    cfg.landingCount = 1;
+
+    movement->configureMovement(cfg);
 }
 
 ViewState IwatodaiDormView::onTileCheck(TileType tile, u32 pressed)

@@ -50,11 +50,34 @@ struct CharacterPosition
     ae::q20_12_t facingAngle;
 };
 
+struct StairSegment
+{
+    ae::q20_12_t x0, z0;
+    ae::q20_12_t x1, z1;
+    ae::q20_12_t halfWidth;
+    ae::q20_12_t y0, y1;
+};
+
+struct HeightRegion
+{
+    ae::q20_12_t minX, maxX;
+    ae::q20_12_t minZ, maxZ;
+    ae::q20_12_t height;
+};
 /**
  * @brief A struct that holds initial config values for the MovementComponent
  */
 struct MovementConfig
 {
+    //stair traversal
+    ae::q20_12_t baseHeight{0};
+
+    const StairSegment* stairs = nullptr;
+    int stairCount = 0;
+
+    const HeightRegion* landings = nullptr;
+    int landingCount = 0;
+
     // 3D environment
     int mapWidth;
     int mapHeight;
@@ -89,6 +112,7 @@ struct MovementConfig
           worldOffsetX(iWorldOffsetX), worldOffsetZ(iWorldOffsetZ), characterSize(iCharacterSize), speed(iSpeed)
     {
         height = iHeight;
+        baseHeight = iHeight;
         characterTranslate = iCharacterTranslate;
         characterFacingAngle = iCharacterFacingAngle;
     };
