@@ -101,18 +101,10 @@ void IwatodaiDormView::setupText()
 
 void IwatodaiDormView::setupUI()
 {
-    // setup pause menu
-    pauseMenuCmpt = PauseMenu::getInstance();
+    setupPauseMenu();
 
     menuHUDScreen = MenuHUDScreen::getInstance();
     dialogueScreen = DialogueScreen::getInstance();
-    pauseMenuHUDScreen = PauseMenuHUDScreen::getInstance();
-
-    pauseMenuHUDScreen->setTextComponent(textSub);
-    pauseMenuHUDScreen->setMenu(pauseMenuCmpt);
-    pauseMenuCmpt->setVisibleOptions(pauseMenuHUDScreen->getVisibleOptions());
-    pauseMenuHUDScreen->setInfoPanelText("9,999,999 Yen", "Ara Mitama", "Chariot", "Level 99", TextColor::DarkestBlue);
-    pauseMenuHUDScreen->setDescriptionText("View Social Link details", TextColor::White);
 
     std::array<UIScreen*, 5> screens = {menuHUDScreen, dialogueScreen, pauseMenuHUDScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt};

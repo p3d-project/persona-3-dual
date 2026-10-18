@@ -91,6 +91,11 @@ class EnvironmentView : public BaseView
     {
     }
 
+    /**
+     * @brief Sets up the pause menu
+     */
+    void setupPauseMenu();
+
     virtual void setupDialogue()
     {
     }
