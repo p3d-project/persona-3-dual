@@ -30,10 +30,10 @@ PauseMenuScreen* PauseMenuScreen::getInstance()
 }
 
 void PauseMenuScreen::setInfoPanelText(const std::string& yen,
-                                          const std::string& persona,
-                                          const std::string& arcana,
-                                          const std::string& level,
-                                          TextColor color)
+                                       const std::string& persona,
+                                       const std::string& arcana,
+                                       const std::string& level,
+                                       TextColor color)
 {
     yenText = yen;
     personaText = persona;
