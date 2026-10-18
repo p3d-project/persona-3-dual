@@ -1,8 +1,35 @@
 #include "controllers/AnimationController.hpp"
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 
 AnimationController* AnimationController::instance = nullptr;
+
+[[noreturn]] static void animationControllerError(const char* description)
+{
+    consoleDemoInit();
+    printf("AnimationController: Error (%s)\n", description);
+    while (1)
+    {
+        swiWaitForVBlank();
+    }
+}
+
+static void readFileOrError(FILE* file, void* buffer, size_t size, size_t count, const char* description)
+{
+    if (fread(buffer, size, count, file) != count)
+    {
+        animationControllerError(description);
+    }
+}
+
+static void seekFileOrError(FILE* file, long offset, int origin, const char* description)
+{
+    if (fseek(file, offset, origin) != 0)
+    {
+        animationControllerError(description);
+    }
+}
 
 void AnimationController::create()
 {
@@ -63,7 +90,7 @@ static ModelVersion readModelVersion(FILE* file)
 {
     char magic[4];
 
-    fread(magic, 1, 4, file);
+    readFileOrError(file, magic, 1, 4, "could not read model header");
 
     if (strncmp(magic, "MDL1", 4) == 0)
         return ModelVersion::MDL1;
@@ -76,27 +103,39 @@ static ModelVersion readModelVersion(FILE* file)
 
 bool AnimationController::loadModel(const char* filepath)
 {
+    if (!filepath)
+    {
+        animationControllerError("model path is null");
+    }
+
     FILE* file = fopen(filepath, "rb");
     if (!file)
-        return false;
+    {
+        animationControllerError("could not open model file");
+    }
 
     ModelVersion version = readModelVersion(file);
     if (version == ModelVersion::INVALID)
     {
         fclose(file);
-        return false;
+        animationControllerError("invalid model format");
     }
 
     u32 numNodes, numAnims;
-    fread(&numNodes, sizeof(u32), 1, file);
-    fread(&numAnims, sizeof(u32), 1, file);
+    readFileOrError(file, &numNodes, sizeof(u32), 1, "could not read model node count");
+    readFileOrError(file, &numAnims, sizeof(u32), 1, "could not read animation count");
 
     if (version == ModelVersion::MDL2)
     {
         u32 texCount;
-        fread(&texCount, sizeof(u32), 1, file);
+        readFileOrError(file, &texCount, sizeof(u32), 1, "could not read texture count");
         // Texture metadata is supplied by the generated model header.
-        fseek(file, (long)(texCount * 72), SEEK_CUR);
+        if (texCount > (u32)(LONG_MAX / 72))
+        {
+            fclose(file);
+            animationControllerError("invalid texture metadata size");
+        }
+        seekFileOrError(file, (long)(texCount * 72), SEEK_CUR, "could not skip texture metadata");
     }
 
     modelNodes.resize(numNodes);
@@ -110,10 +149,10 @@ bool AnimationController::loadModel(const char* filepath)
         node.subLists.clear();
 
         s32 pid, px, py, pz;
-        fread(&pid, sizeof(s32), 1, file);
-        fread(&px, sizeof(s32), 1, file);
-        fread(&py, sizeof(s32), 1, file);
-        fread(&pz, sizeof(s32), 1, file);
+        readFileOrError(file, &pid, sizeof(s32), 1, "could not read node parent");
+        readFileOrError(file, &px, sizeof(s32), 1, "could not read node pivot X");
+        readFileOrError(file, &py, sizeof(s32), 1, "could not read node pivot Y");
+        readFileOrError(file, &pz, sizeof(s32), 1, "could not read node pivot Z");
 
         node.parentId = pid;
         node.pivotX = (v16)px;
@@ -123,7 +162,7 @@ bool AnimationController::loadModel(const char* filepath)
         if (version == ModelVersion::MDL2)
         {
             u32 subListCount;
-            fread(&subListCount, sizeof(u32), 1, file);
+            readFileOrError(file, &subListCount, sizeof(u32), 1, "could not read sub-list count");
             node.subLists.resize(subListCount);
 
             for (u32 s = 0; s < subListCount; s++)
@@ -131,8 +170,8 @@ bool AnimationController::loadModel(const char* filepath)
                 SubList& sl = node.subLists[s];
                 s32 texSlot;
                 u32 dlSize;
-                fread(&texSlot, sizeof(s32), 1, file);
-                fread(&dlSize, sizeof(u32), 1, file);
+                readFileOrError(file, &texSlot, sizeof(s32), 1, "could not read display list texture slot");
+                readFileOrError(file, &dlSize, sizeof(u32), 1, "could not read display list size");
 
                 sl.texSlot = (int)texSlot;
                 sl.displayListSize = dlSize;
@@ -140,7 +179,7 @@ bool AnimationController::loadModel(const char* filepath)
                 sl.displayList[0] = dlSize;
                 if (dlSize > 0)
                 {
-                    fread(&sl.displayList[1], sizeof(u32), dlSize, file);
+                    readFileOrError(file, &sl.displayList[1], sizeof(u32), dlSize, "could not read display list data");
                 }
             }
         }
@@ -148,7 +187,7 @@ bool AnimationController::loadModel(const char* filepath)
         {
             // Legacy models contain one untextured display list per node.
             u32 dlSize;
-            fread(&dlSize, sizeof(u32), 1, file);
+            readFileOrError(file, &dlSize, sizeof(u32), 1, "could not read display list size");
 
             SubList sl;
             sl.texSlot = -1;
@@ -157,7 +196,7 @@ bool AnimationController::loadModel(const char* filepath)
             sl.displayList[0] = dlSize;
             if (dlSize > 0)
             {
-                fread(&sl.displayList[1], sizeof(u32), dlSize, file);
+                readFileOrError(file, &sl.displayList[1], sizeof(u32), dlSize, "could not read display list data");
             }
             node.subLists.push_back(sl);
         }
@@ -176,19 +215,19 @@ bool AnimationController::loadModel(const char* filepath)
     for (u32 i = 0; i < numAnims; i++)
     {
         Animation& anim = animations[i];
-        fseek(file, 32, SEEK_CUR); // skip the 32-byte name string
-        fread(&anim.duration, sizeof(u32), 1, file);
+        seekFileOrError(file, 32, SEEK_CUR, "could not skip animation name");
+        readFileOrError(file, &anim.duration, sizeof(u32), 1, "could not read animation duration");
 
         anim.nodeTracks.resize(numNodes);
         for (u32 n = 0; n < numNodes; n++)
         {
             AnimTrack& track = anim.nodeTracks[n];
             u32 numFrames;
-            fread(&numFrames, sizeof(u32), 1, file);
+            readFileOrError(file, &numFrames, sizeof(u32), 1, "could not read keyframe count");
             track.frames.resize(numFrames);
             if (numFrames > 0)
             {
-                fread(track.frames.data(), sizeof(Keyframe), numFrames, file);
+                readFileOrError(file, track.frames.data(), sizeof(Keyframe), numFrames, "could not read keyframe data");
             }
         }
     }
@@ -201,6 +240,11 @@ bool AnimationController::loadModel(const char* filepath)
 bool AnimationController::loadTextures(
     int count, const unsigned int** bitmaps, const int* widths, const int* heights, const bool* isRGBA)
 {
+    if (count < 0 || (count > 0 && (!bitmaps || !widths || !heights || !isRGBA)))
+    {
+        animationControllerError("invalid texture metadata");
+    }
+
     unloadTextures();
 
     textureIDs.resize(count, 0);
