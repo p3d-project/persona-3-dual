@@ -46,7 +46,20 @@ void SignContractView::init()
     vramSetBankC(VRAM_C_SUB_BG);
 
     // initialize backgrounds
+    bg = bgInit(0, BgType_Text8bpp, BgSize_T_256x256, 9, 2);
+    bgSetPriority(bg, 0);
     int bgSubId = bgInitSub(0, BgType_Text8bpp, BgSize_T_256x256, 8, 0);
+
+    // load contract background from runtime assets
+    GraphicAsset contractBg = graphics->loadGraphic("graphics/SignContractView/backgrounds/contract/contract");
+
+    dmaFillHalfWords(0, bgGetMapPtr(bg), 8192);
+    dmaCopy(contractBg.tiles, bgGetGfxPtr(bg), contractBg.tilesLen);
+    dmaCopy(contractBg.map, bgGetMapPtr(bg), contractBg.mapLen);
+
+    dmaCopy(contractBg.pal, BG_PALETTE, contractBg.palLen);
+
+    graphics->unloadGraphic(contractBg);
 
     signContractScreen = SignContractScreen::getInstance();
     bgSub[0] = bgSubId;
@@ -78,6 +91,14 @@ ViewState SignContractView::update()
 
     case TransitionPhase::IDLE:
     {
+        if (signContractScreen->update() == 1)
+        {
+            cancelSFX();
+            musicCmpt->pauseMusic();
+            fadeTimer.start(ae::q20_12_t{0.85});
+            transitionPhase = TransitionPhase::FADING_OUT;
+        }
+
         if (systemKeysDown & KEY_TOUCH)
         {
             touchRead(&touch);
