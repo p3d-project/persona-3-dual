@@ -124,6 +124,31 @@ ViewState PauseMenu::openCharacterAnimMenu()
     return changeMenu(characterAnimOptions);
 }
 
+ViewState PauseMenu::openMusicMenu()
+{
+    return changeMenu(musicOptions);
+}
+
+ViewState PauseMenu::openBattleMusicMenu()
+{
+    return changeMenu(battleMusicOptions);
+}
+
+ViewState PauseMenu::openLocationMusicMenu()
+{
+    return changeMenu(locationMusicOptions);
+}
+
+ViewState PauseMenu::openMenuMusicMenu()
+{
+    return changeMenu(menuMusicOptions);
+}
+
+ViewState PauseMenu::openOtherMusicMenu()
+{
+    return changeMenu(otherMusicOptions);
+}
+
 // selection handlers
 
 ViewState PauseMenu::skillOptionSelected()
@@ -225,6 +250,77 @@ ViewState PauseMenu::debugOptionSelected()
         selectedView = ViewState::KEEP_CURRENT;
     }
     return selectedView;
+}
+
+ViewState PauseMenu::playMusicOptionSelected(AudioType type, int audioId)
+{
+    AudioManager& audio = AudioManager::GetInstance();
+    AudioDBEntry entry = getAudioDBEntry(type, audioId);
+    if (entry.type != AudioType::NONE)
+    {
+        audio.registerAudio(fatBasePath + "music/" + entry.filename + ".qoa", entry.loopStartTime, entry.loopEndTime);
+        audio.playAudio();
+    }
+    return ViewState::KEEP_CURRENT;
+}
+
+ViewState PauseMenu::battleMusicOptionSelected()
+{
+    switch (static_cast<BattleAudio>(selectedOption))
+    {
+    case BattleAudio::MASS_DESTRUCTION:
+        return playMusicOptionSelected(AudioType::BATTLE, static_cast<int>(BattleAudio::MASS_DESTRUCTION));
+    default:
+        return ViewState::KEEP_CURRENT;
+    }
+}
+
+ViewState PauseMenu::locationMusicOptionSelected()
+{
+    switch (static_cast<LocationAudio>(selectedOption))
+    {
+    case LocationAudio::IWATODAI_DORM:
+        return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::IWATODAI_DORM));
+    case LocationAudio::CHANGING_SEASONS:
+        return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::CHANGING_SEASONS));
+    case LocationAudio::COLOR_YOUR_NIGHT:
+        return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::COLOR_YOUR_NIGHT));
+    case LocationAudio::PAULOWNIA_MALL:
+        return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::PAULOWNIA_MALL));
+    default:
+        return ViewState::KEEP_CURRENT;
+    }
+}
+
+ViewState PauseMenu::menuMusicOptionSelected()
+{
+    switch (static_cast<MenuAudio>(selectedOption))
+    {
+    case MenuAudio::MISTIC:
+        return playMusicOptionSelected(AudioType::MENU, static_cast<int>(MenuAudio::MISTIC));
+    case MenuAudio::TIGHTROPE:
+        return playMusicOptionSelected(AudioType::MENU, static_cast<int>(MenuAudio::TIGHTROPE));
+    case MenuAudio::ARIA_OF_THE_SOUL:
+        return playMusicOptionSelected(AudioType::MENU, static_cast<int>(MenuAudio::ARIA_OF_THE_SOUL));
+    default:
+        return ViewState::KEEP_CURRENT;
+    }
+}
+
+ViewState PauseMenu::otherMusicOptionSelected()
+{
+    switch (static_cast<OtherAudio>(selectedOption))
+    {
+    case OtherAudio::AFTER_THE_BATTLE:
+        return playMusicOptionSelected(AudioType::OTHER, static_cast<int>(OtherAudio::AFTER_THE_BATTLE));
+    case OtherAudio::BECAUSE_I_WILL_PROTECT_YOU:
+        return playMusicOptionSelected(AudioType::OTHER, static_cast<int>(OtherAudio::BECAUSE_I_WILL_PROTECT_YOU));
+    case OtherAudio::CLUB_ESCAPADE_NOUVEAU_METALMOTH_REMIX:
+        return playMusicOptionSelected(AudioType::OTHER,
+                                       static_cast<int>(OtherAudio::CLUB_ESCAPADE_NOUVEAU_METALMOTH_REMIX));
+    default:
+        return ViewState::KEEP_CURRENT;
+    }
 }
 
 ViewState PauseMenu::characterAnimOptionSelected()

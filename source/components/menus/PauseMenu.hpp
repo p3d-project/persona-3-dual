@@ -1,6 +1,7 @@
 #pragma once
 #include "components/menus/UIMenu.hpp"
 #include "controllers/AnimationController.hpp"
+#include "data/audioDb.hpp"
 #include "managers/UIManager.hpp"
 #include "systems/CameraSystem.hpp"
 #include <etl/array.h>
@@ -20,6 +21,7 @@ enum class DebugOption
     CUTSCENE_2,
     TOGGLE_BILLBOARDS,
     TOGGLE_DEBUG_PRINT,
+    PLAY_MUSIC,
     PLAY_CHARACTER_ANIM,
     CYCLE_CAMERA_MODE
 };
@@ -48,7 +50,7 @@ class PauseMenu : public UIMenu
         {"System", -1, MENU_BIND(PauseMenu, openSystemMenu)},
     };
 
-    etl::array<MenuOption, 15> debugOptions = {
+    etl::array<MenuOption, 16> debugOptions = {
         MenuOption{"DisclaimerView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
         {"IntroView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
         {"MainMenuView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
@@ -62,8 +64,39 @@ class PauseMenu : public UIMenu
         {"Cutscene2", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
         {"Toggle Billboards", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
         {"Toggle Debug Print", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+        {"Play Music", -1, MENU_BIND(PauseMenu, openMusicMenu)},
         {"Play Character Animations", -1, MENU_BIND(PauseMenu, openCharacterAnimMenu)},
         {"Cycle Camera Mode", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+    };
+
+    etl::array<MenuOption, 4> musicOptions = {
+        MenuOption{"Battle", -1, MENU_BIND(PauseMenu, openBattleMusicMenu)},
+        {"Location", -1, MENU_BIND(PauseMenu, openLocationMusicMenu)},
+        {"Menu", -1, MENU_BIND(PauseMenu, openMenuMusicMenu)},
+        {"Other", -1, MENU_BIND(PauseMenu, openOtherMusicMenu)},
+    };
+
+    etl::array<MenuOption, 1> battleMusicOptions = {
+        MenuOption{"Mass Destruction", -1, MENU_BIND(PauseMenu, battleMusicOptionSelected)},
+    };
+
+    etl::array<MenuOption, 4> locationMusicOptions = {
+        MenuOption{"Iwatodai Dorm", -1, MENU_BIND(PauseMenu, locationMusicOptionSelected)},
+        {"Changing Seasons", -1, MENU_BIND(PauseMenu, locationMusicOptionSelected)},
+        {"Color Your Night", -1, MENU_BIND(PauseMenu, locationMusicOptionSelected)},
+        {"Paulownia Mall", -1, MENU_BIND(PauseMenu, locationMusicOptionSelected)},
+    };
+
+    etl::array<MenuOption, 3> menuMusicOptions = {
+        MenuOption{"Mistic", -1, MENU_BIND(PauseMenu, menuMusicOptionSelected)},
+        {"Tightrope", -1, MENU_BIND(PauseMenu, menuMusicOptionSelected)},
+        {"Aria of the Soul", -1, MENU_BIND(PauseMenu, menuMusicOptionSelected)},
+    };
+
+    etl::array<MenuOption, 3> otherMusicOptions = {
+        MenuOption{"After the Battle", -1, MENU_BIND(PauseMenu, otherMusicOptionSelected)},
+        {"Because I Will Protect You", -1, MENU_BIND(PauseMenu, otherMusicOptionSelected)},
+        {"Club Escapade Nouveau MetalMoth Remix", -1, MENU_BIND(PauseMenu, otherMusicOptionSelected)},
     };
 
     etl::array<MenuOption, 9> skillOptions = {
@@ -173,6 +206,11 @@ class PauseMenu : public UIMenu
     ViewState openSLinkMenu();
     ViewState openSystemMenu();
     ViewState openCharacterAnimMenu();
+    ViewState openMusicMenu();
+    ViewState openBattleMusicMenu();
+    ViewState openLocationMusicMenu();
+    ViewState openMenuMusicMenu();
+    ViewState openOtherMusicMenu();
 
     // selection handlers
     ViewState debugOptionSelected();
@@ -184,6 +222,11 @@ class PauseMenu : public UIMenu
     ViewState sLinkOptionSelected();
     ViewState systemOptionSelected();
     ViewState characterAnimOptionSelected();
+    ViewState battleMusicOptionSelected();
+    ViewState locationMusicOptionSelected();
+    ViewState menuMusicOptionSelected();
+    ViewState otherMusicOptionSelected();
+    ViewState playMusicOptionSelected(AudioType type, int audioId);
 
     AnimationController* animationCtrl = AnimationController::getInstance();
 
