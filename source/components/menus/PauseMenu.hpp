@@ -49,20 +49,20 @@ class PauseMenu : public UIMenu
     };
 
     etl::array<MenuOption, 15> debugOptions = {
-        MenuOption{"DisclaimerView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"IntroView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"MainMenuView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"IwatodaiDormView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"IwatodaiStreetView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+        MenuOption{"Disclaimer", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+        {"Intro", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+        {"MainMenu", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+        {"IwatodaiDorm", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+        {"IwatodaiStreet", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
         {"StationView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"SignContractView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"PaulowniaMallView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+        {"SignContract", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+        {"PaulowniaMall", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
         {"IntroVideo", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
         {"Cutscene1", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
         {"Cutscene2", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"Toggle Billboards", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"Toggle Debug Print", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"Play Character Animations", -1, MENU_BIND(PauseMenu, openCharacterAnimMenu)},
+        {"Billboards", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+        {"Debug Print", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+        {"Character Anim", -1, MENU_BIND(PauseMenu, openCharacterAnimMenu)},
         {"Cycle Camera Mode", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
     };
 
@@ -135,7 +135,7 @@ class PauseMenu : public UIMenu
     };
 
     etl::array<MenuOption, 25> characterAnimOptions = {
-        MenuOption{"Toggle Auto Animations", -1, MENU_BIND(PauseMenu, characterAnimOptionSelected)},
+        MenuOption{"Auto Anim", -1, MENU_BIND(PauseMenu, characterAnimOptionSelected)},
         {"0000", -1, MENU_BIND(PauseMenu, characterAnimOptionSelected)},
         {"0001", -1, MENU_BIND(PauseMenu, characterAnimOptionSelected)},
         {"0002", -1, MENU_BIND(PauseMenu, characterAnimOptionSelected)},
