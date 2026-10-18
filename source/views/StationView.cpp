@@ -70,6 +70,9 @@ void StationView::setupUI()
 
     menuHUDScreen = MenuHUDScreen::getInstance();
 
+    menuHUDScreen->setTextComponent(textSub);
+    menuHUDScreen->setTextContent("Station", TextColor::White);
+
     std::array<UIScreen*, 5> screens = {menuHUDScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt};
 
