@@ -143,3 +143,109 @@ add_dependencies(p3d_assets p3d_environment_db)
 if(TARGET p3d_game)
     add_dependencies(p3d_game p3d_assets)
 endif()
+
+set(P3D_ADDITIONAL_CLEAN)
+
+file(GLOB P3D_CURRENT_DATA_ITEMS LIST_DIRECTORIES true "${CMAKE_SOURCE_DIR}/data/*/*")
+list(FILTER P3D_CURRENT_DATA_ITEMS EXCLUDE REGEX "/\\.gitkeep$")
+list(FILTER P3D_CURRENT_DATA_ITEMS EXCLUDE REGEX "^${CMAKE_SOURCE_DIR}/data/save")
+list(APPEND P3D_ADDITIONAL_CLEAN ${P3D_CURRENT_DATA_ITEMS})
+
+file(GLOB P3D_CURRENT_DATA_FILES LIST_DIRECTORIES false "${CMAKE_SOURCE_DIR}/data/*")
+list(APPEND P3D_ADDITIONAL_CLEAN ${P3D_CURRENT_DATA_FILES})
+
+file(GLOB P3D_ASSET_ENV_DIRS LIST_DIRECTORIES true "${CMAKE_SOURCE_DIR}/assets/environments/*")
+foreach(env_dir IN LISTS P3D_ASSET_ENV_DIRS)
+    if(IS_DIRECTORY "${env_dir}")
+        get_filename_component(env_name "${env_dir}" NAME)
+        list(APPEND P3D_ADDITIONAL_CLEAN "${CMAKE_SOURCE_DIR}/data/environments/${env_name}")
+    endif()
+endforeach()
+list(APPEND P3D_ADDITIONAL_CLEAN "${CMAKE_SOURCE_DIR}/source/data/environmentDb.cpp")
+
+file(GLOB P3D_ASSET_MODEL_DIRS LIST_DIRECTORIES true "${CMAKE_SOURCE_DIR}/assets/models/*")
+foreach(model_dir IN LISTS P3D_ASSET_MODEL_DIRS)
+    if(IS_DIRECTORY "${model_dir}")
+        get_filename_component(model_name "${model_dir}" NAME)
+        list(APPEND P3D_ADDITIONAL_CLEAN
+            "${CMAKE_SOURCE_DIR}/data/models/${model_name}"
+            "${CMAKE_SOURCE_DIR}/source/models/${model_name}.hpp"
+        )
+    endif()
+endforeach()
+
+# Graphics: each PNG at assets/graphics/<rel>/<stem>.png -> data/graphics/<rel>/<stem>/ (self-named dir)
+file(GLOB_RECURSE P3D_ASSET_GRAPHIC_PNGS "${CMAKE_SOURCE_DIR}/assets/graphics/*.png")
+foreach(png IN LISTS P3D_ASSET_GRAPHIC_PNGS)
+    file(RELATIVE_PATH rel "${CMAKE_SOURCE_DIR}/assets" "${png}")
+    get_filename_component(rel_dir "${rel}" DIRECTORY)
+    get_filename_component(stem "${png}" NAME_WE)
+    list(APPEND P3D_ADDITIONAL_CLEAN "${CMAKE_SOURCE_DIR}/data/${rel_dir}/${stem}")
+endforeach()
+
+# Fonts: each PNG -> data/fonts/<rel_dir>/<stem>.img.bin + .pal.bin; each .fnt -> data/fonts/<rel>
+file(GLOB_RECURSE P3D_ASSET_FONT_PNGS "${CMAKE_SOURCE_DIR}/assets/fonts/*.png")
+foreach(png IN LISTS P3D_ASSET_FONT_PNGS)
+    file(RELATIVE_PATH rel "${CMAKE_SOURCE_DIR}/assets/fonts" "${png}")
+    get_filename_component(rel_dir "${rel}" DIRECTORY)
+    get_filename_component(stem "${png}" NAME_WE)
+    list(APPEND P3D_ADDITIONAL_CLEAN
+        "${CMAKE_SOURCE_DIR}/data/fonts/${rel_dir}/${stem}.img.bin"
+        "${CMAKE_SOURCE_DIR}/data/fonts/${rel_dir}/${stem}.pal.bin"
+    )
+endforeach()
+file(GLOB_RECURSE P3D_ASSET_FONT_FNTS "${CMAKE_SOURCE_DIR}/assets/fonts/*.fnt")
+foreach(fnt IN LISTS P3D_ASSET_FONT_FNTS)
+    file(RELATIVE_PATH rel "${CMAKE_SOURCE_DIR}/assets/fonts" "${fnt}")
+    list(APPEND P3D_ADDITIONAL_CLEAN "${CMAKE_SOURCE_DIR}/data/fonts/${rel}")
+endforeach()
+
+file(GLOB P3D_ASSET_MUSIC_DIRS LIST_DIRECTORIES true "${CMAKE_SOURCE_DIR}/assets/music/*")
+foreach(m_dir IN LISTS P3D_ASSET_MUSIC_DIRS)
+    if(IS_DIRECTORY "${m_dir}")
+        get_filename_component(m_name "${m_dir}" NAME)
+        list(APPEND P3D_ADDITIONAL_CLEAN "${CMAKE_SOURCE_DIR}/data/music/${m_name}")
+    endif()
+endforeach()
+
+file(GLOB_RECURSE P3D_ASSET_MP3_FILES "${CMAKE_SOURCE_DIR}/assets/music/*.mp3")
+foreach(mp3 IN LISTS P3D_ASSET_MP3_FILES)
+    file(RELATIVE_PATH rel "${CMAKE_SOURCE_DIR}/assets/music" "${mp3}")
+    string(REGEX REPLACE "\\.mp3$" ".qoa" rel_qoa "${rel}")
+    string(REGEX REPLACE "\\.mp3$" ".pcm" rel_pcm "${rel}")
+    list(APPEND P3D_ADDITIONAL_CLEAN
+        "${CMAKE_SOURCE_DIR}/data/music/${rel_qoa}"
+        "${CMAKE_SOURCE_DIR}/data/music/${rel_pcm}"
+    )
+endforeach()
+
+file(GLOB P3D_ASSET_VIDEO_FILES "${CMAKE_SOURCE_DIR}/assets/video/*.mp4")
+foreach(mp4 IN LISTS P3D_ASSET_VIDEO_FILES)
+    get_filename_component(stem "${mp4}" NAME_WE)
+    list(APPEND P3D_ADDITIONAL_CLEAN "${CMAKE_SOURCE_DIR}/data/video/${stem}.vid")
+endforeach()
+
+file(GLOB P3D_ASSET_JMAP_FILES "${CMAKE_SOURCE_DIR}/assets/maps/*.jmap")
+foreach(jmap IN LISTS P3D_ASSET_JMAP_FILES)
+    get_filename_component(stem "${jmap}" NAME_WE)
+    list(APPEND P3D_ADDITIONAL_CLEAN "${CMAKE_SOURCE_DIR}/source/maps/${stem}.hpp")
+endforeach()
+
+file(GLOB P3D_ASSET_DLG_FILES "${CMAKE_SOURCE_DIR}/assets/dialogue/*.dlg")
+foreach(dlg IN LISTS P3D_ASSET_DLG_FILES)
+    get_filename_component(stem "${dlg}" NAME_WE)
+    list(APPEND P3D_ADDITIONAL_CLEAN
+        "${CMAKE_SOURCE_DIR}/source/dialogue/${stem}_dialogue.cpp"
+        "${CMAKE_SOURCE_DIR}/source/dialogue/${stem}_dialogue.h"
+        "${CMAKE_SOURCE_DIR}/source/dialogue/${stem}_dialogue.hpp"
+    )
+endforeach()
+
+list(APPEND P3D_ADDITIONAL_CLEAN
+    "${CMAKE_SOURCE_DIR}/sdcard.img"
+    "${CMAKE_SOURCE_DIR}/sdcard.img.idx"
+)
+
+list(REMOVE_DUPLICATES P3D_ADDITIONAL_CLEAN)
+set_property(DIRECTORY "${CMAKE_SOURCE_DIR}" APPEND PROPERTY ADDITIONAL_CLEAN_FILES ${P3D_ADDITIONAL_CLEAN})
+set_target_properties(p3d_clean_assets PROPERTIES ADDITIONAL_CLEAN_FILES "${P3D_ADDITIONAL_CLEAN}")
