@@ -1,17 +1,21 @@
 /**
- * @file AnimationComponent.hpp
- * @brief Per-entity property tweening, bridging `uiAnimation::Animator` into the aegis ECS.
+ * @file UIAnimationComponent.hpp
+ * @brief Per-entity property tweening, bridging UIAnimator into the aegis ECS.
  *
  * @author The P3D Project
  */
 
 #pragma once
-#include "animation/Animator.h"
+
 #include "types/aeTypes.hpp"
+#include "uiAnimation/UIAnimator.hpp"
 
 #include <aegis/component.hpp>
 
-class AnimationComponent : public ae::Component
+/**
+ * @brief ECS component that owns a UIAnimator for entity-scoped UI tweens.
+ */
+class UIAnimationComponent : public ae::Component
 {
   public:
     static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Animation);
@@ -32,18 +36,18 @@ class AnimationComponent : public ae::Component
 
     /**
      * @brief Starts building a tween for a single value owned by the caller.
-     * @see uiAnimation::Animator::animate
+     * @see UIAnimator::animate
      */
-    template <typename T> uiAnimation::PropertyAnimationBuilder<T> animate(T& target)
+    template <typename T> UIPropertyAnimationBuilder<T> animate(T& target)
     {
         return animator.animate(target);
     }
 
     /**
      * @brief Starts building a multi-step (sequenced/parallel) animation.
-     * @see uiAnimation::Animator::sequence
+     * @see UIAnimator::sequence
      */
-    uiAnimation::SequenceBuilder sequence()
+    UISequenceBuilder sequence()
     {
         return animator.sequence();
     }
@@ -62,5 +66,5 @@ class AnimationComponent : public ae::Component
     }
 
   private:
-    uiAnimation::Animator animator;
+    UIAnimator animator;
 };

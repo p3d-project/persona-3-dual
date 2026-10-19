@@ -1,7 +1,7 @@
 #pragma once
-#include "animation/Animator.h"
 #include "components/GraphicsComponent.hpp"
 #include "components/screens/UIScreen.hpp"
+#include "uiAnimation/UIAnimator.hpp"
 
 #include <etl/array.h>
 #include <etl/span.h>
@@ -54,10 +54,10 @@ class DialogueScreen : public UIScreen
     int panelOffset = 40;
     int bustOffsetX = 0;
     etl::span<SpritePayload>* activeBust = nullptr;
-    uiAnimation::Animator panelAnimator;
-    uiAnimation::Animator bustAnimator;
-    uiAnimation::AnimationHandle panelAnimation;
-    uiAnimation::AnimationHandle bustAnimation;
+    UIAnimator panelAnimator;
+    UIAnimator bustAnimator;
+    UIAnimationHandle panelAnimation;
+    UIAnimationHandle bustAnimation;
 
     void updateBustPositions();
 

@@ -113,12 +113,7 @@ void UISystem::Update(ae::q20_12_t dt)
         activeMenu->prevOption();
     }
 
-    // blink the "Pause" text
-    if (renderUIText)
-    {
-        text->clearScreen();
-    }
-
+    // blink the "Pause" text (partial clear only — do not wipe the whole screen)
     if (activeMenu->pauseMessage.length() != 0)
     {
         if (frame % 60 < 30)
@@ -136,6 +131,10 @@ void UISystem::Update(ae::q20_12_t dt)
     if (renderUIText)
     {
         renderUIText = false;
+        // Clear only the option list region so selection slide animation does not ghost.
+        const int optionsTop = textSize;
+        const int optionsHeight = textSize * activeMenu->visibleOptions + text->getLineSpacing();
+        text->clearArea(0, optionsTop, 256, optionsHeight);
         for (int i = 0; i < activeMenu->visibleOptions && activeMenu->startIndex + i < int(activeMenu->options.size());
              i++)
         {

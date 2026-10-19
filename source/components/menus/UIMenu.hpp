@@ -8,9 +8,9 @@
 #include <nds.h>
 #include <string>
 
-#include "animation/Animator.h"
 #include "components/TextComponent.hpp"
 #include "types/UITypes.hpp"
+#include "uiAnimation/UIAnimator.hpp"
 
 class UIMenu
 {
@@ -41,7 +41,7 @@ class UIMenu
     etl::stack<MenuState, 5> prevOptions;
     ViewState nextViewState = ViewState::KEEP_CURRENT;
     int selectionX = 0;
-    uiAnimation::Animator animator;
+    UIAnimator animator;
 
     void animateSelection();
 

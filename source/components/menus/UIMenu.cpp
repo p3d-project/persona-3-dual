@@ -1,6 +1,7 @@
 #include "UIMenu.hpp"
 
-#include "animation/Easing.h"
+#include "managers/MathManager.hpp"
+#include "uiAnimation/UIEase.hpp"
 
 void UIMenu::resetMenu()
 {
@@ -27,7 +28,8 @@ void UIMenu::resetMenu()
 
 void UIMenu::updateAnimation()
 {
-    animator.update(1.0f);
+    const ae::q20_12_t dt = MathManager::GetInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
+    animator.update(dt);
 }
 
 int UIMenu::selectionOffset() const
@@ -39,7 +41,7 @@ void UIMenu::animateSelection()
 {
     animator.cancelAll();
     selectionX = -8;
-    animator.animate(selectionX).from(-8).to(0).duration(140).ease(uiAnimation::Ease::OutBack).start();
+    animator.animate(selectionX).from(-8).to(0).duration(140).ease(UIEase::OutBack).start();
 }
 
 ViewState UIMenu::changeMenu(etl::span<MenuOption> newOptions)

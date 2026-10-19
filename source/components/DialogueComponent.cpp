@@ -201,6 +201,8 @@ void DialogueComponent::end()
     text->clearScreen();
     if (screen != nullptr)
     {
+        // Keep the component active until hideAnimated() finishes; Update()
+        // watches `closing` and clears isActive when !screen->isAnimating().
         screen->hideAnimated();
         closing = true;
         return;

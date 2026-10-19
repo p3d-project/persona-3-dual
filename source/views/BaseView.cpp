@@ -49,13 +49,18 @@ void BaseView::cleanup()
 
 void BaseView::startFadeIn()
 {
+    if (!usesBaseFadeIn())
+    {
+        return;
+    }
+
     fadeBrightness = -16;
     setBrightness(3, fadeBrightness);
 }
 
 void BaseView::updateFadeIn()
 {
-    if (fadeBrightness >= 0)
+    if (!usesBaseFadeIn() || fadeBrightness >= 0)
     {
         return;
     }

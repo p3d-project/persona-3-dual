@@ -1,7 +1,7 @@
 #include "DialogueScreen.hpp"
 #include "core/globals.hpp"
-
-#include "animation/Easing.h"
+#include "managers/MathManager.hpp"
+#include "uiAnimation/UIEase.hpp"
 
 DialogueScreen* DialogueScreen::instance = nullptr;
 
@@ -78,27 +78,23 @@ void DialogueScreen::showAnimated()
 {
     panelAnimator.cancelAll();
     panelOffset = 40;
-    panelAnimation =
-        panelAnimator.animate(panelOffset).from(40).to(0).duration(220).ease(uiAnimation::Ease::OutCubic).start();
+    panelAnimation = panelAnimator.animate(panelOffset).from(40).to(0).duration(220).ease(UIEase::OutCubic).start();
 }
 
 void DialogueScreen::hideAnimated()
 {
     panelAnimator.cancelAll();
-    panelAnimation = panelAnimator.animate(panelOffset)
-                         .from(panelOffset)
-                         .to(40)
-                         .duration(180)
-                         .ease(uiAnimation::Ease::InCubic)
-                         .start();
+    panelAnimation =
+        panelAnimator.animate(panelOffset).from(panelOffset).to(40).duration(180).ease(UIEase::InCubic).start();
 }
 
 void DialogueScreen::updateAnimation()
 {
     bool panelWasAnimating = panelAnimation.isPlaying();
     bool bustWasAnimating = bustAnimation.isPlaying();
-    panelAnimator.update(1.0f);
-    bustAnimator.update(1.0f);
+    const ae::q20_12_t dt = MathManager::GetInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
+    panelAnimator.update(dt);
+    bustAnimator.update(dt);
 
     if (isLoaded && (panelWasAnimating || bustWasAnimating || panelAnimation.isPlaying() || bustAnimation.isPlaying()))
     {
@@ -207,9 +203,9 @@ void DialogueScreen::renderBust(etl::span<SpritePayload>& bustPayload)
     bustAnimator.cancelAll();
     bustOffsetX = 0;
     auto focus = bustAnimator.sequence();
-    focus.append(bustAnimator.animate(bustOffsetX).from(0).to(-3).duration(50).ease(uiAnimation::Ease::OutQuad));
-    focus.append(bustAnimator.animate(bustOffsetX).from(-3).to(3).duration(90).ease(uiAnimation::Ease::InOutQuad));
-    focus.append(bustAnimator.animate(bustOffsetX).from(3).to(0).duration(70).ease(uiAnimation::Ease::OutQuad));
+    focus.append(bustAnimator.animate(bustOffsetX).from(0).to(-3).duration(50).ease(UIEase::OutQuad));
+    focus.append(bustAnimator.animate(bustOffsetX).from(-3).to(3).duration(90).ease(UIEase::InOutQuad));
+    focus.append(bustAnimator.animate(bustOffsetX).from(3).to(0).duration(70).ease(UIEase::OutQuad));
     bustAnimation = focus.start();
 
     // draw bust
@@ -304,6 +300,14 @@ void DialogueScreen::unloadBust(etl::span<SpritePayload>& bustPayload)
 
 void DialogueScreen::unload()
 {
+    panelAnimator.cancelAll();
+    bustAnimator.cancelAll();
+    panelAnimation = UIAnimationHandle();
+    bustAnimation = UIAnimationHandle();
+    panelOffset = 40;
+    bustOffsetX = 0;
+    activeBust = nullptr;
+
     // hide sprites
     removeSprites();
 
