@@ -297,8 +297,8 @@ ViewState PauseMenu::locationMusicOptionSelected()
     {
     case LocationAudio::IWATODAI_DORM:
         return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::IWATODAI_DORM));
-    case LocationAudio::CHANGING_SEASONS:
-        return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::CHANGING_SEASONS));
+    case LocationAudio::SUMMER_BOUND:
+        return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::SUMMER_BOUND));
     case LocationAudio::COLOR_YOUR_NIGHT:
         return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::COLOR_YOUR_NIGHT));
     case LocationAudio::PAULOWNIA_MALL:

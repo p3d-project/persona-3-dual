@@ -58,7 +58,7 @@ void IwatodaiStreetsView::setupMovement()
 
 void IwatodaiStreetsView::setupMusic()
 {
-    musicCmpt->registerMusic(AudioType::LOCATION, LocationAudio::CHANGING_SEASONS);
+    musicCmpt->registerMusic(AudioType::LOCATION, LocationAudio::SUMMER_BOUND);
 }
 
 ViewState IwatodaiStreetsView::onTileCheck(TileType tile, u32 pressed)

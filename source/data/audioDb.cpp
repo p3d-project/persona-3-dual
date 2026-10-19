@@ -16,7 +16,7 @@ static const AudioDBEntry AUDIO_DB_ENTRY[] = {
      ae::q20_12_t{-1.000}},
     {AudioType::LOCATION,
      static_cast<int>(LocationAudio::CHANGING_SEASONS),
-     "locations/iwatodaiStreets/changing_seasons",
+     "locations/iwatodaiStreets/summer_bound",
      ae::q20_12_t{0.000},
      ae::q20_12_t{-1.000}}, // TODO: get correct looping points
     {AudioType::LOCATION,

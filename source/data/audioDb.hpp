@@ -30,7 +30,7 @@ enum class BattleAudio
 enum class LocationAudio
 {
     IWATODAI_DORM = 0,
-    CHANGING_SEASONS,
+    SUMMER_BOUND,
     COLOR_YOUR_NIGHT,
     PAULOWNIA_MALL,
 };
