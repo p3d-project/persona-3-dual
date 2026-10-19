@@ -2,7 +2,7 @@
  * @file UIAnimationComponent.hpp
  * @brief Per-entity property tweening, bridging UIAnimator into the aegis ECS.
  *
- * @author The P3D Project
+ * @author Oles Gedz (@olesgedz)
  */
 
 #pragma once
