@@ -82,6 +82,8 @@ class MovementComponent : public ae::Component
     }
 
   private:
+    ae::q20_12_t getGroundHeight(ae::q20_12_t x, ae::q20_12_t z) const;
+
     MathManager& math = MathManager::GetInstance();
     AnimationController* animationCtrl = AnimationController::getInstance();
 
