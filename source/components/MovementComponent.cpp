@@ -21,8 +21,6 @@ void MovementComponent::Destroy()
 
 void MovementComponent::Update(ae::q20_12_t)
 {
-    // TODO: don't broadcast on every update (waste cpu cycles). Set it once?
-    ae::BroadcastEvent(Event::SetCharacterPosition{isCharacterAt()});
     ae::q20_12_t cameraAngle = CameraSystem::GetInstance().getMovementAngle();
     ae::q20_12_t forwardX;
     ae::q20_12_t forwardZ;
@@ -120,6 +118,9 @@ void MovementComponent::Update(ae::q20_12_t)
         angleRad = math.atan2(deltaX, deltaZ);
         config.characterFacingAngle = angleRad * math.div(ae::q20_12_t{180}, ae::q20_12_t{3.14159265});
     }
+    config.height = getGroundHeight(config.characterTranslate.x, config.characterTranslate.z);
+
+    ae::BroadcastEvent(Event::SetCharacterPosition{isCharacterAt()});
 }
 
 void MovementComponent::configureMovement(const MovementConfig& config)
@@ -162,7 +163,9 @@ TileType MovementComponent::isTileAt(int tileX, int tileZ)
 {
     // default
     if (tileX < 0 || tileX >= config.mapWidth || tileZ < 0 || tileZ >= config.mapHeight)
+    {
         return TileType::NO_COLLISION;
+    }
 
     // else use collision data
     return (TileType)config.collisionMap[(tileZ * config.mapWidth) + tileX];
@@ -170,13 +173,21 @@ TileType MovementComponent::isTileAt(int tileX, int tileZ)
 
 bool MovementComponent::isTileWalkable(ae::q20_12_t worldX, ae::q20_12_t worldZ)
 {
-    ae::q20_12_t distanceToEdge = config.characterSize.x * ae::q20_12_t{0.5};
-
-    int tileMinX = static_cast<int>(math.div(worldX - distanceToEdge + config.worldOffsetX, config.tileSize));
-    int tileMaxX = static_cast<int>(math.div(worldX + distanceToEdge + config.worldOffsetX, config.tileSize));
-    int tileMinZ = static_cast<int>(math.div(worldZ - distanceToEdge + config.worldOffsetZ, config.tileSize));
-    int tileMaxZ = static_cast<int>(math.div(worldZ + distanceToEdge + config.worldOffsetZ, config.tileSize));
-
+    const ae::q20_12_t radiusX = config.characterSize.x * ae::q20_12_t{0.5};
+    const ae::q20_12_t radiusZ = config.characterSize.z * ae::q20_12_t{0.5};
+    const ae::q20_12_t minX = worldX - radiusX + config.worldOffsetX;
+    const ae::q20_12_t maxX = worldX + radiusX + config.worldOffsetX;
+    const ae::q20_12_t minZ = worldZ - radiusZ + config.worldOffsetZ;
+    const ae::q20_12_t maxZ = worldZ + radiusZ + config.worldOffsetZ;
+    if (minX < ae::q20_12_t{0} || minZ < ae::q20_12_t{0} || maxX >= config.tileSize * ae::q20_12_t{config.mapWidth} ||
+        maxZ >= config.tileSize * ae::q20_12_t{config.mapHeight})
+    {
+        return false;
+    }
+    const int tileMinX = static_cast<int>(math.div(minX, config.tileSize));
+    const int tileMaxX = static_cast<int>(math.div(maxX, config.tileSize));
+    const int tileMinZ = static_cast<int>(math.div(minZ, config.tileSize));
+    const int tileMaxZ = static_cast<int>(math.div(maxZ, config.tileSize));
     for (int z = tileMinZ; z <= tileMaxZ; z++)
     {
         for (int x = tileMinX; x <= tileMaxX; x++)
@@ -187,6 +198,69 @@ bool MovementComponent::isTileWalkable(ae::q20_12_t worldX, ae::q20_12_t worldZ)
             }
         }
     }
+    //until room has full 3d collision, refuse larger elevation
+    //discontinuities at the edges of stair/landing regions
+    //this is a guard, not a replacement for correctly joined regions
+    if (config.stairCount > 0 || config.landingCount > 0)
+    {
+        const ae::q20_12_t heightChange = getGroundHeight(worldX, worldZ) - config.height;
+        const ae::q20_12_t maxStep = ae::q20_12_t{0.08};
+        if (heightChange > maxStep || heightChange < -maxStep)
+        {
+            return false;
+        }
+    }
 
     return true;
+}
+
+ae::q20_12_t MovementComponent::getGroundHeight(ae::q20_12_t x, ae::q20_12_t z) const
+{
+    for (int i = 0; i < config.stairCount; ++i)
+    {
+        const auto& s = config.stairs[i];
+
+        const ae::q20_12_t dx = s.x1 - s.x0;
+        const ae::q20_12_t dz = s.z1 - s.z0;
+        const ae::q20_12_t len2 = dx * dx + dz * dz;
+
+        if (len2 == ae::q20_12_t{0})
+        {
+            continue;
+        }
+
+        const ae::q20_12_t px = x - s.x0;
+        const ae::q20_12_t pz = z - s.z0;
+
+        //Projection onto the staircase direction.
+        const ae::q20_12_t dot = px * dx + pz * dz;
+
+        if (dot < ae::q20_12_t{0} || dot > len2)
+        {
+            continue;
+        }
+
+        //Perpendicular distance from the staircase.
+        const ae::q20_12_t cross = px * dz - pz * dx;
+
+        if (cross * cross > s.halfWidth * s.halfWidth * len2)
+        {
+            continue;
+        }
+
+        const ae::q20_12_t t = math.div(dot, len2);
+        return s.y0 + t * (s.y1 - s.y0);
+    }
+
+    for (int i = 0; i < config.landingCount; ++i)
+    {
+        const auto& f = config.landings[i];
+
+        if (x >= f.minX && x <= f.maxX && z >= f.minZ && z <= f.maxZ)
+        {
+            return f.height;
+        }
+    }
+
+    return config.baseHeight;
 }
