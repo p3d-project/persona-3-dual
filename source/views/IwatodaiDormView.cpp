@@ -29,17 +29,35 @@ void IwatodaiDormView::setupMusic()
 }
 void IwatodaiDormView::setupMovement()
 {
-    using q = ae::q20_12_t;
-    static const StairSegment stairs[] = {//first flight, including its initial bend
-                                          {q{0}, q{-2.872}, q{-0.897}, q{-3.051}, q{0.24}, q{0}, q{0.157}},
+    //first flight, including its initial bend
+    static const StairSegment stairs[] = {{ae::q20_12_t{0},
+                                           ae::q20_12_t{-2.872},
+                                           ae::q20_12_t{-0.897},
+                                           ae::q20_12_t{-3.051},
+                                           ae::q20_12_t{0.24},
+                                           ae::q20_12_t{0},
+                                           ae::q20_12_t{0.157}},
 
-                                          {q{-0.897}, q{-3.051}, q{-1.526}, q{-3.051}, q{0.27}, q{0.157}, q{0.503}},
+                                          {ae::q20_12_t{-0.897},
+                                           ae::q20_12_t{-3.051},
+                                           ae::q20_12_t{-1.526},
+                                           ae::q20_12_t{-3.051},
+                                           ae::q20_12_t{0.27},
+                                           ae::q20_12_t{0.157},
+                                           ae::q20_12_t{0.503}},
 
                                           //second flight, after the landing
-                                          {q{-1.840}, q{-2.782}, q{-1.840}, q{-1.885}, q{0.28}, q{0.503}, q{1.041}}};
+                                          {ae::q20_12_t{-1.840},
+                                           ae::q20_12_t{-2.782},
+                                           ae::q20_12_t{-1.840},
+                                           ae::q20_12_t{-1.885},
+                                           ae::q20_12_t{0.28},
+                                           ae::q20_12_t{0.503},
+                                           ae::q20_12_t{1.041}}};
+    //landing between the two flights
+    static const HeightRegion landings[] = {
 
-    static const HeightRegion landings[] = {//landing between the two flights
-                                            {q{-2.154}, q{-1.526}, q{-3.410}, q{-2.782}, q{0.503}}};
+        {ae::q20_12_t{-2.154}, ae::q20_12_t{-1.526}, ae::q20_12_t{-3.410}, ae::q20_12_t{-2.782}, ae::q20_12_t{0.503}}};
     MovementConfig cfg(IWATODAI_DORM_FLOOR_1_MAP_WIDTH,
                        IWATODAI_DORM_FLOOR_1_MAP_HEIGHT,
                        &iwatodai_dorm_floor_1_map[0][0],

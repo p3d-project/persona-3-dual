@@ -108,12 +108,10 @@ struct MovementConfig
                    ae::q20_12_t iHeight,
                    Point2D<ae::q20_12_t> iCharacterTranslate,
                    ae::q20_12_t iCharacterFacingAngle)
-        : mapWidth(iMapWidth), mapHeight(iMapHeight), collisionMap(iCollisionMap), tileSize(iTileSize),
-          worldOffsetX(iWorldOffsetX), worldOffsetZ(iWorldOffsetZ), characterSize(iCharacterSize), speed(iSpeed)
+        : baseHeight(iHeight), mapWidth(iMapWidth), mapHeight(iMapHeight), collisionMap(iCollisionMap),
+          tileSize(iTileSize), worldOffsetX(iWorldOffsetX), worldOffsetZ(iWorldOffsetZ), characterSize(iCharacterSize),
+          speed(iSpeed), height(iHeight), characterTranslate(iCharacterTranslate),
+          characterFacingAngle(iCharacterFacingAngle)
     {
-        height = iHeight;
-        baseHeight = iHeight;
-        characterTranslate = iCharacterTranslate;
-        characterFacingAngle = iCharacterFacingAngle;
-    };
+    }
 };
