@@ -123,24 +123,20 @@ void TextSystem::clearArea(uint16_t* videoBuffer, int x, int y, int width, int h
 
         rowStart = std::max(rowStart, 0);
         rowEnd = std::min(rowEnd, 256);
-        if (rowStart >= rowEnd)
-        {
-            continue;
-        }
-
-        // Clear unaligned edge pixels individually, then fill the aligned span with DMA.
-        if (rowStart % 2 != 0)
-        {
-            drawPixel(videoBuffer, rowStart, pixelY, TextColor::Transparent);
-            ++rowStart;
-        }
-        if (rowEnd % 2 != 0)
-        {
-            --rowEnd;
-            drawPixel(videoBuffer, rowEnd, pixelY, TextColor::Transparent);
-        }
         if (rowStart < rowEnd)
         {
+            // Clear unaligned edge pixels individually, then fill the aligned span with DMA.
+            if (rowStart % 2 != 0)
+            {
+                drawPixel(videoBuffer, rowStart, pixelY, TextColor::Transparent);
+                ++rowStart;
+            }
+            if (rowEnd % 2 != 0)
+            {
+                --rowEnd;
+                drawPixel(videoBuffer, rowEnd, pixelY, TextColor::Transparent);
+            }
+
             dmaFillHalfWords(0, videoBuffer + (pixelY * 256 + rowStart) / 2, static_cast<uint32_t>(rowEnd - rowStart));
         }
     }
