@@ -1,7 +1,7 @@
 /**
  * @file UISequenceAnimation.hpp
  * @brief Ordered groups of UI animations (sequential steps, parallel joins).
- * @author Oles Gedz (@olesgedz)
+ * @author Oles Gedz (olesgedz)
  */
 
 #pragma once

@@ -1,7 +1,7 @@
 /**
  * @file UICallbackAnimation.hpp
  * @brief One-shot animation that invokes a callback on its first tick.
- * @author Oles Gedz (@olesgedz)
+ * @author Oles Gedz (olesgedz)
  */
 
 #pragma once

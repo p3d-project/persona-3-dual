@@ -1,7 +1,7 @@
 /**
  * @file UIAnimation.hpp
  * @brief Base class for one UI animation step (property, delay, callback, sequence).
- * @author Oles Gedz (@olesgedz)
+ * @author Oles Gedz (olesgedz)
  */
 
 #pragma once

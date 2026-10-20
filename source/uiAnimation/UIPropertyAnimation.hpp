@@ -1,7 +1,7 @@
 /**
  * @file UIPropertyAnimation.hpp
  * @brief Tweens a single target value over time with easing and optional repeat.
- * @author Oles Gedz (@olesgedz)
+ * @author Oles Gedz (olesgedz)
  */
 
 #pragma once

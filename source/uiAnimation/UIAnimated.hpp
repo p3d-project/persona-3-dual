@@ -1,7 +1,7 @@
 /**
  * @file UIAnimated.hpp
  * @brief Non-copyable wrapper around a value that UI tweens can target.
- * @author Oles Gedz (@olesgedz)
+ * @author Oles Gedz (olesgedz)
  */
 
 #pragma once

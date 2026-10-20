@@ -1,7 +1,7 @@
 /**
  * @file UIAnimator.hpp
  * @brief Runs a fixed-capacity set of concurrent UI animations.
- * @author Oles Gedz (@olesgedz)
+ * @author Oles Gedz (olesgedz)
  */
 
 #pragma once

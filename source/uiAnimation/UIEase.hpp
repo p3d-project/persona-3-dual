@@ -3,7 +3,7 @@
  * @brief Easing mode alias for UI property animations.
  *
  * Maps onto MathManager::EaseMode so curves stay fixed-point and shared.
- * @author Oles Gedz (@olesgedz)
+ * @author Oles Gedz (olesgedz)
  */
 
 #pragma once

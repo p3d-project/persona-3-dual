@@ -1,7 +1,7 @@
 /**
  * @file UIAnimationHandle.hpp
  * @brief Weak handle used by callers to cancel/pause/query a running UI animation.
- * @author Oles Gedz (@olesgedz)
+ * @author Oles Gedz (olesgedz)
  */
 
 #pragma once

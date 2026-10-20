@@ -1,7 +1,7 @@
 /**
  * @file UIScreenLayout.hpp
  * @brief Convenience constants and points for DS screen layout (256x192).
- * @author Oles Gedz (@olesgedz)
+ * @author Oles Gedz (olesgedz)
  */
 
 #pragma once

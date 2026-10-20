@@ -1,7 +1,7 @@
 /**
  * @file UIDelayAnimation.hpp
  * @brief Animation that waits for a fixed duration before completing.
- * @author Oles Gedz (@olesgedz)
+ * @author Oles Gedz (olesgedz)
  */
 
 #pragma once
