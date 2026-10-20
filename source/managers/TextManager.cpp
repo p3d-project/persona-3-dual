@@ -1,4 +1,5 @@
 #include "TextManager.hpp"
+#include "core/error.hpp"
 #include <sstream>
 
 // Helper macro to convert 8 bit RGB values to 5 bit RGB values for the Nintendo DS
@@ -218,11 +219,5 @@ int TextManager::extractIntValue(const std::string& line, const std::string& key
 
 void TextManager::haltOnError(const std::string& errorMessage)
 {
-    consoleDemoInit();
-    printf("\n\n");
-    printf("Error; %s", errorMessage.c_str());
-    while (1)
-    {
-        swiWaitForVBlank();
-    }
+    logMessage(errorMessage);
 }

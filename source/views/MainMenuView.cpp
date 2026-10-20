@@ -255,6 +255,7 @@ void MainMenuView::cleanup()
         // wait a few frames
         for (int duration = 0; duration <= 2; duration++)
         {
+            // TODO: replace with timer util
             swiWaitForVBlank();
         }
     }

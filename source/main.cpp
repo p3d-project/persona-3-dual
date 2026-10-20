@@ -1,6 +1,7 @@
 #include <memory>
 #include <string>
 
+#include "core/error.hpp"
 #include <fat.h>
 #include <maxmod9.h>
 #include <nds.h>
@@ -83,12 +84,7 @@ int main(int argc, char* argv[])
     // initialize DLDI/FAT
     if (!fatInitDefault())
     {
-        consoleDemoInit();
-        printf("FAT initialization failed!\nPlease ensure the SD card is inserted.\n");
-        while (1)
-        {
-            swiWaitForVBlank();
-        }
+        logMessage("FAT initialization failed!\nPlease ensure the SD card is inserted.");
     }
 
     // dynamically resolve runtime path using argv[0]

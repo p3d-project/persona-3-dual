@@ -1,4 +1,5 @@
 #include "SaveSystem.hpp"
+#include "core/error.hpp"
 #include "core/globals.hpp"
 
 void SaveSystem::on_receive(const Event::ReadSave)
@@ -6,12 +7,7 @@ void SaveSystem::on_receive(const Event::ReadSave)
     bool success = io.readFile<Save>(&saveData, "save/save.sav");
     if (!success)
     {
-        consoleDemoInit();
-        printf("Failed to read save data!\n");
-        while (1)
-        {
-            swiWaitForVBlank();
-        }
+        logMessage("Failed to read save data!");
     }
 
     // down the line, do checksum validation to ensure save file is not corrupted
