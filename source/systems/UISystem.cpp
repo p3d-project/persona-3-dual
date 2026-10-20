@@ -113,7 +113,7 @@ void UISystem::Update(ae::q20_12_t dt)
         activeMenu->prevOption();
     }
 
-    // blink the "Pause" text (partial clear only — do not wipe the whole screen)
+    // blink the "Pause" text
     if (activeMenu->pauseMessage.length() != 0)
     {
         if (frame % 60 < 30)
