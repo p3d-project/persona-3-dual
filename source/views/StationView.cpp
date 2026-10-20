@@ -1,5 +1,5 @@
 #include "StationView.hpp"
-#include "core/globals.hpp"
+#include "data/audioDb.hpp"
 #include "events/UIEvents.hpp"
 
 StationView::StationView()
@@ -8,9 +8,7 @@ StationView::StationView()
 
 void StationView::setupMusic()
 {
-    musicCmpt->registerMusic((fatBasePath + "music/locations/paulowniaMall/station/paulownia_mall.qoa").c_str(),
-                             ae::q20_12_t{2.002},
-                             ae::q20_12_t{73.93});
+    musicCmpt->registerMusic(AudioType::LOCATION, LocationAudio::PAULOWNIA_MALL);
 }
 
 void StationView::setupCamera()
