@@ -1,5 +1,6 @@
 #include "MainMenuView.hpp"
 #include "core/globals.hpp"
+#include "data/audioDb.hpp"
 #include "systems/UISystem.hpp"
 
 #include <nds.h>
@@ -120,8 +121,7 @@ void MainMenuView::init()
     transitionPhase = TransitionPhase::FADING_IN;
 
     //setup music before returning, don't do it earlier
-    musicCmpt->registerMusic(
-        (fatBasePath + "music/menus/velvetRoom/aria_of_the_soul.qoa").c_str(), ae::q20_12_t{0}, ae::q20_12_t{164.940});
+    musicCmpt->registerMusic(AudioType::MENU, MenuAudio::ARIA_OF_THE_SOUL);
 }
 
 ViewState MainMenuView::update()

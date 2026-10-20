@@ -1,12 +1,17 @@
 #include "MusicComponent.hpp"
+#include "core/globals.hpp"
+#include "types/aeTypes.hpp"
 
 void MusicComponent::Destroy()
 {
     stopMusic();
 }
 
-void MusicComponent::registerMusic(std::string path, ae::q20_12_t loopStartTime, ae::q20_12_t loopEndTime)
+void MusicComponent::registerMusic(AudioType type, int audioId)
 {
+    std::string path = fatBasePath + "music/" + getAudioFilepath(type, audioId) + ".qoa";
+    ae::q20_12_t loopStartTime = getLoopStart(type, audioId);
+    ae::q20_12_t loopEndTime = getLoopEnd(type, audioId);
     am.registerAudio(path, loopStartTime, loopEndTime);
 }
 
