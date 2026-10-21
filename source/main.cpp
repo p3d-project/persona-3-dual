@@ -35,14 +35,29 @@ ae::Entity* player;
 volatile int32_t frame = 0;
 volatile u32 systemKeysDown = 0;
 volatile u32 systemKeysHeld = 0;
-std::string fatBasePath = "";
+std::string fatBasePath = "fat:/data/";
 Save saveData;
 ViewState nextView = ViewState::DEFAULT;
 
 std::unique_ptr<BaseView> currentView;
 
-void SwitchView(BaseView* newView)
+void SwitchView(BaseView* newView, const char* viewName = nullptr)
 {
+    if (newView == nullptr)
+    {
+        logMessage(LogSeverity::ERROR, "Called with null newView");
+        return;
+    }
+
+    if (viewName != nullptr)
+    {
+        logMessage(LogSeverity::DEBUG, std::string("Switching view to ") + viewName);
+    }
+    else
+    {
+        logMessage(LogSeverity::DEBUG, "Switching view");
+    }
+
     // cleanup any existing view
     if (currentView != nullptr)
     {
@@ -86,6 +101,8 @@ int main(int argc, char* argv[])
     {
         logMessage(LogSeverity::FATAL, "FAT initialization failed!\nPlease ensure the SD card is inserted.");
     }
+    clearLog();
+    logMessage(LogSeverity::DEBUG, "FAT filesystem initialized successfully");
 
     // dynamically resolve runtime path using argv[0]
     if (argc > 0 && argv[0] != nullptr)
@@ -139,6 +156,7 @@ int main(int argc, char* argv[])
 
     // initialize engine
     engine.InitAll();
+    logMessage(LogSeverity::DEBUG, "Engine systems and managers initialized successfully");
 
     // set up initial game state
     // create entity
@@ -148,7 +166,7 @@ int main(int argc, char* argv[])
     ae::BroadcastEvent(Event::ReadSave{});
 
     // Default is DisclaimerView
-    SwitchView(new DisclaimerView());
+    SwitchView(new DisclaimerView(), "DisclaimerView");
 
     // TODO: set to constant tied to VBlank
     const ae::q20_12_t dt = MathManager::GetInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
@@ -178,67 +196,67 @@ int main(int argc, char* argv[])
             {
             case ViewState::INTRO:
             {
-                SwitchView(new IntroView());
+                SwitchView(new IntroView(), "IntroView");
                 break;
             }
 
             case ViewState::MAIN_MENU:
             {
-                SwitchView(new MainMenuView());
+                SwitchView(new MainMenuView(), "MainMenuView");
                 break;
             }
 
             case ViewState::IWATODAI_DORM:
             {
-                SwitchView(new IwatodaiDormView());
+                SwitchView(new IwatodaiDormView(), "IwatodaiDormView");
                 break;
             }
 
             case ViewState::IWATODAI_STREETS:
             {
-                SwitchView(new IwatodaiStreetsView());
+                SwitchView(new IwatodaiStreetsView(), "IwatodaiStreetsView");
                 break;
             }
 
             case ViewState::DISCLAIMER:
             {
-                SwitchView(new DisclaimerView());
+                SwitchView(new DisclaimerView(), "DisclaimerView");
                 break;
             }
 
             case ViewState::INTRO_VIDEO:
             {
-                SwitchView(new VideoView("intro.vid", ViewState::INTRO));
+                SwitchView(new VideoView("intro.vid", ViewState::INTRO), "VideoView (intro.vid)");
                 break;
             }
 
             case ViewState::CUTSCENE_1:
             {
-                SwitchView(new VideoView("cutscene-1.vid", ViewState::SIGN_CONTRACT));
+                SwitchView(new VideoView("cutscene-1.vid", ViewState::SIGN_CONTRACT), "VideoView (cutscene-1.vid)");
                 break;
             }
 
             case ViewState::SIGN_CONTRACT:
             {
-                SwitchView(new SignContractView());
+                SwitchView(new SignContractView(), "SignContractView");
                 break;
             }
 
             case ViewState::CUTSCENE_2:
             {
-                SwitchView(new VideoView("cutscene-2.vid", ViewState::IWATODAI_DORM));
+                SwitchView(new VideoView("cutscene-2.vid", ViewState::IWATODAI_DORM), "VideoView (cutscene-2.vid)");
                 break;
             }
 
             case ViewState::STATION:
             {
-                SwitchView(new StationView());
+                SwitchView(new StationView(), "StationView");
                 break;
             }
 
             case ViewState::PAULOWNIA_MALL:
             {
-                SwitchView(new PaulowniaMallView());
+                SwitchView(new PaulowniaMallView(), "PaulowniaMallView");
                 break;
             }
 

@@ -41,21 +41,40 @@ void AudioManager::Shutdown()
 
 ae::q20_12_t AudioManager::getDuration()
 {
+    if (!qp || qp->info.samplerate == 0)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null or invalid audio stream");
+        return ae::q20_12_t{0};
+    }
     return ae::q20_12_t{qp->info.samples} / ae::q20_12_t{qp->info.samplerate};
 }
 
 ae::q20_12_t AudioManager::getTime()
 {
+    if (!qp || qp->info.samplerate == 0)
+    {
+        return ae::q20_12_t{0};
+    }
     return ae::q20_12_t{qp->samplePos} / ae::q20_12_t{qp->info.samplerate};
 }
 
 int AudioManager::getFrame()
 {
+    if (!qp)
+    {
+        return 0;
+    }
     return qp->samplePos / QOA_FRAME_LEN;
 }
 
 void AudioManager::seekFrame(int frame)
 {
+    if (!qp || !qp->file)
+    {
+        logMessage(LogSeverity::WARNING, "Called on null audio player or file");
+        return;
+    }
+
     if (frame < 0)
     {
         frame = 0;
@@ -75,6 +94,12 @@ void AudioManager::seekFrame(int frame)
 
 void AudioManager::setLoop(ae::q20_12_t startTime, ae::q20_12_t endTime)
 {
+    if (!qp)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null audio player");
+        return;
+    }
+
     isLoopingEnabled = true;
 
     // use 64-bit integers to prevent overflow
@@ -109,6 +134,11 @@ void AudioManager::loop()
 
 void AudioManager::rewind()
 {
+    if (!qp || !qp->file)
+    {
+        return;
+    }
+
     fseek(qp->file, qp->firstFramePos, SEEK_SET);
     qp->samplePos = 0;
     qp->sampleDataLen = 0;
@@ -117,6 +147,11 @@ void AudioManager::rewind()
 
 uint32_t AudioManager::decodeFrame()
 {
+    if (!qp || !qp->file || !qp->buffer || !qp->sampleData)
+    {
+        return 0;
+    }
+
     qp->bufferLen = fread(qp->buffer, 1, qoa_max_frame_size(&qp->info), qp->file);
 
     uint32_t frame_len;
@@ -128,6 +163,11 @@ uint32_t AudioManager::decodeFrame()
 
 uint32_t AudioManager::decode(short* sample_data, int num_samples)
 {
+    if (!qp || !sample_data)
+    {
+        return 0;
+    }
+
     int src_index = qp->sampleDataPos * qp->info.channels;
     int dst_index = 0;
     for (int i = 0; i < num_samples; i++)
@@ -166,6 +206,11 @@ mm_word AudioManager::audioCallback(mm_word length, mm_addr dest, mm_stream_form
 
 mm_word AudioManager::processStream(mm_word length, mm_addr dest, mm_stream_formats format)
 {
+    if (!qp)
+    {
+        return 0;
+    }
+
     if (((qp->info.channels == 1) && (format != MM_STREAM_16BIT_MONO)) ||
         ((qp->info.channels == 2) && (format != MM_STREAM_16BIT_STEREO)))
     {
@@ -179,10 +224,16 @@ mm_word AudioManager::processStream(mm_word length, mm_addr dest, mm_stream_form
 
 void AudioManager::registerAudio(std::string path, ae::q20_12_t loopStartTime, ae::q20_12_t loopEndTime)
 {
+    if (isAudioRegistered || qp)
+    {
+        stopAudio();
+    }
+
     // open header
     FILE* file = fopen(path.c_str(), "rb");
     if (!file)
     {
+        logMessage(LogSeverity::WARNING, "Failed to open audio file: " + path);
         return;
     }
 
@@ -191,6 +242,8 @@ void AudioManager::registerAudio(std::string path, ae::q20_12_t loopStartTime, a
     int read = fread(header, QOA_MIN_FILESIZE, 1, file);
     if (!read)
     {
+        logMessage(LogSeverity::ERROR, "Failed to read QOA header from: " + path);
+        fclose(file);
         return;
     }
 
@@ -199,6 +252,8 @@ void AudioManager::registerAudio(std::string path, ae::q20_12_t loopStartTime, a
     uint32_t firstFramePos = qoa_decode_header(header, QOA_MIN_FILESIZE, &qoa);
     if (!firstFramePos)
     {
+        logMessage(LogSeverity::ERROR, "Failed to decode QOA header from: " + path);
+        fclose(file);
         return;
     }
 
@@ -211,6 +266,12 @@ void AudioManager::registerAudio(std::string path, ae::q20_12_t loopStartTime, a
     uint32_t sampleDataSize = qoa.channels * QOA_FRAME_LEN * sizeof(short) * 2;
 
     qp = (qoaplay_desc*)malloc(sizeof(qoaplay_desc) + bufferSize + sampleDataSize);
+    if (!qp)
+    {
+        logMessage(LogSeverity::ERROR, "Failed to allocate memory for QOA player: " + path);
+        fclose(file);
+        return;
+    }
     memset(qp, 0, sizeof(qoaplay_desc));
 
     // set qoaplay_desc values

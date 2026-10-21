@@ -1,4 +1,5 @@
 #include "TextSystem.hpp"
+#include "core/error.hpp"
 
 constexpr char INSTRUCTION_BIT = 0xFF; /// Special value used to indicate that the next byte is an instruction
 
@@ -12,6 +13,12 @@ void TextSystem::drawText(const std::string& text,
                           int lineSpacing,
                           int spaceWidth)
 {
+    if (!font || !videoBuffer)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null font or videoBuffer");
+        return;
+    }
+
     Text* textObj = createText(text, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
 
     while (textObj->cursorPos < (int)textObj->content.size())
@@ -33,8 +40,16 @@ void TextSystem::appearText(Text*& appearingText,
                             int lineSpacing,
                             int spaceWidth)
 {
+    if (!font || !videoBuffer)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null font or videoBuffer");
+        return;
+    }
+
     if (appearingText != nullptr)
+    {
         delete appearingText;
+    }
     appearingText =
         createText(content, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
 }
@@ -54,10 +69,14 @@ void TextSystem::appearTextSkip(Text*& appearingText)
 bool TextSystem::appearTextDone(Text*& appearingText)
 {
     if (appearingText == nullptr)
+    {
         return true;
+    }
     if (appearingText->cursorPos >=
         (int)appearingText->content.size()) // not really sure if this is needed but it should be safe to check anyway
+    {
         return true;
+    }
     return false;
 }
 
@@ -71,6 +90,12 @@ void TextSystem::drawGlyph(const Glyph& glyph,
                            bool italic,
                            bool underline)
 {
+    if (!font || !videoBuffer)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null font or videoBuffer");
+        return;
+    }
+
     for (int y = 0; y < glyph.height; y++)
     {
         int distY = italic ? glyph.height - 1 - y : 0; /// Distance from baseline
@@ -82,7 +107,11 @@ void TextSystem::drawGlyph(const Glyph& glyph,
             int bitmapY = glyph.yPos + y;
             int bitmapIndex = bitmapY * font->bitmapWidth + bitmapX;
 
-            sassert(bitmapIndex < font->bitmapWidth * font->bitmapHeight, "Bitmap index out of bounds");
+            if (bitmapIndex >= font->bitmapWidth * font->bitmapHeight)
+            {
+                logMessage(LogSeverity::ERROR, "Bitmap index out of bounds");
+                continue;
+            }
 
             int pixelValue = bold ? font->bitmapBold[bitmapIndex] : font->bitmap[bitmapIndex];
             if (pixelValue > 0)
@@ -108,6 +137,12 @@ void TextSystem::drawGlyph(const Glyph& glyph,
 
 void TextSystem::clearArea(uint16_t* videoBuffer, int x, int y, int width, int height)
 {
+    if (!videoBuffer)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null videoBuffer");
+        return;
+    }
+
     for (int row = 0; row < height; ++row)
     {
         for (int col = 0; col < width; ++col)

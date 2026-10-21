@@ -1,4 +1,5 @@
 #include "IntroView.hpp"
+#include "core/error.hpp"
 #include "core/globals.hpp"
 #include "data/audioDb.hpp"
 #include "systems/UISystem.hpp"
@@ -177,6 +178,8 @@ void IntroView::init()
     setBrightness(1, -16);
     transitionPhase = TransitionPhase::FADING_IN;
     fadeTimer.start(ae::q20_12_t{1.1});
+
+    logMessage(LogSeverity::DEBUG, "IntroView initialized");
 }
 
 ViewState IntroView::update()

@@ -1,4 +1,5 @@
 #include "MainMenuView.hpp"
+#include "core/error.hpp"
 #include "core/globals.hpp"
 #include "data/audioDb.hpp"
 #include "systems/UISystem.hpp"
@@ -122,6 +123,8 @@ void MainMenuView::init()
 
     //setup music before returning, don't do it earlier
     musicCmpt->registerMusic(AudioType::MENU, MenuAudio::ARIA_OF_THE_SOUL);
+
+    logMessage(LogSeverity::DEBUG, "MainMenuView initialized");
 }
 
 ViewState MainMenuView::update()

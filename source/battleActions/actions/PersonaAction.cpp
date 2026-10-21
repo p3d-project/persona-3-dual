@@ -1,18 +1,35 @@
 #include "PersonaAction.hpp"
 #include "battleActions/skills/BattleCalcs.hpp"
+#include "core/error.hpp"
 #include <stdlib.h>
 
 TurnResult PersonaAction::resolve(PartyMember* user, BattleParticipant* target, Skill* skill)
 {
+    if (user == nullptr || skill == nullptr)
+    {
+        logMessage(LogSeverity::ERROR, "Called with null user or skill");
+        return {false, 0, false, "Miss"};
+    }
+
+    logMessage(LogSeverity::DEBUG, "PersonaAction " + skill->name + " resolving for user: " + user->name);
+
     //TODO: same as attack actioon, get rid off in the futrue
     if (skill->skillType == SkillType::Attack || skill->skillType == SkillType::MultiAttack)
     {
+        if (target == nullptr)
+        {
+            logMessage(LogSeverity::ERROR, "Called with null target");
+            return {false, 0, false, "Miss"};
+        }
+
         Enemy* enemy = static_cast<Enemy*>(target);
 
         bool hit = BattleCalcs::hit(*user, *target, *skill);
 
         if (!hit)
+        {
             return {false, 0, false, "Miss"};
+        }
 
         u32 damage = BattleCalcs::attack(*user, *target, *skill);
         bool oneMore = false;

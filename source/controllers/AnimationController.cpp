@@ -1,4 +1,5 @@
 #include "controllers/AnimationController.hpp"
+#include "core/error.hpp"
 #include <stdio.h>
 #include <string.h>
 
@@ -78,11 +79,15 @@ bool AnimationController::loadModel(const char* filepath)
 {
     FILE* file = fopen(filepath, "rb");
     if (!file)
+    {
+        logMessage(LogSeverity::ERROR, std::string("Failed to open model file: ") + (filepath ? filepath : "null"));
         return false;
+    }
 
     ModelVersion version = readModelVersion(file);
     if (version == ModelVersion::INVALID)
     {
+        logMessage(LogSeverity::ERROR, std::string("Invalid model version in: ") + filepath);
         fclose(file);
         return false;
     }
@@ -195,6 +200,7 @@ bool AnimationController::loadModel(const char* filepath)
 
     fclose(file);
     trackIndices.assign(modelNodes.size(), 0);
+    logMessage(LogSeverity::DEBUG, "Model loaded successfully: " + std::string(filepath ? filepath : ""));
     return true;
 }
 
@@ -240,7 +246,10 @@ void AnimationController::unloadTextures()
 void AnimationController::set(int animIndex, bool loop)
 {
     if (animIndex < 0 || animIndex >= (int)animations.size())
+    {
+        logMessage(LogSeverity::WARNING, "Animation index out of bounds: " + std::to_string(animIndex));
         return;
+    }
     currentAnimIndex = animIndex;
     currentFrameFP = 0;
     animSpeedFP = 128; // 30FPS to 60FPS
@@ -309,6 +318,12 @@ void AnimationController::update()
 
 Keyframe AnimationController::getInterpolatedFrame(const AnimTrack& track, int timeFP, int nodeId)
 {
+    if (nodeId < 0 || nodeId >= (int)trackIndices.size())
+    {
+        logMessage(LogSeverity::ERROR, "Node ID out of bounds: " + std::to_string(nodeId));
+        return {0, 0, 0, 0, 0, 0, 0};
+    }
+
     if (track.frames.empty())
         return {0, 0, 0, 0, 0, 0, 0};
     if (track.frames.size() == 1)
@@ -369,6 +384,11 @@ void AnimationController::render()
 
 void AnimationController::renderNode(int nodeId)
 {
+    if (nodeId < 0 || nodeId >= (int)modelNodes.size())
+    {
+        logMessage(LogSeverity::ERROR, "Node ID out of bounds: " + std::to_string(nodeId));
+        return;
+    }
     AnimNode& node = modelNodes[nodeId];
     glPushMatrix();
 

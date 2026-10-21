@@ -73,7 +73,9 @@ Font* TextManager::loadFont(std::string* name, int size)
 void TextManager::unloadFont(Font* font)
 {
     if (font == nullptr)
+    {
         return;
+    }
 
     free(font->bitmap);
     free(font->bitmapBold);
@@ -96,6 +98,7 @@ bool TextManager::loadPalette(std::string* path, bool sub)
     FileBuffer buffer = io.openFileBuffer(*path);
     if (buffer.get() == nullptr)
     {
+        logMessage(LogSeverity::WARNING, "Failed to load palette from: " + *path);
         return false;
     }
 
@@ -128,6 +131,7 @@ std::uint8_t* TextManager::loadFontBitmap(std::string* path)
     FileBuffer buffer = io.openFileBuffer(*path);
     if (buffer.get() == nullptr)
     {
+        logMessage(LogSeverity::WARNING, "Failed to load font bitmap from: " + *path);
         return nullptr;
     }
 
@@ -142,9 +146,16 @@ bool TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBi
                     "nullptr");
     }
 
+    if (font == nullptr)
+    {
+        logMessage(LogSeverity::ERROR, "Font cannot be nullptr");
+        return false;
+    }
+
     FileBuffer buffer = io.openFileBuffer(*path);
     if (buffer.get() == nullptr)
     {
+        logMessage(LogSeverity::WARNING, "Failed to load font metadata from: " + *path);
         return false;
     }
 
@@ -196,6 +207,11 @@ bool TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBi
 
 void TextManager::clearScreen(uint16_t* videoBuffer)
 {
+    if (videoBuffer == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null videoBuffer");
+        return;
+    }
     dmaFillHalfWords(0, videoBuffer, 256 * 256 * sizeof(uint8_t));
 }
 
@@ -208,13 +224,20 @@ int TextManager::extractIntValue(const std::string& line, const std::string& key
     }
 
     const std::size_t dataStart = keyPos + key.size();
-    std::size_t dataEnd = dataStart;
-    while (dataEnd < line.size() && line[dataEnd] != ' ')
+    if (dataStart >= line.size())
     {
-        dataEnd++;
+        return 0;
     }
 
-    return std::stoi(line.substr(dataStart, dataEnd - dataStart));
+    char* endPtr = nullptr;
+    long val = std::strtol(line.c_str() + dataStart, &endPtr, 10);
+    if (endPtr == line.c_str() + dataStart)
+    {
+        logMessage(LogSeverity::WARNING, "Failed to parse int value for key: " + key);
+        return 0;
+    }
+
+    return static_cast<int>(val);
 }
 
 void TextManager::haltOnError(const std::string& errorMessage)

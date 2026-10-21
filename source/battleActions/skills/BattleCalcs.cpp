@@ -1,4 +1,5 @@
 #include "BattleCalcs.hpp"
+#include "core/error.hpp"
 #include <aegis/ndsTypes.hpp>
 #include <fpm/math.hpp>
 
@@ -16,11 +17,21 @@ bool BattleCalcs::hit(BattleParticipant& attacker, BattleParticipant& defender, 
 {
     MathManager& math = MathManager::GetInstance();
 
-    BattleStats& attackerStats = *attacker.getBattleStats();
-    BattleStats& defenderStats = *defender.getBattleStats();
+    BattleStats* attackerStatsPtr = attacker.getBattleStats();
+    BattleStats* defenderStatsPtr = defender.getBattleStats();
+    if (!attackerStatsPtr || !defenderStatsPtr)
+    {
+        logMessage(LogSeverity::ERROR, "Called with null battleStats");
+        return false;
+    }
+
+    BattleStats& attackerStats = *attackerStatsPtr;
+    BattleStats& defenderStats = *defenderStatsPtr;
 
     if (skill.hitRate == 100)
+    {
         return true;
+    }
 
     ae::q20_12_t baseAccuracy = math.div(ae::q20_12_t{attackerStats.ag + 200}, ae::q20_12_t{defenderStats.ag + 200});
     ae::q20_12_t multipliedAccuracy;
@@ -43,6 +54,12 @@ bool BattleCalcs::hit(BattleParticipant& attacker, BattleParticipant& defender, 
 u32 BattleCalcs::healing(BattleParticipant& user, Skill& skill)
 {
     BattleStats* battleStats = user.getBattleStats();
+    if (!battleStats)
+    {
+        logMessage(LogSeverity::ERROR, "Called with null battleStats");
+        return 0;
+    }
+
     ae::q20_12_t teamMultiplier = user.getTeamMultiplier();
 
     uint8_t magicBoost = BattleCalcs::getMagicBoostHeal(battleStats->ma);
@@ -79,26 +96,26 @@ const ae::q20_12_t BattleCalcs::levelMultipliers[24] = {
     ae::q20_12_t{1.41}, ae::q20_12_t{1.47}, ae::q20_12_t{1.49}, ae::q20_12_t{1.5}};
 
 const uint8_t BattleCalcs::magicBoostTableHeal[20] = {
-    0,   // 1-5
-    6,   // 6-10
-    12,  // 11-15
-    17,  // 16-20
-    22,  // 21-25
-    27,  // 26-30
-    34,  // 31-35
-    44,  // 36-40
-    54,  // 41-45
-    65,  // 46-50
-    75,  // 51-55
-    85,  // 56-60
-    93,  // 61-65
-    100, // 66-70
-    105, // 71-75
-    110, // 76-80
-    115, // 81-85
-    120, // 86-90
-    125, // 91-95
-    130  // 96-99
+    0,   /// 1-5
+    6,   /// 6-10
+    12,  /// 11-15
+    17,  /// 16-20
+    22,  /// 21-25
+    27,  /// 26-30
+    34,  /// 31-35
+    44,  /// 36-40
+    54,  /// 41-45
+    65,  /// 46-50
+    75,  /// 51-55
+    85,  /// 56-60
+    93,  /// 61-65
+    100, /// 66-70
+    105, /// 71-75
+    110, /// 76-80
+    115, /// 81-85
+    120, /// 86-90
+    125, /// 91-95
+    130  /// 96-99
 };
 
 u32 BattleCalcs::getAtk(BattleStats& attackerStats, Skill& skill)
@@ -111,7 +128,7 @@ ae::q20_12_t BattleCalcs::getLevelDifference(u32 attackerLevel, u32 defenderLeve
     s32 diff = attackerLevel - defenderLevel;
     diff = std::clamp(diff, (s32)-13, (s32)10);
 
-    // offset so -13 is 0
+    /// offset so -13 is 0
     return levelMultipliers[diff + 13];
 }
 
@@ -130,7 +147,7 @@ ae::q20_12_t BattleCalcs::getAffinityMtp(BattleStats& defenderStats, Skill& skil
     case BattleStats::Affinity::Absorb:
         return ae::q20_12_t{-1.0};
     case BattleStats::Affinity::Repel:
-        return ae::q20_12_t{-2.0}; // TODO: add repel logic
+        return ae::q20_12_t{-2.0}; /// TODO: add repel logic
     case BattleStats::Affinity::Neutral:
     default:
         return ae::q20_12_t{1.0};

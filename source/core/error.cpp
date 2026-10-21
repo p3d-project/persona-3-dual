@@ -16,6 +16,7 @@ struct LogStats
 };
 
 LogStats stats;
+bool isLogSessionStarted = false;
 
 /**
  * @brief Get the string name of the LogSeverity
@@ -91,14 +92,86 @@ void incrementStats(LogSeverity severity)
 }
 } // namespace
 
+void clearLog()
+{
+    const std::string logPath = fatBasePath.empty() ? "fat:/data/log.txt" : (fatBasePath + "log.txt");
+    FILE* logFile = std::fopen(logPath.c_str(), "w");
+    if (logFile != nullptr)
+    {
+        std::fflush(logFile);
+        std::fclose(logFile);
+    }
+    stats = LogStats{};
+    isLogSessionStarted = true;
+}
+
 void logMessageImpl(LogSeverity severity, std::string_view message, const char* file, int line, const char* func)
 {
     incrementStats(severity);
     const char* name = severityName(severity);
 
+    if (severity == LogSeverity::DEBUG)
+    {
+        /// print additional info to stderr
+        std::fprintf(stderr,
+                     "frame=%ld stats(total=%lu debug=%lu warning=%lu error=%lu fatal=%lu)\n"
+                     "[%s] file: %s(%d) `%s`: %.*s\n",
+                     static_cast<long>(frame),
+                     static_cast<unsigned long>(stats.total),
+                     static_cast<unsigned long>(stats.debug),
+                     static_cast<unsigned long>(stats.warning),
+                     static_cast<unsigned long>(stats.error),
+                     static_cast<unsigned long>(stats.fatal),
+                     name,
+                     file,
+                     line,
+                     func,
+                     static_cast<int>(message.size()),
+                     message.data());
+    }
+    else if (severity != LogSeverity::FATAL)
+    {
+        /// log to stderr
+        std::fprintf(stderr,
+                     "[%s] file: %s(%d) `%s`: %.*s\n",
+                     name,
+                     file,
+                     line,
+                     func,
+                     static_cast<int>(message.size()),
+                     message.data());
+    }
+
+    /// log to file
+    const std::string logPath = fatBasePath.empty() ? "fat:/data/log.txt" : (fatBasePath + "log.txt");
+    const char* openMode = isLogSessionStarted ? "a" : "w";
+    FILE* logFile = std::fopen(logPath.c_str(), openMode);
+
+    if (logFile != nullptr)
+    {
+        isLogSessionStarted = true;
+        std::fprintf(logFile,
+                     "frame=%ld stats(total=%lu debug=%lu warning=%lu error=%lu fatal=%lu)\n"
+                     "[%s] file: %s(%d) `%s`: %.*s\n",
+                     static_cast<long>(frame),
+                     static_cast<unsigned long>(stats.total),
+                     static_cast<unsigned long>(stats.debug),
+                     static_cast<unsigned long>(stats.warning),
+                     static_cast<unsigned long>(stats.error),
+                     static_cast<unsigned long>(stats.fatal),
+                     name,
+                     file,
+                     line,
+                     func,
+                     static_cast<int>(message.size()),
+                     message.data());
+        std::fflush(logFile);
+        std::fclose(logFile);
+    }
+
     if (severity == LogSeverity::FATAL)
     {
-        // print additional info to stderr & freeze program
+        /// print additional info to stderr & freeze program
         consoleDemoInit();
         std::fprintf(stderr,
                      "frame=%ld stats(total=%lu debug=%lu warning=%lu error=%lu fatal=%lu)\n"
@@ -118,69 +191,6 @@ void logMessageImpl(LogSeverity severity, std::string_view message, const char* 
         while (1)
         {
             swiWaitForVBlank();
-        }
-    }
-    if (severity == LogSeverity::DEBUG)
-    {
-        // print additional info to stderr
-        std::fprintf(stderr,
-                     "frame=%ld stats(total=%lu debug=%lu warning=%lu error=%lu fatal=%lu)\n"
-                     "[%s] file: %s(%d) `%s`: %.*s\n",
-                     static_cast<long>(frame),
-                     static_cast<unsigned long>(stats.total),
-                     static_cast<unsigned long>(stats.debug),
-                     static_cast<unsigned long>(stats.warning),
-                     static_cast<unsigned long>(stats.error),
-                     static_cast<unsigned long>(stats.fatal),
-                     name,
-                     file,
-                     line,
-                     func,
-                     static_cast<int>(message.size()),
-                     message.data());
-    }
-    else
-    {
-        // log to stderr
-        std::fprintf(stderr,
-                     "[%s] file: %s(%d) `%s`: %.*s\n",
-                     name,
-                     file,
-                     line,
-                     func,
-                     static_cast<int>(message.size()),
-                     message.data());
-    }
-
-    // log to file
-    if ((severity == LogSeverity::DEBUG) && !fatBasePath.empty())
-    {
-        const std::string logPath = fatBasePath + "log.txt";
-        FILE* logFile = std::fopen(logPath.c_str(), "ab");
-
-        // add to file
-        if (logFile != nullptr)
-        {
-            std::fprintf(logFile,
-                         "frame=%ld stats(total=%lu debug=%lu warning=%lu error=%lu fatal=%lu)\n"
-                         "[%s] file: %s(%d) `%s`: %.*s\n",
-                         static_cast<long>(frame),
-                         static_cast<unsigned long>(stats.total),
-                         static_cast<unsigned long>(stats.debug),
-                         static_cast<unsigned long>(stats.warning),
-                         static_cast<unsigned long>(stats.error),
-                         static_cast<unsigned long>(stats.fatal),
-                         name,
-                         file,
-                         line,
-                         func,
-                         static_cast<int>(message.size()),
-                         message.data());
-            std::fclose(logFile);
-        }
-        else
-        {
-            std::fprintf(stderr, "[LOGGER] Failed to open debug log file: %s\n", logPath.c_str());
         }
     }
 }

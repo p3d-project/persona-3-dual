@@ -367,6 +367,8 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
     // maxmod supports one stream at a time: release any music stream first.
     AudioManager::GetInstance().stopAudio();
 
+    logMessage(LogSeverity::DEBUG, "Video playback initialized: " + iFileName);
+
     videoFile = fopen(videoPath.c_str(), "rb");
     if (!videoFile)
     {

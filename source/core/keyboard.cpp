@@ -3,6 +3,11 @@
 
 int OnScreenKeyboard::evaluateInput(touchPosition* touch)
 {
+    if (touch == nullptr)
+    {
+        return 0;
+    }
+
     for (KeyRow& row : keyboardRows)
     {
         if (touch->py >= row.topY && touch->py <= row.bottomY)

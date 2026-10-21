@@ -14,6 +14,11 @@
  */
 static void drawPixel(uint16_t* videoBuffer, int x, int y, int paletteValue)
 {
+    if (!videoBuffer || x < 0 || x >= 256 || y < 0 || y >= 192)
+    {
+        return;
+    }
+
     int wordIndex = (y * 256 + x) / 2;
     u16 currentWord = videoBuffer[wordIndex];
     if (x % 2 == 0)

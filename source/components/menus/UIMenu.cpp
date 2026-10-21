@@ -1,4 +1,5 @@
 #include "UIMenu.hpp"
+#include "core/error.hpp"
 
 void UIMenu::resetMenu()
 {
@@ -23,9 +24,17 @@ void UIMenu::resetMenu()
 
 ViewState UIMenu::changeMenu(etl::span<MenuOption> newOptions)
 {
+    if (prevOptions.full())
+    {
+        logMessage(LogSeverity::WARNING, "prevOptions stack is full");
+        return ViewState::KEEP_CURRENT;
+    }
+
     // add to prevOptions
     MenuState currentState = {options, selectedOption, startIndex};
     prevOptions.push(currentState);
+
+    logMessage(LogSeverity::DEBUG, "Menu options changed, count: " + std::to_string(newOptions.size()));
 
     // set new options
     options = newOptions;

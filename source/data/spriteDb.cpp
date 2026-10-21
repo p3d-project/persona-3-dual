@@ -1,4 +1,5 @@
 #include "data/spriteDb.hpp"
+#include "core/error.hpp"
 
 static const SpriteDBEntry SPRITE_DB_ENTRY[] = {
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_0), "moon-0"},
@@ -61,5 +62,7 @@ std::string getSpriteFilename(SpriteType type, int id)
             return SPRITE_DB_ENTRY[i].filename;
         }
     }
+    logMessage(LogSeverity::WARNING,
+               "Sprite not found for type: " + std::to_string(static_cast<int>(type)) + " id: " + std::to_string(id));
     return "";
 }

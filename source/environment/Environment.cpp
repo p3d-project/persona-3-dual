@@ -1,4 +1,5 @@
 #include "Environment.hpp"
+#include "core/error.hpp"
 #include "core/globals.hpp"
 #include <math.h>
 #include <nds.h>
@@ -24,7 +25,7 @@ bool Environment::load(const EnvironmentDbEntry* entry,
     // Guard against a missing/oversized db entry before touching it
     if (!entry || entry->textureCount > MAX_ENVIRONMENT_TEXTURES)
     {
-        printf("EnvironmentDbEntry textures exceeds MAX_ENVIRONMENT_TEXTURES");
+        logMessage(LogSeverity::ERROR, "EnvironmentDbEntry textures exceeds MAX_ENVIRONMENT_TEXTURES or entry is null");
         return false;
     }
 
@@ -34,12 +35,13 @@ bool Environment::load(const EnvironmentDbEntry* entry,
 
     if (Globals::enableDebugPrint)
     {
-        printf("Environment::load opening '%s'\n", fullBinaryPath.c_str());
+        logMessage(LogSeverity::DEBUG, "Opening '" + fullBinaryPath + "'");
     }
 
     FILE* file = fopen(fullBinaryPath.c_str(), "rb");
     if (!file)
     {
+        logMessage(LogSeverity::ERROR, "Failed to open environment file: " + fullBinaryPath);
         cleanup();
         return false;
     }
@@ -47,6 +49,7 @@ bool Environment::load(const EnvironmentDbEntry* entry,
     char magic[4];
     if (fread(magic, 1, 4, file) != 4)
     {
+        logMessage(LogSeverity::ERROR, "Failed to read environment magic header from: " + fullBinaryPath);
         fclose(file);
         cleanup();
         return false;
@@ -54,6 +57,7 @@ bool Environment::load(const EnvironmentDbEntry* entry,
 
     if (magic[0] != 'E' || magic[1] != 'N' || magic[2] != 'V' || magic[3] != '1')
     {
+        logMessage(LogSeverity::ERROR, "Invalid environment magic header in: " + fullBinaryPath);
         fclose(file);
         cleanup();
         return false;
@@ -62,6 +66,7 @@ bool Environment::load(const EnvironmentDbEntry* entry,
     u32 groupCount = 0;
     if (fread(&groupCount, sizeof(u32), 1, file) != 1)
     {
+        logMessage(LogSeverity::ERROR, "Failed to read groupCount from: " + fullBinaryPath);
         fclose(file);
         cleanup();
         return false;
@@ -69,6 +74,7 @@ bool Environment::load(const EnvironmentDbEntry* entry,
 
     if (groupCount > (u32)entry->textureCount)
     {
+        logMessage(LogSeverity::ERROR, "groupCount exceeds entry->textureCount in: " + fullBinaryPath);
         fclose(file);
         cleanup();
         return false;
@@ -79,6 +85,7 @@ bool Environment::load(const EnvironmentDbEntry* entry,
     {
         if (fread(&dlSizes[i], sizeof(u32), 1, file) != 1)
         {
+            logMessage(LogSeverity::ERROR, "Failed to read display list size in: " + fullBinaryPath);
             fclose(file);
             cleanup(); // frees any displayLists[0..i) already allocated this call
             return false;
@@ -92,6 +99,7 @@ bool Environment::load(const EnvironmentDbEntry* entry,
 
             if (!displayLists[i])
             {
+                logMessage(LogSeverity::ERROR, "Failed to allocate memory for environment display list");
                 fclose(file);
                 cleanup();
                 return false;
@@ -116,7 +124,9 @@ bool Environment::load(const EnvironmentDbEntry* entry,
         textureIDs[i] = 0;
 
         if (bitmaps.empty() || !bitmaps[i])
+        {
             continue;
+        }
 
         render.uploadTexture(textureIDs[i],
                              GL_RGBA,
@@ -125,6 +135,8 @@ bool Environment::load(const EnvironmentDbEntry* entry,
                              TEXGEN_TEXCOORD | GL_TEXTURE_WRAP_S | GL_TEXTURE_WRAP_T,
                              bitmaps[i]);
     }
+
+    logMessage(LogSeverity::DEBUG, "Environment loaded successfully: " + std::string(entry->name));
 
     return true;
 }

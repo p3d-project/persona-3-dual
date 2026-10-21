@@ -1,4 +1,5 @@
 #include "TextComponent.hpp"
+#include "core/error.hpp"
 #include <aegis/ndsTypes.hpp>
 #include <aegis/types.hpp>
 #include <algorithm>
@@ -73,18 +74,34 @@ void TextComponent::configureText(const TextConfig& config, bool loadDefaultPale
     // load default font palette
     if (loadDefaultPalette)
     {
-        sassert(font != nullptr, "Cannot load a font palette if a font has not been loaded first!");
-        tm.loadDefaultPalette();
+        if (font == nullptr)
+        {
+            logMessage(LogSeverity::WARNING, "Cannot load a font palette if a font has not been loaded first!");
+        }
+        else
+        {
+            tm.loadDefaultPalette();
+        }
     }
 }
 
 void TextComponent::drawText(const std::string& text, int x, int y, int color)
 {
+    if (!font || !videoBuffer)
+    {
+        logMessage(LogSeverity::WARNING, "Called without font or videoBuffer");
+        return;
+    }
     ts.drawText(text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth);
 }
 
 void TextComponent::appearText(const std::string& text, int x, int y, int color)
 {
+    if (!font || !videoBuffer)
+    {
+        logMessage(LogSeverity::WARNING, "Called without font or videoBuffer");
+        return;
+    }
     ts.appearText(appearingText, text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth);
 }
 

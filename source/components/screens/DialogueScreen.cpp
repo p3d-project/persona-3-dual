@@ -1,4 +1,5 @@
 #include "DialogueScreen.hpp"
+#include "core/error.hpp"
 #include "core/globals.hpp"
 
 DialogueScreen* DialogueScreen::instance = nullptr;
@@ -107,6 +108,12 @@ void DialogueScreen::load()
 
 void DialogueScreen::loadBusts(etl::array<etl::span<SpritePayload>, 10>* bustPayloads)
 {
+    if (bustPayloads == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null bustPayloads");
+        return;
+    }
+
     for (etl::span<SpritePayload>& sp : *bustPayloads)
     {
         loadBust(sp);

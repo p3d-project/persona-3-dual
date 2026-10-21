@@ -7,6 +7,7 @@
  */
 
 #pragma once
+#include "core/error.hpp"
 #include <aegis/manager.hpp>
 #include <cstdlib>
 #include <nds.h>
@@ -138,16 +139,29 @@ class IOManager : public ae::Manager, public ae::Singleton<IOManager>
      */
     template <typename T> bool readFile(T* data, std::string filePath)
     {
+        if (data == nullptr)
+        {
+            logMessage(LogSeverity::ERROR, "Called with null destination buffer");
+            return false;
+        }
+
         // open file
         std::string path = basePath + filePath;
         FILE* file = fopen(path.c_str(), "rb");
         if (!file)
         {
+            logMessage(LogSeverity::WARNING, "Failed to open file for read: " + path);
             return false;
         }
 
         // read data
-        fread(data, sizeof(T), 1, file);
+        size_t readCount = fread(data, sizeof(T), 1, file);
+        if (readCount != 1)
+        {
+            logMessage(LogSeverity::ERROR, "Failed to read expected data from: " + path);
+            fclose(file);
+            return false;
+        }
 
         // close file
         fclose(file);
@@ -164,6 +178,12 @@ class IOManager : public ae::Manager, public ae::Singleton<IOManager>
      */
     template <typename T> bool writeFile(T* data, std::string filePath)
     {
+        if (data == nullptr)
+        {
+            logMessage(LogSeverity::ERROR, "Called with null source data");
+            return false;
+        }
+
         // open file
         std::string tempPath = basePath + filePath + ".tmp";
         std::string path = basePath + filePath;
@@ -171,11 +191,18 @@ class IOManager : public ae::Manager, public ae::Singleton<IOManager>
         FILE* file = fopen(tempPath.c_str(), "wb");
         if (!file)
         {
+            logMessage(LogSeverity::ERROR, "Failed to open temporary file for write: " + tempPath);
             return false;
         }
 
         // write data
-        fwrite(data, sizeof(T), 1, file);
+        size_t written = fwrite(data, sizeof(T), 1, file);
+        if (written != 1)
+        {
+            logMessage(LogSeverity::ERROR, "Failed to write complete data to: " + tempPath);
+            fclose(file);
+            return false;
+        }
 
         // close file
         fclose(file);

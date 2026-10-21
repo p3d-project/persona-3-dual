@@ -1,5 +1,6 @@
 #include "SignContractView.hpp"
 
+#include "core/error.hpp"
 #include "core/globals.hpp"
 #include "data/audioDb.hpp"
 #include "systems/UISystem.hpp"
@@ -68,6 +69,8 @@ void SignContractView::init()
 
     fadeTimer.start(ae::q20_12_t{0.8});
     transitionPhase = TransitionPhase::FADING_IN;
+
+    logMessage(LogSeverity::DEBUG, "SignContractView initialized");
 }
 
 ViewState SignContractView::update()

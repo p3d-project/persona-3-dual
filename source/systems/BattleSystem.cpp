@@ -1,5 +1,6 @@
 #include "BattleSystem.hpp"
 #include "battleActions/skills/BattleCalcs.hpp"
+#include "core/error.hpp"
 #include "data/audioDb.hpp"
 #include "managers/MathManager.hpp"
 
@@ -46,7 +47,16 @@ void BattleSystem::on_receive(const Event::ExecuteBattle& msg)
     switchedPersonaThisTurn = false;
     personaBeforeSwitch = nullptr;
 
+    logMessage(LogSeverity::DEBUG, "Battle started with enemies count: " + std::to_string(enemies.size()));
+
     calculateTurnOrder();
+
+    if (battleParticipants.empty())
+    {
+        logMessage(LogSeverity::ERROR, "No battle participants configured in ExecuteBattle");
+        isActive = false;
+        return;
+    }
 
     currentParticipantTurn = battleParticipants[0];
 
@@ -118,9 +128,13 @@ void BattleSystem::Update(ae::q20_12_t)
 
             s32* resource;
             if (s->skillRace == SkillRace::mag)
+            {
                 resource = &actor->sp;
+            }
             else
+            {
                 resource = &actor->hp;
+            }
 
             bool canAfford = *resource >= s->cost;
             if (canAfford)
@@ -140,7 +154,9 @@ void BattleSystem::Update(ae::q20_12_t)
         }
 
         if (battleMenuCmpt->consumeCancel())
+        {
             phase = BattlePhase::ChooseAction;
+        }
         break;
     }
 
@@ -179,7 +195,9 @@ void BattleSystem::Update(ae::q20_12_t)
         }
 
         if (battleMenuCmpt->consumeCancel())
+        {
             phase = BattlePhase::ChooseAction;
+        }
         break;
     }
 
@@ -237,7 +255,9 @@ void BattleSystem::Update(ae::q20_12_t)
                     }
                 }
                 if (!canHealAnyTarget)
+                {
                     return;
+                }
             }
 
             bool usingBaseAttack = selectedSkill == actor->baseAttackAction;
@@ -345,6 +365,8 @@ void BattleSystem::Update(ae::q20_12_t)
 
 void BattleSystem::Shutdown()
 {
+    logMessage(LogSeverity::DEBUG, "Battle shutdown");
+
     if (musicCmpt != nullptr)
     {
         musicCmpt->stopMusic();
@@ -386,7 +408,9 @@ void BattleSystem::SetMusicComponent(MusicComponent* music)
 void BattleSystem::applyResult(const TurnResult& turnResult, BattleParticipant* target)
 {
     if (!turnResult.log.empty())
+    {
         pendingAlert += turnResult.log + "\n";
+    }
 
     if (turnResult.hit && target && turnResult.hpDelta != 0)
     {
@@ -402,9 +426,13 @@ void BattleSystem::applyResult(const TurnResult& turnResult, BattleParticipant* 
 
         char buf[48];
         if (turnResult.hpDelta < 0)
+        {
             std::sprintf(buf, "Damage: %ld\n", (long)-turnResult.hpDelta);
+        }
         else
+        {
             std::sprintf(buf, "HP healed: %ld\n", (long)actuallyHealedHp);
+        }
         pendingAlert += buf;
 
         std::sprintf(buf, "%s HP: %ld\n", target->name.c_str(), (long)target->hp);
@@ -452,13 +480,33 @@ void BattleSystem::advanceTurn()
 
     currentParticipantTurn->knockedDown = false;
 
+    if (battleParticipants.empty())
+    {
+        logMessage(LogSeverity::ERROR, "No battle participants");
+        Shutdown();
+        return;
+    }
+
     u32 next = (currentParticipantIndex + 1) % battleParticipants.size();
-    while (battleParticipants.at(next)->hp <= 0)
+    u32 checked = 0;
+    while (battleParticipants.at(next)->hp <= 0 && checked < battleParticipants.size())
+    {
         next = (next + 1) % battleParticipants.size();
+        checked++;
+    }
+
+    if (checked >= battleParticipants.size())
+    {
+        logMessage(LogSeverity::WARNING, "Found no living battle participants");
+        Shutdown();
+        return;
+    }
 
     currentParticipantIndex = next;
     turnsTaken++;
     currentParticipantTurn = battleParticipants.at(next);
+
+    logMessage(LogSeverity::DEBUG, "Turn advanced to: " + currentParticipantTurn->name);
 
     selectedBattleOption = -1;
     BattlePhase nextPhase = currentParticipantTurn->getInitalTurnPhase();
@@ -575,7 +623,9 @@ etl::vector<BattleParticipant*, 13> BattleSystem::getAliveEnemies()
     for (BattleParticipant* enemy : enemies)
     {
         if (enemy->hp > 0)
+        {
             alive.push_back(enemy);
+        }
     }
     return alive;
 }
@@ -590,12 +640,16 @@ bool BattleSystem::allEnemiesKnockedDown()
         {
             aliveCount++;
             if (enemy->knockedDown)
+            {
                 knockedDownCount++;
+            }
         }
     }
 
     if (knockedDownCount >= aliveCount)
+    {
         return true;
+    }
 
     return false;
 }

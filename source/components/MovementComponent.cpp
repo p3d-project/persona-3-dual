@@ -1,4 +1,5 @@
 #include "MovementComponent.hpp"
+#include "core/error.hpp"
 #include "core/globals.hpp"
 
 // TODO: remove hardcoded model references
@@ -162,7 +163,8 @@ TileType MovementComponent::isTileAt()
 TileType MovementComponent::isTileAt(int tileX, int tileZ)
 {
     // default
-    if (tileX < 0 || tileX >= config.mapWidth || tileZ < 0 || tileZ >= config.mapHeight)
+    if (config.collisionMap == nullptr || tileX < 0 || tileX >= config.mapWidth || tileZ < 0 ||
+        tileZ >= config.mapHeight)
     {
         return TileType::NO_COLLISION;
     }
@@ -173,6 +175,12 @@ TileType MovementComponent::isTileAt(int tileX, int tileZ)
 
 bool MovementComponent::isTileWalkable(ae::q20_12_t worldX, ae::q20_12_t worldZ)
 {
+    if (config.tileSize <= ae::q20_12_t{0})
+    {
+        logMessage(LogSeverity::WARNING, "Invalid tileSize");
+        return false;
+    }
+
     const ae::q20_12_t radiusX = config.characterSize.x * ae::q20_12_t{0.5};
     const ae::q20_12_t radiusZ = config.characterSize.z * ae::q20_12_t{0.5};
     const ae::q20_12_t minX = worldX - radiusX + config.worldOffsetX;

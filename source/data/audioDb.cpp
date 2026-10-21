@@ -1,4 +1,6 @@
 #include "data/audioDb.hpp"
+#include "core/error.hpp"
+#include <string>
 
 static const AudioDBEntry AUDIO_DB_ENTRY[] = {
     // battle
@@ -76,6 +78,9 @@ AudioDBEntry getAudioDBEntry(AudioType type, int id)
             return AUDIO_DB_ENTRY[i];
         }
     }
+    logMessage(LogSeverity::WARNING,
+               "AudioDBEntry not found for type: " + std::to_string(static_cast<int>(type)) +
+                   " id: " + std::to_string(id));
     return AudioDBEntry{AudioType::NONE};
 }
 
