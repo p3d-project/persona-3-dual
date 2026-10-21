@@ -219,5 +219,5 @@ int TextManager::extractIntValue(const std::string& line, const std::string& key
 
 void TextManager::haltOnError(const std::string& errorMessage)
 {
-    logMessage(errorMessage);
+    logMessage(LogSeverity::FATAL, errorMessage);
 }

@@ -370,7 +370,7 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
     videoFile = fopen(videoPath.c_str(), "rb");
     if (!videoFile)
     {
-        logMessage(videoPath);
+        logMessage(LogSeverity::FATAL, videoPath);
     }
 
     // Read the optional dynamic video header.
@@ -406,7 +406,7 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
     }
     if ((bpp != 1 && bpp != 2) || frameW == 0 || frameH == 0)
     {
-        logMessage("bad video header");
+        logMessage(LogSeverity::FATAL, "bad video header");
     }
 
     frameSize = (uint32_t)frameW * frameH * bpp;
@@ -421,7 +421,7 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
         size_t palRead = fread(palette, 2, 256, videoFile);
         if (palRead != 256)
         {
-            logMessage("palette read failed");
+            logMessage(LogSeverity::FATAL, "palette read failed");
         }
 
         for (int i = 0; i < 256; i++)
@@ -441,7 +441,7 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
     ramBuffer = (uint8_t*)memalign(32, bufferSize);
     if (!ramBuffer)
     {
-        logMessage("malloc failed");
+        logMessage(LogSeverity::FATAL, "malloc failed");
     }
 
     // Set up the internal audio player (falls back to silent playback on failure).

@@ -169,7 +169,8 @@ mm_word AudioManager::processStream(mm_word length, mm_addr dest, mm_stream_form
     if (((qp->info.channels == 1) && (format != MM_STREAM_16BIT_MONO)) ||
         ((qp->info.channels == 2) && (format != MM_STREAM_16BIT_STEREO)))
     {
-        logMessage("Audio format from the current audio track does not match the original audio format");
+        logMessage(LogSeverity::FATAL,
+                   "Audio format from the current audio track does not match the original audio format");
     }
 
     uint32_t decoded = decode((short*)dest, length);

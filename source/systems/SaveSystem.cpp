@@ -7,7 +7,7 @@ void SaveSystem::on_receive(const Event::ReadSave)
     bool success = io.readFile<Save>(&saveData, "save/save.sav");
     if (!success)
     {
-        logMessage("Failed to read save data!");
+        logMessage(LogSeverity::FATAL, "Failed to read save data!");
     }
 
     // down the line, do checksum validation to ensure save file is not corrupted

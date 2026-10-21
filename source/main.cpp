@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
     // initialize DLDI/FAT
     if (!fatInitDefault())
     {
-        logMessage("FAT initialization failed!\nPlease ensure the SD card is inserted.");
+        logMessage(LogSeverity::FATAL, "FAT initialization failed!\nPlease ensure the SD card is inserted.");
     }
 
     // dynamically resolve runtime path using argv[0]
