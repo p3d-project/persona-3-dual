@@ -111,7 +111,7 @@ class UIMenu
     }
 
     /**
-     * @brief Overrides the default visible option count set by UISystem
+     * @brief Sets the visible option count of a custom render menu, as UISystem only sets it for the menus it draws
      *
      * @param count the number of options visible at once
      */

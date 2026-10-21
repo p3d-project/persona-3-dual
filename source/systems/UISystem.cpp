@@ -212,7 +212,7 @@ void UISystem::on_receive(const Event::ConfigureUIMenu& config)
         menu->isActive = false;
         menu->text = text;
         /// @note 192px is the screen height. 1 row is reserved for the flashing text. Each line takes the font size height
-        if (menu->visibleOptions == 0)
+        if (!menu->customRender)
         {
             menu->visibleOptions = (192 / textSize) - 1;
         }
