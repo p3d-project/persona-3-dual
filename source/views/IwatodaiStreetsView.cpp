@@ -126,11 +126,7 @@ void IwatodaiStreetsView::setupUI()
 
     battleMenuCmpt = BattleMenu::getInstance();
     setupPauseMenu();
-
-    menuHUDScreen = MenuHUDScreen::getInstance();
-
-    menuHUDScreen->setTextComponent(textSub);
-    menuHUDScreen->setTextContent("Streets", TextColor::White);
+    setupMenuHUD("Streets");
 
     std::array<UIScreen*, 5> screens = {menuHUDScreen, pauseMenuScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt, battleMenuCmpt};

@@ -67,11 +67,7 @@ void StationView::setupUI()
     textSub->configureText(TextConfig(textVideoBufferSub, &fontName, fontSize));
 
     setupPauseMenu();
-
-    menuHUDScreen = MenuHUDScreen::getInstance();
-
-    menuHUDScreen->setTextComponent(textSub);
-    menuHUDScreen->setTextContent("Station", TextColor::White);
+    setupMenuHUD("Station");
 
     std::array<UIScreen*, 5> screens = {menuHUDScreen, pauseMenuScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt};

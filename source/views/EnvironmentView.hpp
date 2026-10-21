@@ -96,6 +96,13 @@ class EnvironmentView : public BaseView
      */
     void setupPauseMenu();
 
+    /**
+     * @brief Sets up the menu HUD
+     *
+     * @param location The location name shown on the HUD
+     */
+    void setupMenuHUD(const std::string& location);
+
     virtual void setupDialogue()
     {
     }

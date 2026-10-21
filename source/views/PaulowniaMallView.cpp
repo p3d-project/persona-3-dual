@@ -87,11 +87,7 @@ void PaulowniaMallView::setupUI()
     textSub->configureText(TextConfig(textVideoBufferSub, &fontName, fontSize));
 
     setupPauseMenu();
-
-    menuHUDScreen = MenuHUDScreen::getInstance();
-
-    menuHUDScreen->setTextComponent(textSub);
-    menuHUDScreen->setTextContent("Paulownia Mall", TextColor::White);
+    setupMenuHUD("Paulownia Mall");
 
     std::array<UIScreen*, 5> screens = {menuHUDScreen, pauseMenuScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt};

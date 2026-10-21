@@ -540,3 +540,11 @@ void EnvironmentView::setupPauseMenu()
     pauseMenuScreen->setInfoPanelText("9,999,999 Yen", "Ara Mitama", "Chariot", "Level 99", TextColor::DarkestBlue);
     pauseMenuScreen->setDescriptionText("View Social Link details", TextColor::White);
 }
+
+void EnvironmentView::setupMenuHUD(const std::string& location)
+{
+    menuHUDScreen = MenuHUDScreen::getInstance();
+
+    menuHUDScreen->setTextComponent(textSub);
+    menuHUDScreen->setTextContent(location, TextColor::White);
+}
