@@ -1,5 +1,7 @@
 #include "TextSystem.hpp"
 
+#include <algorithm>
+
 constexpr char INSTRUCTION_BIT = 0xFF; /// Special value used to indicate that the next byte is an instruction
 
 void TextSystem::drawText(const std::string& text,
@@ -110,14 +112,32 @@ void TextSystem::clearArea(uint16_t* videoBuffer, int x, int y, int width, int h
 {
     for (int row = 0; row < height; ++row)
     {
-        for (int col = 0; col < width; ++col)
+        int rowStart = x;
+        int rowEnd = x + width;
+        int pixelY = y + row;
+
+        if (pixelY < 0 || pixelY >= 192)
         {
-            int pixelX = x + col;
-            int pixelY = y + row;
-            if (pixelX >= 0 && pixelX < 256 && pixelY >= 0 && pixelY < 192)
+            continue;
+        }
+
+        rowStart = std::max(rowStart, 0);
+        rowEnd = std::min(rowEnd, 256);
+        if (rowStart < rowEnd)
+        {
+            // Clear unaligned edge pixels individually, then fill the aligned span with DMA.
+            if (rowStart % 2 != 0)
             {
-                drawPixel(videoBuffer, pixelX, pixelY, TextColor::Transparent);
+                drawPixel(videoBuffer, rowStart, pixelY, TextColor::Transparent);
+                ++rowStart;
             }
+            if (rowEnd % 2 != 0)
+            {
+                --rowEnd;
+                drawPixel(videoBuffer, rowEnd, pixelY, TextColor::Transparent);
+            }
+
+            dmaFillHalfWords(0, videoBuffer + (pixelY * 256 + rowStart) / 2, static_cast<uint32_t>(rowEnd - rowStart));
         }
     }
 }
