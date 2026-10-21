@@ -120,7 +120,9 @@ void TextSystem::drawGlyph(const Glyph& glyph,
                 int screenX = cursorX + x + italicOffset;
                 int screenY = cursorY + glyph.yOffset + y;
                 if (screenX >= 0 && screenX < 256 && screenY >= 0 && screenY < 192)
+                {
                     drawPixel(videoBuffer, screenX, screenY, color);
+                }
             }
         }
     }
@@ -131,7 +133,9 @@ void TextSystem::drawGlyph(const Glyph& glyph,
         {
             int screenX = cursorX + x;
             if (screenX >= 0 && screenX < 256 && underlineY >= 0 && underlineY < 192)
+            {
                 drawPixel(videoBuffer, screenX, underlineY, color);
+            }
         }
     }
 }
@@ -218,9 +222,13 @@ void TextSystem::drawNextFromText(Text* text)
         {
             c = getNextChar(text);
             if (c == TextInstruction::Reset) /// Reset to base color
+            {
                 text->activeColor = text->baseColor;
+            }
             else if (c < 256) /// bg palette only has 256 colors
+            {
                 text->activeColor = static_cast<int>(c);
+            }
         }
         else if (c == TextInstruction::StyleChange)
         {
@@ -242,7 +250,9 @@ void TextSystem::drawNextFromText(Text* text)
         }
     }
     else if (text->font->glyphs[c].width == 0)
+    {
         text->cursorX += text->spaceWidth; /// If the glyph width is 0, skip it (char has not been defined in the font)
+    }
     else
     {
         Glyph g = text->bold ? text->font->boldGlyphs[c] : text->font->glyphs[c];
@@ -300,7 +310,9 @@ std::unique_ptr<Text> TextSystem::createText(const std::string& text,
 char TextSystem::getNextChar(Text* text)
 {
     if (text->cursorPos + 1 < (int)text->content.size())
+    {
         return text->content[++text->cursorPos];
+    }
     return 0xFE; /// Return a special value indicating no more characters
 }
 
@@ -309,9 +321,13 @@ void TextSystem::drawPixel(uint16_t* videoBuffer, int x, int y, int paletteValue
     int wordIndex = (y * 256 + x) / 2;
     u16 currentWord = videoBuffer[wordIndex];
     if (x % 2 == 0) //Clear the lower 8 bits, then inject our 8-bit color index
+    {
         videoBuffer[wordIndex] = (currentWord & 0xFF00) | (paletteValue & 0xFF);
+    }
     else //Clear the upper 8 bits, then inject our 8-bit color index shifted up
+    {
         videoBuffer[wordIndex] = (currentWord & 0x00FF) | ((paletteValue & 0xFF) << 8);
+    }
 }
 
 std::string TextSystem::getNextWord(const std::string& text)
@@ -335,7 +351,9 @@ bool TextSystem::checkWordWrap(const std::string& text, Font* font, int startX, 
         cursorX += g.width + letterSpacing;
     }
     if (cursorX > 256)
+    {
         return true; // Word exceeds screen width
+    }
     return false;
 }
 
@@ -345,7 +363,9 @@ void TextSystem::underlineGap(int startX, int y, int width, uint16_t* videoBuffe
     {
         int screenX = startX + x;
         if (screenX >= 0 && screenX < 256 && y >= 0 && y < 192)
+        {
             drawPixel(videoBuffer, screenX, y, color);
+        }
     }
 }
 
@@ -358,7 +378,9 @@ void TextSystem::testBitmap(Font* font, uint16_t* videoBuffer)
             int index = font->bitmap[y * font->bitmapWidth + x];
             int pixelValue = font->bitmap[index];
             if (pixelValue > 0)
+            {
                 drawPixel(videoBuffer, x, y, DualGreen);
+            }
         }
     }
 }

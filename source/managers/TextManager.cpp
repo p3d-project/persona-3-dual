@@ -34,7 +34,7 @@ Font* TextManager::loadFont(std::string* name, int size)
 {
     if (name == nullptr)
     {
-        haltOnError("TextManager::loadFont(std::string* name, int size) : name cannot be nullptr");
+        haltOnError("name cannot be nullptr");
     }
 
     Font* font = new Font();
@@ -92,7 +92,7 @@ bool TextManager::loadPalette(std::string* path, bool sub)
 {
     if (path == nullptr)
     {
-        haltOnError("TextManager::loadPalette(std::string* path, bool sub) : path cannot be nullptr");
+        haltOnError("path cannot be nullptr");
     }
 
     FileBuffer buffer = io.openFileBuffer(*path);
@@ -125,7 +125,7 @@ std::uint8_t* TextManager::loadFontBitmap(std::string* path)
 {
     if (path == nullptr)
     {
-        haltOnError("TextManager::loadFontBitmap(std::string* path) : path cannot be nullptr");
+        haltOnError("path cannot be nullptr");
     }
 
     FileBuffer buffer = io.openFileBuffer(*path);
@@ -142,8 +142,7 @@ bool TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBi
 {
     if (path == nullptr)
     {
-        haltOnError("TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBitmap) : path cannot be "
-                    "nullptr");
+        haltOnError("path cannot be nullptr");
     }
 
     if (font == nullptr)

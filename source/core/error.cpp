@@ -48,8 +48,10 @@ const char* severityName(LogSeverity severity)
     }
 
     case LogSeverity::FATAL:
+    {
         severityStr = "FATAL";
         break;
+    }
     }
 
     return severityStr;
@@ -92,6 +94,9 @@ void incrementStats(LogSeverity severity)
 }
 } // namespace
 
+/**
+ * @brief Clears the log file for a fresh game session
+ */
 void clearLog()
 {
     const std::string logPath = fatBasePath.empty() ? "fat:/data/log.txt" : (fatBasePath + "log.txt");
@@ -105,6 +110,15 @@ void clearLog()
     isLogSessionStarted = true;
 }
 
+/**
+ * @brief Logs a diagnostic message and halts only for fatal messages
+ *
+ * @param severity the log severity level
+ * @param message the message to print
+ * @param file the file of the calling code
+ * @param line the line of the calling code
+ * @param func the function signature of the calling code
+ */
 void logMessageImpl(LogSeverity severity, std::string_view message, const char* file, int line, const char* func)
 {
     incrementStats(severity);

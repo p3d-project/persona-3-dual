@@ -97,12 +97,16 @@ TurnResult Enemy::resolve(BattleParticipant* target, Skill* skill)
     bool hit = BattleCalcs::hit(*this, *target, *skill);
 
     if (!hit)
+    {
         return {false, 0, false, targetLog + "Miss"};
+    }
 
     u32 damage = BattleCalcs::attack(*this, *target, *skill);
 
     if (party->guarding)
+    {
         damage = (u32)(damage * 0.4f);
+    }
 
     bool oneMoreResult = false;
     if (party->curPersona != nullptr)

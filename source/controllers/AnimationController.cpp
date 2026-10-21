@@ -43,19 +43,33 @@ AnimationController::~AnimationController()
 int AnimationController::textureSizeToEnum(int px)
 {
     if (px <= 8)
+    {
         return TEXTURE_SIZE_8;
+    }
     if (px <= 16)
+    {
         return TEXTURE_SIZE_16;
+    }
     if (px <= 32)
+    {
         return TEXTURE_SIZE_32;
+    }
     if (px <= 64)
+    {
         return TEXTURE_SIZE_64;
+    }
     if (px <= 128)
+    {
         return TEXTURE_SIZE_128;
+    }
     if (px <= 256)
+    {
         return TEXTURE_SIZE_256;
+    }
     if (px <= 512)
+    {
         return TEXTURE_SIZE_512;
+    }
     return TEXTURE_SIZE_1024;
 }
 
@@ -67,10 +81,14 @@ static ModelVersion readModelVersion(FILE* file)
     fread(magic, 1, 4, file);
 
     if (strncmp(magic, "MDL1", 4) == 0)
+    {
         return ModelVersion::MDL1;
+    }
 
     if (strncmp(magic, "MDL2", 4) == 0)
+    {
         return ModelVersion::MDL2;
+    }
 
     return ModelVersion::INVALID;
 }
@@ -214,7 +232,9 @@ bool AnimationController::loadTextures(
     for (int i = 0; i < count; i++)
     {
         if (!bitmaps || !bitmaps[i])
+        {
             continue;
+        }
 
         glGenTextures(1, &textureIDs[i]);
         glBindTexture(GL_TEXTURE_2D, textureIDs[i]);
@@ -237,7 +257,9 @@ bool AnimationController::loadTextures(
 void AnimationController::unloadTextures()
 {
     if (textureIDs.empty())
+    {
         return;
+    }
 
     glDeleteTextures((int)textureIDs.size(), textureIDs.data());
     textureIDs.clear();
@@ -261,7 +283,9 @@ void AnimationController::set(int animIndex, bool loop)
 void AnimationController::play()
 {
     if (currentAnimIndex == -1)
+    {
         return;
+    }
     isPlaying = true;
     isFinishing = false;
     if ((currentFrameFP >> 8) >= animations[currentAnimIndex].duration - 1)
@@ -287,7 +311,9 @@ void AnimationController::pause()
 void AnimationController::update()
 {
     if (!isPlaying || currentAnimIndex == -1)
+    {
         return;
+    }
 
     currentFrameFP += animSpeedFP;
     int currentFrameInt = currentFrameFP >> 8;
@@ -325,9 +351,13 @@ Keyframe AnimationController::getInterpolatedFrame(const AnimTrack& track, int t
     }
 
     if (track.frames.empty())
+    {
         return {0, 0, 0, 0, 0, 0, 0};
+    }
     if (track.frames.size() == 1)
+    {
         return track.frames[0];
+    }
 
     int& cacheIdx = trackIndices[nodeId];
 
@@ -344,16 +374,22 @@ Keyframe AnimationController::getInterpolatedFrame(const AnimTrack& track, int t
 
     Keyframe k1 = track.frames[cacheIdx];
     if (cacheIdx >= (int)track.frames.size() - 1)
+    {
         return k1;
+    }
 
     Keyframe k2 = track.frames[cacheIdx + 1];
     int range = k2.time - k1.time;
     if (range == 0)
+    {
         return k1;
+    }
 
     int progressFP = timeFP - (k1.time << 8);
     if (progressFP == 0)
+    {
         return k1;
+    }
 
     int t = (progressFP << 4) / range; // converts 8-bit frac to 12-bit frac (0..4096)
 
@@ -371,7 +407,9 @@ Keyframe AnimationController::getInterpolatedFrame(const AnimTrack& track, int t
 void AnimationController::render()
 {
     if (modelNodes.empty())
+    {
         return;
+    }
     glMatrixMode(GL_MODELVIEW);
     for (int rootId : rootNodes)
     {
@@ -379,7 +417,8 @@ void AnimationController::render()
     }
     // Wait until the geometry FIFO has consumed all commands.
     while (GFX_BUSY)
-        ;
+    {
+    }
 }
 
 void AnimationController::renderNode(int nodeId)
@@ -411,12 +450,15 @@ void AnimationController::renderNode(int nodeId)
     for (SubList& sl : node.subLists)
     {
         if (sl.displayListSize == 0)
+        {
             continue;
+        }
 
         if (sl.texSlot != currentTexSlot)
         {
             while (GFX_BUSY)
-                ;
+            {
+            }
             if (sl.texSlot >= 0 && sl.texSlot < (int)textureIDs.size())
             {
                 glBindTexture(GL_TEXTURE_2D, textureIDs[sl.texSlot]);

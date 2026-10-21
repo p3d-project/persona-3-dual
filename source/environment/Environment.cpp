@@ -144,12 +144,16 @@ bool Environment::load(const EnvironmentDbEntry* entry,
 void Environment::draw()
 {
     if (!dbEntry)
+    {
         return;
+    }
 
     for (int i = 0; i < dbEntry->textureCount; i++)
     {
         if (!textureIDs[i])
+        {
             continue;
+        }
 
         render.renderDisplayList(displayLists[i], textureIDs[i]);
     }
@@ -158,17 +162,23 @@ void Environment::draw()
 void Environment::drawBillboards(bool faceCamera, ae::q20_12_t camX, ae::q20_12_t camY, ae::q20_12_t camZ)
 {
     if (!dbEntry || dbEntry->billboardCount == 0)
+    {
         return;
+    }
 
     for (int i = 0; i < dbEntry->billboardCount; i++)
     {
         const auto& bb = dbEntry->billboards[i];
         // Skip any billboard that references an out-of-range texture slot
         if (bb.texSlot >= dbEntry->textureCount)
+        {
             continue;
+        }
         // Skip any billboard that references a texture slot that has no bound texture ID
         if (!textureIDs[bb.texSlot])
+        {
             continue;
+        }
 
         render.renderTexturedBillboard(bb, textureIDs[bb.texSlot], faceCamera, camX, camY, camZ);
     }
