@@ -13,6 +13,7 @@
 #include "types/aeTypes.hpp"
 
 #include <aegis/component.hpp>
+#include <memory>
 
 class TextComponent : public ae::Component
 {
@@ -169,7 +170,7 @@ class TextComponent : public ae::Component
     TextSystem& ts = TextSystem::GetInstance();
     TextManager& tm = TextManager::GetInstance();
 
-    Text* appearingText = nullptr;
+    std::unique_ptr<Text> appearingText;
     Font* font = nullptr;
     uint16_t* videoBuffer = nullptr;
     int fontSize = 0;

@@ -1,6 +1,7 @@
 #pragma once
 #include "components/GraphicsComponent.hpp"
 #include "components/screens/UIScreen.hpp"
+#include "uiAnimation/UIAnimator.hpp"
 
 #include <etl/array.h>
 #include <etl/span.h>
@@ -23,6 +24,10 @@ class DialogueScreen : public UIScreen
 
     // render the specified bust onto the screen
     void renderBust(etl::span<SpritePayload>& bustPayload);
+    void showAnimated();
+    void hideAnimated();
+    void updateAnimation();
+    bool isAnimating() const;
 
   private:
     DialogueScreen() : UIScreen(false) {};
@@ -46,6 +51,15 @@ class DialogueScreen : public UIScreen
     void* palette1 = nullptr;
 
     int spriteId = 0;
+    int panelOffset = 40;
+    int bustOffsetX = 0;
+    etl::span<SpritePayload>* activeBust = nullptr;
+    UIAnimator panelAnimator;
+    UIAnimator bustAnimator;
+    UIAnimationHandle panelAnimation;
+    UIAnimationHandle bustAnimation;
+
+    void updateBustPositions();
 
     ae::Entity* dialogue = nullptr;
     GraphicsComponent* graphics = nullptr;

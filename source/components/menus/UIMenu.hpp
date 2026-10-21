@@ -10,6 +10,7 @@
 
 #include "components/TextComponent.hpp"
 #include "types/UITypes.hpp"
+#include "uiAnimation/UIAnimator.hpp"
 
 class UIMenu
 {
@@ -40,6 +41,10 @@ class UIMenu
     const bool customRender;
     etl::stack<MenuState, 5> prevOptions;
     ViewState nextViewState = ViewState::KEEP_CURRENT;
+    int selectionX = 0;
+    UIAnimator animator;
+
+    void animateSelection();
 
     /**
      * @brief Changes the current options to the previous options
@@ -79,6 +84,9 @@ class UIMenu
      * Can override the return from the standard update loop
      */
     virtual ViewState updateHook();
+
+    void updateAnimation();
+    int selectionOffset() const;
 
     /**
      * @brief Gets the index of the selected option

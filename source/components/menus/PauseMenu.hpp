@@ -1,27 +1,39 @@
 #pragma once
 #include "components/menus/UIMenu.hpp"
 #include "controllers/AnimationController.hpp"
+#include "data/audioDb.hpp"
 #include "managers/UIManager.hpp"
 #include "systems/CameraSystem.hpp"
 #include <etl/array.h>
 
 enum class DebugOption
 {
-    DISCLAIMER_VIEW = 0,
-    INTRO_VIEW,
-    MAIN_MENU_VIEW,
-    IWATODAI_DORM_VIEW,
-    IWATODAI_STREETS_VIEW,
-    STATION_VIEW,
-    SIGN_CONTRACT_VIEW,
-    PAULOWNIA_MALL_VIEW,
-    INTRO_VIDEO,
-    CUTSCENE_1,
-    CUTSCENE_2,
+    SWITCH_VIEW = 0,
+    PLAY_CUTSCENE,
     TOGGLE_BILLBOARDS,
     TOGGLE_DEBUG_PRINT,
+    PLAY_MUSIC,
     PLAY_CHARACTER_ANIM,
     CYCLE_CAMERA_MODE
+};
+
+enum class ViewOption
+{
+    DISCLAIMER = 0,
+    INTRO,
+    MAIN_MENU,
+    IWATODAI_DORM,
+    IWATODAI_STREETS,
+    STATION,
+    SIGN_CONTRACT,
+    PAULOWNIA_MALL
+};
+
+enum class CutsceneOption
+{
+    INTRO_VIDEO = 0,
+    CUTSCENE_1,
+    CUTSCENE_2
 };
 
 class PauseMenu : public UIMenu
@@ -48,22 +60,61 @@ class PauseMenu : public UIMenu
         {"System", -1, MENU_BIND(PauseMenu, openSystemMenu)},
     };
 
-    etl::array<MenuOption, 15> debugOptions = {
-        MenuOption{"Disclaimer", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"Intro", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"MainMenu", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"IwatodaiDorm", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"IwatodaiStreet", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"StationView", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"SignContract", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"PaulowniaMall", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"IntroVideo", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"Cutscene1", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"Cutscene2", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"Billboards", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"Debug Print", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
-        {"Character Anim", -1, MENU_BIND(PauseMenu, openCharacterAnimMenu)},
+    etl::array<MenuOption, 7> debugOptions = {
+        MenuOption{"Switch View", -1, MENU_BIND(PauseMenu, openViewMenu)},
+        {"Play Cutscene", -1, MENU_BIND(PauseMenu, openCutsceneMenu)},
+        {"Toggle Billboards", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+        {"Toggle Debug Print", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+        {"Play Music", -1, MENU_BIND(PauseMenu, openMusicMenu)},
+        {"Play Character Animations", -1, MENU_BIND(PauseMenu, openCharacterAnimMenu)},
         {"Cycle Camera Mode", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
+    };
+
+    etl::array<MenuOption, 8> viewOptions = {
+        MenuOption{"DisclaimerView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"IntroView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"MainMenuView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"IwatodaiDormView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"IwatodaiStreetView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"StationView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"SignContractView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+        {"PaulowniaMallView", -1, MENU_BIND(PauseMenu, viewOptionSelected)},
+    };
+
+    etl::array<MenuOption, 3> cutsceneOptions = {
+        MenuOption{"IntroVideo", -1, MENU_BIND(PauseMenu, cutsceneOptionSelected)},
+        {"Cutscene1", -1, MENU_BIND(PauseMenu, cutsceneOptionSelected)},
+        {"Cutscene2", -1, MENU_BIND(PauseMenu, cutsceneOptionSelected)},
+    };
+
+    etl::array<MenuOption, 4> musicOptions = {
+        MenuOption{"Battle", -1, MENU_BIND(PauseMenu, openBattleMusicMenu)},
+        {"Location", -1, MENU_BIND(PauseMenu, openLocationMusicMenu)},
+        {"Menu", -1, MENU_BIND(PauseMenu, openMenuMusicMenu)},
+        {"Other", -1, MENU_BIND(PauseMenu, openOtherMusicMenu)},
+    };
+
+    etl::array<MenuOption, 1> battleMusicOptions = {
+        MenuOption{"Mass Destruction", -1, MENU_BIND(PauseMenu, battleMusicOptionSelected)},
+    };
+
+    etl::array<MenuOption, 4> locationMusicOptions = {
+        MenuOption{"Iwatodai Dorm", -1, MENU_BIND(PauseMenu, locationMusicOptionSelected)},
+        {"Changing Seasons", -1, MENU_BIND(PauseMenu, locationMusicOptionSelected)},
+        {"Color Your Night", -1, MENU_BIND(PauseMenu, locationMusicOptionSelected)},
+        {"Paulownia Mall", -1, MENU_BIND(PauseMenu, locationMusicOptionSelected)},
+    };
+
+    etl::array<MenuOption, 3> menuMusicOptions = {
+        MenuOption{"Mistic", -1, MENU_BIND(PauseMenu, menuMusicOptionSelected)},
+        {"Tightrope", -1, MENU_BIND(PauseMenu, menuMusicOptionSelected)},
+        {"Aria of the Soul", -1, MENU_BIND(PauseMenu, menuMusicOptionSelected)},
+    };
+
+    etl::array<MenuOption, 3> otherMusicOptions = {
+        MenuOption{"After the Battle", -1, MENU_BIND(PauseMenu, otherMusicOptionSelected)},
+        {"Because I Will Protect You", -1, MENU_BIND(PauseMenu, otherMusicOptionSelected)},
+        {"Club Escapade Nouveau MetalMoth Remix", -1, MENU_BIND(PauseMenu, otherMusicOptionSelected)},
     };
 
     etl::array<MenuOption, 9> skillOptions = {
@@ -173,9 +224,18 @@ class PauseMenu : public UIMenu
     ViewState openSLinkMenu();
     ViewState openSystemMenu();
     ViewState openCharacterAnimMenu();
+    ViewState openViewMenu();
+    ViewState openCutsceneMenu();
+    ViewState openMusicMenu();
+    ViewState openBattleMusicMenu();
+    ViewState openLocationMusicMenu();
+    ViewState openMenuMusicMenu();
+    ViewState openOtherMusicMenu();
 
     // selection handlers
     ViewState debugOptionSelected();
+    ViewState viewOptionSelected();
+    ViewState cutsceneOptionSelected();
     ViewState skillOptionSelected();
     ViewState itemOptionSelected();
     ViewState equipOptionSelected();
@@ -184,6 +244,11 @@ class PauseMenu : public UIMenu
     ViewState sLinkOptionSelected();
     ViewState systemOptionSelected();
     ViewState characterAnimOptionSelected();
+    ViewState battleMusicOptionSelected();
+    ViewState locationMusicOptionSelected();
+    ViewState menuMusicOptionSelected();
+    ViewState otherMusicOptionSelected();
+    ViewState playMusicOptionSelected(AudioType type, int audioId);
 
     AnimationController* animationCtrl = AnimationController::getInstance();
 

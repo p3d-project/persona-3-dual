@@ -9,9 +9,30 @@ void DialogueComponent::Init()
 
 void DialogueComponent::Update(ae::q20_12_t)
 {
+    if (closing)
+    {
+        if (screen == nullptr || !screen->isAnimating())
+        {
+            closing = false;
+            isActive = false;
+        }
+        return;
+    }
+
     if (!isActive || current == nullptr)
     {
         isActive = false;
+        return;
+    }
+
+    if (opening)
+    {
+        if (screen != nullptr && screen->isAnimating())
+        {
+            return;
+        }
+        opening = false;
+        advanceTo(current);
         return;
     }
 
@@ -158,8 +179,17 @@ void DialogueComponent::configureDialogue(const DialogueConfig& config)
 
 void DialogueComponent::start(Dialogue* firstLine)
 {
-    // point to first line
-    advanceTo(firstLine);
+    current = firstLine;
+    optionCount = 0;
+    selectedOption = 0;
+    doRenderOptions = false;
+    text->clearScreen();
+    opening = true;
+    closing = false;
+    if (screen != nullptr)
+    {
+        screen->showAnimated();
+    }
 
     prevKeys = systemKeysHeld;
     isActive = true;
@@ -169,6 +199,14 @@ void DialogueComponent::start(Dialogue* firstLine)
 void DialogueComponent::end()
 {
     text->clearScreen();
+    if (screen != nullptr)
+    {
+        // Keep the component active until hideAnimated() finishes; Update()
+        // watches `closing` and clears isActive when !screen->isAnimating().
+        screen->hideAnimated();
+        closing = true;
+        return;
+    }
     isActive = false;
 }
 
