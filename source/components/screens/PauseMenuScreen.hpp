@@ -29,21 +29,47 @@ class PauseMenuScreen : public UIScreen
 
     // TODO: replace with ae dependency injection
     /**
-     * @brief Set the Info Panel Text object
+     * @brief Set the Yen Text object (info panel)
      *
      * @param yen The yen amount string
-     * @param persona The persona name string
-     * @param arcana The arcana name string
-     * @param level The level string
-     * @param color The text colour to render the panel in
+     * @param color The text colour to render the yen amount in
      *
      * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
      */
-    void setInfoPanelText(const std::string& yen,
-                          const std::string& persona,
-                          const std::string& arcana,
-                          const std::string& level,
-                          TextColor color);
+    void setYenText(const std::string& yen, TextColor color);
+
+    // TODO: replace with ae dependency injection
+    /**
+     * @brief Set the Persona Text object (info panel)
+     *
+     * @param persona The active persona name string
+     * @param color The text colour to render the persona name in
+     *
+     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
+     */
+    void setPersonaText(const std::string& persona, TextColor color);
+
+    // TODO: replace with ae dependency injection
+    /**
+     * @brief Set the Arcana Text object (info panel)
+     *
+     * @param arcana The active persona arcana string
+     * @param color The text colour to render the arcana in
+     *
+     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
+     */
+    void setArcanaText(const std::string& arcana, TextColor color);
+
+    // TODO: replace with ae dependency injection
+    /**
+     * @brief Set the Level Text object (info panel)
+     *
+     * @param level The active persona level string
+     * @param color The text colour to render the level in
+     *
+     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
+     */
+    void setLevelText(const std::string& level, TextColor color);
 
     // TODO: replace with ae dependency injection
     /**
@@ -106,10 +132,16 @@ class PauseMenuScreen : public UIScreen
 
     //Menu texts
     std::string yenText = "";
+    TextColor yenColor = TextColor::DarkestBlue;
+
     std::string personaText = "";
+    TextColor personaColor = TextColor::DarkestBlue;
+
     std::string arcanaText = "";
+    TextColor arcanaColor = TextColor::DarkestBlue;
+
     std::string levelText = "";
-    TextColor textColor = TextColor::DarkestBlue;
+    TextColor levelColor = TextColor::DarkestBlue;
 
     std::string descriptionText = "";
     TextColor descriptionColor = TextColor::White;

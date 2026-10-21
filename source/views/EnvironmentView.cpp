@@ -537,7 +537,10 @@ void EnvironmentView::setupPauseMenu()
     pauseMenuScreen->setTextComponent(textSub);
     pauseMenuScreen->setMenu(pauseMenuCmpt);
     pauseMenuCmpt->setVisibleOptions(pauseMenuScreen->getVisibleOptions());
-    pauseMenuScreen->setInfoPanelText("9,999,999 Yen", "Ara Mitama", "Chariot", "Level 99", TextColor::DarkestBlue);
+    pauseMenuScreen->setYenText("9,999,999 Yen", TextColor::DarkestBlue);
+    pauseMenuScreen->setPersonaText("Ara Mitama", TextColor::DarkestBlue);
+    pauseMenuScreen->setArcanaText("Chariot", TextColor::DarkestBlue);
+    pauseMenuScreen->setLevelText("Level 99", TextColor::DarkestBlue);
     pauseMenuScreen->setDescriptionText("View Social Link details", TextColor::White);
 }
 

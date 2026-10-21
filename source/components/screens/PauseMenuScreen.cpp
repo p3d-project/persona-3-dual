@@ -29,17 +29,28 @@ PauseMenuScreen* PauseMenuScreen::getInstance()
     return instance;
 }
 
-void PauseMenuScreen::setInfoPanelText(const std::string& yen,
-                                       const std::string& persona,
-                                       const std::string& arcana,
-                                       const std::string& level,
-                                       TextColor color)
+void PauseMenuScreen::setYenText(const std::string& yen, TextColor color)
 {
     yenText = yen;
+    yenColor = color;
+}
+
+void PauseMenuScreen::setPersonaText(const std::string& persona, TextColor color)
+{
     personaText = persona;
+    personaColor = color;
+}
+
+void PauseMenuScreen::setArcanaText(const std::string& arcana, TextColor color)
+{
     arcanaText = arcana;
+    arcanaColor = color;
+}
+
+void PauseMenuScreen::setLevelText(const std::string& level, TextColor color)
+{
     levelText = level;
-    textColor = color;
+    levelColor = color;
 }
 
 void PauseMenuScreen::setDescriptionText(const std::string& description, TextColor color)
@@ -80,16 +91,16 @@ void PauseMenuScreen::renderText()
     text->clearArea(138, 92, 82, 70);
 
     // yen
-    text->drawText(yenText, 138, 92, textColor);
+    text->drawText(yenText, 138, 92, yenColor);
 
     //  active persona name
-    text->drawText(personaText, 138, 117, textColor);
+    text->drawText(personaText, 138, 117, personaColor);
 
     // active persona arcana
-    text->drawText(arcanaText, 138, 136, textColor);
+    text->drawText(arcanaText, 138, 136, arcanaColor);
 
     // active persona level
-    text->drawText(levelText, 138, 155, textColor);
+    text->drawText(levelText, 138, 155, levelColor);
 
     renderOptions();
 }
