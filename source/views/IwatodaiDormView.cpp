@@ -1,8 +1,8 @@
 #include "IwatodaiDormView.hpp"
-#include "core/globals.hpp"
 #include "events/UIEvents.hpp"
 #include "types/CameraTypes.hpp"
 
+#include "data/audioDb.hpp"
 #include "data/environmentDb.hpp"
 #include "demo/demo_dialogue.hpp"
 #include "maps/iwatodai_dorm_floor_1.hpp"
@@ -24,23 +24,58 @@ void IwatodaiDormView::setupCamera()
 
 void IwatodaiDormView::setupMusic()
 {
-    musicCmpt->registerMusic(
-        (fatBasePath + "music/locations/iwatodaiDorm/iwatodai_dorm.qoa").c_str(), ae::q20_12_t{1.3}, ae::q20_12_t{-1});
+    musicCmpt->registerMusic(AudioType::LOCATION, LocationAudio::IWATODAI_DORM);
 }
-
 void IwatodaiDormView::setupMovement()
 {
-    movement->configureMovement(MovementConfig(IWATODAI_DORM_FLOOR_1_MAP_WIDTH,
-                                               IWATODAI_DORM_FLOOR_1_MAP_HEIGHT,
-                                               &iwatodai_dorm_floor_1_map[0][0],
-                                               tileSize,
-                                               dbEntry->worldOffsetX,
-                                               dbEntry->worldOffsetZ,
-                                               characterSize,
-                                               speed,
-                                               height,
-                                               characterTranslate,
-                                               characterFacingAngle));
+    //first flight, including its initial bend
+    static const StairSegment stairs[] = {{ae::q20_12_t{0},
+                                           ae::q20_12_t{-2.872},
+                                           ae::q20_12_t{-0.897},
+                                           ae::q20_12_t{-3.051},
+                                           ae::q20_12_t{0.24},
+                                           ae::q20_12_t{0},
+                                           ae::q20_12_t{0.157}},
+
+                                          {ae::q20_12_t{-0.897},
+                                           ae::q20_12_t{-3.051},
+                                           ae::q20_12_t{-1.526},
+                                           ae::q20_12_t{-3.051},
+                                           ae::q20_12_t{0.27},
+                                           ae::q20_12_t{0.157},
+                                           ae::q20_12_t{0.503}},
+
+                                          //second flight, after the landing
+                                          {ae::q20_12_t{-1.840},
+                                           ae::q20_12_t{-2.782},
+                                           ae::q20_12_t{-1.840},
+                                           ae::q20_12_t{-1.885},
+                                           ae::q20_12_t{0.28},
+                                           ae::q20_12_t{0.503},
+                                           ae::q20_12_t{1.041}}};
+    //landing between the two flights
+    static const HeightRegion landings[] = {
+
+        {ae::q20_12_t{-2.154}, ae::q20_12_t{-1.526}, ae::q20_12_t{-3.410}, ae::q20_12_t{-2.782}, ae::q20_12_t{0.503}}};
+    MovementConfig cfg(IWATODAI_DORM_FLOOR_1_MAP_WIDTH,
+                       IWATODAI_DORM_FLOOR_1_MAP_HEIGHT,
+                       &iwatodai_dorm_floor_1_map[0][0],
+                       tileSize,
+                       dbEntry->worldOffsetX,
+                       dbEntry->worldOffsetZ,
+                       characterSize,
+                       speed,
+                       height,
+                       characterTranslate,
+                       characterFacingAngle);
+
+    cfg.stairs = stairs;
+    cfg.stairCount = 3;
+
+    cfg.landings = landings;
+    cfg.landingCount = 1;
+
+    movement->configureMovement(cfg);
 }
 
 ViewState IwatodaiDormView::onTileCheck(TileType tile, u32 pressed)

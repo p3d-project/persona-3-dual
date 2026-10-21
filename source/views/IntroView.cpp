@@ -1,5 +1,6 @@
 #include "IntroView.hpp"
 #include "core/globals.hpp"
+#include "data/audioDb.hpp"
 #include "systems/UISystem.hpp"
 
 #include <maxmod9.h>
@@ -163,8 +164,7 @@ void IntroView::init()
     // point to music
     sfxCmpt->registerSFX(SFX::SFX_0);
     sfxCmpt->registerSFX(SFX::SFX_2);
-    musicCmpt->registerMusic(
-        (fatBasePath + "music/menus/title/tightrope.qoa").c_str(), ae::q20_12_t{17.962}, ae::q20_12_t{66.082});
+    musicCmpt->registerMusic(AudioType::MENU, MenuAudio::TIGHTROPE);
 
     // hide sub screen text and attribution text layer
     REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_SRC_BG0 | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;

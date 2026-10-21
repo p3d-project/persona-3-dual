@@ -124,6 +124,41 @@ ViewState PauseMenu::openCharacterAnimMenu()
     return changeMenu(characterAnimOptions);
 }
 
+ViewState PauseMenu::openViewMenu()
+{
+    return changeMenu(viewOptions);
+}
+
+ViewState PauseMenu::openCutsceneMenu()
+{
+    return changeMenu(cutsceneOptions);
+}
+
+ViewState PauseMenu::openMusicMenu()
+{
+    return changeMenu(musicOptions);
+}
+
+ViewState PauseMenu::openBattleMusicMenu()
+{
+    return changeMenu(battleMusicOptions);
+}
+
+ViewState PauseMenu::openLocationMusicMenu()
+{
+    return changeMenu(locationMusicOptions);
+}
+
+ViewState PauseMenu::openMenuMusicMenu()
+{
+    return changeMenu(menuMusicOptions);
+}
+
+ViewState PauseMenu::openOtherMusicMenu()
+{
+    return changeMenu(otherMusicOptions);
+}
+
 // selection handlers
 
 ViewState PauseMenu::skillOptionSelected()
@@ -161,45 +196,51 @@ ViewState PauseMenu::systemOptionSelected()
     return ViewState::KEEP_CURRENT;
 }
 
+ViewState PauseMenu::viewOptionSelected()
+{
+    switch (static_cast<ViewOption>(selectedOption))
+    {
+    case ViewOption::DISCLAIMER:
+        return ViewState::DISCLAIMER;
+    case ViewOption::INTRO:
+        return ViewState::INTRO;
+    case ViewOption::MAIN_MENU:
+        return ViewState::MAIN_MENU;
+    case ViewOption::IWATODAI_DORM:
+        return ViewState::IWATODAI_DORM;
+    case ViewOption::IWATODAI_STREETS:
+        return ViewState::IWATODAI_STREETS;
+    case ViewOption::STATION:
+        return ViewState::STATION;
+    case ViewOption::SIGN_CONTRACT:
+        return ViewState::SIGN_CONTRACT;
+    case ViewOption::PAULOWNIA_MALL:
+        return ViewState::PAULOWNIA_MALL;
+    default:
+        return ViewState::KEEP_CURRENT;
+    }
+}
+
+ViewState PauseMenu::cutsceneOptionSelected()
+{
+    switch (static_cast<CutsceneOption>(selectedOption))
+    {
+    case CutsceneOption::INTRO_VIDEO:
+        return ViewState::INTRO_VIDEO;
+    case CutsceneOption::CUTSCENE_1:
+        return ViewState::CUTSCENE_1;
+    case CutsceneOption::CUTSCENE_2:
+        return ViewState::CUTSCENE_2;
+    default:
+        return ViewState::KEEP_CURRENT;
+    }
+}
+
 ViewState PauseMenu::debugOptionSelected()
 {
     ViewState selectedView;
     switch (static_cast<DebugOption>(selectedOption))
     {
-    case DebugOption::DISCLAIMER_VIEW:
-        selectedView = ViewState::DISCLAIMER;
-        break;
-    case DebugOption::INTRO_VIEW:
-        selectedView = ViewState::INTRO;
-        break;
-    case DebugOption::MAIN_MENU_VIEW:
-        selectedView = ViewState::MAIN_MENU;
-        break;
-    case DebugOption::IWATODAI_DORM_VIEW:
-        selectedView = ViewState::IWATODAI_DORM;
-        break;
-    case DebugOption::IWATODAI_STREETS_VIEW:
-        selectedView = ViewState::IWATODAI_STREETS;
-        break;
-    case DebugOption::STATION_VIEW:
-        selectedView = ViewState::STATION;
-        break;
-    case DebugOption::SIGN_CONTRACT_VIEW:
-        selectedView = ViewState::SIGN_CONTRACT;
-        break;
-    case DebugOption::PAULOWNIA_MALL_VIEW:
-        selectedView = ViewState::PAULOWNIA_MALL;
-        break;
-    case DebugOption::INTRO_VIDEO:
-        selectedView = ViewState::INTRO_VIDEO;
-        break;
-    case DebugOption::CUTSCENE_1:
-        selectedView = ViewState::CUTSCENE_1;
-        break;
-    case DebugOption::CUTSCENE_2:
-        selectedView = ViewState::CUTSCENE_2;
-        break;
-
     case DebugOption::TOGGLE_BILLBOARDS:
         Globals::enableBillboards = !Globals::enableBillboards;
         selectedView = ViewState::KEEP_CURRENT;
@@ -225,6 +266,77 @@ ViewState PauseMenu::debugOptionSelected()
         selectedView = ViewState::KEEP_CURRENT;
     }
     return selectedView;
+}
+
+ViewState PauseMenu::playMusicOptionSelected(AudioType type, int audioId)
+{
+    AudioManager& audio = AudioManager::GetInstance();
+    AudioDBEntry entry = getAudioDBEntry(type, audioId);
+    if (entry.type != AudioType::NONE)
+    {
+        audio.registerAudio(fatBasePath + "music/" + entry.filename + ".qoa", entry.loopStartTime, entry.loopEndTime);
+        audio.playAudio();
+    }
+    return ViewState::KEEP_CURRENT;
+}
+
+ViewState PauseMenu::battleMusicOptionSelected()
+{
+    switch (static_cast<BattleAudio>(selectedOption))
+    {
+    case BattleAudio::MASS_DESTRUCTION:
+        return playMusicOptionSelected(AudioType::BATTLE, static_cast<int>(BattleAudio::MASS_DESTRUCTION));
+    default:
+        return ViewState::KEEP_CURRENT;
+    }
+}
+
+ViewState PauseMenu::locationMusicOptionSelected()
+{
+    switch (static_cast<LocationAudio>(selectedOption))
+    {
+    case LocationAudio::IWATODAI_DORM:
+        return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::IWATODAI_DORM));
+    case LocationAudio::SUMMER_BOUND:
+        return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::SUMMER_BOUND));
+    case LocationAudio::COLOR_YOUR_NIGHT:
+        return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::COLOR_YOUR_NIGHT));
+    case LocationAudio::PAULOWNIA_MALL:
+        return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::PAULOWNIA_MALL));
+    default:
+        return ViewState::KEEP_CURRENT;
+    }
+}
+
+ViewState PauseMenu::menuMusicOptionSelected()
+{
+    switch (static_cast<MenuAudio>(selectedOption))
+    {
+    case MenuAudio::MISTIC:
+        return playMusicOptionSelected(AudioType::MENU, static_cast<int>(MenuAudio::MISTIC));
+    case MenuAudio::TIGHTROPE:
+        return playMusicOptionSelected(AudioType::MENU, static_cast<int>(MenuAudio::TIGHTROPE));
+    case MenuAudio::ARIA_OF_THE_SOUL:
+        return playMusicOptionSelected(AudioType::MENU, static_cast<int>(MenuAudio::ARIA_OF_THE_SOUL));
+    default:
+        return ViewState::KEEP_CURRENT;
+    }
+}
+
+ViewState PauseMenu::otherMusicOptionSelected()
+{
+    switch (static_cast<OtherAudio>(selectedOption))
+    {
+    case OtherAudio::AFTER_THE_BATTLE:
+        return playMusicOptionSelected(AudioType::OTHER, static_cast<int>(OtherAudio::AFTER_THE_BATTLE));
+    case OtherAudio::BECAUSE_I_WILL_PROTECT_YOU:
+        return playMusicOptionSelected(AudioType::OTHER, static_cast<int>(OtherAudio::BECAUSE_I_WILL_PROTECT_YOU));
+    case OtherAudio::CLUB_ESCAPADE_NOUVEAU_METALMOTH_REMIX:
+        return playMusicOptionSelected(AudioType::OTHER,
+                                       static_cast<int>(OtherAudio::CLUB_ESCAPADE_NOUVEAU_METALMOTH_REMIX));
+    default:
+        return ViewState::KEEP_CURRENT;
+    }
 }
 
 ViewState PauseMenu::characterAnimOptionSelected()

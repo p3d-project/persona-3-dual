@@ -1,8 +1,8 @@
 #include "BattleSystem.hpp"
 #include "battleActions/skills/BattleCalcs.hpp"
+#include "data/audioDb.hpp"
 #include "managers/MathManager.hpp"
 
-#include "core/globals.hpp"
 #include <cstdlib>
 #include <ctime>
 
@@ -11,10 +11,9 @@ void BattleSystem::on_receive(const Event::ExecuteBattle& msg)
     isActive = true;
     battleMenuCmpt = BattleMenu::getInstance();
 
-    std::string path = fatBasePath + "music/battle/" + "mass_destruction.qoa";
     if (musicCmpt != nullptr)
     {
-        musicCmpt->registerMusic(path, ae::q20_12_t{0}, ae::q20_12_t{-1});
+        musicCmpt->registerMusic(AudioType::BATTLE, BattleAudio::MASS_DESTRUCTION);
     }
 
     this->player = new Player(msg.player);

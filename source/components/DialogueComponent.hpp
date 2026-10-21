@@ -88,6 +88,8 @@ class DialogueComponent : public ae::Component
 
     /// track the currently loaded bust
     bool renderBust = true;
+    bool opening = false;
+    bool closing = false;
 
     u32 prevKeys = 0;
 
