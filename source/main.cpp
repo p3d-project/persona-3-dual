@@ -61,6 +61,7 @@ void SwitchView(BaseView* newView, const char* viewName = nullptr)
     // cleanup any existing view
     if (currentView != nullptr)
     {
+        setBrightness(3, -16);
         currentView->cleanup();
     }
 
@@ -69,6 +70,7 @@ void SwitchView(BaseView* newView, const char* viewName = nullptr)
     if (currentView != nullptr)
     {
         currentView->init();
+        currentView->startFadeIn();
     }
 }
 
@@ -181,6 +183,7 @@ int main(int argc, char* argv[])
         // check state of currentView
         if (currentView != nullptr)
         {
+            currentView->updateFadeIn();
             ViewState nextState;
             if (nextView != ViewState::DEFAULT)
             {

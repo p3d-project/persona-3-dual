@@ -24,6 +24,13 @@ void UISystem::Update(ae::q20_12_t dt)
         return;
     }
 
+    bool selectionWasMoving = activeMenu->selectionOffset() != 0;
+    activeMenu->updateAnimation();
+    if (selectionWasMoving || activeMenu->selectionOffset() != 0)
+    {
+        renderUIText = true;
+    }
+
     // run the hook
     ViewState updateHookState = activeMenu->updateHook();
     if (updateHookState != ViewState::DEFAULT)
@@ -40,6 +47,7 @@ void UISystem::Update(ae::q20_12_t dt)
             sfxCmpt->playSFX(SFX::SFX_1, 255, 128);
         }
         activeMenu->selectedOption = (activeMenu->selectedOption + 1) % activeMenu->options.size();
+        activeMenu->animateSelection();
         renderUIText = true;
     }
     else if (systemKeysDown & KEY_UP)
@@ -50,6 +58,7 @@ void UISystem::Update(ae::q20_12_t dt)
         }
         activeMenu->selectedOption =
             (activeMenu->selectedOption + activeMenu->options.size() - 1) % activeMenu->options.size();
+        activeMenu->animateSelection();
         renderUIText = true;
     }
 
@@ -123,12 +132,17 @@ void UISystem::Update(ae::q20_12_t dt)
     if (renderUIText)
     {
         renderUIText = false;
+        // Clear only the option list region so selection slide animation does not ghost.
+        const int optionsTop = textSize;
+        const int optionsHeight = textSize * activeMenu->visibleOptions + text->getLineSpacing();
+        text->clearArea(0, optionsTop, 256, optionsHeight);
         for (int i = 0; i < activeMenu->visibleOptions && activeMenu->startIndex + i < int(activeMenu->options.size());
              i++)
         {
             int option = activeMenu->startIndex + i;
             TextColor color = option == activeMenu->selectedOption ? TextColor::Blue : TextColor::White;
-            text->drawText(activeMenu->options[option].name, 10, textSize + textSize * i, color);
+            int x = option == activeMenu->selectedOption ? 10 + activeMenu->selectionOffset() : 10;
+            text->drawText(activeMenu->options[option].name, x, textSize + textSize * i, color);
         }
     }
 

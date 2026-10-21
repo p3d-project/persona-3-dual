@@ -257,6 +257,11 @@ ViewState EnvironmentView::update()
     bgUpdate();
     oamUpdate(&oamSub);
 
+    if (dialogueScreen != nullptr)
+    {
+        dialogueScreen->updateAnimation();
+    }
+
     switch (phase)
     {
     case ViewPhase::BATTLE:
