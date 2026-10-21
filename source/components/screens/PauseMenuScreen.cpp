@@ -182,11 +182,6 @@ void PauseMenuScreen::renderSprites()
 
 int PauseMenuScreen::onTouch(touchPosition* touch)
 {
-    if (touch->px >= 193 && touch->px <= 250 && touch->py >= 166 && touch->py <= 184)
-    {
-        return 1;
-    }
-
     return -1;
 }
 
