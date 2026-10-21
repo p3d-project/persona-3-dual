@@ -11,7 +11,7 @@ void TextComponent::Update(ae::q20_12_t)
         {
             if (appearingText->counter <= 0)
             {
-                ts.drawNextFromText(appearingText);
+                ts.drawNextFromText(appearingText.get());
                 appearingText->cursorPos++;
                 appearingText->counter = ts.APPEAR_DELAY; // Reset the counter for the next character
             }
@@ -20,8 +20,7 @@ void TextComponent::Update(ae::q20_12_t)
         }
         else //this text has finished appearing, so we can clear the storage
         {
-            delete appearingText;
-            appearingText = nullptr;
+            appearingText.reset();
         }
     }
 }
@@ -90,21 +89,17 @@ void TextComponent::appearText(const std::string& text, int x, int y, int color)
 
 void TextComponent::appearTextSkip()
 {
-    ts.appearTextSkip(appearingText);
+    ts.appearTextSkip(appearingText.get());
 }
 
 void TextComponent::appearTextStop()
 {
-    if (appearingText != nullptr)
-    {
-        delete appearingText;
-        appearingText = nullptr;
-    }
+    appearingText.reset();
 }
 
 bool TextComponent::appearTextDone()
 {
-    return ts.appearTextDone(appearingText);
+    return ts.appearTextDone(appearingText.get());
 }
 
 void TextComponent::drawGlyph(const Glyph& glyph, int x, int y, int color, bool bold, bool italic, bool underline)
