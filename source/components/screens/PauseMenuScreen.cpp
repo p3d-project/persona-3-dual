@@ -85,7 +85,7 @@ void PauseMenuScreen::unloadBackground()
 void PauseMenuScreen::renderText()
 {
     // description (top bar)
-    text->clearArea(82, 5, 166, 14);
+    text->clearArea(72, 5, 176, 14);
     text->drawText(descriptionText, 72, 8, descriptionColor);
 
     text->clearArea(138, 92, 82, 70);
