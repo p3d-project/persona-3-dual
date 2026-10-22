@@ -50,14 +50,14 @@ class PauseMenu : public UIMenu
         CameraMode::Free, CameraMode::Static, CameraMode::CCTV, CameraMode::Follow};
 
     etl::array<MenuOption, 8> menuOptions = {
-        MenuOption{"Debug", -1, MENU_BIND(PauseMenu, openDebugMenu)},
-        {"Skill", -1, MENU_BIND(PauseMenu, openSkillMenu)},
-        {"Item", -1, MENU_BIND(PauseMenu, openItemMenu)},
-        {"Persona", -1, MENU_BIND(PauseMenu, openPersonaMenu)},
-        {"Equip", -1, MENU_BIND(PauseMenu, openEquipMenu)},
-        {"Status", -1, MENU_BIND(PauseMenu, openStatusMenu)},
-        {"S.Link", -1, MENU_BIND(PauseMenu, openSLinkMenu)},
-        {"System", -1, MENU_BIND(PauseMenu, openSystemMenu)},
+        MenuOption{"DEBUG", -1, MENU_BIND(PauseMenu, openDebugMenu)},
+        {"SKILL", -1, MENU_BIND(PauseMenu, openSkillMenu)},
+        {"ITEM", -1, MENU_BIND(PauseMenu, openItemMenu)},
+        {"PERSONA", -1, MENU_BIND(PauseMenu, openPersonaMenu)},
+        {"EQUIP", -1, MENU_BIND(PauseMenu, openEquipMenu)},
+        {"STATUS", -1, MENU_BIND(PauseMenu, openStatusMenu)},
+        {"S.LINK", -1, MENU_BIND(PauseMenu, openSLinkMenu)},
+        {"SYSTEM", -1, MENU_BIND(PauseMenu, openSystemMenu)},
     };
 
     etl::array<MenuOption, 7> debugOptions = {

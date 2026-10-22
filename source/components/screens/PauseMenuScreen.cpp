@@ -88,19 +88,19 @@ void PauseMenuScreen::renderText()
     text->clearArea(72, 5, 176, 14);
     text->drawText(descriptionText, 72, 8, descriptionColor);
 
-    text->clearArea(138, 92, 82, 70);
+    text->clearArea(138, 89, 82, 73);
 
     // yen
-    text->drawText(yenText, 138, 92, yenColor);
+    text->drawText(yenText, 138, 89, yenColor);
 
     //  active persona name
-    text->drawText(personaText, 138, 117, personaColor);
+    text->drawText(personaText, 138, 113, personaColor);
 
     // active persona arcana
-    text->drawText(arcanaText, 138, 136, arcanaColor);
+    text->drawText(arcanaText, 138, 132, arcanaColor);
 
     // active persona level
-    text->drawText(levelText, 138, 155, levelColor);
+    text->drawText(levelText, 138, 151, levelColor);
 
     renderOptions();
 }
@@ -115,7 +115,7 @@ void PauseMenuScreen::renderOptions()
     {
         int option = startIndex + i;
         TextColor color = option == selectedOption ? selectedOptionColor : optionColor;
-        text->drawText(options[option].name, optionsStartX, optionsStartY + optionsRowHeight * i, color);
+        optionsText->drawText(options[option].name, optionsStartX, optionsStartY + optionsRowHeight * i, color);
     }
 
     int y = optionsStartY + optionsRowHeight * (selectedOption - startIndex) + selectedBarYOffset;
@@ -188,6 +188,11 @@ int PauseMenuScreen::onTouch(touchPosition* touch)
 void PauseMenuScreen::setTextComponent(TextComponent* text)
 {
     this->text = text;
+}
+
+void PauseMenuScreen::setOptionsTextComponent(TextComponent* optionsText)
+{
+    this->optionsText = optionsText;
 }
 
 void PauseMenuScreen::setMenu(const UIMenu* menu)

@@ -165,6 +165,7 @@ class EnvironmentView : public BaseView
     TextComponent* text = nullptr;
     TextComponent* textSub = nullptr;
     TextComponent* textSubAlt = nullptr;
+    TextComponent* textSubOptions = nullptr;
 
     AnimationController* animationCtrl = AnimationController::getInstance();
     MusicComponent* musicCmpt = nullptr;
@@ -193,6 +194,8 @@ class EnvironmentView : public BaseView
     uint16_t* textVideoBufferSub = nullptr;
     std::string fontName = "cosmetica";
     uint8_t fontSize = 12;
+    std::string optionsFontName = "noto-sans-jp-extra-bold";
+    uint8_t optionsFontSize = 19;
     // set in init()
     uint8_t lineSpacing = 0;
 

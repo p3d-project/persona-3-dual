@@ -113,6 +113,7 @@ void EnvironmentView::init()
         text = engine.CreateComponent<TextComponent>();
         textSub = engine.CreateComponent<TextComponent>();
         textSubAlt = engine.CreateComponent<TextComponent>();
+        textSubOptions = engine.CreateComponent<TextComponent>();
         musicCmpt = engine.CreateComponent<MusicComponent>();
         sfxCmpt = engine.CreateComponent<SFXComponent>();
 
@@ -120,6 +121,7 @@ void EnvironmentView::init()
         environment->AddComponent(text);
         environment->AddComponent(textSub);
         environment->AddComponent(textSubAlt);
+        environment->AddComponent(textSubOptions);
         environment->AddComponent(musicCmpt);
         environment->AddComponent(sfxCmpt);
 
@@ -503,6 +505,7 @@ void EnvironmentView::cleanup()
         text = nullptr;
         textSub = nullptr;
         textSubAlt = nullptr;
+        textSubOptions = nullptr;
         musicCmpt = nullptr;
     }
 
@@ -539,7 +542,10 @@ void EnvironmentView::setupPauseMenu()
     pauseMenuCmpt = PauseMenu::getInstance();
     pauseMenuScreen = PauseMenuScreen::getInstance();
 
+    textSubOptions->configureText(TextConfig(textVideoBufferSub, &optionsFontName, optionsFontSize), false);
+
     pauseMenuScreen->setTextComponent(textSub);
+    pauseMenuScreen->setOptionsTextComponent(textSubOptions);
     pauseMenuScreen->setMenu(pauseMenuCmpt);
     pauseMenuCmpt->setVisibleOptions(pauseMenuScreen->getVisibleOptions());
     pauseMenuScreen->setYenText("9,999,999 Yen", TextColor::DarkestBlue);

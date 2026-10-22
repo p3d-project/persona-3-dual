@@ -29,6 +29,14 @@ class PauseMenuScreen : public UIScreen
 
     // TODO: replace with ae dependency injection
     /**
+     * @brief Set the Text Component used to draw the menu options
+     * @param optionsText The TextComponent pointer to set
+     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
+     */
+    void setOptionsTextComponent(TextComponent* optionsText);
+
+    // TODO: replace with ae dependency injection
+    /**
      * @brief Set the Yen Text object (info panel)
      *
      * @param yen The yen amount string
@@ -120,12 +128,13 @@ class PauseMenuScreen : public UIScreen
     ae::Entity* pauseMenu = nullptr;
     GraphicsComponent* graphics = nullptr;
     TextComponent* text = nullptr;
+    TextComponent* optionsText = nullptr;
     const UIMenu* menu = nullptr;
 
     // menu options
     const int visibleOptions = 7;
     const int optionsStartX = 26;
-    const int optionsStartY = 60;
+    const int optionsStartY = 52;
     const int optionsRowHeight = 19;
     TextColor optionColor = TextColor::RichBlue;
     TextColor selectedOptionColor = TextColor::DarkestBlue;
@@ -168,7 +177,7 @@ class PauseMenuScreen : public UIScreen
     GraphicAsset selectedOptionGraphics[4] = {};
 
     const int selectedBarPieceWidth = 32;
-    const int selectedBarYOffset = -2;
+    const int selectedBarYOffset = 7;
 
     SpriteRenderState srs1 = {selectedOptionSprites[0], 0, 0, 1, -1, false, false, false, false};
     SpritePayload sp1 = {srs1,
