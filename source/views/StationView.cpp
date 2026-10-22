@@ -64,14 +64,10 @@ void StationView::setupUI()
 {
     textSub->configureText(TextConfig(textVideoBufferSub, &fontName, fontSize));
 
-    pauseMenuCmpt = PauseMenu::getInstance();
+    setupPauseMenu();
+    setupMenuHUD("Station");
 
-    menuHUDScreen = MenuHUDScreen::getInstance();
-
-    menuHUDScreen->setTextComponent(textSub);
-    menuHUDScreen->setTextContent("Station", TextColor::White);
-
-    std::array<UIScreen*, 5> screens = {menuHUDScreen};
+    std::array<UIScreen*, 5> screens = {menuHUDScreen, pauseMenuScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt};
 
     ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, screens});

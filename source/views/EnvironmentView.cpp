@@ -113,6 +113,7 @@ void EnvironmentView::init()
         text = engine.CreateComponent<TextComponent>();
         textSub = engine.CreateComponent<TextComponent>();
         textSubAlt = engine.CreateComponent<TextComponent>();
+        textSubOptions = engine.CreateComponent<TextComponent>();
         musicCmpt = engine.CreateComponent<MusicComponent>();
         sfxCmpt = engine.CreateComponent<SFXComponent>();
 
@@ -120,6 +121,7 @@ void EnvironmentView::init()
         environment->AddComponent(text);
         environment->AddComponent(textSub);
         environment->AddComponent(textSubAlt);
+        environment->AddComponent(textSubOptions);
         environment->AddComponent(musicCmpt);
         environment->AddComponent(sfxCmpt);
 
@@ -258,6 +260,11 @@ ViewState EnvironmentView::update()
         dialogueScreen->updateAnimation();
     }
 
+    if (pauseMenuScreen != nullptr)
+    {
+        pauseMenuScreen->updateAnimation();
+    }
+
     switch (phase)
     {
     case ViewPhase::BATTLE:
@@ -304,8 +311,15 @@ ViewState EnvironmentView::update()
 
             prevPauseState = true;
 
-            ae::BroadcastEvent(Event::HideAllScreens{});
+            // ShowMenu clears textSub, so show the screen after it to keep the text displayed
             ae::BroadcastEvent(Event::ShowMenu{pauseMenuCmpt});
+            ae::BroadcastEvent(Event::ShowScreen{pauseMenuScreen});
+        }
+
+        // menu clears textSub when navigating,so a redraw is required
+        if (systemKeysDown & (KEY_A | KEY_B | KEY_UP | KEY_DOWN))
+        {
+            pauseMenuScreen->renderText();
         }
 
         if ((systemKeysDown & KEY_START) || pauseMenuCmpt->isClosed)
@@ -496,6 +510,7 @@ void EnvironmentView::cleanup()
         text = nullptr;
         textSub = nullptr;
         textSubAlt = nullptr;
+        textSubOptions = nullptr;
         musicCmpt = nullptr;
     }
 
@@ -511,6 +526,7 @@ void EnvironmentView::cleanup()
 
     dialogueScreen = nullptr;
     menuHUDScreen = nullptr;
+    pauseMenuScreen = nullptr;
     battleMenuCmpt = nullptr;
     pauseMenuCmpt = nullptr;
 
@@ -524,4 +540,30 @@ void EnvironmentView::cleanup()
     env.cleanup();
 
     BaseView::cleanup();
+}
+
+void EnvironmentView::setupPauseMenu()
+{
+    pauseMenuCmpt = PauseMenu::getInstance();
+    pauseMenuScreen = PauseMenuScreen::getInstance();
+
+    textSubOptions->configureText(TextConfig(textVideoBufferSub, &optionsFontName, optionsFontSize), false);
+
+    pauseMenuScreen->setTextComponent(textSub);
+    pauseMenuScreen->setOptionsTextComponent(textSubOptions);
+    pauseMenuScreen->setMenu(pauseMenuCmpt);
+    pauseMenuCmpt->setVisibleOptions(pauseMenuScreen->getVisibleOptions());
+    pauseMenuScreen->setYenText("9,999,999 Yen", TextColor::DarkestBlue);
+    pauseMenuScreen->setPersonaText("Ara Mitama", TextColor::DarkestBlue);
+    pauseMenuScreen->setArcanaText("Chariot", TextColor::DarkestBlue);
+    pauseMenuScreen->setLevelText("Level 99", TextColor::DarkestBlue);
+    pauseMenuScreen->setDescriptionText("View Social Link details", TextColor::White);
+}
+
+void EnvironmentView::setupMenuHUD(const std::string& location)
+{
+    menuHUDScreen = MenuHUDScreen::getInstance();
+
+    menuHUDScreen->setTextComponent(textSub);
+    menuHUDScreen->setTextContent(location, TextColor::White);
 }

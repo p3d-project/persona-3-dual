@@ -33,7 +33,6 @@ PauseMenu* PauseMenu::getInstance()
 
 void PauseMenu::resetHook()
 {
-    pauseMessage = "Pause";
     options = menuOptions;
     isClosed = false;
 }
