@@ -7,7 +7,7 @@
  */
 
 #pragma once
-#include "core/error.hpp"
+#include "core/logger.hpp"
 #include <aegis/manager.hpp>
 #include <cstdlib>
 #include <nds.h>

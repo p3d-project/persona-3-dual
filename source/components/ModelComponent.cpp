@@ -1,5 +1,5 @@
 #include "ModelComponent.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 
 void ModelComponent::Update(ae::q20_12_t)
 {

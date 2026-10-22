@@ -1,5 +1,5 @@
 #include "UIMenu.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 
 #include "managers/MathManager.hpp"
 #include "uiAnimation/UIEase.hpp"

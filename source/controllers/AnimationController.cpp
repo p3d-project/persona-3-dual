@@ -1,5 +1,5 @@
 #include "controllers/AnimationController.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 #include <stdio.h>
 #include <string.h>
 

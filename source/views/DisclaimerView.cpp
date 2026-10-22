@@ -1,6 +1,6 @@
 #include "DisclaimerView.hpp"
-#include "core/error.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include <nds.h>
 
 void DisclaimerView::init()

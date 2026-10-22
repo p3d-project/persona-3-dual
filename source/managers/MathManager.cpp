@@ -1,5 +1,5 @@
 #include "MathManager.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 
 ae::q20_12_t MathManager::div(ae::q20_12_t num, ae::q20_12_t den)
 {

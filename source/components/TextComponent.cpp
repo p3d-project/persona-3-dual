@@ -1,5 +1,5 @@
 #include "TextComponent.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 #include <aegis/ndsTypes.hpp>
 #include <aegis/types.hpp>
 #include <algorithm>

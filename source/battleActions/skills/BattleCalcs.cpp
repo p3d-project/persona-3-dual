@@ -1,5 +1,5 @@
 #include "BattleCalcs.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 #include <aegis/ndsTypes.hpp>
 #include <fpm/math.hpp>
 

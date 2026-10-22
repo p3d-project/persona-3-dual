@@ -1,6 +1,6 @@
 #include "GraphicsComponent.hpp"
-#include "core/error.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "data/spriteDb.hpp"
 
 void GraphicsComponent::Destroy()

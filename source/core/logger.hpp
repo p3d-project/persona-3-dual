@@ -1,5 +1,5 @@
 /**
- * @file error.hpp
+ * @file logger.hpp
  * @brief Util to handle error logging
  * @author Taha Rashid (TheBossT910 / thebosst)
  */

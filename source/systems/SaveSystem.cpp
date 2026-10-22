@@ -1,6 +1,6 @@
 #include "SaveSystem.hpp"
-#include "core/error.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 
 void SaveSystem::on_receive(const Event::ReadSave)
 {

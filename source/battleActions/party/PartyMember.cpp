@@ -1,6 +1,6 @@
 #include "PartyMember.hpp"
 #include "../skills/BattleCalcs.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 #include <fpm/math.hpp>
 
 PartyMember::PartyMember(const CharacterProfile& iCharacterProfile) : characterProfile(iCharacterProfile)

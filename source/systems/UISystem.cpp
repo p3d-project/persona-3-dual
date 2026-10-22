@@ -4,8 +4,8 @@
 #include "components/menus/PauseMenu.hpp"
 #include "components/screens/DialogueScreen.hpp"
 #include "components/screens/MenuHUDScreen.hpp"
-#include "core/error.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "events/GenericEvents.hpp"
 #include <aegis/ndsTypes.hpp>
 #include <aegis/types.hpp>

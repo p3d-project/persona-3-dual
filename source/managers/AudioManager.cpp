@@ -1,7 +1,7 @@
 #define QOA_IMPLEMENTATION
 #include "AudioManager.hpp"
-#include "core/error.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 
 #include <nds.h>
 #include <p3d-qoa>

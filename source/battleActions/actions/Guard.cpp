@@ -1,5 +1,5 @@
 #include "Guard.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 
 TurnResult Guard::resolve(PartyMember* user, BattleParticipant* /*target*/, Skill* /*skill*/)
 {

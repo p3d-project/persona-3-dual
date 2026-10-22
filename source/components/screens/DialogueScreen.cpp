@@ -1,6 +1,6 @@
 #include "DialogueScreen.hpp"
-#include "core/error.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "managers/MathManager.hpp"
 #include "uiAnimation/UIEase.hpp"
 

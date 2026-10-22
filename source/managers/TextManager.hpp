@@ -93,13 +93,4 @@ class TextManager : public ae::Manager, public ae::Singleton<TextManager>
      * @note This function assumes that the line takes the form "key=value ".
      */
     int extractIntValue(const std::string& line, const std::string& key);
-
-    /**
-     * @brief Halts the program and displays an error message.
-     *
-     * @param errorMessage The error message to be displayed.
-     * @note This function will enter an infinite loop after displaying the error message, effectively halting the program.
-     * It is intended for use in critical error situations where continuing execution could lead to undefined behavior or further errors.
-     */
-    void haltOnError(const std::string& errorMessage);
 };

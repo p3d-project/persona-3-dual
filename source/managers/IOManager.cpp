@@ -1,5 +1,5 @@
 #include "IOManager.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 
 extern std::string fatBasePath;
 void IOManager::Init()

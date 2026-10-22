@@ -1,5 +1,5 @@
 #include "RenderManager.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 #include <nds.h>
 #include <string>
 

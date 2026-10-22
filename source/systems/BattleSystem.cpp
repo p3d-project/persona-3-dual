@@ -1,6 +1,6 @@
 #include "BattleSystem.hpp"
 #include "battleActions/skills/BattleCalcs.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 #include "data/audioDb.hpp"
 #include "managers/MathManager.hpp"
 

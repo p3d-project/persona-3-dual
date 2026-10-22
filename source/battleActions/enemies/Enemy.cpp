@@ -1,7 +1,7 @@
 #include "Enemy.hpp"
 #include "../party/PartyMember.hpp"
 #include "../skills/BattleCalcs.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 #include <stdlib.h>
 
 Enemy::Enemy(const EnemyProfile& iEnemyProfile) : enemyProfile(iEnemyProfile)

@@ -1,6 +1,6 @@
 #include "VideoController.hpp"
-#include "core/error.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "managers/AudioManager.hpp"
 #include <malloc.h>
 #include <maxmod9.h>

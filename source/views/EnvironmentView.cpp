@@ -1,6 +1,6 @@
 #include "EnvironmentView.hpp"
-#include "core/error.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "models/makoto.hpp"
 #include "systems/BattleSystem.hpp"
 

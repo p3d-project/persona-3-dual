@@ -1,5 +1,5 @@
 #include "TextSystem.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 
 #include <algorithm>
 

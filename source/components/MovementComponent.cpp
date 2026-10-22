@@ -1,6 +1,6 @@
 #include "MovementComponent.hpp"
-#include "core/error.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 
 // TODO: remove hardcoded model references
 #include "models/makoto.hpp"

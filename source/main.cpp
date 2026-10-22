@@ -1,7 +1,7 @@
 #include <memory>
 #include <string>
 
-#include "core/error.hpp"
+#include "core/logger.hpp"
 #include <fat.h>
 #include <maxmod9.h>
 #include <nds.h>
@@ -101,10 +101,16 @@ int main(int argc, char* argv[])
     // initialize DLDI/FAT
     if (!fatInitDefault())
     {
-        logMessage(LogSeverity::FATAL, "FAT initialization failed!\nPlease ensure the SD card is inserted.");
+        // manual error message, since logger filepath has not been fetched yet
+        consoleDemoInit();
+        std::fprintf(stderr,
+                     "FAT initialization failed!\nPlease ensure the data folder or sdcard.img is accessible depending "
+                     "on your platform.");
+        while (1)
+        {
+            swiWaitForVBlank();
+        }
     }
-    clearLog();
-    logMessage(LogSeverity::DEBUG, "FAT filesystem initialized successfully");
 
     // dynamically resolve runtime path using argv[0]
     if (argc > 0 && argv[0] != nullptr)
@@ -117,6 +123,8 @@ int main(int argc, char* argv[])
             fatBasePath = execPath.substr(0, lastSlash + 1) + "data/";
         }
     }
+
+    clearLog();
 
     // setup db's. DO NOT CHANGE order
     WeaponDb::Initialize();

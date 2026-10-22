@@ -1,6 +1,6 @@
 #include "BattleMenu.hpp"
-#include "core/error.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "events/UIEvents.hpp"
 
 BattleMenu* BattleMenu::instance = nullptr;

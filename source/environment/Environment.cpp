@@ -1,6 +1,6 @@
 #include "Environment.hpp"
-#include "core/error.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include <math.h>
 #include <nds.h>
 #include <stdio.h>

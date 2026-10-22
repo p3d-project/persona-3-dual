@@ -1,6 +1,6 @@
 #include "AttackAction.hpp"
 #include "battleActions/skills/BattleCalcs.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 #include <stdlib.h>
 
 //ignore skill here

@@ -1,6 +1,6 @@
 #include "IntroView.hpp"
-#include "core/error.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "data/audioDb.hpp"
 #include "systems/UISystem.hpp"
 

@@ -1,6 +1,6 @@
 #include "PersonaAction.hpp"
 #include "battleActions/skills/BattleCalcs.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 #include <stdlib.h>
 
 TurnResult PersonaAction::resolve(PartyMember* user, BattleParticipant* target, Skill* skill)

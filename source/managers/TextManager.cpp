@@ -1,5 +1,5 @@
 #include "TextManager.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 #include <sstream>
 
 // Helper macro to convert 8 bit RGB values to 5 bit RGB values for the Nintendo DS
@@ -34,7 +34,7 @@ Font* TextManager::loadFont(std::string* name, int size)
 {
     if (name == nullptr)
     {
-        haltOnError("name cannot be nullptr");
+        logMessage(LogSeverity::FATAL, "name cannot be nullptr");
     }
 
     Font* font = new Font();
@@ -44,13 +44,13 @@ Font* TextManager::loadFont(std::string* name, int size)
     font->bitmap = loadFontBitmap(&fontBitmapPath);
     if (!font->bitmap)
     {
-        haltOnError("Failed to load font bitmap from \n" + fullPath + ".img.bin");
+        logMessage(LogSeverity::FATAL, "Failed to load font bitmap from \n" + fullPath + ".img.bin");
     }
 
     std::string fontMetadataPath = fullPath + ".fnt";
     if (!loadFontMetadata(&fontMetadataPath, font))
     {
-        haltOnError("Failed to load font metadata from \n" + fullPath + ".fnt");
+        logMessage(LogSeverity::FATAL, "Failed to load font metadata from \n" + fullPath + ".fnt");
     }
 
     std::string fontBitmapBoldPath = fullPath + "-bold.img.bin";
@@ -92,7 +92,7 @@ bool TextManager::loadPalette(std::string* path, bool sub)
 {
     if (path == nullptr)
     {
-        haltOnError("path cannot be nullptr");
+        logMessage(LogSeverity::FATAL, "path cannot be nullptr");
     }
 
     FileBuffer buffer = io.openFileBuffer(*path);
@@ -125,7 +125,7 @@ std::uint8_t* TextManager::loadFontBitmap(std::string* path)
 {
     if (path == nullptr)
     {
-        haltOnError("path cannot be nullptr");
+        logMessage(LogSeverity::FATAL, "path cannot be nullptr");
     }
 
     FileBuffer buffer = io.openFileBuffer(*path);
@@ -142,7 +142,7 @@ bool TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBi
 {
     if (path == nullptr)
     {
-        haltOnError("path cannot be nullptr");
+        logMessage(LogSeverity::FATAL, "path cannot be nullptr");
     }
 
     if (font == nullptr)
@@ -237,9 +237,4 @@ int TextManager::extractIntValue(const std::string& line, const std::string& key
     }
 
     return static_cast<int>(val);
-}
-
-void TextManager::haltOnError(const std::string& errorMessage)
-{
-    logMessage(LogSeverity::FATAL, errorMessage);
 }
