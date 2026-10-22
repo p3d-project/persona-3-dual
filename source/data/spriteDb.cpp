@@ -1,5 +1,5 @@
 #include "data/spriteDb.hpp"
-#include "core/error.hpp"
+#include "core/logger.hpp"
 
 static const SpriteDBEntry SPRITE_DB_ENTRY[] = {
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_0), "moon-0"},
