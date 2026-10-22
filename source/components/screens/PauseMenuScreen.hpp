@@ -9,6 +9,7 @@
 #include "components/TextComponent.hpp"
 #include "components/menus/UIMenu.hpp"
 #include "components/screens/UIScreen.hpp"
+#include "uiAnimation/UIAnimator.hpp"
 
 #include <etl/array.h>
 #include <nds.h>
@@ -24,6 +25,28 @@ class PauseMenuScreen : public UIScreen
     void unload();
     void renderSprites() override;
     int onTouch(touchPosition* touch) override;
+
+    /**
+     * @brief Starts the jiggle animation on the selected option sprite
+     */
+    void animateSelection();
+
+    /**
+     * @brief Updates active UI animations
+     */
+    void updateAnimation();
+
+    /**
+     * @brief Updates active UI animations with a given delta time
+     * @param dt Delta time in seconds (Q20.12)
+     */
+    void updateAnimation(ae::q20_12_t dt);
+
+    /**
+     * @brief Checks if the selection sprite is currently animating
+     * @return true if currently animating, false otherwise
+     */
+    bool isAnimating() const;
 
     /**
      * @brief Set the Text Component object
@@ -125,11 +148,21 @@ class PauseMenuScreen : public UIScreen
      */
     void renderOptions();
 
+    /**
+     * @brief Updates the positions of the selected option bar sprites (including jiggle offset)
+     */
+    void updateSelectionSpritePosition();
+
     ae::Entity* pauseMenu = nullptr;
     GraphicsComponent* graphics = nullptr;
     TextComponent* text = nullptr;
     TextComponent* optionsText = nullptr;
     const UIMenu* menu = nullptr;
+
+    int selectedBarBaseY = 0;
+    int jiggleOffsetY = 0;
+    UIAnimator animator;
+    UIAnimationHandle selectionAnimation;
 
     // menu options
     const int visibleOptions = 7;

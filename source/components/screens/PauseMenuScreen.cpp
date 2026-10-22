@@ -1,5 +1,7 @@
 #include "PauseMenuScreen.hpp"
 #include "core/globals.hpp"
+#include "managers/MathManager.hpp"
+#include "uiAnimation/UIEase.hpp"
 
 PauseMenuScreen* PauseMenuScreen::instance = nullptr;
 
@@ -107,7 +109,17 @@ void PauseMenuScreen::renderText()
 
 void PauseMenuScreen::renderOptions()
 {
+    if (menu == nullptr)
+    {
+        return;
+    }
+
     etl::span<MenuOption> options = menu->getOptions();
+    if (options.empty())
+    {
+        return;
+    }
+
     int startIndex = menu->getStartIndex();
     int selectedOption = menu->getSelectedOption();
 
@@ -118,7 +130,14 @@ void PauseMenuScreen::renderOptions()
         optionsText->drawText(options[option].name, optionsStartX, optionsStartY + optionsRowHeight * i, color);
     }
 
-    int y = optionsStartY + optionsRowHeight * (selectedOption - startIndex) + selectedBarYOffset;
+    selectedBarBaseY = optionsStartY + optionsRowHeight * (selectedOption - startIndex) + selectedBarYOffset;
+    animateSelection();
+    updateSelectionSpritePosition();
+}
+
+void PauseMenuScreen::updateSelectionSpritePosition()
+{
+    int y = selectedBarBaseY + jiggleOffsetY;
 
     etl::array<SpriteRenderState*, 4> barPieces = {&srs1, &srs2, &srs3, &srs4};
     for (int i = 0; i < 4; i++)
@@ -129,6 +148,41 @@ void PauseMenuScreen::renderOptions()
             moveSprite(i + 1, barPieces[i]->x, y);
         }
     }
+}
+
+void PauseMenuScreen::animateSelection()
+{
+    animator.cancelAll();
+    jiggleOffsetY = 0;
+
+    auto seq = animator.sequence();
+    seq.append(animator.animate(jiggleOffsetY).from(0).to(-2).duration(40).ease(UIEase::OutQuad));
+    seq.append(animator.animate(jiggleOffsetY).from(-2).to(2).duration(70).ease(UIEase::InOutQuad));
+    seq.append(animator.animate(jiggleOffsetY).from(2).to(-1).duration(50).ease(UIEase::InOutQuad));
+    seq.append(animator.animate(jiggleOffsetY).from(-1).to(0).duration(40).ease(UIEase::OutQuad));
+    selectionAnimation = seq.start();
+}
+
+void PauseMenuScreen::updateAnimation()
+{
+    const ae::q20_12_t dt = MathManager::GetInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
+    updateAnimation(dt);
+}
+
+void PauseMenuScreen::updateAnimation(ae::q20_12_t dt)
+{
+    bool wasAnimating = selectionAnimation.isPlaying();
+    animator.update(dt);
+
+    if (isLoaded && (wasAnimating || selectionAnimation.isPlaying()))
+    {
+        updateSelectionSpritePosition();
+    }
+}
+
+bool PauseMenuScreen::isAnimating() const
+{
+    return selectionAnimation.isPlaying();
 }
 
 void PauseMenuScreen::renderSprites()
@@ -239,6 +293,9 @@ void PauseMenuScreen::load()
 
 void PauseMenuScreen::unload()
 {
+    animator.cancelAll();
+    jiggleOffsetY = 0;
+
     // hide sprites
     removeSprites();
 

@@ -260,6 +260,11 @@ ViewState EnvironmentView::update()
         dialogueScreen->updateAnimation();
     }
 
+    if (pauseMenuScreen != nullptr)
+    {
+        pauseMenuScreen->updateAnimation();
+    }
+
     switch (phase)
     {
     case ViewPhase::BATTLE:
