@@ -67,8 +67,6 @@ class PauseMenuScreen : public UIScreen
      *
      * @param yen The yen amount string
      * @param color The text colour to render the yen amount in
-     *
-     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
      */
     void setYenText(const std::string& yen, TextColor color);
 
@@ -77,8 +75,6 @@ class PauseMenuScreen : public UIScreen
      *
      * @param persona The active persona name string
      * @param color The text colour to render the persona name in
-     *
-     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
      */
     void setPersonaText(const std::string& persona, TextColor color);
 
@@ -87,8 +83,6 @@ class PauseMenuScreen : public UIScreen
      *
      * @param arcana The active persona arcana string
      * @param color The text colour to render the arcana in
-     *
-     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
      */
     void setArcanaText(const std::string& arcana, TextColor color);
 
@@ -97,19 +91,14 @@ class PauseMenuScreen : public UIScreen
      *
      * @param level The active persona level string
      * @param color The text colour to render the level in
-     *
-     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
      */
     void setLevelText(const std::string& level, TextColor color);
 
-    // TODO: replace with ae dependency injection
     /**
      * @brief Set the Description Text object (top bar)
      *
      * @param description The description string
      * @param color The text colour to render the description in
-     *
-     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
      */
     void setDescriptionText(const std::string& description, TextColor color);
 
