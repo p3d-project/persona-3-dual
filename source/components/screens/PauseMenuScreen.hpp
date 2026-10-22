@@ -1,3 +1,9 @@
+/**
+ * @file PauseMenuScreen.hpp
+ * @brief Pause menu screen
+ * @author Nolan Kolb (TrueGiles / themoonwalker8692)
+ */
+
 #pragma once
 #include "components/GraphicsComponent.hpp"
 #include "components/TextComponent.hpp"
@@ -19,7 +25,6 @@ class PauseMenuScreen : public UIScreen
     void renderSprites() override;
     int onTouch(touchPosition* touch) override;
 
-    // TODO: replace with ae dependency injection
     /**
      * @brief Set the Text Component object
      * @param text The TextComponent pointer to set
@@ -27,7 +32,6 @@ class PauseMenuScreen : public UIScreen
      */
     void setTextComponent(TextComponent* text);
 
-    // TODO: replace with ae dependency injection
     /**
      * @brief Set the Text Component used to draw the menu options
      * @param optionsText The TextComponent pointer to set
@@ -35,7 +39,6 @@ class PauseMenuScreen : public UIScreen
      */
     void setOptionsTextComponent(TextComponent* optionsText);
 
-    // TODO: replace with ae dependency injection
     /**
      * @brief Set the Yen Text object (info panel)
      *
@@ -46,7 +49,6 @@ class PauseMenuScreen : public UIScreen
      */
     void setYenText(const std::string& yen, TextColor color);
 
-    // TODO: replace with ae dependency injection
     /**
      * @brief Set the Persona Text object (info panel)
      *
@@ -57,7 +59,6 @@ class PauseMenuScreen : public UIScreen
      */
     void setPersonaText(const std::string& persona, TextColor color);
 
-    // TODO: replace with ae dependency injection
     /**
      * @brief Set the Arcana Text object (info panel)
      *
@@ -68,7 +69,6 @@ class PauseMenuScreen : public UIScreen
      */
     void setArcanaText(const std::string& arcana, TextColor color);
 
-    // TODO: replace with ae dependency injection
     /**
      * @brief Set the Level Text object (info panel)
      *
