@@ -1,0 +1,1 @@
+Copyright (C) 2001 BitmapMania / COOZ. All rights reserved.
