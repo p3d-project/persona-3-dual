@@ -1,18 +1,34 @@
 #include "MathManager.hpp"
+#include "core/logger.hpp"
 
 ae::q20_12_t MathManager::div(ae::q20_12_t num, ae::q20_12_t den)
 {
+    if (den.raw_value() == 0)
+    {
+        logMessage(LogSeverity::ERROR, "Division by zero");
+        return ae::q20_12_t{0};
+    }
     return ae::q20_12_t::from_raw_value(divf32(num.raw_value(), den.raw_value()));
 }
 
 ae::q20_12_t MathManager::sqrt(ae::q20_12_t v)
 {
+    if (v.raw_value() < 0)
+    {
+        logMessage(LogSeverity::WARNING, "Square root of negative value");
+        return ae::q20_12_t{0};
+    }
     uint32_t raw = sqrtf32(static_cast<uint32_t>(v.raw_value()));
     return ae::q20_12_t::from_raw_value(static_cast<int32_t>(raw));
 }
 
 ae::q20_12_t MathManager::mod(ae::q20_12_t num, ae::q20_12_t den)
 {
+    if (den.raw_value() == 0)
+    {
+        logMessage(LogSeverity::ERROR, "Modulo by zero");
+        return ae::q20_12_t{0};
+    }
     return ae::q20_12_t::from_raw_value(mod32(num.raw_value(), den.raw_value()));
 }
 

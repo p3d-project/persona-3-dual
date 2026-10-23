@@ -1,5 +1,6 @@
 #include "IntroView.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "data/audioDb.hpp"
 #include "systems/UISystem.hpp"
 
@@ -177,6 +178,8 @@ void IntroView::init()
     setBrightness(1, -16);
     transitionPhase = TransitionPhase::FADING_IN;
     fadeTimer.start(ae::q20_12_t{1.1});
+
+    logMessage(LogSeverity::DEBUG, "IntroView initialized");
 }
 
 ViewState IntroView::update()
@@ -250,7 +253,9 @@ ViewState IntroView::update()
         {
             silhouetteX += (-silhouetteX) / 6 + 1;
             if (silhouetteX > 0)
+            {
                 silhouetteX = 0;
+            }
         }
 
         // animate Y (moving up towards 0)
@@ -258,7 +263,9 @@ ViewState IntroView::update()
         {
             silhouetteY += (-silhouetteY) / 6 + 1;
             if (silhouetteY < 0)
+            {
                 silhouetteY = 0;
+            }
         }
 
         bgSetScroll(bg[0], -silhouetteX, -silhouetteY);

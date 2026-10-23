@@ -1,5 +1,7 @@
 #include "RenderManager.hpp"
+#include "core/logger.hpp"
 #include <nds.h>
+#include <string>
 
 static constexpr int32_t ONE_Q12 = 1 << 12;
 
@@ -34,7 +36,7 @@ static int textureSizeEnum(int size)
     case 1024:
         return TEXTURE_SIZE_1024;
     default:
-        printf("Invalid texture size %d\n", size);
+        logMessage(LogSeverity::WARNING, "Invalid texture size: " + std::to_string(size));
         return TEXTURE_SIZE_8;
     }
 }
@@ -104,6 +106,12 @@ bool RenderManager::uploadTexture(int& textureID,
                                   int param,
                                   const void* texture)
 {
+    if (texture == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null texture data");
+        return false;
+    }
+
     if (textureID != -1 && textureID != 0)
     {
         glDeleteTextures(1, &textureID);
@@ -113,8 +121,15 @@ bool RenderManager::uploadTexture(int& textureID,
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
-    // glTexImage2D can returns 0 on failure, we can use this to catch out of VRAM errors, etc.
-    return glTexImage2D(GL_TEXTURE_2D, 0, texType, textureSizeEnum(sizeX), textureSizeEnum(sizeY), 0, param, texture);
+    /// glTexImage2D can return 0 on failure, we can use this to catch out of VRAM errors, etc.
+    int res =
+        glTexImage2D(GL_TEXTURE_2D, 0, texType, textureSizeEnum(sizeX), textureSizeEnum(sizeY), 0, param, texture);
+    if (!res)
+    {
+        logMessage(LogSeverity::ERROR, "glTexImage2D failed to upload texture");
+        return false;
+    }
+    return true;
 }
 
 void RenderManager::renderModelComponent(MDL3Model& model)

@@ -1,5 +1,6 @@
 #include "DialogueComponent.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "types/UITypes.hpp"
 
 void DialogueComponent::Init()
@@ -165,6 +166,11 @@ void DialogueComponent::Destroy()
 
 void DialogueComponent::configureDialogue(const DialogueConfig& config)
 {
+    if (config.text == nullptr || config.textAlt == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null text component");
+    }
+
     text = config.text;
     textAlt = config.textAlt;
     screen = config.screen;
@@ -179,6 +185,14 @@ void DialogueComponent::configureDialogue(const DialogueConfig& config)
 
 void DialogueComponent::start(Dialogue* firstLine)
 {
+    if (firstLine == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null firstLine");
+        return;
+    }
+
+    logMessage(LogSeverity::DEBUG, "Dialogue started: " + firstLine->name);
+
     current = firstLine;
     optionCount = 0;
     selectedOption = 0;
@@ -198,7 +212,13 @@ void DialogueComponent::start(Dialogue* firstLine)
 
 void DialogueComponent::end()
 {
-    text->clearScreen();
+    logMessage(LogSeverity::DEBUG, "Dialogue ended");
+
+    if (text != nullptr)
+    {
+        text->clearScreen();
+    }
+
     if (screen != nullptr)
     {
         // Keep the component active until hideAnimated() finishes; Update()
@@ -212,23 +232,47 @@ void DialogueComponent::end()
 
 void DialogueComponent::advanceTo(Dialogue* next)
 {
+    if (next == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null Dialogue");
+        end();
+        return;
+    }
+
+    logMessage(LogSeverity::DEBUG, "Dialogue advanced to: " + next->name);
+
     current = next;
     doRenderOptions = false;
     optionCount = 0;
     selectedOption = 0;
     renderBust = true;
-    text->clearScreen();
+    if (text != nullptr)
+    {
+        text->clearScreen();
+    }
     renderAnimFrame();
 }
 
 void DialogueComponent::renderAnimFrame()
 {
+    if (!text || !textAlt || !current)
+    {
+        logMessage(LogSeverity::WARNING, "text, textAlt, or current is null");
+        return;
+    }
+
     textAlt->drawText("\xFF\x02\x01" + current->name, 8, 128, TextColor::RichBlue);
     text->appearText(current->text, 8, 154, TextColor::Black);
 }
 
 void DialogueComponent::renderOptions()
 {
+    if (!text || !textAlt || !current)
+    {
+        logMessage(LogSeverity::WARNING, "text, textAlt, or current is null");
+        return;
+    }
+
     /// reprint the complete line then list choices below it
     text->clearScreen();
     textAlt->drawText("\xFF\x02\x01" + current->name, 8, 128, TextColor::DualGreen);

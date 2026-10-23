@@ -1,5 +1,6 @@
 #include "PauseMenu.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include <nds.h>
 #include <string>
 
@@ -33,6 +34,7 @@ PauseMenu* PauseMenu::getInstance()
 
 void PauseMenu::resetHook()
 {
+    logMessage(LogSeverity::DEBUG, "Pause menu opened");
     options = menuOptions;
     isClosed = false;
 }
@@ -44,6 +46,7 @@ ViewState PauseMenu::updateHook()
 
 void PauseMenu::closeHook()
 {
+    logMessage(LogSeverity::DEBUG, "Pause menu closed");
     resetMenu();
 
     // set flag

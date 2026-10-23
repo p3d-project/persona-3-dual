@@ -1,4 +1,5 @@
 #include "TextManager.hpp"
+#include "core/logger.hpp"
 #include <sstream>
 
 // Helper macro to convert 8 bit RGB values to 5 bit RGB values for the Nintendo DS
@@ -33,7 +34,7 @@ Font* TextManager::loadFont(std::string* name, int size)
 {
     if (name == nullptr)
     {
-        haltOnError("TextManager::loadFont(std::string* name, int size) : name cannot be nullptr");
+        logMessage(LogSeverity::FATAL, "name cannot be nullptr");
     }
 
     Font* font = new Font();
@@ -43,13 +44,13 @@ Font* TextManager::loadFont(std::string* name, int size)
     font->bitmap = loadFontBitmap(&fontBitmapPath);
     if (!font->bitmap)
     {
-        haltOnError("Failed to load font bitmap from \n" + fullPath + ".img.bin");
+        logMessage(LogSeverity::FATAL, "Failed to load font bitmap from \n" + fullPath + ".img.bin");
     }
 
     std::string fontMetadataPath = fullPath + ".fnt";
     if (!loadFontMetadata(&fontMetadataPath, font))
     {
-        haltOnError("Failed to load font metadata from \n" + fullPath + ".fnt");
+        logMessage(LogSeverity::FATAL, "Failed to load font metadata from \n" + fullPath + ".fnt");
     }
 
     std::string fontBitmapBoldPath = fullPath + "-bold.img.bin";
@@ -72,7 +73,9 @@ Font* TextManager::loadFont(std::string* name, int size)
 void TextManager::unloadFont(Font* font)
 {
     if (font == nullptr)
+    {
         return;
+    }
 
     free(font->bitmap);
     free(font->bitmapBold);
@@ -89,12 +92,13 @@ bool TextManager::loadPalette(std::string* path, bool sub)
 {
     if (path == nullptr)
     {
-        haltOnError("TextManager::loadPalette(std::string* path, bool sub) : path cannot be nullptr");
+        logMessage(LogSeverity::FATAL, "path cannot be nullptr");
     }
 
     FileBuffer buffer = io.openFileBuffer(*path);
     if (buffer.get() == nullptr)
     {
+        logMessage(LogSeverity::WARNING, "Failed to load palette from: " + *path);
         return false;
     }
 
@@ -121,12 +125,13 @@ std::uint8_t* TextManager::loadFontBitmap(std::string* path)
 {
     if (path == nullptr)
     {
-        haltOnError("TextManager::loadFontBitmap(std::string* path) : path cannot be nullptr");
+        logMessage(LogSeverity::FATAL, "path cannot be nullptr");
     }
 
     FileBuffer buffer = io.openFileBuffer(*path);
     if (buffer.get() == nullptr)
     {
+        logMessage(LogSeverity::WARNING, "Failed to load font bitmap from: " + *path);
         return nullptr;
     }
 
@@ -137,13 +142,19 @@ bool TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBi
 {
     if (path == nullptr)
     {
-        haltOnError("TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBitmap) : path cannot be "
-                    "nullptr");
+        logMessage(LogSeverity::FATAL, "path cannot be nullptr");
+    }
+
+    if (font == nullptr)
+    {
+        logMessage(LogSeverity::ERROR, "Font cannot be nullptr");
+        return false;
     }
 
     FileBuffer buffer = io.openFileBuffer(*path);
     if (buffer.get() == nullptr)
     {
+        logMessage(LogSeverity::WARNING, "Failed to load font metadata from: " + *path);
         return false;
     }
 
@@ -195,6 +206,11 @@ bool TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBi
 
 void TextManager::clearScreen(uint16_t* videoBuffer)
 {
+    if (videoBuffer == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null videoBuffer");
+        return;
+    }
     dmaFillHalfWords(0, videoBuffer, 256 * 256 * sizeof(uint8_t));
 }
 
@@ -207,22 +223,18 @@ int TextManager::extractIntValue(const std::string& line, const std::string& key
     }
 
     const std::size_t dataStart = keyPos + key.size();
-    std::size_t dataEnd = dataStart;
-    while (dataEnd < line.size() && line[dataEnd] != ' ')
+    if (dataStart >= line.size())
     {
-        dataEnd++;
+        return 0;
     }
 
-    return std::stoi(line.substr(dataStart, dataEnd - dataStart));
-}
-
-void TextManager::haltOnError(const std::string& errorMessage)
-{
-    consoleDemoInit();
-    printf("\n\n");
-    printf("Error; %s", errorMessage.c_str());
-    while (1)
+    char* endPtr = nullptr;
+    long val = std::strtol(line.c_str() + dataStart, &endPtr, 10);
+    if (endPtr == line.c_str() + dataStart)
     {
-        swiWaitForVBlank();
+        logMessage(LogSeverity::WARNING, "Failed to parse int value for key: " + key);
+        return 0;
     }
+
+    return static_cast<int>(val);
 }

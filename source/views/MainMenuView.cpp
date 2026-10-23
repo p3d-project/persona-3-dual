@@ -1,5 +1,6 @@
 #include "MainMenuView.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "data/audioDb.hpp"
 #include "systems/UISystem.hpp"
 
@@ -122,6 +123,8 @@ void MainMenuView::init()
 
     //setup music before returning, don't do it earlier
     musicCmpt->registerMusic(AudioType::MENU, MenuAudio::ARIA_OF_THE_SOUL);
+
+    logMessage(LogSeverity::DEBUG, "MainMenuView initialized");
 }
 
 ViewState MainMenuView::update()
@@ -255,6 +258,7 @@ void MainMenuView::cleanup()
         // wait a few frames
         for (int duration = 0; duration <= 2; duration++)
         {
+            // TODO: replace with timer util
             swiWaitForVBlank();
         }
     }

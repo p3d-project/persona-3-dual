@@ -5,6 +5,7 @@
 #include "components/screens/DialogueScreen.hpp"
 #include "components/screens/MenuHUDScreen.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "events/GenericEvents.hpp"
 #include <aegis/ndsTypes.hpp>
 #include <aegis/types.hpp>
@@ -167,6 +168,7 @@ void UISystem::SetSFXComponent(SFXComponent* sfx)
 
 void UISystem::on_receive(const Event::SwitchView& msg)
 {
+    logMessage(LogSeverity::DEBUG, "View switch event received");
     nextView = msg.view;
 }
 
@@ -235,6 +237,14 @@ void UISystem::on_receive(const Event::ConfigureUIMenu& config)
 
 void UISystem::on_receive(const Event::ShowScreen& msg)
 {
+    if (msg.screen == nullptr)
+    {
+        logMessage(LogSeverity::ERROR, "ShowScreen event received with nullptr screen");
+        return;
+    }
+
+    logMessage(LogSeverity::DEBUG, "ShowScreen event processed");
+
     // check if it is already loaded. If not, load it in
     if (!msg.screen->isLoaded)
     {
@@ -276,13 +286,20 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
                 }
             }
 
-            oldScreen->unload();
-            oldScreen->isLoaded = false;
+            if (oldScreen != nullptr)
+            {
+                oldScreen->unload();
+                oldScreen->isLoaded = false;
 
-            msg.screen->bgId = oldScreen->bgId;
-            msg.screen->oam = oldScreen->oam;
-            oldScreen->bgId = -1;
-            oldScreen->oam = nullptr;
+                msg.screen->bgId = oldScreen->bgId;
+                msg.screen->oam = oldScreen->oam;
+                oldScreen->bgId = -1;
+                oldScreen->oam = nullptr;
+            }
+            else
+            {
+                logMessage(LogSeverity::ERROR, "Failed to find LRU screen to evict");
+            }
 
             msg.screen->load();
             msg.screen->isLoaded = true;
@@ -309,6 +326,14 @@ void UISystem::on_receive(const Event::HideAllScreens& /*msg*/)
 
 void UISystem::on_receive(const Event::ShowMenu& msg)
 {
+    if (msg.menu == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "ShowMenu event received with nullptr menu");
+        return;
+    }
+
+    logMessage(LogSeverity::DEBUG, "ShowMenu event processed");
+
     if (sfxCmpt != nullptr)
     {
         sfxCmpt->registerSFX(SFX::SFX_1);
@@ -394,7 +419,13 @@ void UISystem::lruUpdate(int id, bool isMain)
 
 void UISystem::registerScreen(UIScreen* screen)
 {
-    sassert(screen != nullptr, "UIScreen cannot be nullptr.");
+    if (screen == nullptr)
+    {
+        logMessage(LogSeverity::ERROR, "Called with nullptr screen");
+        return;
+    }
+
+    logMessage(LogSeverity::DEBUG, "Screen registered successfully");
 
     // load screen
     if (screen->isMain && screenMainCount < 2)
@@ -422,13 +453,15 @@ void UISystem::registerScreen(UIScreen* screen)
     // throw error (too many screens registered)
     if (screen->isMain)
     {
-        sassert(screenMainCount < 2,
-                "Too many screens registered. A maximum of 2 main screens and 3 sub screens can be registered.");
+        logMessage(LogSeverity::ERROR,
+                   "Too many main screens registered. A maximum of 2 main screens can be registered.");
+        return;
     }
     else
     {
-        sassert(screenSubCount < 3,
-                "Too many screens registered. A maximum of 2 main screens and 3 sub screens can be registered.");
+        logMessage(LogSeverity::ERROR,
+                   "Too many sub screens registered. A maximum of 3 sub screens can be registered.");
+        return;
     }
 }
 

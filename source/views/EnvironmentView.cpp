@@ -1,5 +1,6 @@
 #include "EnvironmentView.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "models/makoto.hpp"
 #include "systems/BattleSystem.hpp"
 
@@ -88,6 +89,7 @@ void EnvironmentView::setupEnvironment()
 
     if (!env.load(dbEntry, bitmapsEnv))
     {
+        logMessage(LogSeverity::ERROR, "Failed to load environment " + std::string(dbEntry->name));
         textSub->drawText(
             "EnvironmentView: failed to load environment " + std::string(dbEntry->name), 0, 0, TextColor::Red);
     }
@@ -168,7 +170,7 @@ void EnvironmentView::init()
     dbEntry = getEnvironmentDbEntry();
     if (!dbEntry)
     {
-        sassert(false, "EnvironmentView::init - no EnvironmentDbEntry for this room");
+        logMessage(LogSeverity::ERROR, "No EnvironmentDbEntry for this room");
         return;
     }
 
@@ -245,6 +247,8 @@ void EnvironmentView::init()
     bgSetPriority(0, 2); // set 3D view on main to be behind text layer
 
     lineSpacing = textSub->getLineSpacing();
+
+    logMessage(LogSeverity::DEBUG, "EnvironmentView initialized for: " + std::string(dbEntry->name));
 }
 
 ViewState EnvironmentView::update()
@@ -498,6 +502,8 @@ ViewState EnvironmentView::update()
 
 void EnvironmentView::cleanup()
 {
+    logMessage(LogSeverity::DEBUG, "EnvironmentView cleaned up");
+
     cleanupHook();
 
     // entity
