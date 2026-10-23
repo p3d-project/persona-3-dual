@@ -6,6 +6,8 @@ enum class SpriteType
 {
     NONE = 0,
     MOON,
+    STATUS,
+    SELECTED_OPTION,
     DAY_OF_WEEK,
     TIME,
     SKILL_SPRITE,
@@ -32,6 +34,22 @@ enum class MoonSprite
     MOON_6,
     MOON_7,
     MOON_8,
+};
+
+enum class StatusSprite
+{
+    STATUS_GREAT = 0,
+    STATUS_GOOD,
+    STATUS_TIRED,
+    STATUS_SICK
+};
+
+enum class SelectedOptionSprite
+{
+    SELECTED_OPTION_0 = 0,
+    SELECTED_OPTION_1,
+    SELECTED_OPTION_2,
+    SELECTED_OPTION_3,
 };
 
 enum class TimeSprite

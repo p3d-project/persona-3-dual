@@ -42,14 +42,11 @@ class MenuHUDScreen : public UIScreen
      */
     void setTextComponent(TextComponent* text);
 
-    // TODO: replace with ae dependency injection
     /**
      * @brief Set the Text Content object
      *
      * @param textContent The text to print
      * @param textColor The text colour to render the textContent in
-     *
-     * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
      */
     void setTextContent(std::string textContent, TextColor textColor);
 
@@ -80,8 +77,7 @@ class MenuHUDScreen : public UIScreen
 
     // ---
     // sprite setup
-    // TODO: make const!
-    std::string spritePath = "graphics/MenuHUD/sprites/";
+    const std::string spritePath = "graphics/MenuHUD/sprites/";
 
     // moon sprite
     Sprite moonSprite = {SpriteSize_32x32, SpriteColorFormat_16Color, 0};

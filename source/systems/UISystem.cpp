@@ -115,7 +115,7 @@ void UISystem::Update(ae::q20_12_t dt)
     }
 
     // blink the "Pause" text
-    if (activeMenu->pauseMessage.length() != 0)
+    if (!activeMenu->customRender && activeMenu->pauseMessage.length() != 0)
     {
         if (frame % 60 < 30)
         {
@@ -132,17 +132,21 @@ void UISystem::Update(ae::q20_12_t dt)
     if (renderUIText)
     {
         renderUIText = false;
-        // Clear only the option list region so selection slide animation does not ghost.
-        const int optionsTop = textSize;
-        const int optionsHeight = textSize * activeMenu->visibleOptions + text->getLineSpacing();
-        text->clearArea(0, optionsTop, 256, optionsHeight);
-        for (int i = 0; i < activeMenu->visibleOptions && activeMenu->startIndex + i < int(activeMenu->options.size());
-             i++)
+        if (!activeMenu->customRender)
         {
-            int option = activeMenu->startIndex + i;
-            TextColor color = option == activeMenu->selectedOption ? TextColor::Blue : TextColor::White;
-            int x = option == activeMenu->selectedOption ? 10 + activeMenu->selectionOffset() : 10;
-            text->drawText(activeMenu->options[option].name, x, textSize + textSize * i, color);
+            // Clear only the option list region so selection slide animation does not ghost.
+            const int optionsTop = textSize;
+            const int optionsHeight = textSize * activeMenu->visibleOptions + text->getLineSpacing();
+            text->clearArea(0, optionsTop, 256, optionsHeight);
+            for (int i = 0;
+                 i < activeMenu->visibleOptions && activeMenu->startIndex + i < int(activeMenu->options.size());
+                 i++)
+            {
+                int option = activeMenu->startIndex + i;
+                TextColor color = option == activeMenu->selectedOption ? TextColor::Blue : TextColor::White;
+                int x = option == activeMenu->selectedOption ? 10 + activeMenu->selectionOffset() : 10;
+                text->drawText(activeMenu->options[option].name, x, textSize + textSize * i, color);
+            }
         }
     }
 
@@ -224,7 +228,10 @@ void UISystem::on_receive(const Event::ConfigureUIMenu& config)
         menu->isActive = false;
         menu->text = text;
         /// @note 192px is the screen height. 1 row is reserved for the flashing text. Each line takes the font size height
-        menu->visibleOptions = (192 / textSize) - 1;
+        if (!menu->customRender)
+        {
+            menu->visibleOptions = (192 / textSize) - 1;
+        }
     }
 }
 

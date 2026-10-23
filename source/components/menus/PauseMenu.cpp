@@ -35,7 +35,6 @@ PauseMenu* PauseMenu::getInstance()
 void PauseMenu::resetHook()
 {
     logMessage(LogSeverity::DEBUG, "Pause menu opened");
-    pauseMessage = "Pause";
     options = menuOptions;
     isClosed = false;
 }

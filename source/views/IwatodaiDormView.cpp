@@ -136,16 +136,12 @@ void IwatodaiDormView::setupText()
 
 void IwatodaiDormView::setupUI()
 {
-    // setup pause menu
-    pauseMenuCmpt = PauseMenu::getInstance();
+    setupPauseMenu();
+    setupMenuHUD("Dorm");
 
-    menuHUDScreen = MenuHUDScreen::getInstance();
     dialogueScreen = DialogueScreen::getInstance();
 
-    menuHUDScreen->setTextComponent(textSub);
-    menuHUDScreen->setTextContent("Dorm", TextColor::White);
-
-    std::array<UIScreen*, 5> screens = {menuHUDScreen, dialogueScreen};
+    std::array<UIScreen*, 5> screens = {menuHUDScreen, dialogueScreen, pauseMenuScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt};
 
     ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, screens});
