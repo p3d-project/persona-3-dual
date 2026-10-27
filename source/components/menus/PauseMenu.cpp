@@ -195,7 +195,13 @@ ViewState PauseMenu::sLinkOptionSelected()
 
 ViewState PauseMenu::systemOptionSelected()
 {
-    return ViewState::KEEP_CURRENT;
+    switch (static_cast<SystemOption>(selectedOption))
+    {
+    case SystemOption::RETURN_TO_TITLE:
+        return ViewState::INTRO;
+    default:
+        return ViewState::KEEP_CURRENT;
+    }
 }
 
 ViewState PauseMenu::viewOptionSelected()
