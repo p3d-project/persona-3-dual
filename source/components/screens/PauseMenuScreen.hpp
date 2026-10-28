@@ -49,7 +49,7 @@ class PauseMenuScreen : public UIScreen
     bool isAnimating() const;
 
     /**
-     * @brief Cancels the all animations
+     * @brief Cancels all animations
      */
     void cancelAnimation();
 
