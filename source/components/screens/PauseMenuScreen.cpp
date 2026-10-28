@@ -185,6 +185,12 @@ bool PauseMenuScreen::isAnimating() const
     return selectionAnimation.isPlaying();
 }
 
+void PauseMenuScreen::cancelAnimation()
+{
+    animator.cancelAll();
+    jiggleOffsetY = 0;
+}
+
 void PauseMenuScreen::renderSprites()
 {
     // load palettes
@@ -293,8 +299,7 @@ void PauseMenuScreen::load()
 
 void PauseMenuScreen::unload()
 {
-    animator.cancelAll();
-    jiggleOffsetY = 0;
+    cancelAnimation();
 
     // hide sprites
     removeSprites();

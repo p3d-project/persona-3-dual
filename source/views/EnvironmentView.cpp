@@ -330,6 +330,7 @@ ViewState EnvironmentView::update()
         {
             prevPauseState = false;
             textSub->clearScreen();
+            pauseMenuScreen->cancelAnimation();
 
             ae::BroadcastEvent(Event::HideAllMenus{});
 
