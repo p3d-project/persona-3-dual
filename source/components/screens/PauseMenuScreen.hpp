@@ -49,6 +49,11 @@ class PauseMenuScreen : public UIScreen
     bool isAnimating() const;
 
     /**
+     * @brief Cancels all animations
+     */
+    void cancelAnimation();
+
+    /**
      * @brief Set the Text Component object
      * @param text The TextComponent pointer to set
      * @warning This will be removed in the future in favour of a native dependency injection solution in Aegis Engine
