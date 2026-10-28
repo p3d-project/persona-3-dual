@@ -198,9 +198,13 @@ ViewState PauseMenu::systemOptionSelected()
     switch (static_cast<SystemOption>(selectedOption))
     {
     case SystemOption::RETURN_TO_TITLE:
+    {
         return ViewState::INTRO;
+    }
     default:
+    {
         return ViewState::KEEP_CURRENT;
+    }
     }
 }
 
