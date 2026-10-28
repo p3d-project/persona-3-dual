@@ -49,7 +49,7 @@ class PauseMenuScreen : public UIScreen
     bool isAnimating() const;
 
     /**
-     * @brief Cancels the selection animation and resets the jiggle offset
+     * @brief Cancels the all animations
      */
     void cancelAnimation();
 
