@@ -36,6 +36,16 @@ enum class CutsceneOption
     CUTSCENE_2
 };
 
+enum class SystemOption
+{
+    TUTORIAL = 0,
+    CONFIG,
+    DICTIONARY,
+    LOAD_DATA,
+    SAVE_DATA,
+    RETURN_TO_TITLE
+};
+
 class PauseMenu : public UIMenu
 {
   private:

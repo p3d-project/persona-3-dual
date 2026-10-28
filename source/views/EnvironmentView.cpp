@@ -326,7 +326,7 @@ ViewState EnvironmentView::update()
             pauseMenuScreen->renderText();
         }
 
-        if ((systemKeysDown & KEY_START) || pauseMenuCmpt->isClosed)
+        if ((systemKeysDown & KEY_X) || pauseMenuCmpt->isClosed)
         {
             prevPauseState = false;
             textSub->clearScreen();
@@ -389,7 +389,7 @@ ViewState EnvironmentView::update()
         CharacterPosition charPos = movement->isCharacterAt();
         camPos = CameraSystem::GetInstance().getCameraPosition();
 
-        if (systemKeysDown & KEY_START)
+        if (systemKeysDown & KEY_X)
         {
             textSub->clearScreen();
             prevEnvironmentState = false;
