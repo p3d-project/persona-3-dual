@@ -61,8 +61,8 @@ void SwitchView(BaseView* newView, const char* viewName = nullptr)
     // cleanup any existing view
     if (currentView != nullptr)
     {
-        currentView->cleanup();
         setBrightness(3, -16);
+        currentView->cleanup();
     }
 
     // load new view
