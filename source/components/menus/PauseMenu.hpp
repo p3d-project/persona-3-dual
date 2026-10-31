@@ -76,7 +76,7 @@ class PauseMenu : public UIMenu
         {"Toggle Billboards", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
         {"Toggle Debug Print", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
         {"Play Music", -1, MENU_BIND(PauseMenu, openMusicMenu)},
-        {"Play Character Animations", -1, MENU_BIND(PauseMenu, openCharacterAnimMenu)},
+        {"Play Animations", -1, MENU_BIND(PauseMenu, openCharacterAnimMenu)},
         {"Cycle Camera Mode", -1, MENU_BIND(PauseMenu, debugOptionSelected)},
     };
 
