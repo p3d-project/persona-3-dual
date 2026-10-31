@@ -97,8 +97,8 @@ def to_header(rows, height, width, stem):
     lines.append(f"#ifndef {guard}")
     lines.append(f"#define {guard}")
     lines.append("")
-    lines.append(f"#define {define_prefix}_MAP_WIDTH  {width}")
-    lines.append(f"#define {define_prefix}_MAP_HEIGHT {height}")
+    lines.append(f"constexpr uint16_t {define_prefix}_MAP_WIDTH = {width};")
+    lines.append(f"constexpr uint16_t {define_prefix}_MAP_HEIGHT = {height};")
     lines.append("")
 
     # CRITICAL FIX: Changed uint8_t to uint16_t to support tile IDs > 255

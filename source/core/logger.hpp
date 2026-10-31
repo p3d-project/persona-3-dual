@@ -40,4 +40,7 @@ void logMessageImpl(LogSeverity severity, std::string_view message, const char* 
  */
 void clearLog();
 
-#define logMessage(severity, message) logMessageImpl(severity, message, __FILE__, __LINE__, __func__)
+constexpr void logMessage(LogSeverity severity, std::string_view message)
+{
+    logMessageImpl(severity, message, __FILE__, __LINE__, __func__);
+};
