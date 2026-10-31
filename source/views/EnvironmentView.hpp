@@ -72,6 +72,11 @@ class EnvironmentView : public BaseView
      */
     void cleanup() override;
 
+    bool usesBaseFadeIn() const override
+    {
+        return true;
+    }
+
   protected:
     // Room-specific hooks (implemented/overridden by derived rooms)
     virtual ae::q20_12_t getCameraYOffset() const

@@ -152,8 +152,7 @@ void PauseMenuScreen::updateSelectionSpritePosition()
 
 void PauseMenuScreen::animateSelection()
 {
-    animator.cancelAll();
-    jiggleOffsetY = 0;
+    cancelAnimation();
 
     auto seq = animator.sequence();
     seq.append(animator.animate(jiggleOffsetY).from(0).to(-2).duration(40).ease(UIEase::OutQuad));
@@ -183,6 +182,12 @@ void PauseMenuScreen::updateAnimation(ae::q20_12_t dt)
 bool PauseMenuScreen::isAnimating() const
 {
     return selectionAnimation.isPlaying();
+}
+
+void PauseMenuScreen::cancelAnimation()
+{
+    animator.cancelAll();
+    jiggleOffsetY = 0;
 }
 
 void PauseMenuScreen::renderSprites()
@@ -293,8 +298,7 @@ void PauseMenuScreen::load()
 
 void PauseMenuScreen::unload()
 {
-    animator.cancelAll();
-    jiggleOffsetY = 0;
+    cancelAnimation();
 
     // hide sprites
     removeSprites();
