@@ -62,15 +62,31 @@ class TextComponent : public ae::Component
      * @param x The x-coordinate to start drawing the text.
      * @param y The y-coordinate to start drawing the text.
      * @param color The color to use for the text (default is white).
+     * @param maxX Right edge (exclusive) used for word wrapping (default is the screen width).
+     * @param maxY Bottom edge of the text area. When the next line would not fit above it, the text pauses
+     *             until appearTextNextPage() is called. 0 (default) disables pagination.
      * @see appearText
      */
-    void appearText(const std::string& text, int x, int y, int color = TextColor::White);
+    void appearText(const std::string& text, int x, int y, int color = TextColor::White, int maxX = 256, int maxY = 0);
 
     /**
      * @brief A wrapper for appearTextSkip in TextSystem. If a text is currently being rendered with appearText, this function will immediately render the rest of the text without delay.
+     * @note Stops at the end of the current page if the text is paginated.
      * @see appearTextSkip
      */
     void appearTextSkip();
+
+    /**
+     * @brief Check if the paginated text is waiting for the next page.
+     * @return true if the current page is full and more text remains, false otherwise.
+     */
+    bool appearTextPaused();
+
+    /**
+     * @brief Clear the text area and continue the paused text from the top of it.
+     * @note Does nothing if the text is not paused.
+     */
+    void appearTextNextPage();
 
     /**
      * @brief Stops the appearText animation immediately and clears the state.

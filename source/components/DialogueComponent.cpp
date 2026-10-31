@@ -3,6 +3,18 @@
 #include "core/logger.hpp"
 #include "types/UITypes.hpp"
 
+namespace
+{
+// text area inside the dialogue box; text beyond TEXT_MAX_X wraps and beyond TEXT_MAX_Y moves to a new page
+constexpr int TEXT_X = 8;
+constexpr int TEXT_Y = 154;
+constexpr int TEXT_MAX_X = 248;
+constexpr int TEXT_MAX_Y = 186;
+
+constexpr int OPTIONS_X = 128;
+constexpr int OPTIONS_Y = 50;
+} // namespace
+
 void DialogueComponent::Init()
 {
     isActive = false;
@@ -102,9 +114,8 @@ void DialogueComponent::Update(ae::q20_12_t)
         }
         if (pressed & KEY_A)
         {
-            if (!text->appearTextDone())
+            if (skipOrContinueText())
             {
-                text->appearTextSkip();
                 return;
             }
             Dialogue* next = current->selections[selectedOption].next;
@@ -128,9 +139,8 @@ void DialogueComponent::Update(ae::q20_12_t)
         // linear dialogue
         if (pressed & KEY_A)
         {
-            if (!text->appearTextDone())
+            if (skipOrContinueText())
             {
-                text->appearTextSkip();
                 return;
             }
             Dialogue* next = current->next;
@@ -143,9 +153,8 @@ void DialogueComponent::Update(ae::q20_12_t)
         }
         else if (pressed & KEY_B)
         {
-            if (!text->appearTextDone())
+            if (skipOrContinueText())
             {
-                text->appearTextSkip();
                 return;
             }
             Dialogue* next = current->prev;
@@ -262,7 +271,26 @@ void DialogueComponent::renderAnimFrame()
     }
 
     textAlt->drawText("\xFF\x02\x01" + current->name, 8, 128, TextColor::RichBlue);
-    text->appearText(current->text, 8, 154, TextColor::Black);
+    text->appearText(current->text, TEXT_X, TEXT_Y, TextColor::Black, TEXT_MAX_X, TEXT_MAX_Y);
+}
+
+bool DialogueComponent::skipOrContinueText()
+{
+    if (text->appearTextDone())
+    {
+        return false;
+    }
+
+    // a full page waits for input, otherwise finish the current page instantly
+    if (text->appearTextPaused())
+    {
+        text->appearTextNextPage();
+    }
+    else
+    {
+        text->appearTextSkip();
+    }
+    return true;
 }
 
 void DialogueComponent::renderOptions()
@@ -273,21 +301,20 @@ void DialogueComponent::renderOptions()
         return;
     }
 
-    /// reprint the complete line then list choices below it
-    text->clearScreen();
+    // the line itself stays on screen (it may span several pages), only the name and options are redrawn
     textAlt->drawText("\xFF\x02\x01" + current->name, 8, 128, TextColor::DualGreen);
-    text->drawText(current->text, 8, 154, TextColor::Black);
     //TODO: The options are currently drawn outside the textbox, do we want to add an extra overlay for them similar to the actual game?
     int textSize = text->getFontSize();
+    text->clearArea(OPTIONS_X, OPTIONS_Y, 256 - OPTIONS_X, textSize * optionCount + 4);
     for (int i = 0; i < optionCount; i++)
     {
         if (i == selectedOption)
         {
-            text->drawText(current->selections[i].text, 128, 50 + textSize * i, TextColor::Blue);
+            text->drawText(current->selections[i].text, OPTIONS_X, OPTIONS_Y + textSize * i, TextColor::Blue);
         }
         else
         {
-            text->drawText(current->selections[i].text, 128, 50 + textSize * i, TextColor::White);
+            text->drawText(current->selections[i].text, OPTIONS_X, OPTIONS_Y + textSize * i, TextColor::White);
         }
     }
 }

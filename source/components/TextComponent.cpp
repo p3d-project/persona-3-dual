@@ -8,12 +8,20 @@ void TextComponent::Update(ae::q20_12_t)
 {
     if (appearingText != nullptr)
     {
+        if (appearingText->pageBreak)
+        {
+            return; // waiting for appearTextNextPage()
+        }
+
         if (appearingText->cursorPos < (int)appearingText->content.size())
         {
             if (appearingText->counter <= 0)
             {
                 ts.drawNextFromText(appearingText.get());
-                appearingText->cursorPos++;
+                if (!appearingText->pageBreak)
+                {
+                    appearingText->cursorPos++;
+                }
                 appearingText->counter = ts.APPEAR_DELAY; // Reset the counter for the next character
             }
             else
@@ -94,19 +102,30 @@ void TextComponent::drawText(const std::string& text, int x, int y, int color)
     ts.drawText(text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth);
 }
 
-void TextComponent::appearText(const std::string& text, int x, int y, int color)
+void TextComponent::appearText(const std::string& text, int x, int y, int color, int maxX, int maxY)
 {
     if (!font || !videoBuffer)
     {
         logMessage(LogSeverity::WARNING, "Called without font or videoBuffer");
         return;
     }
-    ts.appearText(appearingText, text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth);
+    ts.appearText(
+        appearingText, text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth, maxX, maxY);
 }
 
 void TextComponent::appearTextSkip()
 {
     ts.appearTextSkip(appearingText.get());
+}
+
+bool TextComponent::appearTextPaused()
+{
+    return ts.appearTextPaused(appearingText.get());
+}
+
+void TextComponent::appearTextNextPage()
+{
+    ts.appearTextNextPage(appearingText.get());
 }
 
 void TextComponent::appearTextStop()

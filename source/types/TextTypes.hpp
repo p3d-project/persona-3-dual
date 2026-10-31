@@ -97,6 +97,13 @@ struct Text
     int letterSpacing;
     int lineSpacing;
     int spaceWidth;
+
+    /// Right edge (exclusive) used for word wrapping
+    int maxX = 256;
+    /// Bottom edge used for pagination. 0 disables pagination
+    int maxY = 0;
+    /// Set when the next glyph would not fit above maxY. Output pauses until the next page is requested
+    bool pageBreak = false;
 };
 
 /**

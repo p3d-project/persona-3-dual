@@ -39,7 +39,9 @@ void TextSystem::appearText(std::unique_ptr<Text>& appearingText,
                             int color,
                             int letterSpacing,
                             int lineSpacing,
-                            int spaceWidth)
+                            int spaceWidth,
+                            int maxX,
+                            int maxY)
 {
     if (!font || !videoBuffer)
     {
@@ -51,20 +53,46 @@ void TextSystem::appearText(std::unique_ptr<Text>& appearingText,
     {
         appearingText.reset();
     }
-    appearingText =
-        createText(content, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
+    appearingText = createText(
+        content, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth, maxX, maxY);
 }
 
 void TextSystem::appearTextSkip(Text* appearingText)
 {
     if (appearingText != nullptr)
     {
-        while (appearingText->cursorPos < (int)appearingText->content.size())
+        while (appearingText->cursorPos < (int)appearingText->content.size() && !appearingText->pageBreak)
         {
             drawNextFromText(appearingText);
-            appearingText->cursorPos++;
+            if (!appearingText->pageBreak)
+            {
+                appearingText->cursorPos++;
+            }
         }
     }
+}
+
+bool TextSystem::appearTextPaused(Text* appearingText)
+{
+    return appearingText != nullptr && appearingText->pageBreak;
+}
+
+void TextSystem::appearTextNextPage(Text* appearingText)
+{
+    if (!appearTextPaused(appearingText))
+    {
+        return;
+    }
+
+    clearArea(appearingText->videoBuffer,
+              appearingText->startX,
+              appearingText->startY,
+              appearingText->maxX - appearingText->startX,
+              appearingText->maxY - appearingText->startY);
+    appearingText->cursorX = appearingText->startX;
+    appearingText->cursorY = appearingText->startY;
+    appearingText->counter = 0;
+    appearingText->pageBreak = false;
 }
 
 bool TextSystem::appearTextDone(Text* appearingText)
@@ -197,7 +225,7 @@ void TextSystem::drawNextFromText(Text* text)
             return; /// Don't add a space at the beginning of a line
         }
         std::string nextWord = getNextWord(text->content.substr(text->cursorPos + 1));
-        if (checkWordWrap(nextWord, text->font, text->cursorX, text->bold, text->letterSpacing))
+        if (checkWordWrap(nextWord, text->font, text->cursorX, text->bold, text->letterSpacing, text->maxX))
         {
             text->cursorX = text->startX;
             text->cursorY += text->font->lineHeight + text->lineSpacing;
@@ -255,7 +283,27 @@ void TextSystem::drawNextFromText(Text* text)
     }
     else
     {
+        /// Pause on the current character; it is drawn once the next page starts
+        if (text->maxY > 0 && text->cursorY + text->font->lineHeight > text->maxY)
+        {
+            text->pageBreak = true;
+            return;
+        }
+
         Glyph g = text->bold ? text->font->boldGlyphs[c] : text->font->glyphs[c];
+
+        /// Break words that are longer than a whole line
+        if (text->cursorX > text->startX && text->cursorX + g.width > text->maxX)
+        {
+            text->cursorX = text->startX;
+            text->cursorY += text->font->lineHeight + text->lineSpacing;
+            if (text->maxY > 0 && text->cursorY + text->font->lineHeight > text->maxY)
+            {
+                text->pageBreak = true;
+                return;
+            }
+        }
+
         drawGlyph(g,
                   text->font,
                   text->videoBuffer,
@@ -285,7 +333,9 @@ std::unique_ptr<Text> TextSystem::createText(const std::string& text,
                                              int color,
                                              int letterSpacing,
                                              int lineSpacing,
-                                             int spaceWidth)
+                                             int spaceWidth,
+                                             int maxX,
+                                             int maxY)
 {
     auto newText = std::make_unique<Text>();
     newText->cursorX = startX;
@@ -304,6 +354,9 @@ std::unique_ptr<Text> TextSystem::createText(const std::string& text,
     newText->letterSpacing = letterSpacing;
     newText->lineSpacing = lineSpacing;
     newText->spaceWidth = spaceWidth;
+    newText->maxX = maxX;
+    newText->maxY = maxY;
+    newText->pageBreak = false;
     return newText;
 }
 
@@ -342,17 +395,23 @@ std::string TextSystem::getNextWord(const std::string& text)
     return nextWord;
 }
 
-bool TextSystem::checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing)
+bool TextSystem::checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing, int maxX)
 {
     int cursorX = startX;
-    for (char c : text)
+    for (size_t i = 0; i < text.size(); ++i)
     {
-        Glyph g = bold ? font->boldGlyphs[static_cast<unsigned char>(c)] : font->glyphs[static_cast<unsigned char>(c)];
+        unsigned char c = static_cast<unsigned char>(text[i]);
+        if (c == static_cast<unsigned char>(INSTRUCTION_BIT))
+        {
+            i += 2; /// skip the instruction type and argument bytes, they are not drawn
+            continue;
+        }
+        Glyph g = bold ? font->boldGlyphs[c] : font->glyphs[c];
         cursorX += g.width + letterSpacing;
     }
-    if (cursorX > 256)
+    if (cursorX > maxX)
     {
-        return true; // Word exceeds screen width
+        return true; // Word exceeds the available width
     }
     return false;
 }

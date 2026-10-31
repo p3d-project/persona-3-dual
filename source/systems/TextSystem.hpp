@@ -60,6 +60,9 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param letterSpacing Pixels of horizontal space to add after each glyph.
      * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
      * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
+     * @param maxX Right edge (exclusive) used for word wrapping.
+     * @param maxY Bottom edge of the text area. When a line would not fit above it, the text pauses until
+     *             appearTextNextPage() is called. 0 disables pagination.
      */
     void appearText(std::unique_ptr<Text>& appearingText,
                     const std::string& text,
@@ -70,13 +73,29 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
                     int color,
                     int letterSpacing,
                     int lineSpacing,
-                    int spaceWidth);
+                    int spaceWidth,
+                    int maxX = 256,
+                    int maxY = 0);
 
     /**
      * @brief If a text is currently being rendered with appearText, this function will immediately render the rest of the text without delay.
+     * @note Stops at the end of the current page if the text is paginated.
      * @param appearingText The current apperance of the text
      */
     void appearTextSkip(Text* appearingText);
+
+    /**
+     * @brief Check if the text being rendered with appearText is waiting for the next page.
+     * @param appearingText The current apperance of the text
+     * @return true if the current page is full and more text remains, false otherwise.
+     */
+    bool appearTextPaused(Text* appearingText);
+
+    /**
+     * @brief Clear the text area and continue the paused text from the top of it.
+     * @param appearingText The current apperance of the text
+     */
+    void appearTextNextPage(Text* appearingText);
 
     /**
      * @brief Check if the text being rendered with appearText has finished appearing.
@@ -142,6 +161,8 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param letterSpacing Pixels of horizontal space to add after each glyph.
      * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
      * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
+     * @param maxX Right edge (exclusive) used for word wrapping.
+     * @param maxY Bottom edge used for pagination. 0 disables pagination.
      * @return Owning pointer to the newly created Text object.
      */
     std::unique_ptr<Text> createText(const std::string& text,
@@ -152,7 +173,9 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
                                      int color,
                                      int letterSpacing,
                                      int lineSpacing,
-                                     int spaceWidth);
+                                     int spaceWidth,
+                                     int maxX = 256,
+                                     int maxY = 0);
 
     /**
      * @brief Get the next character from a given Text object.
@@ -185,9 +208,11 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param startX The starting x-coordinate for rendering the text.
      * @param bold Whether the bitmap is using bold text
      * @param letterSpacing Pixels of horizontal space to add after each glyph.
-     * @return true if the text will exceed the screen width, false otherwise.
+     * @param maxX Right edge (exclusive) the text must not pass.
+     * @return true if the text will exceed maxX, false otherwise.
+     * @note Formatting instructions embedded in the text are not measured.
      */
-    bool checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing);
+    bool checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing, int maxX);
 
     /**
      * @brief Underline a specificed area.

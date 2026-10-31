@@ -12,19 +12,45 @@ Dialogue* demo_dialogue_init()
     DialogueSelection demo_dialogue_sel_19_1 = {"Tell her it can wait", false, &demo_dialogue_lines[23]};
     DialogueSelection demo_dialogue_sel_19_2 = {"Follow the rule", false, &demo_dialogue_lines[26]};
 
+    // demo_dialogue_lines[0] = {"Aigis",
+    //                           "Yukari, the\xFF\x01\x07 east path\xFF\x01\xFF is closed after sundown. "
+    //                           "It's the second time I have stated this.",
+    //                           BustAigis::spNeutral,
+    //                           NULL,
+    //                           &demo_dialogue_lines[1],
+    //                           {}};
+    // demo_dialogue_lines[1] = {"Yukari",
+    //                           "I know, I know - I just left my bag on the bench. Thirty seconds, tops.",
+    //                           BustYukari::spNeutral,
+    //                           &demo_dialogue_lines[0],
+    //                           &demo_dialogue_lines[2],
+    //                           {}};
+
     demo_dialogue_lines[0] = {"Aigis",
                               "Yukari, the\xFF\x01\x07 east path\xFF\x01\xFF is closed after sundown. "
-                              "It's the second time I have stated this.",
+                              "sadasdasdasdasdasdasdasdasdasdasdasdasdas"
+                              "1sadasdasdasdasdasdasdasdasdasdasdasdasdas"
+                              "2sadasdasdasdasdasdasdasdasdasdasdasdasdas"
+                              "3sadasdasdasdasdasdasdasdasdasdasdasdasdas"
+                              "4sadasdasdasdasdasdasdasdasdasdasdasdasdas"
+                              "5sadasdasdasdasdasdasdasdasdasdasdasdasdas"
+                              "6sadasdasdasdasdasdasdasdasdasdasdasdasdas"
+                              "It's the second time I have stated this.asdasdasdasdasdasdasdasdasdawsdsadwedadc",
                               BustAigis::spNeutral,
                               NULL,
                               &demo_dialogue_lines[1],
                               {}};
-    demo_dialogue_lines[1] = {"Yukari",
-                              "I know, I know - I just left my bag on the bench. Thirty seconds, tops.",
-                              BustYukari::spNeutral,
-                              &demo_dialogue_lines[0],
-                              &demo_dialogue_lines[2],
-                              {}};
+    demo_dialogue_lines[1] = {
+        "Yukari",
+        "I know, I know - I just left my bag on the bench. Thirty seconds, tops. sdasdasdasdawsdsadwedadc "
+        "sdasdasdasdawsdsadwedadc  sdasdasdasdawsdsadwedadc sdasdasdasdawsdsadwedadc sdasdasdasdawsdsadwedadc "
+        "sdasdasdasdawsdsadwedadc sdasdasdasdawsdsadwedadc sdasdasdasdawsdsadwedadc sdasdasdasdawsdsadwedadc "
+        "sdasdasdasdawsdsadwedadc sdasdasdasdawsdsadwedadc sdasdasdasdawsdsadwedadc sdasdasdasdawsdsadwedadc "
+        "sdasdasdasdawsdsadwedadc",
+        BustYukari::spNeutral,
+        &demo_dialogue_lines[0],
+        &demo_dialogue_lines[2],
+        {}};
     demo_dialogue_lines[2] = {"Aigis",
                               "I am not authorized to make exceptions. Please retrieve it after sunrise.",
                               BustAigis::spNeutral,
