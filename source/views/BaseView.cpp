@@ -9,8 +9,7 @@ void BaseView::cleanup()
 {
     ae::BroadcastEvent(Event::ResetUIResources{});
 
-    // clear screen
-    setBrightness(3, 0);
+    setBrightness(3, -16);
 
     // global components
     Globals::enableBillboards = true;
