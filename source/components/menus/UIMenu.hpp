@@ -6,6 +6,7 @@
 #include <etl/stack.h>
 #include <maxmod9.h>
 #include <nds.h>
+#include <stdint.h>
 #include <string>
 
 #include "components/TextComponent.hpp"
@@ -44,6 +45,12 @@ class UIMenu
     int selectionX = 0;
     UIAnimator animator;
 
+    // alert state
+    std::string alertText;
+    int32_t alertStartFrame = 0;
+    int alertDurationFrames = 0;
+    bool alertMessagePrinted = false;
+
     void animateSelection();
 
     /**
@@ -72,6 +79,24 @@ class UIMenu
     UIMenu(bool iCustomRender = false) : customRender(iCustomRender)
     {
     }
+
+    /**
+     * @brief Shows a timed alert message, replacing the options display until it expires.
+     *
+     * @param message The message to display.
+     * @param durationFrames How long to show the alert (default: 120 frames = 2 s at 60 fps).
+     */
+    void showAlert(const std::string& message, int durationFrames = 120);
+
+    /**
+     * @brief Returns true while a timed alert is being displayed.
+     */
+    bool isAlertActive() const;
+
+    /**
+     * @brief Clears the active alert immediately.
+     */
+    void clearAlert();
 
     /**
      * @brief Resets the menu to its initial state.

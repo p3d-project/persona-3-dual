@@ -196,24 +196,14 @@ void BattleMenu::loadAllOutAttackConfirmation()
     options = battleOptions;
 }
 
-void BattleMenu::loadAlertOptions(const std::string& text)
+void BattleMenu::loadAlertOptions(const std::string& alertMsg)
 {
-    if (loadedOption == BattleMenuOptions::ALERT)
+    if (isAlertActive())
     {
         return;
     }
 
-    battleOptions.clear();
-    loadedOption = BattleMenuOptions::ALERT;
-    pauseMessage = text;
-    alertStartFrame = frame;
-
-    options = {};
-}
-
-bool BattleMenu::isAlertExpired(int durationFrames) const
-{
-    return (frame - alertStartFrame) >= durationFrames;
+    showAlert(alertMsg);
 }
 
 void BattleMenu::resetHook()
@@ -222,14 +212,12 @@ void BattleMenu::resetHook()
     options = {};
 
     loadedOption = BattleMenuOptions::NONE;
-    messagePrinted = false;
     selectedBattleOption = -1;
 }
 
 void BattleMenu::resetLoadedOptions()
 {
     loadedOption = BattleMenuOptions::NONE;
-    messagePrinted = false;
     text->clearScreen();
 
     pauseMessage = "";
@@ -240,17 +228,6 @@ void BattleMenu::resetLoadedOptions()
 
 ViewState BattleMenu::updateHook()
 {
-    if (loadedOption == BattleMenuOptions::ALERT)
-    {
-        if (!messagePrinted)
-        {
-            text->clearScreen();
-            messagePrinted = true;
-            text->drawText(pauseMessage, 0, 0, TextColor::White);
-        }
-        return ViewState::KEEP_CURRENT;
-    }
-
     return ViewState::DEFAULT;
 }
 

@@ -191,8 +191,8 @@ class PauseMenu : public UIMenu
     };
 
     etl::array<MenuOption, 2> skills = {
-        MenuOption{"Skill 1", -1, nullptr},
-        {"Skill 2", -1, nullptr},
+        MenuOption{"Skill 1", -1, MENU_BIND(PauseMenu, skillActionSelected)},
+        {"Skill 2", -1, MENU_BIND(PauseMenu, skillActionSelected)},
     };
 
     etl::array<MenuOption, 25> characterAnimOptions = {
@@ -247,6 +247,7 @@ class PauseMenu : public UIMenu
     ViewState viewOptionSelected();
     ViewState cutsceneOptionSelected();
     ViewState skillOptionSelected();
+    ViewState skillActionSelected();
     ViewState itemOptionSelected();
     ViewState equipOptionSelected();
     ViewState personaOptionSelected();
