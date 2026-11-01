@@ -30,18 +30,18 @@ class MainMenu : public UIMenu
     static MainMenu* instance;
 
     MenuOption mainMenuOptions[3] = {
-        {"Load Game", -1, MENU_BIND(MainMenu, mainMenuOptionSelected)},
-        {"Settings", -1, MENU_BIND(MainMenu, mainMenuOptionSelected)},
-        {"Return to Title", -1, MENU_BIND(MainMenu, mainMenuOptionSelected)},
+        {"Load Game", -1, menuBind(&MainMenu::mainMenuOptionSelected)},
+        {"Settings", -1, menuBind(&MainMenu::mainMenuOptionSelected)},
+        {"Return to Title", -1, menuBind(&MainMenu::mainMenuOptionSelected)},
     };
 
     MenuOption levelOptions[6] = {
-        {"Start Game", -1, MENU_BIND(MainMenu, levelOptionSelected)},
-        {"Iwatodai Dorm", -1, MENU_BIND(MainMenu, levelOptionSelected)},
-        {"Iwatodai Streets", -1, MENU_BIND(MainMenu, levelOptionSelected)},
-        {"Station", -1, MENU_BIND(MainMenu, levelOptionSelected)},
-        {"Paulownia Mall", -1, MENU_BIND(MainMenu, levelOptionSelected)},
-        {"Sign Contract", -1, MENU_BIND(MainMenu, levelOptionSelected)},
+        {"Start Game", -1, menuBind(&MainMenu::levelOptionSelected)},
+        {"Iwatodai Dorm", -1, menuBind(&MainMenu::levelOptionSelected)},
+        {"Iwatodai Streets", -1, menuBind(&MainMenu::levelOptionSelected)},
+        {"Station", -1, menuBind(&MainMenu::levelOptionSelected)},
+        {"Paulownia Mall", -1, menuBind(&MainMenu::levelOptionSelected)},
+        {"Sign Contract", -1, menuBind(&MainMenu::levelOptionSelected)},
     };
 
     MenuOption settingOptions[1] = {

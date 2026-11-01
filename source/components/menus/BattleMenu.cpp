@@ -57,7 +57,7 @@ void BattleMenu::loadActionOptions(std::array<ActionBase*, 4>* actions, std::str
 
     for (int i = 0; i < count; i++)
     {
-        MenuOption option = {actions->at(i)->name.c_str(), -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+        MenuOption option = {actions->at(i)->name.c_str(), -1, menuBind(&BattleMenu::battleOptionSelected)};
         battleOptions.push_back(option);
     }
 
@@ -93,7 +93,7 @@ void BattleMenu::loadSkillOptions(PersonaBase* persona)
 
     for (int i = 0; i < count; i++)
     {
-        MenuOption option = {persona->skills[i]->name.c_str(), -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+        MenuOption option = {persona->skills[i]->name.c_str(), -1, menuBind(&BattleMenu::battleOptionSelected)};
         battleOptions.push_back(option);
     }
 
@@ -125,7 +125,7 @@ void BattleMenu::loadPersonaOptions(etl::vector<PersonaBase*, 13>* personas)
 
     for (int i = 0; i < count; i++)
     {
-        MenuOption option = {personas->at(i)->name.c_str(), -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+        MenuOption option = {personas->at(i)->name.c_str(), -1, menuBind(&BattleMenu::battleOptionSelected)};
         battleOptions.push_back(option);
     }
 
@@ -165,7 +165,7 @@ void BattleMenu::loadTargetOptions(etl::vector<BattleParticipant*, 13>* targets,
             continue;
         }
 
-        MenuOption option = {targets->at(i)->name.c_str(), -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+        MenuOption option = {targets->at(i)->name.c_str(), -1, menuBind(&BattleMenu::battleOptionSelected)};
         battleOptions.push_back(option);
     }
 
@@ -188,8 +188,8 @@ void BattleMenu::loadAllOutAttackConfirmation()
     loadedOption = BattleMenuOptions::ALL_OUT_ATTACK;
     pauseMessage = "Confirm All-out-attack?";
 
-    MenuOption yes = {"Yes", -1, MENU_BIND(BattleMenu, battleOptionSelected)};
-    MenuOption no = {"No", -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+    MenuOption yes = {"Yes", -1, menuBind(&BattleMenu::battleOptionSelected)};
+    MenuOption no = {"No", -1, menuBind(&BattleMenu::battleOptionSelected)};
     battleOptions.push_back(yes);
     battleOptions.push_back(no);
 

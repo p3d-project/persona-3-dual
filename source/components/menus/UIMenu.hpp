@@ -1,7 +1,5 @@
 #pragma once
 
-#define MENU_BIND(ClassName, Method) reinterpret_cast<ViewState (UIMenu::*)()>(&ClassName::Method)
-
 #include <etl/span.h>
 #include <etl/stack.h>
 #include <maxmod9.h>
@@ -11,6 +9,13 @@
 #include "components/TextComponent.hpp"
 #include "types/UITypes.hpp"
 #include "uiAnimation/UIAnimator.hpp"
+
+using MenuOptionFunc = ViewState (UIMenu::*)();
+
+template <typename Method> constexpr MenuOptionFunc menuBind(Method method)
+{
+    return static_cast<MenuOptionFunc>(method);
+}
 
 class UIMenu
 {
