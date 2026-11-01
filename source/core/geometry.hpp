@@ -3,8 +3,7 @@
  * @brief Holds geometry structures & operations
  */
 
-#ifndef Geometry_h
-#define Geometry_h
+#pragma once
 
 template <typename T> struct Point2D
 {
@@ -188,5 +187,3 @@ template <typename T> struct Vec3
         return Vec3<T>(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x);
     }
 };
-
-#endif
