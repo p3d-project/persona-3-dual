@@ -97,6 +97,7 @@ struct Text
     int letterSpacing;
     int lineSpacing;
     int spaceWidth;
+    int xBoundary;
 };
 
 /**

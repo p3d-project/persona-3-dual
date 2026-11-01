@@ -37,6 +37,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param letterSpacing Pixels of horizontal space to add after each glyph.
      * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
      * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
+     * @param xBoundary Upper limit of drawing text on the y-axis.
      */
     void drawText(const std::string& text,
                   Font* font,
@@ -46,7 +47,8 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
                   int color,
                   int letterSpacing,
                   int lineSpacing,
-                  int spaceWidth);
+                  int spaceWidth,
+                  int xBoundary);
 
     /**
      * @brief Create a Text object and renders each character with a delay to simulate typing effect.
@@ -60,6 +62,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param letterSpacing Pixels of horizontal space to add after each glyph.
      * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
      * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
+     * @param xBoundary Upper limit of drawing text on the y-axis.
      */
     void appearText(std::unique_ptr<Text>& appearingText,
                     const std::string& text,
@@ -70,7 +73,8 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
                     int color,
                     int letterSpacing,
                     int lineSpacing,
-                    int spaceWidth);
+                    int spaceWidth,
+                    int xBoundary);
 
     /**
      * @brief If a text is currently being rendered with appearText, this function will immediately render the rest of the text without delay.
@@ -142,6 +146,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param letterSpacing Pixels of horizontal space to add after each glyph.
      * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
      * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
+     * @param xBoundary Upper limit of drawing text on the y-axis.
      * @return Owning pointer to the newly created Text object.
      */
     std::unique_ptr<Text> createText(const std::string& text,
@@ -152,7 +157,8 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
                                      int color,
                                      int letterSpacing,
                                      int lineSpacing,
-                                     int spaceWidth);
+                                     int spaceWidth,
+                                     int xBoundary);
 
     /**
      * @brief Get the next character from a given Text object.
@@ -179,15 +185,16 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
     std::string getNextWord(const std::string& text);
 
     /**
-     * @brief Check if a given text string will exceed the screen width when rendered with the specified font.
+     * @brief Check if a given text string will exceed a limit on the x-axis when rendered with the specified font.
      * @param text The text string to check.
      * @param font Pointer to the font to use for rendering.
      * @param startX The starting x-coordinate for rendering the text.
      * @param bold Whether the bitmap is using bold text
      * @param letterSpacing Pixels of horizontal space to add after each glyph.
+     * @param xBoundary Upper x limit to check against.
      * @return true if the text will exceed the screen width, false otherwise.
      */
-    bool checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing);
+    bool checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing, int xBoundary);
 
     /**
      * @brief Underline a specificed area.

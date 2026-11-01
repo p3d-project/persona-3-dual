@@ -84,24 +84,25 @@ void TextComponent::configureText(const TextConfig& config, bool loadDefaultPale
     }
 }
 
-void TextComponent::drawText(const std::string& text, int x, int y, int color)
+void TextComponent::drawText(const std::string& text, int x, int y, int color, int xBoundary)
 {
     if (!font || !videoBuffer)
     {
         logMessage(LogSeverity::WARNING, "Called without font or videoBuffer");
         return;
     }
-    ts.drawText(text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth);
+    ts.drawText(text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 }
 
-void TextComponent::appearText(const std::string& text, int x, int y, int color)
+void TextComponent::appearText(const std::string& text, int x, int y, int color, int xBoundary)
 {
     if (!font || !videoBuffer)
     {
         logMessage(LogSeverity::WARNING, "Called without font or videoBuffer");
         return;
     }
-    ts.appearText(appearingText, text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth);
+    ts.appearText(
+        appearingText, text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 }
 
 void TextComponent::appearTextSkip()
