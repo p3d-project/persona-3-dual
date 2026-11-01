@@ -13,7 +13,8 @@ void TextSystem::drawText(const std::string& text,
                           int color,
                           int letterSpacing,
                           int lineSpacing,
-                          int spaceWidth)
+                          int spaceWidth,
+                          int xBoundary)
 {
     if (!font || !videoBuffer)
     {
@@ -21,7 +22,8 @@ void TextSystem::drawText(const std::string& text,
         return;
     }
 
-    auto textObj = createText(text, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
+    auto textObj =
+        createText(text, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 
     while (textObj->cursorPos < (int)textObj->content.size())
     {
@@ -39,7 +41,8 @@ void TextSystem::appearText(std::unique_ptr<Text>& appearingText,
                             int color,
                             int letterSpacing,
                             int lineSpacing,
-                            int spaceWidth)
+                            int spaceWidth,
+                            int xBoundary)
 {
     if (!font || !videoBuffer)
     {
@@ -51,8 +54,8 @@ void TextSystem::appearText(std::unique_ptr<Text>& appearingText,
     {
         appearingText.reset();
     }
-    appearingText =
-        createText(content, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
+    appearingText = createText(
+        content, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 }
 
 void TextSystem::appearTextSkip(Text* appearingText)
@@ -197,7 +200,7 @@ void TextSystem::drawNextFromText(Text* text)
             return; /// Don't add a space at the beginning of a line
         }
         std::string nextWord = getNextWord(text->content.substr(text->cursorPos + 1));
-        if (checkWordWrap(nextWord, text->font, text->cursorX, text->bold, text->letterSpacing))
+        if (checkWordWrap(nextWord, text->font, text->cursorX, text->bold, text->letterSpacing, text->xBoundary))
         {
             text->cursorX = text->startX;
             text->cursorY += text->font->lineHeight + text->lineSpacing;
@@ -285,7 +288,8 @@ std::unique_ptr<Text> TextSystem::createText(const std::string& text,
                                              int color,
                                              int letterSpacing,
                                              int lineSpacing,
-                                             int spaceWidth)
+                                             int spaceWidth,
+                                             int xBoundary)
 {
     auto newText = std::make_unique<Text>();
     newText->cursorX = startX;
@@ -304,6 +308,7 @@ std::unique_ptr<Text> TextSystem::createText(const std::string& text,
     newText->letterSpacing = letterSpacing;
     newText->lineSpacing = lineSpacing;
     newText->spaceWidth = spaceWidth;
+    newText->xBoundary = xBoundary;
     return newText;
 }
 
@@ -342,7 +347,8 @@ std::string TextSystem::getNextWord(const std::string& text)
     return nextWord;
 }
 
-bool TextSystem::checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing)
+bool TextSystem::checkWordWrap(
+    const std::string& text, Font* font, int startX, bool bold, int letterSpacing, int xBoundary)
 {
     int cursorX = startX;
     for (char c : text)
@@ -350,7 +356,7 @@ bool TextSystem::checkWordWrap(const std::string& text, Font* font, int startX, 
         Glyph g = bold ? font->boldGlyphs[static_cast<unsigned char>(c)] : font->glyphs[static_cast<unsigned char>(c)];
         cursorX += g.width + letterSpacing;
     }
-    if (cursorX > 256)
+    if (cursorX > xBoundary)
     {
         return true; // Word exceeds screen width
     }
