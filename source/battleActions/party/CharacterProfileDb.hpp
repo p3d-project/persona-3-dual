@@ -7,5 +7,5 @@ struct CharacterProfileDb
     static CharacterProfile yukari;
     static CharacterProfile junpei;
 
-    static void Initialize();
+    static void initialize();
 };

@@ -1,6 +1,6 @@
 #include "SFXComponent.hpp"
 
-void SFXComponent::Destroy()
+void SFXComponent::destroy()
 {
     stopSFX();
 }

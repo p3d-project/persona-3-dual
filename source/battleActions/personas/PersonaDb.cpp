@@ -11,7 +11,7 @@ Skill* PersonaDb::forneusSkills[2];
 Skill* PersonaDb::hermesSkills[1];
 Skill* PersonaDb::ioSkills[3];
 
-void PersonaDb::Initialize()
+void PersonaDb::initialize()
 {
     /*--------------ORPHEUS--------------*/
     orpheus.name = "Orpheus";

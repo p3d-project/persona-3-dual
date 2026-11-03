@@ -41,7 +41,7 @@ ViewState nextView = ViewState::DEFAULT;
 
 std::unique_ptr<BaseView> currentView;
 
-void SwitchView(BaseView* newView, const char* viewName = nullptr)
+void switchView(BaseView* newView, const char* viewName = nullptr)
 {
     if (newView == nullptr)
     {
@@ -75,7 +75,7 @@ void SwitchView(BaseView* newView, const char* viewName = nullptr)
 }
 
 // fn for the interrupt
-void Vblank()
+void vblank()
 {
     frame = frame + 1;
 }
@@ -96,7 +96,7 @@ void NDSComputeCallback()
 
 int main(int argc, char* argv[])
 {
-    irqSet(IRQ_VBLANK, Vblank);
+    irqSet(IRQ_VBLANK, vblank);
 
     // initialize DLDI/FAT
     if (!fatInitDefault())
@@ -127,13 +127,13 @@ int main(int argc, char* argv[])
     clearLog();
 
     // setup db's. DO NOT CHANGE order
-    WeaponDb::Initialize();
-    SkillDb::Initialize();
-    ArmourDb::Initialize();
-    ShoeDb::Initialize();
-    PersonaDb::Initialize();
-    EnemyProfileDb::Initialize();
-    CharacterProfileDb::Initialize();
+    WeaponDb::initialize();
+    SkillDb::initialize();
+    ArmourDb::initialize();
+    ShoeDb::initialize();
+    PersonaDb::initialize();
+    EnemyProfileDb::initialize();
+    CharacterProfileDb::initialize();
 
     // setup globals
     Globals::enableDebugPrint = false;
@@ -146,47 +146,47 @@ int main(int argc, char* argv[])
     srand(TIMER0_DATA);
 
     // set platform hooks
-    engine.SetComputeCallback(&NDSComputeCallback);
-    engine.SetComputeEnabled(true);
-    engine.SetPollInputCallback(&NDSPollInputCallback);
-    engine.SetPollingEnabled(true);
+    engine.setComputeCallback(&NDSComputeCallback);
+    engine.setComputeEnabled(true);
+    engine.setPollInputCallback(&NDSPollInputCallback);
+    engine.setPollingEnabled(true);
 
     // register singletons
-    engine.RegisterSystem(&BattleSystem::GetInstance());
-    engine.RegisterSystem(&CameraSystem::GetInstance());
-    engine.RegisterSystem(&SaveSystem::GetInstance());
-    engine.RegisterSystem(&TextSystem::GetInstance());
-    engine.RegisterSystem(&UISystem::GetInstance());
+    engine.registerSystem(&BattleSystem::getInstance());
+    engine.registerSystem(&CameraSystem::getInstance());
+    engine.registerSystem(&SaveSystem::getInstance());
+    engine.registerSystem(&TextSystem::getInstance());
+    engine.registerSystem(&UISystem::getInstance());
 
-    engine.RegisterManager(&MathManager::GetInstance());
-    engine.RegisterManager(&IOManager::GetInstance());
-    engine.RegisterManager(&TextManager::GetInstance());
-    engine.RegisterManager(&UIManager::GetInstance());
-    engine.RegisterManager(&AudioManager::GetInstance());
+    engine.registerManager(&MathManager::getInstance());
+    engine.registerManager(&IOManager::getInstance());
+    engine.registerManager(&TextManager::getInstance());
+    engine.registerManager(&UIManager::getInstance());
+    engine.registerManager(&AudioManager::getInstance());
 
     // initialize engine
-    engine.InitAll();
+    engine.initAll();
     logMessage(LogSeverity::DEBUG, "Engine systems and managers initialized successfully");
 
     // set up initial game state
     // create entity
-    player = engine.CreateEntity();
+    player = engine.createEntity();
 
     // load save data
-    ae::BroadcastEvent(Event::ReadSave{});
+    ae::broadcastEvent(Event::ReadSave{});
 
     // Default is DisclaimerView
-    SwitchView(new DisclaimerView(), "DisclaimerView");
+    switchView(new DisclaimerView(), "DisclaimerView");
 
     // TODO: set to constant tied to VBlank
-    const ae::q20_12_t dt = MathManager::GetInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
+    const ae::q20_12_t dt = MathManager::getInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
 
     while (1)
     {
         swiWaitForVBlank();
 
         // Poll Input -> Update Systems -> Update Components -> Process Managers -> Compute
-        engine.Tick(dt);
+        engine.tick(dt);
 
         // check state of currentView
         if (currentView != nullptr)
@@ -207,67 +207,67 @@ int main(int argc, char* argv[])
             {
             case ViewState::INTRO:
             {
-                SwitchView(new IntroView(), "IntroView");
+                switchView(new IntroView(), "IntroView");
                 break;
             }
 
             case ViewState::MAIN_MENU:
             {
-                SwitchView(new MainMenuView(), "MainMenuView");
+                switchView(new MainMenuView(), "MainMenuView");
                 break;
             }
 
             case ViewState::IWATODAI_DORM:
             {
-                SwitchView(new IwatodaiDormView(), "IwatodaiDormView");
+                switchView(new IwatodaiDormView(), "IwatodaiDormView");
                 break;
             }
 
             case ViewState::IWATODAI_STREETS:
             {
-                SwitchView(new IwatodaiStreetsView(), "IwatodaiStreetsView");
+                switchView(new IwatodaiStreetsView(), "IwatodaiStreetsView");
                 break;
             }
 
             case ViewState::DISCLAIMER:
             {
-                SwitchView(new DisclaimerView(), "DisclaimerView");
+                switchView(new DisclaimerView(), "DisclaimerView");
                 break;
             }
 
             case ViewState::INTRO_VIDEO:
             {
-                SwitchView(new VideoView("intro.vid", ViewState::INTRO), "VideoView (intro.vid)");
+                switchView(new VideoView("intro.vid", ViewState::INTRO), "VideoView (intro.vid)");
                 break;
             }
 
             case ViewState::CUTSCENE_1:
             {
-                SwitchView(new VideoView("cutscene-1.vid", ViewState::SIGN_CONTRACT), "VideoView (cutscene-1.vid)");
+                switchView(new VideoView("cutscene-1.vid", ViewState::SIGN_CONTRACT), "VideoView (cutscene-1.vid)");
                 break;
             }
 
             case ViewState::SIGN_CONTRACT:
             {
-                SwitchView(new SignContractView(), "SignContractView");
+                switchView(new SignContractView(), "SignContractView");
                 break;
             }
 
             case ViewState::CUTSCENE_2:
             {
-                SwitchView(new VideoView("cutscene-2.vid", ViewState::IWATODAI_DORM), "VideoView (cutscene-2.vid)");
+                switchView(new VideoView("cutscene-2.vid", ViewState::IWATODAI_DORM), "VideoView (cutscene-2.vid)");
                 break;
             }
 
             case ViewState::STATION:
             {
-                SwitchView(new StationView(), "StationView");
+                switchView(new StationView(), "StationView");
                 break;
             }
 
             case ViewState::PAULOWNIA_MALL:
             {
-                SwitchView(new PaulowniaMallView(), "PaulowniaMallView");
+                switchView(new PaulowniaMallView(), "PaulowniaMallView");
                 break;
             }
 
@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
         oamUpdate(&oamMain);
     }
 
-    engine.ShutdownAll();
+    engine.shutdownAll();
 
     return 0;
 }

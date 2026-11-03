@@ -13,15 +13,15 @@
 class TextManager : public ae::Manager, public ae::Singleton<TextManager>
 {
   public:
-    void Init() override
+    void init() override
     {
     }
 
-    void Process() override
+    void process() override
     {
     }
 
-    void Shutdown() override
+    void shutdown() override
     {
     }
 
@@ -83,7 +83,7 @@ class TextManager : public ae::Manager, public ae::Singleton<TextManager>
     friend class Singleton<TextManager>;
     TextManager() = default;
 
-    IOManager& io = IOManager::GetInstance();
+    IOManager& io = IOManager::getInstance();
 
     /**
      * @brief Extract an integer value from a line of text based on a specified key.
