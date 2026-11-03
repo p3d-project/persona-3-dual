@@ -9,7 +9,7 @@
 
 void BattleSystem::on_receive(const Event::ExecuteBattle& msg)
 {
-    isActive = true;
+    active = true;
     battleMenuCmpt = BattleMenu::getInstance();
 
     if (musicCmpt != nullptr)
@@ -54,7 +54,7 @@ void BattleSystem::on_receive(const Event::ExecuteBattle& msg)
     if (battleParticipants.empty())
     {
         logMessage(LogSeverity::ERROR, "No battle participants configured in ExecuteBattle");
-        isActive = false;
+        active = false;
         return;
     }
 
@@ -64,12 +64,12 @@ void BattleSystem::on_receive(const Event::ExecuteBattle& msg)
     phase = currentParticipantTurn->getInitalTurnPhase();
 }
 
-void BattleSystem::Init()
+void BattleSystem::init()
 {
-    isActive = false;
+    active = false;
 }
 
-void BattleSystem::Update(ae::q20_12_t)
+void BattleSystem::update(ae::q20_12_t)
 {
     switch (phase)
     {
@@ -363,7 +363,7 @@ void BattleSystem::Update(ae::q20_12_t)
     return;
 }
 
-void BattleSystem::Shutdown()
+void BattleSystem::shutdown()
 {
     logMessage(LogSeverity::DEBUG, "Battle shutdown");
 
@@ -372,7 +372,7 @@ void BattleSystem::Shutdown()
         musicCmpt->stopMusic();
     }
 
-    isActive = false;
+    active = false;
 
     turnsTaken = 0;
     currentParticipantIndex = 0;
@@ -400,7 +400,7 @@ void BattleSystem::Shutdown()
     player = nullptr;
 }
 
-void BattleSystem::SetMusicComponent(MusicComponent* music)
+void BattleSystem::setMusicComponent(MusicComponent* music)
 {
     musicCmpt = music;
 }
@@ -483,7 +483,7 @@ void BattleSystem::advanceTurn()
     if (battleParticipants.empty())
     {
         logMessage(LogSeverity::ERROR, "No battle participants");
-        Shutdown();
+        shutdown();
         return;
     }
 
@@ -498,7 +498,7 @@ void BattleSystem::advanceTurn()
     if (checked >= battleParticipants.size())
     {
         logMessage(LogSeverity::WARNING, "Found no living battle participants");
-        Shutdown();
+        shutdown();
         return;
     }
 
@@ -532,7 +532,7 @@ void BattleSystem::setNextPhase(BattlePhase nextPhase)
 void BattleSystem::calculateTurnOrder()
 {
     // random boost from 1.2 to 1.4 that priorizes party
-    ae::q20_12_t boost = ae::q20_12_t{1.2} + MathManager::GetInstance().randFrac() * ae::q20_12_t{0.2};
+    ae::q20_12_t boost = ae::q20_12_t{1.2} + MathManager::getInstance().randFrac() * ae::q20_12_t{0.2};
 
     for (BattleParticipant* battleParticipant : battleParticipants)
     {
@@ -593,7 +593,7 @@ void BattleSystem::handleDeadParticipants()
         if (battleResult.playerDied)
         {
             /// Don't display any battle results
-            Shutdown();
+            shutdown();
             return;
         }
     }
@@ -611,8 +611,8 @@ void BattleSystem::handleDeadParticipants()
     if (!enemiesAlive)
     {
         /// Display battle results
-        ae::BroadcastEvent(battleResult);
-        Shutdown();
+        ae::broadcastEvent(battleResult);
+        shutdown();
         return;
     }
 }

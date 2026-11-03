@@ -9,7 +9,7 @@
 
 /**
  * @details
- * Db of enemy Profiles. Call Initialize() once at startup before any
+ * Db of enemy Profiles. Call initialize() once at startup before any
  * profile here is used to construct an Enemy.
  */
 struct EnemyProfileDb
@@ -18,7 +18,7 @@ struct EnemyProfileDb
     static EnemyProfile cowardlyMaya;
 
     /// @brief Initialize all static EnemyProfiles with their stats, call once before first use
-    static void Initialize();
+    static void initialize();
 
   private:
     static Skill* mercilessMayaSkills[1];

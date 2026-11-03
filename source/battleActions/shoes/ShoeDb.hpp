@@ -6,5 +6,5 @@ struct ShoeDb
     static Shoe rubberSole;
     static Shoe enemyShoe;
 
-    static void Initialize();
+    static void initialize();
 };

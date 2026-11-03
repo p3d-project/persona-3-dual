@@ -25,9 +25,9 @@ void IwatodaiStreetsView::startBattle()
 {
     // start battle
     musicCmpt->stopMusic();
-    BattleSystem::GetInstance().SetMusicComponent(musicCmpt);
+    BattleSystem::getInstance().setMusicComponent(musicCmpt);
     Event::ExecuteBattle msg(CharacterProfileDb::player, characterProfiles, enemyProfiles, battleStartCondition);
-    ae::BroadcastEvent(msg);
+    ae::broadcastEvent(msg);
 }
 
 void IwatodaiStreetsView::setupCamera()
@@ -130,6 +130,6 @@ void IwatodaiStreetsView::setupUI()
     std::array<UIScreen*, 5> screens = {menuHUDScreen, pauseMenuScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt, battleMenuCmpt};
 
-    ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, screens});
-    ae::BroadcastEvent(Event::ConfigureUIMenu{textSub, menus});
+    ae::broadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, screens});
+    ae::broadcastEvent(Event::ConfigureUIMenu{textSub, menus});
 }

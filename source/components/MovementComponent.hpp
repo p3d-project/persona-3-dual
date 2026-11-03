@@ -22,18 +22,18 @@ class MovementComponent : public ae::Component
 {
   public:
     static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Movement);
-    void Init() override;
+    void init() override;
 
-    void Destroy() override;
+    void destroy() override;
 
     /**
      * @brief Core update loop that calculates the character & camera movement
      *
      * @param dt Fixed-point delta time passed from the aegis engine loop (currently unused).
      */
-    void Update(ae::q20_12_t /*dt*/) override;
+    void update(ae::q20_12_t /*dt*/) override;
 
-    ae::ComponentTypeID GetType() const override
+    ae::ComponentTypeID getType() const override
     {
         return TYPE_ID;
     }
@@ -48,14 +48,14 @@ class MovementComponent : public ae::Component
     void configureMovement(const MovementConfig& config);
 
     /**
-     * @brief Start the Update(ae::q20_12_t) loop by setting isActive to true
+     * @brief Start the update(ae::q20_12_t) loop by setting active to true
      *
      * Movement must be set by configureMovement() before start() can be called
      */
     void start();
 
     /**
-     * @brief Stop the Update(ae::q20_12_t) loop by setting isActive to false
+     * @brief Stop the update(ae::q20_12_t) loop by setting active to false
      */
     void stop();
 
@@ -77,14 +77,14 @@ class MovementComponent : public ae::Component
     TileType isTileAt();
 
   protected:
-    void SubmitToManager() override
+    void submitToManager() override
     {
     }
 
   private:
     ae::q20_12_t getGroundHeight(ae::q20_12_t x, ae::q20_12_t z) const;
 
-    MathManager& math = MathManager::GetInstance();
+    MathManager& math = MathManager::getInstance();
     AnimationController* animationCtrl = AnimationController::getInstance();
 
     MovementConfig config;

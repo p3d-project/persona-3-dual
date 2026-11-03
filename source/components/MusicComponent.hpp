@@ -14,20 +14,20 @@ class MusicComponent : public ae::Component
 {
   public:
     static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Music);
-    void Init() override
+    void init() override
     {
     }
 
     /**
      * @brief Automatically deregisters the currently registered music, if any
      */
-    void Destroy() override;
+    void destroy() override;
 
-    void Update(ae::q20_12_t /*dt*/) override
+    void update(ae::q20_12_t /*dt*/) override
     {
     }
 
-    ae::ComponentTypeID GetType() const override
+    ae::ComponentTypeID getType() const override
     {
         return TYPE_ID;
     }
@@ -61,12 +61,12 @@ class MusicComponent : public ae::Component
     void stopMusic();
 
   protected:
-    void SubmitToManager() override
+    void submitToManager() override
     {
     }
 
   private:
-    AudioManager& am = AudioManager::GetInstance();
+    AudioManager& am = AudioManager::getInstance();
 
     /**
      * @brief Implementation to set up the music to play

@@ -47,7 +47,7 @@ void BattleMenu::loadActionOptions(std::array<ActionBase*, 4>* actions, std::str
     };
 
     text->clearScreen();
-    ae::BroadcastEvent(Event::RenderUIText{});
+    ae::broadcastEvent(Event::RenderUIText{});
 
     battleOptions.clear();
     loadedOption = BattleMenuOptions::ACTION;
@@ -79,7 +79,7 @@ void BattleMenu::loadSkillOptions(PersonaBase* persona)
     };
 
     text->clearScreen();
-    ae::BroadcastEvent(Event::RenderUIText{});
+    ae::broadcastEvent(Event::RenderUIText{});
 
     logMessage(LogSeverity::DEBUG, "Skill options loaded for: " + persona->name);
 
@@ -114,7 +114,7 @@ void BattleMenu::loadPersonaOptions(etl::vector<PersonaBase*, 13>* personas)
     }
 
     text->clearScreen();
-    ae::BroadcastEvent(Event::RenderUIText{});
+    ae::broadcastEvent(Event::RenderUIText{});
 
     logMessage(LogSeverity::DEBUG, "Persona menu options loaded");
 
@@ -149,7 +149,7 @@ void BattleMenu::loadTargetOptions(etl::vector<BattleParticipant*, 13>* targets,
     }
 
     text->clearScreen();
-    ae::BroadcastEvent(Event::RenderUIText{});
+    ae::broadcastEvent(Event::RenderUIText{});
 
     logMessage(LogSeverity::DEBUG, "Target options loaded");
 
@@ -180,7 +180,7 @@ void BattleMenu::loadAllOutAttackConfirmation()
     };
 
     text->clearScreen();
-    ae::BroadcastEvent(Event::RenderUIText{});
+    ae::broadcastEvent(Event::RenderUIText{});
 
     logMessage(LogSeverity::DEBUG, "All-Out Attack confirmation prompt loaded");
 

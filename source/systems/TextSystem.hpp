@@ -14,15 +14,15 @@
 class TextSystem : public ae::System, public ae::Singleton<TextSystem>
 {
   public:
-    void Init() override
+    void init() override
     {
     }
 
-    void Shutdown() override
+    void shutdown() override
     {
     }
 
-    void Update(ae::q20_12_t /*dt*/) override
+    void update(ae::q20_12_t /*dt*/) override
     {
     }
 

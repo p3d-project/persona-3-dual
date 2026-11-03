@@ -9,7 +9,7 @@ CharacterProfile CharacterProfileDb::player;
 CharacterProfile CharacterProfileDb::yukari;
 CharacterProfile CharacterProfileDb::junpei;
 
-void CharacterProfileDb::Initialize()
+void CharacterProfileDb::initialize()
 {
     /*--------------MC-----------------*/
     player.name = "Player";

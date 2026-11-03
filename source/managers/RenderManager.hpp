@@ -14,15 +14,15 @@
 class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
 {
   public:
-    void Init() override
+    void init() override
     {
     }
 
-    void Process() override
+    void process() override
     {
     }
 
-    void Shutdown() override
+    void shutdown() override
     {
     }
 
@@ -134,5 +134,5 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
     static inline const ae::q20_12_t DEGREE_MODIFIER = ae::q20_12_t{1 << 15} / ae::q20_12_t{360};
     int activeTexture = -1;
 
-    MathManager& math = MathManager::GetInstance();
+    MathManager& math = MathManager::getInstance();
 };
