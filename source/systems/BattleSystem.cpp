@@ -327,7 +327,7 @@ void BattleSystem::Update(ae::q20_12_t)
     case BattlePhase::ShowAlert:
     {
         battleMenuCmpt->loadAlertOptions(pendingAlert);
-        if (battleMenuCmpt->isAlertExpired(120))
+        if (!battleMenuCmpt->isAlertActive())
         {
             pendingAlert.clear();
             battleMenuCmpt->resetLoadedOptions();
