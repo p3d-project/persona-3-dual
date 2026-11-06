@@ -33,14 +33,14 @@ static const uint16_t customPalette[21] = {
     ARGB16(1, 15, 15, 15), // Gray          255
 };
 
-Font* TextManager::loadFont(std::string* name, int size)
+std::unique_ptr<Font> TextManager::loadFont(std::string* name, int size)
 {
     if (name == nullptr)
     {
         logMessage(LogSeverity::FATAL, "name cannot be nullptr");
     }
 
-    Font* font = new Font();
+    auto font = std::make_unique<Font>();
     std::string fullPath = "fonts/" + *name + "/size-" + std::to_string(size);
 
     std::string fontBitmapPath = fullPath + ".img.bin";
@@ -51,7 +51,7 @@ Font* TextManager::loadFont(std::string* name, int size)
     }
 
     std::string fontMetadataPath = fullPath + ".fnt";
-    if (!loadFontMetadata(&fontMetadataPath, font))
+    if (!loadFontMetadata(&fontMetadataPath, font.get()))
     {
         logMessage(LogSeverity::FATAL, "Failed to load font metadata from \n" + fullPath + ".fnt");
     }
@@ -59,7 +59,7 @@ Font* TextManager::loadFont(std::string* name, int size)
     std::string fontBitmapBoldPath = fullPath + "-bold.img.bin";
     std::string fontMetadataBoldPath = fullPath + "-bold.fnt";
     font->bitmapBold = loadFontBitmap(&fontBitmapBoldPath);
-    if (!font->bitmapBold || !loadFontMetadata(&fontMetadataBoldPath, font, true))
+    if (!font->bitmapBold || !loadFontMetadata(&fontMetadataBoldPath, font.get(), true))
     {
         font->boldLoaded = false;
         free(font->bitmapBold);
@@ -71,18 +71,6 @@ Font* TextManager::loadFont(std::string* name, int size)
     }
 
     return font;
-}
-
-void TextManager::unloadFont(Font* font)
-{
-    if (font == nullptr)
-    {
-        return;
-    }
-
-    free(font->bitmap);
-    free(font->bitmapBold);
-    delete font;
 }
 
 void TextManager::loadDefaultPalette()
