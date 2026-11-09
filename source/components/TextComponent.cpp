@@ -30,19 +30,14 @@ void TextComponent::Destroy()
 {
     isActive = false;
     appearTextStop();
-    tm.unloadFont(font);
-    font = nullptr;
+    font.reset();
 }
 
 void TextComponent::configureText(const TextConfig& config, bool loadDefaultPalette)
 {
     isActive = true;
 
-    if (font != nullptr)
-    {
-        tm.unloadFont(font);
-        font = nullptr;
-    }
+    font.reset();
 
     // set video buffer
     if (config.videoBuffer != nullptr)
@@ -91,7 +86,7 @@ void TextComponent::drawText(const std::string& text, int x, int y, int color, i
         logMessage(LogSeverity::WARNING, "Called without font or videoBuffer");
         return;
     }
-    ts.drawText(text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
+    ts.drawText(text, font.get(), videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 }
 
 void TextComponent::appearText(const std::string& text, int x, int y, int color, int xBoundary)
@@ -102,7 +97,7 @@ void TextComponent::appearText(const std::string& text, int x, int y, int color,
         return;
     }
     ts.appearText(
-        appearingText, text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
+        appearingText, text, font.get(), videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 }
 
 void TextComponent::appearTextSkip()
@@ -122,7 +117,7 @@ bool TextComponent::appearTextDone()
 
 void TextComponent::drawGlyph(const Glyph& glyph, int x, int y, int color, bool bold, bool italic, bool underline)
 {
-    ts.drawGlyph(glyph, font, videoBuffer, x, y, color, bold, italic, underline);
+    ts.drawGlyph(glyph, font.get(), videoBuffer, x, y, color, bold, italic, underline);
 }
 
 Glyph* TextComponent::getGlyph(const char& c, bool bold)
@@ -186,7 +181,7 @@ void TextComponent::setSpaceWidth(int value)
 
 void TextComponent::testBitmap()
 {
-    ts.testBitmap(font, videoBuffer);
+    ts.testBitmap(font.get(), videoBuffer);
 }
 
 void TextComponent::testPalette()
