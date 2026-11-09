@@ -102,15 +102,26 @@ void TextComponent::drawText(const std::string& text, int x, int y, int color)
     ts.drawText(text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth);
 }
 
-void TextComponent::appearText(const std::string& text, int x, int y, int color, int maxX, int maxY)
+void TextComponent::appearText(const std::string& text, int x, int y, int color, int maxX, int maxY, bool hyphenate)
 {
     if (!font || !videoBuffer)
     {
         logMessage(LogSeverity::WARNING, "Called without font or videoBuffer");
         return;
     }
-    ts.appearText(
-        appearingText, text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth, maxX, maxY);
+    ts.appearText(appearingText,
+                  text,
+                  font,
+                  videoBuffer,
+                  x,
+                  y,
+                  color,
+                  letterSpacing,
+                  lineSpacing,
+                  spaceWidth,
+                  maxX,
+                  maxY,
+                  hyphenate);
 }
 
 void TextComponent::appearTextSkip()

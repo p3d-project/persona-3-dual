@@ -65,9 +65,16 @@ class TextComponent : public ae::Component
      * @param maxX Right edge (exclusive) used for word wrapping (default is the screen width).
      * @param maxY Bottom edge of the text area. When the next line would not fit above it, the text pauses
      *             until appearTextNextPage() is called. 0 (default) disables pagination.
+     * @param hyphenate Enable character-based splitting of overlong words.
      * @see appearText
      */
-    void appearText(const std::string& text, int x, int y, int color = TextColor::White, int maxX = 256, int maxY = 0);
+    void appearText(const std::string& text,
+                    int x,
+                    int y,
+                    int color = TextColor::White,
+                    int maxX = 256,
+                    int maxY = 0,
+                    bool hyphenate = false);
 
     /**
      * @brief A wrapper for appearTextSkip in TextSystem. If a text is currently being rendered with appearText, this function will immediately render the rest of the text without delay.

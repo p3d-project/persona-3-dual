@@ -271,7 +271,7 @@ void DialogueComponent::renderAnimFrame()
     }
 
     textAlt->drawText("\xFF\x02\x01" + current->name, 8, 128, TextColor::RichBlue);
-    text->appearText(current->text, TEXT_X, TEXT_Y, TextColor::Black, TEXT_MAX_X, TEXT_MAX_Y);
+    text->appearText(current->text, TEXT_X, TEXT_Y, TextColor::Black, TEXT_MAX_X, TEXT_MAX_Y, true);
 }
 
 bool DialogueComponent::skipOrContinueText()

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <nds.h>
 #include <string>
 
 /**
@@ -104,6 +103,7 @@ struct Text
     int maxY = 0;
     /// Set when the next glyph would not fit above maxY. Output pauses until the next page is requested
     bool pageBreak = false;
+    bool hyphenate = false;
 };
 
 /**

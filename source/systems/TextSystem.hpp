@@ -63,6 +63,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param maxX Right edge (exclusive) used for word wrapping.
      * @param maxY Bottom edge of the text area. When a line would not fit above it, the text pauses until
      *             appearTextNextPage() is called. 0 disables pagination.
+     * @param hyphenate Enable character-based splitting of overlong words (dialogue only).
      */
     void appearText(std::unique_ptr<Text>& appearingText,
                     const std::string& text,
@@ -75,7 +76,8 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
                     int lineSpacing,
                     int spaceWidth,
                     int maxX = 256,
-                    int maxY = 0);
+                    int maxY = 0,
+                    bool hyphenate = false);
 
     /**
      * @brief If a text is currently being rendered with appearText, this function will immediately render the rest of the text without delay.
@@ -193,26 +195,6 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param paletteValue The color index in the palette to use for the pixel.
      */
     void drawPixel(uint16_t* videoBuffer, int x, int y, int paletteValue);
-
-    /**
-     * @brief Get the next word from a given text string.
-     * @param text The text string to extract the next word from.
-     * @return The next word in the text string, or an empty string if there are no more words.
-     */
-    std::string getNextWord(const std::string& text);
-
-    /**
-     * @brief Check if a given text string will exceed the screen width when rendered with the specified font.
-     * @param text The text string to check.
-     * @param font Pointer to the font to use for rendering.
-     * @param startX The starting x-coordinate for rendering the text.
-     * @param bold Whether the bitmap is using bold text
-     * @param letterSpacing Pixels of horizontal space to add after each glyph.
-     * @param maxX Right edge (exclusive) the text must not pass.
-     * @return true if the text will exceed maxX, false otherwise.
-     * @note Formatting instructions embedded in the text are not measured.
-     */
-    bool checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing, int maxX);
 
     /**
      * @brief Underline a specificed area.

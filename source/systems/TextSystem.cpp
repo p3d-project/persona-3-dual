@@ -1,9 +1,10 @@
 #include "TextSystem.hpp"
+#include "TextLayout.hpp"
 #include "core/logger.hpp"
 
 #include <algorithm>
 
-constexpr char INSTRUCTION_BIT = 0xFF; /// Special value used to indicate that the next byte is an instruction
+constexpr unsigned char INSTRUCTION_BIT = 0xFF;
 
 void TextSystem::drawText(const std::string& text,
                           Font* font,
@@ -41,7 +42,8 @@ void TextSystem::appearText(std::unique_ptr<Text>& appearingText,
                             int lineSpacing,
                             int spaceWidth,
                             int maxX,
-                            int maxY)
+                            int maxY,
+                            bool hyphenate)
 {
     if (!font || !videoBuffer)
     {
@@ -55,6 +57,7 @@ void TextSystem::appearText(std::unique_ptr<Text>& appearingText,
     }
     appearingText = createText(
         content, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth, maxX, maxY);
+    appearingText->hyphenate = hyphenate;
 }
 
 void TextSystem::appearTextSkip(Text* appearingText)
@@ -224,8 +227,7 @@ void TextSystem::drawNextFromText(Text* text)
         {
             return; /// Don't add a space at the beginning of a line
         }
-        std::string nextWord = getNextWord(text->content.substr(text->cursorPos + 1));
-        if (checkWordWrap(nextWord, text->font, text->cursorX, text->bold, text->letterSpacing, text->maxX))
+        if (TextLayout::shouldWrapWord(*text))
         {
             text->cursorX = text->startX;
             text->cursorY += text->font->lineHeight + text->lineSpacing;
@@ -261,20 +263,7 @@ void TextSystem::drawNextFromText(Text* text)
         else if (c == TextInstruction::StyleChange)
         {
             c = getNextChar(text);
-            if (c == TextInstruction::Reset) /// Reset all styles
-            {
-                text->bold = false;
-                text->italic = false;
-                text->underline = false;
-            }
-            else
-            {
-                /// Extract style flags from indivudual bits
-                text->bold = (c & TextInstruction::StyleBold) != 0 &&
-                             text->font->boldLoaded; /// Only apply bold if the font has a bold bitmap
-                text->italic = (c & TextInstruction::StyleItalic) != 0;
-                text->underline = (c & TextInstruction::StyleUnderline) != 0;
-            }
+            TextLayout::applyStyle(*text->font, c, text->bold, text->italic, text->underline);
         }
     }
     else if (text->font->glyphs[c].width == 0)
@@ -284,24 +273,31 @@ void TextSystem::drawNextFromText(Text* text)
     else
     {
         /// Pause on the current character; it is drawn once the next page starts
-        if (text->maxY > 0 && text->cursorY + text->font->lineHeight > text->maxY)
+        if (TextLayout::pageFull(*text))
         {
-            text->pageBreak = true;
             return;
         }
 
         Glyph g = text->bold ? text->font->boldGlyphs[c] : text->font->glyphs[c];
 
-        /// Break words that are longer than a whole line
-        if (text->cursorX > text->startX && text->cursorX + g.width > text->maxX)
+        const int oldX = text->cursorX;
+        const int oldY = text->cursorY;
+        if (TextLayout::prepareGlyph(*text, g))
         {
-            text->cursorX = text->startX;
-            text->cursorY += text->font->lineHeight + text->lineSpacing;
-            if (text->maxY > 0 && text->cursorY + text->font->lineHeight > text->maxY)
-            {
-                text->pageBreak = true;
-                return;
-            }
+            const Glyph& hyphen = text->bold ? text->font->boldGlyphs['-'] : text->font->glyphs['-'];
+            drawGlyph(hyphen,
+                      text->font,
+                      text->videoBuffer,
+                      oldX,
+                      oldY,
+                      text->activeColor,
+                      text->bold,
+                      text->italic,
+                      text->underline);
+        }
+        if (text->pageBreak)
+        {
+            return;
         }
 
         drawGlyph(g,
@@ -381,39 +377,6 @@ void TextSystem::drawPixel(uint16_t* videoBuffer, int x, int y, int paletteValue
     {
         videoBuffer[wordIndex] = (currentWord & 0x00FF) | ((paletteValue & 0xFF) << 8);
     }
-}
-
-std::string TextSystem::getNextWord(const std::string& text)
-{
-    std::string nextWord = "";
-    int i = 0;
-    while (i < (int)text.size() && text[i] != ' ' && text[i] != '\n')
-    {
-        nextWord += text[i];
-        i++;
-    }
-    return nextWord;
-}
-
-bool TextSystem::checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing, int maxX)
-{
-    int cursorX = startX;
-    for (size_t i = 0; i < text.size(); ++i)
-    {
-        unsigned char c = static_cast<unsigned char>(text[i]);
-        if (c == static_cast<unsigned char>(INSTRUCTION_BIT))
-        {
-            i += 2; /// skip the instruction type and argument bytes, they are not drawn
-            continue;
-        }
-        Glyph g = bold ? font->boldGlyphs[c] : font->glyphs[c];
-        cursorX += g.width + letterSpacing;
-    }
-    if (cursorX > maxX)
-    {
-        return true; // Word exceeds the available width
-    }
-    return false;
 }
 
 void TextSystem::underlineGap(int startX, int y, int width, uint16_t* videoBuffer, int color)
