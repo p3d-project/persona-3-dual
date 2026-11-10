@@ -1,6 +1,8 @@
 #include "SignContractView.hpp"
 
 #include "core/globals.hpp"
+#include "core/logger.hpp"
+#include "data/audioDb.hpp"
 #include "systems/UISystem.hpp"
 
 #include <cstring>
@@ -33,8 +35,7 @@ void SignContractView::init()
     sfxCmpt->registerSFX(SFX::SFX_1);
     sfxCmpt->registerSFX(SFX::SFX_2);
     sfxCmpt->registerSFX(SFX::SFX_0);
-    musicCmpt->registerMusic(
-        (fatBasePath + "music/menus/contract/mistic.qoa").c_str(), ae::q20_12_t{1.998}, ae::q20_12_t{49.959});
+    musicCmpt->registerMusic(AudioType::MENU, MenuAudio::MISTIC);
 
     videoSetMode(MODE_5_2D);
     videoSetModeSub(MODE_3_2D | DISPLAY_BG3_ACTIVE);
@@ -68,6 +69,8 @@ void SignContractView::init()
 
     fadeTimer.start(ae::q20_12_t{0.8});
     transitionPhase = TransitionPhase::FADING_IN;
+
+    logMessage(LogSeverity::DEBUG, "SignContractView initialized");
 }
 
 ViewState SignContractView::update()

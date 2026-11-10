@@ -1,7 +1,5 @@
 #pragma once
 
-#define MENU_BIND(ClassName, Method) reinterpret_cast<ViewState (UIMenu::*)()>(&ClassName::Method)
-
 #include <etl/span.h>
 #include <etl/stack.h>
 #include <maxmod9.h>
@@ -10,6 +8,14 @@
 
 #include "components/TextComponent.hpp"
 #include "types/UITypes.hpp"
+#include "uiAnimation/UIAnimator.hpp"
+
+using MenuOptionFunc = ViewState (UIMenu::*)();
+
+template <typename Method> constexpr MenuOptionFunc menuBind(Method method)
+{
+    return static_cast<MenuOptionFunc>(method);
+}
 
 class UIMenu
 {
@@ -37,8 +43,13 @@ class UIMenu
     // options
     /// @note visibleOptions is set via the UISystem via the ConfigureUIMenu event handler
     int visibleOptions = 0;
+    const bool customRender;
     etl::stack<MenuState, 5> prevOptions;
     ViewState nextViewState = ViewState::KEEP_CURRENT;
+    int selectionX = 0;
+    UIAnimator animator;
+
+    void animateSelection();
 
     /**
      * @brief Changes the current options to the previous options
@@ -59,6 +70,15 @@ class UIMenu
 
   public:
     /**
+     * @brief Construct a new UIMenu
+     *
+     * @param iCustomRender if a custom render is used, the UISystem doesn't draw the options, instead the UIScreen does
+     */
+    UIMenu(bool iCustomRender = false) : customRender(iCustomRender)
+    {
+    }
+
+    /**
      * @brief Resets the menu to its initial state.
      */
     virtual void resetMenu();
@@ -69,4 +89,47 @@ class UIMenu
      * Can override the return from the standard update loop
      */
     virtual ViewState updateHook();
+
+    void updateAnimation();
+    int selectionOffset() const;
+
+    /**
+     * @brief Gets the index of the selected option
+     *
+     * @return int the selected option index
+     */
+    int getSelectedOption() const
+    {
+        return selectedOption;
+    }
+
+    /**
+     * @brief Gets the index of the first visible option
+     *
+     * @return int the start index
+     */
+    int getStartIndex() const
+    {
+        return startIndex;
+    }
+
+    /**
+     * @brief Gets the options of the active menu
+     *
+     * @return etl::span<MenuOption> the active options
+     */
+    etl::span<MenuOption> getOptions() const
+    {
+        return options;
+    }
+
+    /**
+     * @brief Sets the visible option count of a custom render menu, as UISystem only sets it for the menus it draws
+     *
+     * @param count the number of options visible at once
+     */
+    void setVisibleOptions(int count)
+    {
+        visibleOptions = count;
+    }
 };

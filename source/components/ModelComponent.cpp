@@ -1,4 +1,5 @@
 #include "ModelComponent.hpp"
+#include "core/logger.hpp"
 
 void ModelComponent::Update(ae::q20_12_t)
 {
@@ -80,6 +81,7 @@ bool ModelComponent::loadTexture(FILE* f, MDL3Texture& tex)
     uint32_t* alignedBuffer = static_cast<uint32_t*>(malloc(alignedWords * 4));
     if (!alignedBuffer)
     {
+        logMessage(LogSeverity::ERROR, "Failed to allocate aligned buffer for texture");
         return false;
     }
 
@@ -114,12 +116,14 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
 {
     if (meshFilePath == nullptr)
     {
+        logMessage(LogSeverity::WARNING, "Called with null meshFilePath");
         return false;
     }
 
     FILE* f = fopen(meshFilePath->c_str(), "rb");
     if (!f)
     {
+        logMessage(LogSeverity::ERROR, "Failed to open mesh file: " + *meshFilePath);
         return false;
     }
 
@@ -128,6 +132,7 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
 
     if (fread(&rawHeader, sizeof(RawModelHeader), 1, f) != 1)
     {
+        logMessage(LogSeverity::ERROR, "Failed to read mesh header from: " + *meshFilePath);
         model.reset();
         fclose(f);
         return false;
@@ -135,6 +140,7 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
 
     if (memcmp(rawHeader.magic, "MDL3", 4) != 0)
     {
+        logMessage(LogSeverity::ERROR, "Invalid MDL3 magic header in mesh file: " + *meshFilePath);
         fclose(f);
         model.reset();
         return false;
@@ -230,5 +236,9 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
 
 void ModelComponent::drawMesh()
 {
+    if (!model)
+    {
+        return;
+    }
     render.renderModelComponent(*model);
 }

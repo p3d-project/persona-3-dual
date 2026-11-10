@@ -1,4 +1,5 @@
 #include "IOManager.hpp"
+#include "core/logger.hpp"
 
 extern std::string fatBasePath;
 void IOManager::Init()
@@ -42,6 +43,10 @@ void* IOManager::loadToRAM(const std::string& filePath, u32* outSize)
     if (buffer)
     {
         fread(buffer, 1, size, file);
+    }
+    else
+    {
+        logMessage(LogSeverity::ERROR, "malloc failed for: " + path);
     }
 
     fclose(file);
@@ -93,7 +98,9 @@ void* IOManager::openFile(const std::string& filePath)
     std::string path = basePath + filePath;
     FILE* file = fopen(path.c_str(), "rb");
     if (!file)
+    {
         return nullptr;
+    }
 
     //get file size
     fseek(file, 0, SEEK_END);
@@ -108,7 +115,13 @@ void* IOManager::openFile(const std::string& filePath)
 
     void* buffer = malloc(size);
     if (buffer)
+    {
         fread(buffer, 1, size, file);
+    }
+    else
+    {
+        logMessage(LogSeverity::ERROR, "malloc failed for: " + path);
+    }
     fclose(file);
 
     return buffer;
@@ -120,7 +133,9 @@ void* IOManager::openFile(const std::string& filePath, u32& size)
     std::string path = basePath + filePath;
     FILE* file = fopen(path.c_str(), "rb");
     if (!file)
+    {
         return nullptr;
+    }
 
     fseek(file, 0, SEEK_END);
     size = ftell(file);
@@ -134,7 +149,13 @@ void* IOManager::openFile(const std::string& filePath, u32& size)
 
     void* buffer = malloc(size);
     if (buffer)
+    {
         fread(buffer, 1, size, file);
+    }
+    else
+    {
+        logMessage(LogSeverity::ERROR, "malloc failed for: " + path);
+    }
     fclose(file);
 
     return buffer;

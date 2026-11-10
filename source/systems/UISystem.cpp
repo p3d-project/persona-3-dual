@@ -5,6 +5,7 @@
 #include "components/screens/DialogueScreen.hpp"
 #include "components/screens/MenuHUDScreen.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "events/GenericEvents.hpp"
 #include <aegis/ndsTypes.hpp>
 #include <aegis/types.hpp>
@@ -23,6 +24,13 @@ void UISystem::Update(ae::q20_12_t dt)
         return;
     }
 
+    bool selectionWasMoving = activeMenu->selectionOffset() != 0;
+    activeMenu->updateAnimation();
+    if (selectionWasMoving || activeMenu->selectionOffset() != 0)
+    {
+        renderUIText = true;
+    }
+
     // run the hook
     ViewState updateHookState = activeMenu->updateHook();
     if (updateHookState != ViewState::DEFAULT)
@@ -39,6 +47,7 @@ void UISystem::Update(ae::q20_12_t dt)
             sfxCmpt->playSFX(SFX::SFX_1, 255, 128);
         }
         activeMenu->selectedOption = (activeMenu->selectedOption + 1) % activeMenu->options.size();
+        activeMenu->animateSelection();
         renderUIText = true;
     }
     else if (systemKeysDown & KEY_UP)
@@ -49,6 +58,7 @@ void UISystem::Update(ae::q20_12_t dt)
         }
         activeMenu->selectedOption =
             (activeMenu->selectedOption + activeMenu->options.size() - 1) % activeMenu->options.size();
+        activeMenu->animateSelection();
         renderUIText = true;
     }
 
@@ -105,7 +115,7 @@ void UISystem::Update(ae::q20_12_t dt)
     }
 
     // blink the "Pause" text
-    if (activeMenu->pauseMessage.length() != 0)
+    if (!activeMenu->customRender && activeMenu->pauseMessage.length() != 0)
     {
         if (frame % 60 < 30)
         {
@@ -122,12 +132,21 @@ void UISystem::Update(ae::q20_12_t dt)
     if (renderUIText)
     {
         renderUIText = false;
-        for (int i = 0; i < activeMenu->visibleOptions && activeMenu->startIndex + i < int(activeMenu->options.size());
-             i++)
+        if (!activeMenu->customRender)
         {
-            int option = activeMenu->startIndex + i;
-            TextColor color = option == activeMenu->selectedOption ? TextColor::Blue : TextColor::White;
-            text->drawText(activeMenu->options[option].name, 10, textSize + textSize * i, color);
+            // Clear only the option list region so selection slide animation does not ghost.
+            const int optionsTop = textSize;
+            const int optionsHeight = textSize * activeMenu->visibleOptions + text->getLineSpacing();
+            text->clearArea(0, optionsTop, 256, optionsHeight);
+            for (int i = 0;
+                 i < activeMenu->visibleOptions && activeMenu->startIndex + i < int(activeMenu->options.size());
+                 i++)
+            {
+                int option = activeMenu->startIndex + i;
+                TextColor color = option == activeMenu->selectedOption ? TextColor::Blue : TextColor::White;
+                int x = option == activeMenu->selectedOption ? 10 + activeMenu->selectionOffset() : 10;
+                text->drawText(activeMenu->options[option].name, x, textSize + textSize * i, color);
+            }
         }
     }
 
@@ -149,6 +168,7 @@ void UISystem::SetSFXComponent(SFXComponent* sfx)
 
 void UISystem::on_receive(const Event::SwitchView& msg)
 {
+    logMessage(LogSeverity::DEBUG, "View switch event received");
     nextView = msg.view;
 }
 
@@ -208,12 +228,23 @@ void UISystem::on_receive(const Event::ConfigureUIMenu& config)
         menu->isActive = false;
         menu->text = text;
         /// @note 192px is the screen height. 1 row is reserved for the flashing text. Each line takes the font size height
-        menu->visibleOptions = (192 / textSize) - 1;
+        if (!menu->customRender)
+        {
+            menu->visibleOptions = (192 / textSize) - 1;
+        }
     }
 }
 
 void UISystem::on_receive(const Event::ShowScreen& msg)
 {
+    if (msg.screen == nullptr)
+    {
+        logMessage(LogSeverity::ERROR, "ShowScreen event received with nullptr screen");
+        return;
+    }
+
+    logMessage(LogSeverity::DEBUG, "ShowScreen event processed");
+
     // check if it is already loaded. If not, load it in
     if (!msg.screen->isLoaded)
     {
@@ -255,13 +286,20 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
                 }
             }
 
-            oldScreen->unload();
-            oldScreen->isLoaded = false;
+            if (oldScreen != nullptr)
+            {
+                oldScreen->unload();
+                oldScreen->isLoaded = false;
 
-            msg.screen->bgId = oldScreen->bgId;
-            msg.screen->oam = oldScreen->oam;
-            oldScreen->bgId = -1;
-            oldScreen->oam = nullptr;
+                msg.screen->bgId = oldScreen->bgId;
+                msg.screen->oam = oldScreen->oam;
+                oldScreen->bgId = -1;
+                oldScreen->oam = nullptr;
+            }
+            else
+            {
+                logMessage(LogSeverity::ERROR, "Failed to find LRU screen to evict");
+            }
 
             msg.screen->load();
             msg.screen->isLoaded = true;
@@ -288,6 +326,14 @@ void UISystem::on_receive(const Event::HideAllScreens& /*msg*/)
 
 void UISystem::on_receive(const Event::ShowMenu& msg)
 {
+    if (msg.menu == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "ShowMenu event received with nullptr menu");
+        return;
+    }
+
+    logMessage(LogSeverity::DEBUG, "ShowMenu event processed");
+
     if (sfxCmpt != nullptr)
     {
         sfxCmpt->registerSFX(SFX::SFX_1);
@@ -373,7 +419,13 @@ void UISystem::lruUpdate(int id, bool isMain)
 
 void UISystem::registerScreen(UIScreen* screen)
 {
-    sassert(screen != nullptr, "UIScreen cannot be nullptr.");
+    if (screen == nullptr)
+    {
+        logMessage(LogSeverity::ERROR, "Called with nullptr screen");
+        return;
+    }
+
+    logMessage(LogSeverity::DEBUG, "Screen registered successfully");
 
     // load screen
     if (screen->isMain && screenMainCount < 2)
@@ -401,13 +453,15 @@ void UISystem::registerScreen(UIScreen* screen)
     // throw error (too many screens registered)
     if (screen->isMain)
     {
-        sassert(screenMainCount < 2,
-                "Too many screens registered. A maximum of 2 main screens and 3 sub screens can be registered.");
+        logMessage(LogSeverity::ERROR,
+                   "Too many main screens registered. A maximum of 2 main screens can be registered.");
+        return;
     }
     else
     {
-        sassert(screenSubCount < 3,
-                "Too many screens registered. A maximum of 2 main screens and 3 sub screens can be registered.");
+        logMessage(LogSeverity::ERROR,
+                   "Too many sub screens registered. A maximum of 3 sub screens can be registered.");
+        return;
     }
 }
 

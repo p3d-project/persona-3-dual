@@ -13,6 +13,7 @@
 #include "types/aeTypes.hpp"
 
 #include <aegis/component.hpp>
+#include <memory>
 
 class TextComponent : public ae::Component
 {
@@ -51,9 +52,10 @@ class TextComponent : public ae::Component
      * @param x The x-coordinate to start drawing the text.
      * @param y The y-coordinate to start drawing the text.
      * @param color The color to use for the text (default is white).
+     * @param xBoundary An optional limit to the right side of a textbox, for when text is only supposed to take up an area of the screen.
      * @see drawText
      */
-    void drawText(const std::string& text, int x, int y, int color = TextColor::White);
+    void drawText(const std::string& text, int x, int y, int color = TextColor::White, int xBoundary = 256);
 
     /**
      * @brief A wrapper for appearText in TextSystem. Simulates text typing effect.
@@ -61,9 +63,10 @@ class TextComponent : public ae::Component
      * @param x The x-coordinate to start drawing the text.
      * @param y The y-coordinate to start drawing the text.
      * @param color The color to use for the text (default is white).
+     * @param xBoundary An optional limit to the right side of a textbox, for when text is only supposed to take up an area of the screen.
      * @see appearText
      */
-    void appearText(const std::string& text, int x, int y, int color = TextColor::White);
+    void appearText(const std::string& text, int x, int y, int color = TextColor::White, int xBoundary = 256);
 
     /**
      * @brief A wrapper for appearTextSkip in TextSystem. If a text is currently being rendered with appearText, this function will immediately render the rest of the text without delay.
@@ -169,8 +172,8 @@ class TextComponent : public ae::Component
     TextSystem& ts = TextSystem::GetInstance();
     TextManager& tm = TextManager::GetInstance();
 
-    Text* appearingText = nullptr;
-    Font* font = nullptr;
+    std::unique_ptr<Text> appearingText;
+    std::unique_ptr<Font> font;
     uint16_t* videoBuffer = nullptr;
     int fontSize = 0;
 

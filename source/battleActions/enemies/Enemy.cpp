@@ -1,6 +1,7 @@
 #include "Enemy.hpp"
 #include "../party/PartyMember.hpp"
 #include "../skills/BattleCalcs.hpp"
+#include "core/logger.hpp"
 #include <stdlib.h>
 
 Enemy::Enemy(const EnemyProfile& iEnemyProfile) : enemyProfile(iEnemyProfile)
@@ -32,28 +33,63 @@ Skill* Enemy::pickSkill()
 
 BattleParticipant* Enemy::pickTarget(etl::vector<BattleParticipant*, 13>& partyMembers)
 {
+    if (partyMembers.empty())
+    {
+        logMessage(LogSeverity::ERROR, "Called with empty partyMembers");
+        return nullptr;
+    }
+
+    bool anyAlive = false;
+    for (BattleParticipant* p : partyMembers)
+    {
+        if (p != nullptr && p->hp > 0)
+        {
+            anyAlive = true;
+            break;
+        }
+    }
+    if (!anyAlive)
+    {
+        logMessage(LogSeverity::WARNING, "No alive party members found");
+        return nullptr;
+    }
+
     BattleParticipant* target = nullptr;
     do
     {
         target = partyMembers[rand() % partyMembers.size()];
-    } while (target->hp <= 0);
+    } while (target == nullptr || target->hp <= 0);
 
     return target;
 }
 
 TurnResult Enemy::resolve(BattleParticipant* target, Skill* skill)
 {
+    if (target == nullptr || skill == nullptr)
+    {
+        logMessage(LogSeverity::ERROR, "Called with null target or skill");
+        return {false, 0, false, "Miss"};
+    }
+
+    logMessage(LogSeverity::DEBUG, "Enemy " + name + " resolving " + skill->name + " on target: " + target->name);
+
     PartyMember* party = static_cast<PartyMember*>(target);
 
     s32* resource;
     if (skill->skillRace == SkillRace::mag)
+    {
         resource = &sp;
+    }
     else
+    {
         resource = &hp;
+    }
 
     bool canAfford = *resource >= skill->cost;
     if (!canAfford)
+    {
         return {false, 0, false, skill->name};
+    }
 
     std::string targetLog = name + " targets " + target->name + "\n";
 
@@ -61,19 +97,26 @@ TurnResult Enemy::resolve(BattleParticipant* target, Skill* skill)
     bool hit = BattleCalcs::hit(*this, *target, *skill);
 
     if (!hit)
+    {
         return {false, 0, false, targetLog + "Miss"};
+    }
 
     u32 damage = BattleCalcs::attack(*this, *target, *skill);
 
     if (party->guarding)
+    {
         damage = (u32)(damage * 0.4f);
+    }
 
     bool oneMoreResult = false;
-    u32 affinity = party->curPersona->battleStats.affinities[(u32)skill->element];
-    if (affinity == BattleStats::Affinity::Weak && !party->knockedDown && !party->guarding)
+    if (party->curPersona != nullptr)
     {
-        oneMoreResult = true;
-        party->knockedDown = true;
+        u32 affinity = party->curPersona->battleStats.affinities[(u32)skill->element];
+        if (affinity == BattleStats::Affinity::Weak && !party->knockedDown && !party->guarding)
+        {
+            oneMoreResult = true;
+            party->knockedDown = true;
+        }
     }
 
     return {true, -(s32)damage, oneMoreResult, targetLog + skill->name};
@@ -81,23 +124,36 @@ TurnResult Enemy::resolve(BattleParticipant* target, Skill* skill)
 
 ae::q20_12_t Enemy::calculateBaseDamage(BattleParticipant& defender, Skill& skill)
 {
+    BattleStats* defStats = defender.getBattleStats();
+    if (!defStats)
+    {
+        logMessage(LogSeverity::ERROR, "Null defender battleStats");
+        return ae::q20_12_t{0};
+    }
+
     u32 atk = BattleCalcs::getAtk(battleStats, skill);
     ae::q20_12_t levelDifference = BattleCalcs::getLevelDifference(lv, defender.lv);
-    ae::q20_12_t affinityMtp = BattleCalcs::getAffinityMtp(*defender.getBattleStats(), skill);
+    ae::q20_12_t affinityMtp = BattleCalcs::getAffinityMtp(*defStats, skill);
 
     if (skill.skillType == SkillType::RegularAttack)
+    {
         return (math.sqrt(math.div(ae::q20_12_t{skill.movePower * 6 * atk},
-                                   ae::q20_12_t{8 * defender.getBattleStats()->en + defender.armour.defense})) *
+                                   ae::q20_12_t{8 * defStats->en + defender.armour.defense})) *
                 ae::q20_12_t{9} * levelDifference) *
                affinityMtp;
+    }
     else if (skill.skillType == SkillType::Attack || skill.skillType == SkillType::MultiAttack)
+    {
         return ((math.sqrt(math.div(ae::q20_12_t{skill.movePower * 6 * atk},
-                                    ae::q20_12_t{8 * defender.getBattleStats()->en + defender.armour.defense})) *
+                                    ae::q20_12_t{8 * defStats->en + defender.armour.defense})) *
                      ae::q20_12_t{9} * levelDifference -
                  ae::q20_12_t{10}) *
                 affinityMtp);
+    }
     else
+    {
         return ae::q20_12_t{0};
+    }
 }
 
 ae::q20_12_t Enemy::getTeamMultiplier()

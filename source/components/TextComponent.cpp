@@ -1,4 +1,5 @@
 #include "TextComponent.hpp"
+#include "core/logger.hpp"
 #include <aegis/ndsTypes.hpp>
 #include <aegis/types.hpp>
 #include <algorithm>
@@ -11,7 +12,7 @@ void TextComponent::Update(ae::q20_12_t)
         {
             if (appearingText->counter <= 0)
             {
-                ts.drawNextFromText(appearingText);
+                ts.drawNextFromText(appearingText.get());
                 appearingText->cursorPos++;
                 appearingText->counter = ts.APPEAR_DELAY; // Reset the counter for the next character
             }
@@ -20,8 +21,7 @@ void TextComponent::Update(ae::q20_12_t)
         }
         else //this text has finished appearing, so we can clear the storage
         {
-            delete appearingText;
-            appearingText = nullptr;
+            appearingText.reset();
         }
     }
 }
@@ -30,19 +30,14 @@ void TextComponent::Destroy()
 {
     isActive = false;
     appearTextStop();
-    tm.unloadFont(font);
-    font = nullptr;
+    font.reset();
 }
 
 void TextComponent::configureText(const TextConfig& config, bool loadDefaultPalette)
 {
     isActive = true;
 
-    if (font != nullptr)
-    {
-        tm.unloadFont(font);
-        font = nullptr;
-    }
+    font.reset();
 
     // set video buffer
     if (config.videoBuffer != nullptr)
@@ -73,43 +68,56 @@ void TextComponent::configureText(const TextConfig& config, bool loadDefaultPale
     // load default font palette
     if (loadDefaultPalette)
     {
-        sassert(font != nullptr, "Cannot load a font palette if a font has not been loaded first!");
-        tm.loadDefaultPalette();
+        if (font == nullptr)
+        {
+            logMessage(LogSeverity::WARNING, "Cannot load a font palette if a font has not been loaded first!");
+        }
+        else
+        {
+            tm.loadDefaultPalette();
+        }
     }
 }
 
-void TextComponent::drawText(const std::string& text, int x, int y, int color)
+void TextComponent::drawText(const std::string& text, int x, int y, int color, int xBoundary)
 {
-    ts.drawText(text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth);
+    if (!font || !videoBuffer)
+    {
+        logMessage(LogSeverity::WARNING, "Called without font or videoBuffer");
+        return;
+    }
+    ts.drawText(text, font.get(), videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 }
 
-void TextComponent::appearText(const std::string& text, int x, int y, int color)
+void TextComponent::appearText(const std::string& text, int x, int y, int color, int xBoundary)
 {
-    ts.appearText(appearingText, text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth);
+    if (!font || !videoBuffer)
+    {
+        logMessage(LogSeverity::WARNING, "Called without font or videoBuffer");
+        return;
+    }
+    ts.appearText(
+        appearingText, text, font.get(), videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 }
 
 void TextComponent::appearTextSkip()
 {
-    ts.appearTextSkip(appearingText);
+    ts.appearTextSkip(appearingText.get());
 }
 
 void TextComponent::appearTextStop()
 {
-    if (appearingText != nullptr)
-    {
-        delete appearingText;
-        appearingText = nullptr;
-    }
+    appearingText.reset();
 }
 
 bool TextComponent::appearTextDone()
 {
-    return ts.appearTextDone(appearingText);
+    return ts.appearTextDone(appearingText.get());
 }
 
 void TextComponent::drawGlyph(const Glyph& glyph, int x, int y, int color, bool bold, bool italic, bool underline)
 {
-    ts.drawGlyph(glyph, font, videoBuffer, x, y, color, bold, italic, underline);
+    ts.drawGlyph(glyph, font.get(), videoBuffer, x, y, color, bold, italic, underline);
 }
 
 Glyph* TextComponent::getGlyph(const char& c, bool bold)
@@ -173,7 +181,7 @@ void TextComponent::setSpaceWidth(int value)
 
 void TextComponent::testBitmap()
 {
-    ts.testBitmap(font, videoBuffer);
+    ts.testBitmap(font.get(), videoBuffer);
 }
 
 void TextComponent::testPalette()

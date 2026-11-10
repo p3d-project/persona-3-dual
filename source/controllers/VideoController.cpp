@@ -1,5 +1,6 @@
 #include "VideoController.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "managers/AudioManager.hpp"
 #include <malloc.h>
 #include <maxmod9.h>
@@ -366,15 +367,12 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
     // maxmod supports one stream at a time: release any music stream first.
     AudioManager::GetInstance().stopAudio();
 
+    logMessage(LogSeverity::DEBUG, "Video playback initialized: " + iFileName);
+
     videoFile = fopen(videoPath.c_str(), "rb");
     if (!videoFile)
     {
-        consoleDemoInit();
-        printf("ERR: %s", videoPath.c_str());
-        while (1)
-        {
-            swiWaitForVBlank();
-        }
+        logMessage(LogSeverity::FATAL, videoPath);
     }
 
     // Read the optional dynamic video header.
@@ -410,12 +408,7 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
     }
     if ((bpp != 1 && bpp != 2) || frameW == 0 || frameH == 0)
     {
-        consoleDemoInit();
-        printf("ERR: bad video header");
-        while (1)
-        {
-            swiWaitForVBlank();
-        }
+        logMessage(LogSeverity::FATAL, "bad video header");
     }
 
     frameSize = (uint32_t)frameW * frameH * bpp;
@@ -430,12 +423,7 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
         size_t palRead = fread(palette, 2, 256, videoFile);
         if (palRead != 256)
         {
-            consoleDemoInit();
-            printf("ERR: palette read failed");
-            while (1)
-            {
-                swiWaitForVBlank();
-            }
+            logMessage(LogSeverity::FATAL, "palette read failed");
         }
 
         for (int i = 0; i < 256; i++)
@@ -455,12 +443,7 @@ void VideoController::init(std::string iFileName, ae::q20_12_t iFps, ViewState i
     ramBuffer = (uint8_t*)memalign(32, bufferSize);
     if (!ramBuffer)
     {
-        consoleDemoInit();
-        printf("ERR: malloc failed");
-        while (1)
-        {
-            swiWaitForVBlank();
-        }
+        logMessage(LogSeverity::FATAL, "malloc failed");
     }
 
     // Set up the internal audio player (falls back to silent playback on failure).

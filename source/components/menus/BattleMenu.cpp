@@ -1,5 +1,6 @@
 #include "BattleMenu.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "events/UIEvents.hpp"
 
 BattleMenu* BattleMenu::instance = nullptr;
@@ -33,6 +34,12 @@ BattleMenu* BattleMenu::getInstance()
 // option loaders
 void BattleMenu::loadActionOptions(std::array<ActionBase*, 4>* actions, std::string name)
 {
+    if (actions == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null actions");
+        return;
+    }
+
     // skip if action options have already been loaded
     if (loadedOption == BattleMenuOptions::ACTION)
     {
@@ -42,17 +49,15 @@ void BattleMenu::loadActionOptions(std::array<ActionBase*, 4>* actions, std::str
     text->clearScreen();
     ae::BroadcastEvent(Event::RenderUIText{});
 
-    // set new options
     battleOptions.clear();
-
-    // indicate we loaded option
     loadedOption = BattleMenuOptions::ACTION;
+    logMessage(LogSeverity::DEBUG, "Action options loaded for: " + name);
     pauseMessage = name.c_str();
     int count = actions->size();
 
     for (int i = 0; i < count; i++)
     {
-        MenuOption option = {actions->at(i)->name.c_str(), -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+        MenuOption option = {actions->at(i)->name.c_str(), -1, menuBind(&BattleMenu::battleOptionSelected)};
         battleOptions.push_back(option);
     }
 
@@ -61,6 +66,12 @@ void BattleMenu::loadActionOptions(std::array<ActionBase*, 4>* actions, std::str
 
 void BattleMenu::loadSkillOptions(PersonaBase* persona)
 {
+    if (persona == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null persona");
+        return;
+    }
+
     // skip if action options have already been loaded
     if (loadedOption == BattleMenuOptions::SKILL)
     {
@@ -69,6 +80,8 @@ void BattleMenu::loadSkillOptions(PersonaBase* persona)
 
     text->clearScreen();
     ae::BroadcastEvent(Event::RenderUIText{});
+
+    logMessage(LogSeverity::DEBUG, "Skill options loaded for: " + persona->name);
 
     // set new options
     battleOptions.clear();
@@ -80,7 +93,7 @@ void BattleMenu::loadSkillOptions(PersonaBase* persona)
 
     for (int i = 0; i < count; i++)
     {
-        MenuOption option = {persona->skills[i]->name.c_str(), -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+        MenuOption option = {persona->skills[i]->name.c_str(), -1, menuBind(&BattleMenu::battleOptionSelected)};
         battleOptions.push_back(option);
     }
 
@@ -89,6 +102,12 @@ void BattleMenu::loadSkillOptions(PersonaBase* persona)
 
 void BattleMenu::loadPersonaOptions(etl::vector<PersonaBase*, 13>* personas)
 {
+    if (personas == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null personas");
+        return;
+    }
+
     if (loadedOption == BattleMenuOptions::PERSONA)
     {
         return;
@@ -97,6 +116,8 @@ void BattleMenu::loadPersonaOptions(etl::vector<PersonaBase*, 13>* personas)
     text->clearScreen();
     ae::BroadcastEvent(Event::RenderUIText{});
 
+    logMessage(LogSeverity::DEBUG, "Persona menu options loaded");
+
     battleOptions.clear();
     loadedOption = BattleMenuOptions::PERSONA;
     pauseMessage = "Persona";
@@ -104,7 +125,7 @@ void BattleMenu::loadPersonaOptions(etl::vector<PersonaBase*, 13>* personas)
 
     for (int i = 0; i < count; i++)
     {
-        MenuOption option = {personas->at(i)->name.c_str(), -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+        MenuOption option = {personas->at(i)->name.c_str(), -1, menuBind(&BattleMenu::battleOptionSelected)};
         battleOptions.push_back(option);
     }
 
@@ -113,6 +134,12 @@ void BattleMenu::loadPersonaOptions(etl::vector<PersonaBase*, 13>* personas)
 
 void BattleMenu::loadTargetOptions(etl::vector<BattleParticipant*, 13>* targets, bool healTarget)
 {
+    if (targets == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null targets");
+        return;
+    }
+
     BattleMenuOptions targetLoadedOption =
         healTarget ? BattleMenuOptions::TARGET_HEAL : BattleMenuOptions::TARGET_ENEMY;
 
@@ -124,6 +151,8 @@ void BattleMenu::loadTargetOptions(etl::vector<BattleParticipant*, 13>* targets,
     text->clearScreen();
     ae::BroadcastEvent(Event::RenderUIText{});
 
+    logMessage(LogSeverity::DEBUG, "Target options loaded");
+
     battleOptions.clear();
     loadedOption = targetLoadedOption;
     pauseMessage = "Target";
@@ -132,9 +161,11 @@ void BattleMenu::loadTargetOptions(etl::vector<BattleParticipant*, 13>* targets,
     for (int i = 0; i < count; i++)
     {
         if (targets->at(i)->hp <= 0)
+        {
             continue;
+        }
 
-        MenuOption option = {targets->at(i)->name.c_str(), -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+        MenuOption option = {targets->at(i)->name.c_str(), -1, menuBind(&BattleMenu::battleOptionSelected)};
         battleOptions.push_back(option);
     }
 
@@ -151,12 +182,14 @@ void BattleMenu::loadAllOutAttackConfirmation()
     text->clearScreen();
     ae::BroadcastEvent(Event::RenderUIText{});
 
+    logMessage(LogSeverity::DEBUG, "All-Out Attack confirmation prompt loaded");
+
     battleOptions.clear();
     loadedOption = BattleMenuOptions::ALL_OUT_ATTACK;
     pauseMessage = "Confirm All-out-attack?";
 
-    MenuOption yes = {"Yes", -1, MENU_BIND(BattleMenu, battleOptionSelected)};
-    MenuOption no = {"No", -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+    MenuOption yes = {"Yes", -1, menuBind(&BattleMenu::battleOptionSelected)};
+    MenuOption no = {"No", -1, menuBind(&BattleMenu::battleOptionSelected)};
     battleOptions.push_back(yes);
     battleOptions.push_back(no);
 

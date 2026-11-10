@@ -1,24 +1,28 @@
 #include "TextManager.hpp"
+#include "core/logger.hpp"
 #include <sstream>
 
-// Helper macro to convert 8 bit RGB values to 5 bit RGB values for the Nintendo DS
-#define NDS_RGB(r, g, b) (uint16_t)((r) >> 3) | (((g) >> 3) << 5) | (((b) >> 3) << 10) | BIT(15)
+// Helper constexpr to convert 8 bit RGB values to 5 bit RGB values for the Nintendo DS
+constexpr uint16_t nds_rgb(uint8_t r, uint8_t g, uint8_t b)
+{
+    return static_cast<uint16_t>((r >> 3) | (((g) >> 3) << 5) | (((b) >> 3) << 10) | BIT(15));
+}
 
 static const uint16_t customPalette[21] = {
     ARGB16(1, 0, 0, 0),     // Black         235
     ARGB16(1, 31, 31, 31),  // White         236
-    NDS_RGB(0, 202, 105),   // Dual Green    237
-    NDS_RGB(18, 168, 88),   // Dual Green 2  238
-    NDS_RGB(28, 118, 55),   // Dark Green    239
-    NDS_RGB(0, 69, 40),     // Darker Green  240
-    NDS_RGB(4, 34, 18),     // Darkest Green 241
-    NDS_RGB(121, 206, 255), // Light Blue    242
-    NDS_RGB(9, 137, 253),   // Rich Blue     243
-    NDS_RGB(0, 104, 208),   // Dark Blue     244
-    NDS_RGB(0, 44, 208),    // Navy Blue     245
-    NDS_RGB(0, 0, 36),      // Darkest Blue  246
-    NDS_RGB(245, 198, 164), // Light Orange  247
-    NDS_RGB(198, 164, 245), // Light Purple  248
+    nds_rgb(0, 202, 105),   // Dual Green    237
+    nds_rgb(18, 168, 88),   // Dual Green 2  238
+    nds_rgb(28, 118, 55),   // Dark Green    239
+    nds_rgb(0, 69, 40),     // Darker Green  240
+    nds_rgb(4, 34, 18),     // Darkest Green 241
+    nds_rgb(121, 206, 255), // Light Blue    242
+    nds_rgb(9, 137, 253),   // Rich Blue     243
+    nds_rgb(0, 104, 208),   // Dark Blue     244
+    nds_rgb(0, 44, 208),    // Navy Blue     245
+    nds_rgb(0, 0, 36),      // Darkest Blue  246
+    nds_rgb(245, 198, 164), // Light Orange  247
+    nds_rgb(198, 164, 245), // Light Purple  248
     //Defaults
     ARGB16(1, 31, 0, 0),   // Red           249
     ARGB16(1, 0, 31, 0),   // Green         250
@@ -29,33 +33,33 @@ static const uint16_t customPalette[21] = {
     ARGB16(1, 15, 15, 15), // Gray          255
 };
 
-Font* TextManager::loadFont(std::string* name, int size)
+std::unique_ptr<Font> TextManager::loadFont(std::string* name, int size)
 {
     if (name == nullptr)
     {
-        haltOnError("TextManager::loadFont(std::string* name, int size) : name cannot be nullptr");
+        logMessage(LogSeverity::FATAL, "name cannot be nullptr");
     }
 
-    Font* font = new Font();
+    auto font = std::make_unique<Font>();
     std::string fullPath = "fonts/" + *name + "/size-" + std::to_string(size);
 
     std::string fontBitmapPath = fullPath + ".img.bin";
     font->bitmap = loadFontBitmap(&fontBitmapPath);
     if (!font->bitmap)
     {
-        haltOnError("Failed to load font bitmap from \n" + fullPath + ".img.bin");
+        logMessage(LogSeverity::FATAL, "Failed to load font bitmap from \n" + fullPath + ".img.bin");
     }
 
     std::string fontMetadataPath = fullPath + ".fnt";
-    if (!loadFontMetadata(&fontMetadataPath, font))
+    if (!loadFontMetadata(&fontMetadataPath, font.get()))
     {
-        haltOnError("Failed to load font metadata from \n" + fullPath + ".fnt");
+        logMessage(LogSeverity::FATAL, "Failed to load font metadata from \n" + fullPath + ".fnt");
     }
 
     std::string fontBitmapBoldPath = fullPath + "-bold.img.bin";
     std::string fontMetadataBoldPath = fullPath + "-bold.fnt";
     font->bitmapBold = loadFontBitmap(&fontBitmapBoldPath);
-    if (!font->bitmapBold || !loadFontMetadata(&fontMetadataBoldPath, font, true))
+    if (!font->bitmapBold || !loadFontMetadata(&fontMetadataBoldPath, font.get(), true))
     {
         font->boldLoaded = false;
         free(font->bitmapBold);
@@ -69,16 +73,6 @@ Font* TextManager::loadFont(std::string* name, int size)
     return font;
 }
 
-void TextManager::unloadFont(Font* font)
-{
-    if (font == nullptr)
-        return;
-
-    free(font->bitmap);
-    free(font->bitmapBold);
-    delete font;
-}
-
 void TextManager::loadDefaultPalette()
 {
     dmaCopy(customPalette, BG_PALETTE + 235, 21 * sizeof(uint16_t));
@@ -89,12 +83,13 @@ bool TextManager::loadPalette(std::string* path, bool sub)
 {
     if (path == nullptr)
     {
-        haltOnError("TextManager::loadPalette(std::string* path, bool sub) : path cannot be nullptr");
+        logMessage(LogSeverity::FATAL, "path cannot be nullptr");
     }
 
     FileBuffer buffer = io.openFileBuffer(*path);
     if (buffer.get() == nullptr)
     {
+        logMessage(LogSeverity::WARNING, "Failed to load palette from: " + *path);
         return false;
     }
 
@@ -121,12 +116,13 @@ std::uint8_t* TextManager::loadFontBitmap(std::string* path)
 {
     if (path == nullptr)
     {
-        haltOnError("TextManager::loadFontBitmap(std::string* path) : path cannot be nullptr");
+        logMessage(LogSeverity::FATAL, "path cannot be nullptr");
     }
 
     FileBuffer buffer = io.openFileBuffer(*path);
     if (buffer.get() == nullptr)
     {
+        logMessage(LogSeverity::WARNING, "Failed to load font bitmap from: " + *path);
         return nullptr;
     }
 
@@ -137,13 +133,19 @@ bool TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBi
 {
     if (path == nullptr)
     {
-        haltOnError("TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBitmap) : path cannot be "
-                    "nullptr");
+        logMessage(LogSeverity::FATAL, "path cannot be nullptr");
+    }
+
+    if (font == nullptr)
+    {
+        logMessage(LogSeverity::ERROR, "Font cannot be nullptr");
+        return false;
     }
 
     FileBuffer buffer = io.openFileBuffer(*path);
     if (buffer.get() == nullptr)
     {
+        logMessage(LogSeverity::WARNING, "Failed to load font metadata from: " + *path);
         return false;
     }
 
@@ -195,6 +197,11 @@ bool TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBi
 
 void TextManager::clearScreen(uint16_t* videoBuffer)
 {
+    if (videoBuffer == nullptr)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null videoBuffer");
+        return;
+    }
     dmaFillHalfWords(0, videoBuffer, 256 * 256 * sizeof(uint8_t));
 }
 
@@ -207,22 +214,18 @@ int TextManager::extractIntValue(const std::string& line, const std::string& key
     }
 
     const std::size_t dataStart = keyPos + key.size();
-    std::size_t dataEnd = dataStart;
-    while (dataEnd < line.size() && line[dataEnd] != ' ')
+    if (dataStart >= line.size())
     {
-        dataEnd++;
+        return 0;
     }
 
-    return std::stoi(line.substr(dataStart, dataEnd - dataStart));
-}
-
-void TextManager::haltOnError(const std::string& errorMessage)
-{
-    consoleDemoInit();
-    printf("\n\n");
-    printf("Error; %s", errorMessage.c_str());
-    while (1)
+    char* endPtr = nullptr;
+    long val = std::strtol(line.c_str() + dataStart, &endPtr, 10);
+    if (endPtr == line.c_str() + dataStart)
     {
-        swiWaitForVBlank();
+        logMessage(LogSeverity::WARNING, "Failed to parse int value for key: " + key);
+        return 0;
     }
+
+    return static_cast<int>(val);
 }

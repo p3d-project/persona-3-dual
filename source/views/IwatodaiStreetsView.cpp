@@ -1,8 +1,9 @@
 #include "IwatodaiStreetsView.hpp"
-#include "core/globals.hpp"
+#include "data/audioDb.hpp"
 #include "events/BattleEvents.hpp"
 #include "events/GenericEvents.hpp"
 #include "events/UIEvents.hpp"
+#include "systems/BattleSystem.hpp"
 
 IwatodaiStreetsView::IwatodaiStreetsView()
 {
@@ -57,9 +58,7 @@ void IwatodaiStreetsView::setupMovement()
 
 void IwatodaiStreetsView::setupMusic()
 {
-    musicCmpt->registerMusic((fatBasePath + "music/locations/iwatodaiStreets/changing_seasons.qoa").c_str(),
-                             ae::q20_12_t{31},
-                             ae::q20_12_t{177.587});
+    musicCmpt->registerMusic(AudioType::LOCATION, LocationAudio::SUMMER_BOUND);
 }
 
 ViewState IwatodaiStreetsView::onTileCheck(TileType tile, u32 pressed)
@@ -125,14 +124,10 @@ void IwatodaiStreetsView::setupUI()
     textSub->configureText(TextConfig(textVideoBufferSub, &fontName, fontSize));
 
     battleMenuCmpt = BattleMenu::getInstance();
-    pauseMenuCmpt = PauseMenu::getInstance();
+    setupPauseMenu();
+    setupMenuHUD("Streets");
 
-    menuHUDScreen = MenuHUDScreen::getInstance();
-
-    menuHUDScreen->setTextComponent(textSub);
-    menuHUDScreen->setTextContent("Streets", TextColor::White);
-
-    std::array<UIScreen*, 5> screens = {menuHUDScreen};
+    std::array<UIScreen*, 5> screens = {menuHUDScreen, pauseMenuScreen};
     std::array<UIMenu*, 10> menus = {pauseMenuCmpt, battleMenuCmpt};
 
     ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, screens});

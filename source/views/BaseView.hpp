@@ -13,4 +13,18 @@ class BaseView
     virtual void init() = 0;        // view setup
     virtual ViewState update() = 0; // view update
     virtual void cleanup();         // view cleanup
+
+    /**
+     * @brief Whether BaseView should drive a dual-engine brightness fade-in.
+     */
+    virtual bool usesBaseFadeIn() const
+    {
+        return false;
+    }
+
+    void startFadeIn();
+    void updateFadeIn();
+
+  private:
+    int fadeBrightness = -16;
 };

@@ -1,4 +1,5 @@
 #include "data/spriteDb.hpp"
+#include "core/logger.hpp"
 
 static const SpriteDBEntry SPRITE_DB_ENTRY[] = {
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_0), "moon-0"},
@@ -10,6 +11,16 @@ static const SpriteDBEntry SPRITE_DB_ENTRY[] = {
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_6), "moon-6"},
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_7), "moon-7"},
     {SpriteType::MOON, static_cast<int>(MoonSprite::MOON_8), "moon-8"},
+
+    {SpriteType::SELECTED_OPTION, static_cast<int>(SelectedOptionSprite::SELECTED_OPTION_0), "selected-0"},
+    {SpriteType::SELECTED_OPTION, static_cast<int>(SelectedOptionSprite::SELECTED_OPTION_1), "selected-1"},
+    {SpriteType::SELECTED_OPTION, static_cast<int>(SelectedOptionSprite::SELECTED_OPTION_2), "selected-2"},
+    {SpriteType::SELECTED_OPTION, static_cast<int>(SelectedOptionSprite::SELECTED_OPTION_3), "selected-3"},
+
+    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_GREAT), "status-great"},
+    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_GOOD), "status-good"},
+    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_TIRED), "status-tired"},
+    {SpriteType::STATUS, static_cast<int>(StatusSprite::STATUS_SICK), "status-sick"},
 
     {SpriteType::TIME, static_cast<int>(TimeSprite::AFTER_SCHOOL_0_0), "after-school-0-0"},
     {SpriteType::TIME, static_cast<int>(TimeSprite::AFTER_SCHOOL_1_0), "after-school-1-0"},
@@ -61,5 +72,7 @@ std::string getSpriteFilename(SpriteType type, int id)
             return SPRITE_DB_ENTRY[i].filename;
         }
     }
+    logMessage(LogSeverity::WARNING,
+               "Sprite not found for type: " + std::to_string(static_cast<int>(type)) + " id: " + std::to_string(id));
     return "";
 }

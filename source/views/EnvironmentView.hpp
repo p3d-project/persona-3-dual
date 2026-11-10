@@ -18,6 +18,7 @@
 #include "components/menus/PauseMenu.hpp"
 #include "components/screens/DialogueScreen.hpp"
 #include "components/screens/MenuHUDScreen.hpp"
+#include "components/screens/PauseMenuScreen.hpp"
 // controllers
 #include "controllers/AnimationController.hpp"
 // managers
@@ -71,6 +72,11 @@ class EnvironmentView : public BaseView
      */
     void cleanup() override;
 
+    bool usesBaseFadeIn() const override
+    {
+        return true;
+    }
+
   protected:
     // Room-specific hooks (implemented/overridden by derived rooms)
     virtual ae::q20_12_t getCameraYOffset() const
@@ -89,6 +95,18 @@ class EnvironmentView : public BaseView
     virtual void setupUI()
     {
     }
+
+    /**
+     * @brief Sets up the pause menu
+     */
+    void setupPauseMenu();
+
+    /**
+     * @brief Sets up the menu HUD
+     *
+     * @param location The location name shown on the HUD
+     */
+    void setupMenuHUD(const std::string& location);
 
     virtual void setupDialogue()
     {
@@ -152,6 +170,7 @@ class EnvironmentView : public BaseView
     TextComponent* text = nullptr;
     TextComponent* textSub = nullptr;
     TextComponent* textSubAlt = nullptr;
+    TextComponent* textSubOptions = nullptr;
 
     AnimationController* animationCtrl = AnimationController::getInstance();
     MusicComponent* musicCmpt = nullptr;
@@ -161,6 +180,7 @@ class EnvironmentView : public BaseView
     // UI
     DialogueScreen* dialogueScreen = nullptr;
     MenuHUDScreen* menuHUDScreen = nullptr;
+    PauseMenuScreen* pauseMenuScreen = nullptr;
 
     BattleMenu* battleMenuCmpt = nullptr;
     PauseMenu* pauseMenuCmpt = nullptr;
@@ -179,6 +199,8 @@ class EnvironmentView : public BaseView
     uint16_t* textVideoBufferSub = nullptr;
     std::string fontName = "cosmetica";
     uint8_t fontSize = 12;
+    std::string optionsFontName = "noto-sans-jp-extra-bold";
+    uint8_t optionsFontSize = 19;
     // set in init()
     uint8_t lineSpacing = 0;
 

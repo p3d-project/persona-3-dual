@@ -210,6 +210,55 @@ class MathManager : public ae::Manager, public ae::Singleton<MathManager>
      */
     ae::q20_12_t randFrac();
 
+    /**
+     * @brief Easing curves for fixed-point interpolation (t in [0, 1]).
+     */
+    enum class EaseMode
+    {
+        Linear,
+        InQuad,
+        OutQuad,
+        InOutQuad,
+        InCubic,
+        OutCubic,
+        InBack,
+        OutBack,
+    };
+
+    /**
+     * @brief Linearly interpolates two Q20.12 values.
+     *
+     * @param a Start value.
+     * @param b End value.
+     * @param t Blend factor in [0, 1] as Q20.12.
+     * @return The interpolated value.
+     */
+    ae::q20_12_t lerp(ae::q20_12_t a, ae::q20_12_t b, ae::q20_12_t t);
+
+    /**
+     * @brief Linearly interpolates two integers with a fixed-point blend factor.
+     *
+     * @param a Start value.
+     * @param b End value.
+     * @param t Blend factor in [0, 1] as Q20.12.
+     * @return The interpolated integer.
+     */
+    int lerp(int a, int b, ae::q20_12_t t);
+
+    /**
+     * @brief Applies an easing curve to a normalized time value.
+     *
+     * @param mode Easing curve to apply.
+     * @param t Normalized time in [0, 1] as Q20.12 (clamped).
+     * @return Eased time in [0, 1] as Q20.12.
+     */
+    ae::q20_12_t ease(EaseMode mode, ae::q20_12_t t);
+
+    /**
+     * @brief Clamps a Q20.12 value to [lo, hi].
+     */
+    ae::q20_12_t clamp(ae::q20_12_t v, ae::q20_12_t lo, ae::q20_12_t hi);
+
   private:
     friend class Singleton<MathManager>;
     MathManager() = default;

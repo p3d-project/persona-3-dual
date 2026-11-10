@@ -1,5 +1,7 @@
 #include "IntroView.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
+#include "data/audioDb.hpp"
 #include "systems/UISystem.hpp"
 
 #include <maxmod9.h>
@@ -163,8 +165,7 @@ void IntroView::init()
     // point to music
     sfxCmpt->registerSFX(SFX::SFX_0);
     sfxCmpt->registerSFX(SFX::SFX_2);
-    musicCmpt->registerMusic(
-        (fatBasePath + "music/menus/title/tightrope.qoa").c_str(), ae::q20_12_t{17.962}, ae::q20_12_t{66.082});
+    musicCmpt->registerMusic(AudioType::MENU, MenuAudio::TIGHTROPE);
 
     // hide sub screen text and attribution text layer
     REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_SRC_BG0 | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;
@@ -177,6 +178,8 @@ void IntroView::init()
     setBrightness(1, -16);
     transitionPhase = TransitionPhase::FADING_IN;
     fadeTimer.start(ae::q20_12_t{1.1});
+
+    logMessage(LogSeverity::DEBUG, "IntroView initialized");
 }
 
 ViewState IntroView::update()
@@ -250,7 +253,9 @@ ViewState IntroView::update()
         {
             silhouetteX += (-silhouetteX) / 6 + 1;
             if (silhouetteX > 0)
+            {
                 silhouetteX = 0;
+            }
         }
 
         // animate Y (moving up towards 0)
@@ -258,7 +263,9 @@ ViewState IntroView::update()
         {
             silhouetteY += (-silhouetteY) / 6 + 1;
             if (silhouetteY < 0)
+            {
                 silhouetteY = 0;
+            }
         }
 
         bgSetScroll(bg[0], -silhouetteX, -silhouetteY);

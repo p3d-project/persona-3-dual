@@ -1,5 +1,6 @@
 #include "EnvironmentView.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "models/makoto.hpp"
 #include "systems/BattleSystem.hpp"
 
@@ -88,6 +89,7 @@ void EnvironmentView::setupEnvironment()
 
     if (!env.load(dbEntry, bitmapsEnv))
     {
+        logMessage(LogSeverity::ERROR, "Failed to load environment " + std::string(dbEntry->name));
         textSub->drawText(
             "EnvironmentView: failed to load environment " + std::string(dbEntry->name), 0, 0, TextColor::Red);
     }
@@ -113,6 +115,7 @@ void EnvironmentView::init()
         text = engine.CreateComponent<TextComponent>();
         textSub = engine.CreateComponent<TextComponent>();
         textSubAlt = engine.CreateComponent<TextComponent>();
+        textSubOptions = engine.CreateComponent<TextComponent>();
         musicCmpt = engine.CreateComponent<MusicComponent>();
         sfxCmpt = engine.CreateComponent<SFXComponent>();
 
@@ -120,6 +123,7 @@ void EnvironmentView::init()
         environment->AddComponent(text);
         environment->AddComponent(textSub);
         environment->AddComponent(textSubAlt);
+        environment->AddComponent(textSubOptions);
         environment->AddComponent(musicCmpt);
         environment->AddComponent(sfxCmpt);
 
@@ -166,7 +170,7 @@ void EnvironmentView::init()
     dbEntry = getEnvironmentDbEntry();
     if (!dbEntry)
     {
-        sassert(false, "EnvironmentView::init - no EnvironmentDbEntry for this room");
+        logMessage(LogSeverity::ERROR, "No EnvironmentDbEntry for this room");
         return;
     }
 
@@ -243,6 +247,8 @@ void EnvironmentView::init()
     bgSetPriority(0, 2); // set 3D view on main to be behind text layer
 
     lineSpacing = textSub->getLineSpacing();
+
+    logMessage(LogSeverity::DEBUG, "EnvironmentView initialized for: " + std::string(dbEntry->name));
 }
 
 ViewState EnvironmentView::update()
@@ -252,6 +258,16 @@ ViewState EnvironmentView::update()
 
     bgUpdate();
     oamUpdate(&oamSub);
+
+    if (dialogueScreen != nullptr)
+    {
+        dialogueScreen->updateAnimation();
+    }
+
+    if (pauseMenuScreen != nullptr)
+    {
+        pauseMenuScreen->updateAnimation();
+    }
 
     switch (phase)
     {
@@ -274,8 +290,8 @@ ViewState EnvironmentView::update()
         {
             prevBattleState = false;
 
-            ae::BroadcastEvent(Event::ShowScreen{menuHUDScreen});
             ae::BroadcastEvent(Event::HideAllMenus{});
+            ae::BroadcastEvent(Event::ShowScreen{menuHUDScreen});
 
             prevEnvironmentState = true;
 
@@ -299,14 +315,22 @@ ViewState EnvironmentView::update()
 
             prevPauseState = true;
 
-            ae::BroadcastEvent(Event::HideAllScreens{});
+            // ShowMenu clears textSub, so show the screen after it to keep the text displayed
             ae::BroadcastEvent(Event::ShowMenu{pauseMenuCmpt});
+            ae::BroadcastEvent(Event::ShowScreen{pauseMenuScreen});
         }
 
-        if ((systemKeysDown & KEY_START) || pauseMenuCmpt->isClosed)
+        // menu clears textSub when navigating,so a redraw is required
+        if (systemKeysDown & (KEY_A | KEY_B | KEY_UP | KEY_DOWN))
+        {
+            pauseMenuScreen->renderText();
+        }
+
+        if ((systemKeysDown & KEY_X) || pauseMenuCmpt->isClosed)
         {
             prevPauseState = false;
             textSub->clearScreen();
+            pauseMenuScreen->cancelAnimation();
 
             ae::BroadcastEvent(Event::HideAllMenus{});
 
@@ -366,7 +390,7 @@ ViewState EnvironmentView::update()
         CharacterPosition charPos = movement->isCharacterAt();
         camPos = CameraSystem::GetInstance().getCameraPosition();
 
-        if (systemKeysDown & KEY_START)
+        if (systemKeysDown & KEY_X)
         {
             textSub->clearScreen();
             prevEnvironmentState = false;
@@ -479,6 +503,8 @@ ViewState EnvironmentView::update()
 
 void EnvironmentView::cleanup()
 {
+    logMessage(LogSeverity::DEBUG, "EnvironmentView cleaned up");
+
     cleanupHook();
 
     // entity
@@ -491,6 +517,7 @@ void EnvironmentView::cleanup()
         text = nullptr;
         textSub = nullptr;
         textSubAlt = nullptr;
+        textSubOptions = nullptr;
         musicCmpt = nullptr;
     }
 
@@ -506,6 +533,7 @@ void EnvironmentView::cleanup()
 
     dialogueScreen = nullptr;
     menuHUDScreen = nullptr;
+    pauseMenuScreen = nullptr;
     battleMenuCmpt = nullptr;
     pauseMenuCmpt = nullptr;
 
@@ -519,4 +547,30 @@ void EnvironmentView::cleanup()
     env.cleanup();
 
     BaseView::cleanup();
+}
+
+void EnvironmentView::setupPauseMenu()
+{
+    pauseMenuCmpt = PauseMenu::getInstance();
+    pauseMenuScreen = PauseMenuScreen::getInstance();
+
+    textSubOptions->configureText(TextConfig(textVideoBufferSub, &optionsFontName, optionsFontSize), false);
+
+    pauseMenuScreen->setTextComponent(textSub);
+    pauseMenuScreen->setOptionsTextComponent(textSubOptions);
+    pauseMenuScreen->setMenu(pauseMenuCmpt);
+    pauseMenuCmpt->setVisibleOptions(pauseMenuScreen->getVisibleOptions());
+    pauseMenuScreen->setYenText("9,999,999 Yen", TextColor::DarkestBlue);
+    pauseMenuScreen->setPersonaText("Ara Mitama", TextColor::DarkestBlue);
+    pauseMenuScreen->setArcanaText("Chariot", TextColor::DarkestBlue);
+    pauseMenuScreen->setLevelText("Level 99", TextColor::DarkestBlue);
+    pauseMenuScreen->setDescriptionText("View Social Link details", TextColor::White);
+}
+
+void EnvironmentView::setupMenuHUD(const std::string& location)
+{
+    menuHUDScreen = MenuHUDScreen::getInstance();
+
+    menuHUDScreen->setTextComponent(textSub);
+    menuHUDScreen->setTextContent(location, TextColor::White);
 }

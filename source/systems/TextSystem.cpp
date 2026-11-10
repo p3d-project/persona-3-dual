@@ -1,4 +1,7 @@
 #include "TextSystem.hpp"
+#include "core/logger.hpp"
+
+#include <algorithm>
 
 constexpr char INSTRUCTION_BIT = 0xFF; /// Special value used to indicate that the next byte is an instruction
 
@@ -10,19 +13,26 @@ void TextSystem::drawText(const std::string& text,
                           int color,
                           int letterSpacing,
                           int lineSpacing,
-                          int spaceWidth)
+                          int spaceWidth,
+                          int xBoundary)
 {
-    Text* textObj = createText(text, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
+    if (!font || !videoBuffer)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null font or videoBuffer");
+        return;
+    }
+
+    auto textObj =
+        createText(text, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 
     while (textObj->cursorPos < (int)textObj->content.size())
     {
-        drawNextFromText(textObj);
+        drawNextFromText(textObj.get());
         textObj->cursorPos++;
     }
-    delete textObj;
 }
 
-void TextSystem::appearText(Text*& appearingText,
+void TextSystem::appearText(std::unique_ptr<Text>& appearingText,
                             const std::string& content,
                             Font* font,
                             uint16_t* videoBuffer,
@@ -31,15 +41,24 @@ void TextSystem::appearText(Text*& appearingText,
                             int color,
                             int letterSpacing,
                             int lineSpacing,
-                            int spaceWidth)
+                            int spaceWidth,
+                            int xBoundary)
 {
+    if (!font || !videoBuffer)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null font or videoBuffer");
+        return;
+    }
+
     if (appearingText != nullptr)
-        delete appearingText;
-    appearingText =
-        createText(content, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
+    {
+        appearingText.reset();
+    }
+    appearingText = createText(
+        content, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 }
 
-void TextSystem::appearTextSkip(Text*& appearingText)
+void TextSystem::appearTextSkip(Text* appearingText)
 {
     if (appearingText != nullptr)
     {
@@ -51,13 +70,17 @@ void TextSystem::appearTextSkip(Text*& appearingText)
     }
 }
 
-bool TextSystem::appearTextDone(Text*& appearingText)
+bool TextSystem::appearTextDone(Text* appearingText)
 {
     if (appearingText == nullptr)
+    {
         return true;
+    }
     if (appearingText->cursorPos >=
         (int)appearingText->content.size()) // not really sure if this is needed but it should be safe to check anyway
+    {
         return true;
+    }
     return false;
 }
 
@@ -71,6 +94,12 @@ void TextSystem::drawGlyph(const Glyph& glyph,
                            bool italic,
                            bool underline)
 {
+    if (!font || !videoBuffer)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null font or videoBuffer");
+        return;
+    }
+
     for (int y = 0; y < glyph.height; y++)
     {
         int distY = italic ? glyph.height - 1 - y : 0; /// Distance from baseline
@@ -82,7 +111,11 @@ void TextSystem::drawGlyph(const Glyph& glyph,
             int bitmapY = glyph.yPos + y;
             int bitmapIndex = bitmapY * font->bitmapWidth + bitmapX;
 
-            sassert(bitmapIndex < font->bitmapWidth * font->bitmapHeight, "Bitmap index out of bounds");
+            if (bitmapIndex >= font->bitmapWidth * font->bitmapHeight)
+            {
+                logMessage(LogSeverity::ERROR, "Bitmap index out of bounds");
+                continue;
+            }
 
             int pixelValue = bold ? font->bitmapBold[bitmapIndex] : font->bitmap[bitmapIndex];
             if (pixelValue > 0)
@@ -90,7 +123,9 @@ void TextSystem::drawGlyph(const Glyph& glyph,
                 int screenX = cursorX + x + italicOffset;
                 int screenY = cursorY + glyph.yOffset + y;
                 if (screenX >= 0 && screenX < 256 && screenY >= 0 && screenY < 192)
+                {
                     drawPixel(videoBuffer, screenX, screenY, color);
+                }
             }
         }
     }
@@ -101,28 +136,54 @@ void TextSystem::drawGlyph(const Glyph& glyph,
         {
             int screenX = cursorX + x;
             if (screenX >= 0 && screenX < 256 && underlineY >= 0 && underlineY < 192)
+            {
                 drawPixel(videoBuffer, screenX, underlineY, color);
+            }
         }
     }
 }
 
 void TextSystem::clearArea(uint16_t* videoBuffer, int x, int y, int width, int height)
 {
+    if (!videoBuffer)
+    {
+        logMessage(LogSeverity::WARNING, "Called with null videoBuffer");
+        return;
+    }
+
     for (int row = 0; row < height; ++row)
     {
-        for (int col = 0; col < width; ++col)
+        int rowStart = x;
+        int rowEnd = x + width;
+        int pixelY = y + row;
+
+        if (pixelY < 0 || pixelY >= 192)
         {
-            int pixelX = x + col;
-            int pixelY = y + row;
-            if (pixelX >= 0 && pixelX < 256 && pixelY >= 0 && pixelY < 192)
+            continue;
+        }
+
+        rowStart = std::max(rowStart, 0);
+        rowEnd = std::min(rowEnd, 256);
+        if (rowStart < rowEnd)
+        {
+            // Clear unaligned edge pixels individually, then fill the aligned span with DMA.
+            if (rowStart % 2 != 0)
             {
-                drawPixel(videoBuffer, pixelX, pixelY, TextColor::Transparent);
+                drawPixel(videoBuffer, rowStart, pixelY, TextColor::Transparent);
+                ++rowStart;
             }
+            if (rowEnd % 2 != 0)
+            {
+                --rowEnd;
+                drawPixel(videoBuffer, rowEnd, pixelY, TextColor::Transparent);
+            }
+
+            dmaFillHalfWords(0, videoBuffer + (pixelY * 256 + rowStart) / 2, static_cast<uint32_t>(rowEnd - rowStart));
         }
     }
 }
 
-void TextSystem::drawNextFromText(Text*& text)
+void TextSystem::drawNextFromText(Text* text)
 {
     unsigned char c = text->content[text->cursorPos];
 
@@ -139,7 +200,7 @@ void TextSystem::drawNextFromText(Text*& text)
             return; /// Don't add a space at the beginning of a line
         }
         std::string nextWord = getNextWord(text->content.substr(text->cursorPos + 1));
-        if (checkWordWrap(nextWord, text->font, text->cursorX, text->bold, text->letterSpacing))
+        if (checkWordWrap(nextWord, text->font, text->cursorX, text->bold, text->letterSpacing, text->xBoundary))
         {
             text->cursorX = text->startX;
             text->cursorY += text->font->lineHeight + text->lineSpacing;
@@ -164,9 +225,13 @@ void TextSystem::drawNextFromText(Text*& text)
         {
             c = getNextChar(text);
             if (c == TextInstruction::Reset) /// Reset to base color
+            {
                 text->activeColor = text->baseColor;
+            }
             else if (c < 256) /// bg palette only has 256 colors
+            {
                 text->activeColor = static_cast<int>(c);
+            }
         }
         else if (c == TextInstruction::StyleChange)
         {
@@ -188,7 +253,9 @@ void TextSystem::drawNextFromText(Text*& text)
         }
     }
     else if (text->font->glyphs[c].width == 0)
+    {
         text->cursorX += text->spaceWidth; /// If the glyph width is 0, skip it (char has not been defined in the font)
+    }
     else
     {
         Glyph g = text->bold ? text->font->boldGlyphs[c] : text->font->glyphs[c];
@@ -213,17 +280,18 @@ void TextSystem::drawNextFromText(Text*& text)
     }
 }
 
-Text* TextSystem::createText(const std::string& text,
-                             Font* font,
-                             uint16_t* videoBuffer,
-                             int startX,
-                             int startY,
-                             int color,
-                             int letterSpacing,
-                             int lineSpacing,
-                             int spaceWidth)
+std::unique_ptr<Text> TextSystem::createText(const std::string& text,
+                                             Font* font,
+                                             uint16_t* videoBuffer,
+                                             int startX,
+                                             int startY,
+                                             int color,
+                                             int letterSpacing,
+                                             int lineSpacing,
+                                             int spaceWidth,
+                                             int xBoundary)
 {
-    Text* newText = new Text();
+    auto newText = std::make_unique<Text>();
     newText->cursorX = startX;
     newText->cursorY = startY;
     newText->startX = startX;
@@ -240,13 +308,16 @@ Text* TextSystem::createText(const std::string& text,
     newText->letterSpacing = letterSpacing;
     newText->lineSpacing = lineSpacing;
     newText->spaceWidth = spaceWidth;
+    newText->xBoundary = xBoundary;
     return newText;
 }
 
 char TextSystem::getNextChar(Text* text)
 {
     if (text->cursorPos + 1 < (int)text->content.size())
+    {
         return text->content[++text->cursorPos];
+    }
     return 0xFE; /// Return a special value indicating no more characters
 }
 
@@ -255,9 +326,13 @@ void TextSystem::drawPixel(uint16_t* videoBuffer, int x, int y, int paletteValue
     int wordIndex = (y * 256 + x) / 2;
     u16 currentWord = videoBuffer[wordIndex];
     if (x % 2 == 0) //Clear the lower 8 bits, then inject our 8-bit color index
+    {
         videoBuffer[wordIndex] = (currentWord & 0xFF00) | (paletteValue & 0xFF);
+    }
     else //Clear the upper 8 bits, then inject our 8-bit color index shifted up
+    {
         videoBuffer[wordIndex] = (currentWord & 0x00FF) | ((paletteValue & 0xFF) << 8);
+    }
 }
 
 std::string TextSystem::getNextWord(const std::string& text)
@@ -272,7 +347,8 @@ std::string TextSystem::getNextWord(const std::string& text)
     return nextWord;
 }
 
-bool TextSystem::checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing)
+bool TextSystem::checkWordWrap(
+    const std::string& text, Font* font, int startX, bool bold, int letterSpacing, int xBoundary)
 {
     int cursorX = startX;
     for (char c : text)
@@ -280,8 +356,10 @@ bool TextSystem::checkWordWrap(const std::string& text, Font* font, int startX, 
         Glyph g = bold ? font->boldGlyphs[static_cast<unsigned char>(c)] : font->glyphs[static_cast<unsigned char>(c)];
         cursorX += g.width + letterSpacing;
     }
-    if (cursorX > 256)
+    if (cursorX > xBoundary)
+    {
         return true; // Word exceeds screen width
+    }
     return false;
 }
 
@@ -291,7 +369,9 @@ void TextSystem::underlineGap(int startX, int y, int width, uint16_t* videoBuffe
     {
         int screenX = startX + x;
         if (screenX >= 0 && screenX < 256 && y >= 0 && y < 192)
+        {
             drawPixel(videoBuffer, screenX, y, color);
+        }
     }
 }
 
@@ -304,7 +384,9 @@ void TextSystem::testBitmap(Font* font, uint16_t* videoBuffer)
             int index = font->bitmap[y * font->bitmapWidth + x];
             int pixelValue = font->bitmap[index];
             if (pixelValue > 0)
+            {
                 drawPixel(videoBuffer, x, y, DualGreen);
+            }
         }
     }
 }

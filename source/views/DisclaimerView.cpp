@@ -1,5 +1,6 @@
 #include "DisclaimerView.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include <nds.h>
 
 void DisclaimerView::init()
@@ -49,20 +50,38 @@ void DisclaimerView::init()
     GraphicAsset bgCaution = graphics->loadGraphic(bgPath + "cautionBackground/cautionBackground");
     GraphicAsset bgCautionSub = graphics->loadGraphic(bgPath + "cautionBackgroundSub/cautionBackgroundSub");
 
-    dmaCopy(bgCaution.tiles, bgGetGfxPtr(bg[0]), bgCaution.tilesLen);
-    dmaCopy(bgCautionSub.tiles, bgGetGfxPtr(bg[1]), bgCautionSub.tilesLen);
+    if (bgCaution.tiles && bgCaution.tilesLen > 0)
+    {
+        dmaCopy(bgCaution.tiles, bgGetGfxPtr(bg[0]), bgCaution.tilesLen);
+    }
+    if (bgCautionSub.tiles && bgCautionSub.tilesLen > 0)
+    {
+        dmaCopy(bgCautionSub.tiles, bgGetGfxPtr(bg[1]), bgCautionSub.tilesLen);
+    }
 
     // copy maps to vram
-    dmaCopy(bgCaution.map, bgGetMapPtr(bg[0]), bgCaution.mapLen);
-    dmaCopy(bgCautionSub.map, bgGetMapPtr(bg[1]), bgCautionSub.mapLen);
+    if (bgCaution.map && bgCaution.mapLen > 0)
+    {
+        dmaCopy(bgCaution.map, bgGetMapPtr(bg[0]), bgCaution.mapLen);
+    }
+    if (bgCautionSub.map && bgCautionSub.mapLen > 0)
+    {
+        dmaCopy(bgCautionSub.map, bgGetMapPtr(bg[1]), bgCautionSub.mapLen);
+    }
 
     // can only write to extended palettes in LCD mode
     vramSetBankE(VRAM_E_LCD); // for main engine
     vramSetBankH(VRAM_H_LCD); // for subv engine
 
     // copy palettes to extended palette area
-    dmaCopy(bgCaution.pal, &VRAM_E_EXT_PALETTE[2][0], bgCaution.palLen); // bg 2, slot 0
-    dmaCopy(bgCautionSub.pal, &VRAM_H_EXT_PALETTE[1][0], bgCautionSub.palLen);
+    if (bgCaution.pal && bgCaution.palLen > 0)
+    {
+        dmaCopy(bgCaution.pal, &VRAM_E_EXT_PALETTE[2][0], bgCaution.palLen); /// bg 2, slot 0
+    }
+    if (bgCautionSub.pal && bgCautionSub.palLen > 0)
+    {
+        dmaCopy(bgCautionSub.pal, &VRAM_H_EXT_PALETTE[1][0], bgCautionSub.palLen);
+    }
 
     // map vram to extended palette
     vramSetBankE(VRAM_E_BG_EXT_PALETTE);
@@ -75,6 +94,8 @@ void DisclaimerView::init()
 
     fadeTimer.start(ae::q20_12_t{2.0});
     transitionPhase = TransitionPhase::FADING_IN;
+
+    logMessage(LogSeverity::DEBUG, "DisclaimerView initialized");
 }
 
 ViewState DisclaimerView::update()

@@ -1,18 +1,34 @@
 #include "MathManager.hpp"
+#include "core/logger.hpp"
 
 ae::q20_12_t MathManager::div(ae::q20_12_t num, ae::q20_12_t den)
 {
+    if (den.raw_value() == 0)
+    {
+        logMessage(LogSeverity::ERROR, "Division by zero");
+        return ae::q20_12_t{0};
+    }
     return ae::q20_12_t::from_raw_value(divf32(num.raw_value(), den.raw_value()));
 }
 
 ae::q20_12_t MathManager::sqrt(ae::q20_12_t v)
 {
+    if (v.raw_value() < 0)
+    {
+        logMessage(LogSeverity::WARNING, "Square root of negative value");
+        return ae::q20_12_t{0};
+    }
     uint32_t raw = sqrtf32(static_cast<uint32_t>(v.raw_value()));
     return ae::q20_12_t::from_raw_value(static_cast<int32_t>(raw));
 }
 
 ae::q20_12_t MathManager::mod(ae::q20_12_t num, ae::q20_12_t den)
 {
+    if (den.raw_value() == 0)
+    {
+        logMessage(LogSeverity::ERROR, "Modulo by zero");
+        return ae::q20_12_t{0};
+    }
     return ae::q20_12_t::from_raw_value(mod32(num.raw_value(), den.raw_value()));
 }
 
@@ -118,4 +134,72 @@ u32 MathManager::secondsToSamples(ae::q20_12_t seconds, u32 sampleRate)
     ae::q20_12_t fractionalSeconds = seconds - ae::q20_12_t{wholeSeconds};
     u32 fractionalSamples = static_cast<u32>(fractionalSeconds * sampleRate);
     return (wholeSeconds * sampleRate) + fractionalSamples;
+}
+
+ae::q20_12_t MathManager::clamp(ae::q20_12_t v, ae::q20_12_t lo, ae::q20_12_t hi)
+{
+    if (v < lo)
+    {
+        return lo;
+    }
+    if (v > hi)
+    {
+        return hi;
+    }
+    return v;
+}
+
+ae::q20_12_t MathManager::lerp(ae::q20_12_t a, ae::q20_12_t b, ae::q20_12_t t)
+{
+    return a + (b - a) * t;
+}
+
+int MathManager::lerp(int a, int b, ae::q20_12_t t)
+{
+    const ae::q20_12_t delta = ae::q20_12_t{b - a} * t;
+    return a + static_cast<int>(delta);
+}
+
+ae::q20_12_t MathManager::ease(EaseMode mode, ae::q20_12_t t)
+{
+    t = clamp(t, ae::q20_12_t{0}, ae::q20_12_t{1});
+
+    switch (mode)
+    {
+    case EaseMode::InQuad:
+        return t * t;
+    case EaseMode::OutQuad:
+        return t * (ae::q20_12_t{2} - t);
+    case EaseMode::InOutQuad:
+    {
+        if (t < ae::q20_12_t::from_raw_value(2048)) // 0.5
+        {
+            return ae::q20_12_t{2} * t * t;
+        }
+        // -1 + (4 - 2t) * t
+        return ae::q20_12_t{-1} + (ae::q20_12_t{4} - ae::q20_12_t{2} * t) * t;
+    }
+    case EaseMode::InCubic:
+        return t * t * t;
+    case EaseMode::OutCubic:
+    {
+        const ae::q20_12_t f = t - ae::q20_12_t{1};
+        return f * f * f + ae::q20_12_t{1};
+    }
+    case EaseMode::InBack:
+    {
+        // s ≈ 1.70158 → raw 1.70158 * 4096 ≈ 6970
+        const ae::q20_12_t s = ae::q20_12_t::from_raw_value(6970);
+        return t * t * ((s + ae::q20_12_t{1}) * t - s);
+    }
+    case EaseMode::OutBack:
+    {
+        const ae::q20_12_t s = ae::q20_12_t::from_raw_value(6970);
+        const ae::q20_12_t f = t - ae::q20_12_t{1};
+        return f * f * ((s + ae::q20_12_t{1}) * f + s) + ae::q20_12_t{1};
+    }
+    case EaseMode::Linear:
+    default:
+        return t;
+    }
 }

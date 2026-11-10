@@ -1,5 +1,6 @@
 #include "GraphicsComponent.hpp"
 #include "core/globals.hpp"
+#include "core/logger.hpp"
 #include "data/spriteDb.hpp"
 
 void GraphicsComponent::Destroy()
@@ -13,6 +14,7 @@ GraphicAsset GraphicsComponent::loadGraphic(const std::string& path)
 
     if (loadedGraphics.full())
     {
+        logMessage(LogSeverity::ERROR, "LoadedGraphics capacity exceeded");
         return asset;
     }
 
@@ -23,6 +25,7 @@ GraphicAsset GraphicsComponent::loadGraphic(const std::string& path)
 
     if (asset.tiles == nullptr)
     {
+        logMessage(LogSeverity::WARNING, "Failed to load tiles for graphic: " + path);
         io.unloadFromRAM(asset.tiles);
         io.unloadFromRAM(asset.pal);
         io.unloadFromRAM(asset.map);
@@ -39,6 +42,7 @@ GraphicAsset GraphicsComponent::loadSpriteGraphicImpl(const std::string& spriteP
     std::string filename = getSpriteFilename(type, spriteId);
     if (filename.empty())
     {
+        logMessage(LogSeverity::WARNING, "Empty filename for sprite type/id");
         return GraphicAsset{};
     }
 

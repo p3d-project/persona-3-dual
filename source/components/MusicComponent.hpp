@@ -5,8 +5,8 @@
  */
 
 #pragma once
+#include "data/audioDb.hpp"
 #include "managers/AudioManager.hpp"
-#include "types/aeTypes.hpp"
 #include <aegis/component.hpp>
 #include <string>
 
@@ -33,15 +33,17 @@ class MusicComponent : public ae::Component
     }
 
     /**
-     * @brief Set up the music to play
+     * @brief Wrapper to set up the music to play
      *
      * @note Can only register one music track
      *
-     * @param path the music file path
-     * @param loopStartTime the loop start time in seconds
-     * @param loopEndTimethe loop end time in seconds
+     * @param type the audio type
+     * @param audioId the specific audio to play
      */
-    void registerMusic(std::string path, ae::q20_12_t loopStartTime, ae::q20_12_t loopEndTime);
+    template <typename AudioID> void registerMusic(AudioType type, AudioID audioId)
+    {
+        registerMusic(type, static_cast<int>(audioId));
+    }
 
     /**
      * @brief Play the registered song if currently paused
@@ -65,4 +67,14 @@ class MusicComponent : public ae::Component
 
   private:
     AudioManager& am = AudioManager::GetInstance();
+
+    /**
+     * @brief Implementation to set up the music to play
+     *
+     * @note Can only register one music track
+     *
+     * @param type the audio type
+     * @param audioId the specific audio to play
+     */
+    void registerMusic(AudioType type, int audioId);
 };

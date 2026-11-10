@@ -1,12 +1,25 @@
 #include "MusicComponent.hpp"
+#include "core/globals.hpp"
+#include "core/logger.hpp"
+#include "types/aeTypes.hpp"
 
 void MusicComponent::Destroy()
 {
     stopMusic();
 }
 
-void MusicComponent::registerMusic(std::string path, ae::q20_12_t loopStartTime, ae::q20_12_t loopEndTime)
+void MusicComponent::registerMusic(AudioType type, int audioId)
 {
+    std::string filename = getAudioFilepath(type, audioId);
+    if (filename.empty())
+    {
+        logMessage(LogSeverity::WARNING, "Empty filename for audio type/id");
+        return;
+    }
+    std::string path = fatBasePath + "music/" + filename + ".qoa";
+    ae::q20_12_t loopStartTime = getLoopStart(type, audioId);
+    ae::q20_12_t loopEndTime = getLoopEnd(type, audioId);
+    logMessage(LogSeverity::DEBUG, "Registering music: " + filename);
     am.registerAudio(path, loopStartTime, loopEndTime);
 }
 
