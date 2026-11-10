@@ -147,6 +147,18 @@ void RenderManager::renderModelComponent(MDL3Model& model)
     }
 }
 
+void RenderManager::RenderModelNode(const Node& node)
+{
+    for (const SubList_N& sl : node.subLists)
+    {
+        // Guard against texture ID's that are out of bounds or corrupted. Use no texture in that case.
+        const int textureID = sl.texSlot >= 0 && static_cast<size_t>(sl.texSlot) < model.textures.size()
+                                  ? model.textures[sl.texSlot].textureID
+                                  : -1;
+        renderDisplayList(sl.displayList, textureID);
+    }
+}
+
 void RenderManager::renderModelComponent(MDL3Model& model,
                                          ae::q20_12_t posX,
                                          ae::q20_12_t posY,
@@ -180,14 +192,7 @@ void RenderManager::renderModelComponent(MDL3Model& model,
 
     for (const Node& node : model.nodes)
     {
-        for (const SubList_N& sl : node.subLists)
-        {
-            // Guard against texture ID's that are out of bounds or corrupted. Use no texture in that case.
-            const int textureID = sl.texSlot >= 0 && static_cast<size_t>(sl.texSlot) < model.textures.size()
-                                      ? model.textures[sl.texSlot].textureID
-                                      : -1;
-            renderDisplayList(sl.displayList, textureID);
-        }
+        RenderModelNode(node);
     }
 
     glPopMatrix(1);
@@ -266,6 +271,37 @@ void RenderManager::renderDisplayList(const void* displayList, const int texture
     }
 
     glCallList(displayList);
+}
+
+void RenderManager::TranslateMatrix(int32_t x, int32_t y, int32_t z)
+{
+    glTranslatef32(x, y, z);
+}
+
+void RenderManager::RotateMatrix(int32_t x, int32_t y, int32_t z, int32_t w)
+{
+    if (x)
+    {
+        glRotatef32(x, 1, 0, 0);
+    }
+    if (y)
+    {
+        glRotatef32(y, 0, 1, 0);
+    }
+    if (z)
+    {
+        glRotatef32(z, 0, 0, 1);
+    }
+}
+
+void RenderManager::PushMatrix()
+{
+    glPushMatrix();
+}
+
+void RenderManager::PopMatrix()
+{
+    glPopMatrix(1);
 }
 
 void RenderManager::deleteTexture(int& texture)

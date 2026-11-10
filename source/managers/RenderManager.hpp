@@ -96,6 +96,8 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
                               uint32_t rotZ,
                               ae::q20_12_t scale = ae::q20_12_t{1});
 
+    void RenderModelNode(const Node& node);
+
     /**
      * @brief Renders a textured billboard.
      *
@@ -120,6 +122,16 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
      * Calls from outside of RenderManager should start using renderMeshComponent() instead.
      */
     void renderDisplayList(const void* displayList, const int texture);
+
+    // Todo: consider combined push and translate/rotate function
+
+    void TranslateMatrix(int32_t x, int32_t y, int32_t z);
+
+    void RotateMatrix(int32_t x, int32_t y, int32_t z, int32_t w);
+
+    void PushMatrix();
+
+    void PopMatrix();
 
     /**
      * @brief Deletes a texture from the GPU and resets its ID.
