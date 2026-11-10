@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include "components/ModelAnimatorComponent.hpp"
 #include "managers/RenderManager.hpp"
 #include "types/aeTypes.hpp"
 
@@ -56,6 +57,7 @@ class ModelComponent : public ae::Component
 
   private:
     std::unique_ptr<MDL3Model> model;
+    std::unique_ptr<ModelAnimatorComponent> animator;
 
     RenderManager& render = RenderManager::GetInstance();
 
