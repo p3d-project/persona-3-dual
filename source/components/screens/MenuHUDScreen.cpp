@@ -192,12 +192,15 @@ void MenuHUDScreen::setTextContent(std::string textContent, TextColor textColor)
 
 void MenuHUDScreen::renderText()
 {
+    char date[6];
+    std::sprintf(date, "%02d/%02d", month, day);
+
     // place
     text->clearArea(3, 3, 134, 19);
     text->drawText(textContent.c_str(), 5, 6, textColor);
 
     // date
-    text->drawText("12/31", 208, 5, TextColor::White);
+    text->drawText(date, 208, 5, TextColor::White);
 
     // day
     text->drawText("Sa", 243, 5, TextColor::White);

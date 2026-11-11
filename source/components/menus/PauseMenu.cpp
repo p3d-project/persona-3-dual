@@ -4,6 +4,8 @@
 #include <nds.h>
 #include <string>
 
+#include "systems/Scripts/VmSystem.hpp"
+
 PauseMenu* PauseMenu::instance = nullptr;
 
 void PauseMenu::create()
@@ -274,6 +276,8 @@ ViewState PauseMenu::debugOptionSelected()
         updateCameraOptionName();
         selectedView = ViewState::KEEP_CURRENT;
         break;
+    case DebugOption::SCRIPTING_TEST:
+        VmSystem::GetInstance().setActive(true);
     default:
         selectedView = ViewState::KEEP_CURRENT;
     }

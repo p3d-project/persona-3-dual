@@ -14,7 +14,8 @@ enum class DebugOption
     TOGGLE_DEBUG_PRINT,
     PLAY_MUSIC,
     PLAY_CHARACTER_ANIM,
-    CYCLE_CAMERA_MODE
+    CYCLE_CAMERA_MODE,
+    SCRIPTING_TEST
 };
 
 enum class ViewOption
@@ -70,7 +71,7 @@ class PauseMenu : public UIMenu
         {"SYSTEM", -1, menuBind(&PauseMenu::openSystemMenu)},
     };
 
-    etl::array<MenuOption, 7> debugOptions = {
+    etl::array<MenuOption, 8> debugOptions = {
         MenuOption{"Switch View", -1, menuBind(&PauseMenu::openViewMenu)},
         {"Play Cutscene", -1, menuBind(&PauseMenu::openCutsceneMenu)},
         {"Toggle Billboards", -1, menuBind(&PauseMenu::debugOptionSelected)},
@@ -78,6 +79,7 @@ class PauseMenu : public UIMenu
         {"Play Music", -1, menuBind(&PauseMenu::openMusicMenu)},
         {"Play Animations", -1, menuBind(&PauseMenu::openCharacterAnimMenu)},
         {"Cycle Camera Mode", -1, menuBind(&PauseMenu::debugOptionSelected)},
+        {"Scripting Test", -1, menuBind(&PauseMenu::debugOptionSelected)},
     };
 
     etl::array<MenuOption, 8> viewOptions = {

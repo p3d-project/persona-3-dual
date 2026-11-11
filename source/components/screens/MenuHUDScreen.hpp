@@ -15,6 +15,9 @@
 class MenuHUDScreen : public UIScreen
 {
   public:
+    int day = 31;
+    int month = 12;
+
     static void create();
     static void destroy();
     static MenuHUDScreen* getInstance();

@@ -6,6 +6,7 @@
 #include <maxmod9.h>
 #include <nds.h>
 
+#include "systems/Scripts/VmSystem.hpp"
 // states
 #include "views/BaseView.hpp"
 #include "views/DisclaimerView.hpp"
@@ -157,6 +158,7 @@ int main(int argc, char* argv[])
     engine.RegisterSystem(&SaveSystem::GetInstance());
     engine.RegisterSystem(&TextSystem::GetInstance());
     engine.RegisterSystem(&UISystem::GetInstance());
+    engine.RegisterSystem(&VmSystem::GetInstance());
 
     engine.RegisterManager(&MathManager::GetInstance());
     engine.RegisterManager(&IOManager::GetInstance());
@@ -180,6 +182,13 @@ int main(int argc, char* argv[])
 
     // TODO: set to constant tied to VBlank
     const ae::q20_12_t dt = MathManager::GetInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
+
+    constexpr VmInstruction testScript[] = {{VmOpcode::PUSH_INT, 1},
+                                            {VmOpcode::PUSH_INT, 2},
+                                            {VmOpcode::ADD, 0},
+                                            {VmOpcode::CALL_NATIVE, 0},
+                                            {VmOpcode::END, 0}};
+    VmSystem::GetInstance().setScript(testScript);
 
     while (1)
     {
