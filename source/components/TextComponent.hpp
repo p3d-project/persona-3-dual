@@ -173,7 +173,7 @@ class TextComponent : public ae::Component
     TextManager& tm = TextManager::getInstance();
 
     std::unique_ptr<Text> appearingText;
-    Font* font = nullptr;
+    std::unique_ptr<Font> font;
     uint16_t* videoBuffer = nullptr;
     int fontSize = 0;
 

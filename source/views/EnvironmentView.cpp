@@ -290,8 +290,8 @@ ViewState EnvironmentView::update()
         {
             prevBattleState = false;
 
-            ae::broadcastEvent(Event::ShowScreen{menuHUDScreen});
-            ae::broadcastEvent(Event::HideAllMenus{});
+            ae::BroadcastEvent(Event::HideAllMenus{});
+            ae::BroadcastEvent(Event::ShowScreen{menuHUDScreen});
 
             prevEnvironmentState = true;
 

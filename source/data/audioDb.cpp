@@ -65,6 +65,12 @@ static const AudioDBEntry AUDIO_DB_ENTRY[] = {
      "other/club_escapade_nouveau_metalmoth_remix",
      ae::q20_12_t{0.000},
      ae::q20_12_t{-1.000}}, // TODO: get correct looping points
+    {AudioType::OTHER, static_cast<int>(OtherAudio::PEACE), "other/peace", ae::q20_12_t{47.060}, ae::q20_12_t{-1.000}},
+    {AudioType::OTHER,
+     static_cast<int>(OtherAudio::WANT_TO_BE_CLOSE),
+     "other/want_to_be_close",
+     ae::q20_12_t{47.060},
+     ae::q20_12_t{-1.000}},
 };
 
 static const int AUDIO_DB_ENTRY_LEN = sizeof(AUDIO_DB_ENTRY) / sizeof(AUDIO_DB_ENTRY[0]);

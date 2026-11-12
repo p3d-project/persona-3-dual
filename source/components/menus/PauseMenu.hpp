@@ -121,10 +121,12 @@ class PauseMenu : public UIMenu
         {"Aria of the Soul", -1, menuBind(&PauseMenu::menuMusicOptionSelected)},
     };
 
-    etl::array<MenuOption, 3> otherMusicOptions = {
+    etl::array<MenuOption, 5> otherMusicOptions = {
         MenuOption{"After the Battle", -1, menuBind(&PauseMenu::otherMusicOptionSelected)},
         {"Because I Will Protect You", -1, menuBind(&PauseMenu::otherMusicOptionSelected)},
         {"Club Escapade Nouveau MetalMoth Remix", -1, menuBind(&PauseMenu::otherMusicOptionSelected)},
+        {"Peace", -1, menuBind(&PauseMenu::otherMusicOptionSelected)},
+        {"Want To Be Close", -1, menuBind(&PauseMenu::otherMusicOptionSelected)},
     };
 
     etl::array<MenuOption, 9> skillOptions = {
