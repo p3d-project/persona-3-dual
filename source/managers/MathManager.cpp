@@ -37,6 +37,11 @@ ae::angle16_t MathManager::radiansToAngle(ae::q20_12_t radians)
     return static_cast<ae::angle16_t>((static_cast<int32_t>(radians.raw_value()) * 5215) / 4096);
 }
 
+ae::angle16_t MathManager::degreesToCyclicAngle(ae::q20_12_t degrees)
+{
+    return static_cast<ae::angle16_t>((static_cast<int64_t>(degrees.raw_value()) * DEGREES_IN_CIRCLE / 360) >> 12);
+}
+
 ae::q20_12_t MathManager::angleToRadians(ae::angle16_t angle)
 {
     int32_t raw_rad = (static_cast<int32_t>(angle) * 51472) >> 16;

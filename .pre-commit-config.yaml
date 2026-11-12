@@ -32,3 +32,13 @@ repos:
     hooks:
       - id: prettier
         types_or: [html, css, javascript]
+
+  # Banned types (float/double): the DS has no FPU, use fixed point instead.
+  - repo: local
+    hooks:
+      - id: banned-types
+        name: pygrep for banned types (float/double)
+        entry: '^(?!\s*(//|/\*|\*))(?:(?!//).)*\b(float|double)\b'
+        language: pygrep
+        types_or: [c, c++]
+        files: ^(source|include)/
