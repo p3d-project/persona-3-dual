@@ -1,74 +1,57 @@
 {
-    // Formatting & Whitespace
-    "tab_size": 4,
-    "hard_tabs": false,
-    "line_ending": "prefer_lf",
-    "remove_trailing_whitespace_on_save": true,
-    "ensure_final_newline_on_save": true,
-    "format_on_save": "on",
+  // Formatting & Whitespace
+  "tab_size": 4,
+  "hard_tabs": false,
+  "line_ending": "prefer_lf",
+  "remove_trailing_whitespace_on_save": true,
+  "ensure_final_newline_on_save": true,
+  "format_on_save": "on",
 
-    // File and Search Exclusions
-    "file_scan_exclusions": [
-        "**/.git",
-        "**/.DS_Store",
-        "**/build",
-        "**/build/**",
-        "**/out",
-        "**/out/**",
-        "**/data",
-        "**/data/**",
-        "**/*.elf",
-        "**/*.nds",
-        "**/*.map",
-        "**/*.d",
-        "**/*.o"
-    ],
+  // File and Search Exclusions (equivalent to files.exclude and search.exclude)
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.DS_Store",
+    "**/build",
+    "**/build/**",
+    "**/out",
+    "**/out/**",
+    "**/data",
+    "**/data/**",
+    "**/*.elf",
+    "**/*.nds",
+    "**/*.map",
+    "**/*.d",
+    "**/*.o"
+  ],
 
-    // Auto-installed extensions
-    "auto_install_extensions": {
-        "cmake": true,
-        "dockerfile": true,
-        "git-firefly": true
-    },
-
-    // Diagnostics & Project Panel
-    "diagnostics": {
-        "inline": {
-            "enabled": true
-        }
-    },
-    "project_panel": {
-        "show_diagnostics": "all"
-    },
-
-    // C/C++ IntelliSense & Toolchain (LSP - clangd)
-    "lsp": {
-        "clangd": {
-            "binary": {
-                "arguments": [
-                    "--background-index",
-                    "--background-index-priority=normal",
-                    "--compile-commands-dir=out/build/nds-debug-sdcard",
-                    "--query-driver=/opt/wonderful/toolchain/gcc-arm-none-eabi/bin/arm-none-eabi-*,**/arm-none-eabi-*",
-                    "--header-insertion=iwyu",
-                    "--completion-style=detailed",
-                    "--clang-tidy"
-                ]
-            }
-        }
-    },
-
-    // Language-specific formatting overrides
-    "languages": {
-        "C++": {
-            "tab_size": 4,
-            "hard_tabs": false,
-            "format_on_save": "on"
-        },
-        "C": {
-            "tab_size": 4,
-            "hard_tabs": false,
-            "format_on_save": "on"
-        }
+  // C/C++ IntelliSense & Toolchain (LSP - clangd)
+  "lsp": {
+    "clangd": {
+      "binary": {
+        "arguments": [
+          "--background-index",
+          "--background-index-priority=normal",
+          "--compile-commands-dir=out/build/nds-debug-sdcard",
+          "--query-driver=/opt/wonderful/toolchain/gcc-arm-none-eabi/bin/arm-none-eabi-*,**/arm-none-eabi-*",
+          "--header-insertion=iwyu",
+          "--completion-style=detailed",
+          "--clang-tidy"
+        ]
+      }
     }
+  },
+
+  // Language-specific formatting overrides
+  "languages": {
+    "C++": {
+      "tab_size": 4,
+      "hard_tabs": false,
+      "format_on_save": "on"
+    },
+    "C": {
+      "tab_size": 4,
+      "hard_tabs": false,
+      "format_on_save": "on"
+    }
+  }
 }

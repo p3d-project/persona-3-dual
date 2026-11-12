@@ -2,7 +2,7 @@
   {
     "label": "Connect to melonDS",
     "adapter": "CodeLLDB",
-    "request": "attach",
+    "request": "launch",
     "initCommands": [
       "settings set target.disable-aslr false"
     ],
@@ -16,7 +16,7 @@
   {
     "label": "Build & Connect to melonDS",
     "adapter": "CodeLLDB",
-    "request": "attach",
+    "request": "launch",
     "build": {
       "command": "cmake",
       "args": [
@@ -40,7 +40,7 @@
   {
     "label": "Connect to melonDS (Localhost)",
     "adapter": "CodeLLDB",
-    "request": "attach",
+    "request": "launch",
     "initCommands": [
       "settings set target.disable-aslr false"
     ],
