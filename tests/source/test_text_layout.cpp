@@ -1,3 +1,10 @@
+/**
+ * @file test_text_layout.cpp
+ * @brief Unit tests for the TextLayout utilities.
+ *
+ * @author Oles Gedz (olesgedz)
+ */
+
 #include "systems/TextLayout.hpp"
 
 #include <gtest/gtest.h>

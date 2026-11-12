@@ -1,3 +1,13 @@
+/**
+ * @file TextLayout.hpp
+ * @brief Provides text layout utilities for measuring and positioning text.
+ *
+ * Contains functions for applying text styles, measuring word widths, handling line breaks,
+ * and determining when pages are full or words should wrap.
+ *
+ * @author Oles Gedz (olesgedz)
+ */
+
 #pragma once
 
 #include "types/TextTypes.hpp"
