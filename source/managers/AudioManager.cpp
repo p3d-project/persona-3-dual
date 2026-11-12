@@ -12,7 +12,7 @@ extern "C"
 #include "soundbank_bin.h"
 }
 
-void AudioManager::Init()
+void AudioManager::init()
 {
     // initialize maxmod (for audio)
     mm_ds_system sys;
@@ -26,7 +26,7 @@ void AudioManager::Init()
     mmInitDefaultMem((mm_addr)soundbank_bin);
 }
 
-void AudioManager::Process()
+void AudioManager::process()
 {
     if (isAudioRegistered)
     {
@@ -34,7 +34,7 @@ void AudioManager::Process()
     }
 }
 
-void AudioManager::Shutdown()
+void AudioManager::shutdown()
 {
     stopAudio();
 }
@@ -201,7 +201,7 @@ uint32_t AudioManager::decode(short* sample_data, int num_samples)
 
 mm_word AudioManager::audioCallback(mm_word length, mm_addr dest, mm_stream_formats format)
 {
-    return AudioManager::GetInstance().processStream(length, dest, format);
+    return AudioManager::getInstance().processStream(length, dest, format);
 }
 
 mm_word AudioManager::processStream(mm_word length, mm_addr dest, mm_stream_formats format)

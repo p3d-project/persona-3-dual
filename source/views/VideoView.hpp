@@ -22,7 +22,7 @@ class VideoView : public BaseView
     const char* filename;
     const ViewState nextView;
     VideoController* videoCtrl = VideoController::getInstance();
-    AudioManager& audio = AudioManager::GetInstance();
+    AudioManager& audio = AudioManager::getInstance();
 
     Timer fadeTimer;
     TransitionPhase transitionPhase = TransitionPhase::IDLE;

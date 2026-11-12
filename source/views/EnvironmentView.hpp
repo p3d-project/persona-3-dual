@@ -209,7 +209,7 @@ class EnvironmentView : public BaseView
     Dialogue* dialogueFirstLine = nullptr;
 
   private:
-    RenderManager& render = RenderManager::GetInstance();
+    RenderManager& render = RenderManager::getInstance();
 
     /**
      * @brief Loads a single .grit asset and returns its raw tile pointer.
