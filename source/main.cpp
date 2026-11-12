@@ -81,7 +81,7 @@ void vblank()
 }
 
 // TODO: add doxyen docs
-void NDSPollInputCallback()
+void ndsPollInputCallback()
 {
     scanKeys();
     systemKeysDown = keysDown();
@@ -89,7 +89,7 @@ void NDSPollInputCallback()
 }
 
 // TODO: add doxyen docs
-void NDSComputeCallback()
+void ndsComputeCallback()
 {
     //...
 }
@@ -146,9 +146,9 @@ int main(int argc, char* argv[])
     srand(TIMER0_DATA);
 
     // set platform hooks
-    engine.setComputeCallback(&NDSComputeCallback);
+    engine.setComputeCallback(&ndsComputeCallback);
     engine.setComputeEnabled(true);
-    engine.setPollInputCallback(&NDSPollInputCallback);
+    engine.setPollInputCallback(&ndsPollInputCallback);
     engine.setPollingEnabled(true);
 
     // register singletons
