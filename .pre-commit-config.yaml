@@ -41,4 +41,4 @@ repos:
         entry: '^(?!\s*(//|/\*|\*))(?:(?!//).)*\b(float|double)\b'
         language: pygrep
         types_or: [c, c++]
-        files: ^(source|include)/
+        files: ^(source|include|tests)/
