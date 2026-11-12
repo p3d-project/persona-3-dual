@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstdlib>
 #include <string>
 
 /**
@@ -64,6 +65,20 @@ struct Glyph
  */
 struct Font
 {
+    Font() = default;
+
+    /**
+     * @brief Frees the regular and bold bitmaps.
+     */
+    ~Font()
+    {
+        free(bitmap);
+        free(bitmapBold);
+    }
+
+    Font(const Font&) = delete;
+    Font& operator=(const Font&) = delete;
+
     std::uint8_t* bitmap = nullptr;
     std::uint8_t* bitmapBold = nullptr;
     int bitmapWidth = 256;

@@ -37,6 +37,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param letterSpacing Pixels of horizontal space to add after each glyph.
      * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
      * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
+     * @param xBoundary Right edge (exclusive) used for word wrapping.
      */
     void drawText(const std::string& text,
                   Font* font,
@@ -46,7 +47,8 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
                   int color,
                   int letterSpacing,
                   int lineSpacing,
-                  int spaceWidth);
+                  int spaceWidth,
+                  int xBoundary);
 
     /**
      * @brief Create a Text object and renders each character with a delay to simulate typing effect.

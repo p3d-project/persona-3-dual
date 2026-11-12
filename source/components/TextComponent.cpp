@@ -38,19 +38,14 @@ void TextComponent::Destroy()
 {
     isActive = false;
     appearTextStop();
-    tm.unloadFont(font);
-    font = nullptr;
+    font.reset();
 }
 
 void TextComponent::configureText(const TextConfig& config, bool loadDefaultPalette)
 {
     isActive = true;
 
-    if (font != nullptr)
-    {
-        tm.unloadFont(font);
-        font = nullptr;
-    }
+    font.reset();
 
     // set video buffer
     if (config.videoBuffer != nullptr)
@@ -92,14 +87,14 @@ void TextComponent::configureText(const TextConfig& config, bool loadDefaultPale
     }
 }
 
-void TextComponent::drawText(const std::string& text, int x, int y, int color)
+void TextComponent::drawText(const std::string& text, int x, int y, int color, int xBoundary)
 {
     if (!font || !videoBuffer)
     {
         logMessage(LogSeverity::WARNING, "Called without font or videoBuffer");
         return;
     }
-    ts.drawText(text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth);
+    ts.drawText(text, font.get(), videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 }
 
 void TextComponent::appearText(const std::string& text, int x, int y, int color, int maxX, int maxY, bool hyphenate)
@@ -111,7 +106,7 @@ void TextComponent::appearText(const std::string& text, int x, int y, int color,
     }
     ts.appearText(appearingText,
                   text,
-                  font,
+                  font.get(),
                   videoBuffer,
                   x,
                   y,
@@ -151,7 +146,7 @@ bool TextComponent::appearTextDone()
 
 void TextComponent::drawGlyph(const Glyph& glyph, int x, int y, int color, bool bold, bool italic, bool underline)
 {
-    ts.drawGlyph(glyph, font, videoBuffer, x, y, color, bold, italic, underline);
+    ts.drawGlyph(glyph, font.get(), videoBuffer, x, y, color, bold, italic, underline);
 }
 
 Glyph* TextComponent::getGlyph(const char& c, bool bold)
@@ -215,7 +210,7 @@ void TextComponent::setSpaceWidth(int value)
 
 void TextComponent::testBitmap()
 {
-    ts.testBitmap(font, videoBuffer);
+    ts.testBitmap(font.get(), videoBuffer);
 }
 
 void TextComponent::testPalette()

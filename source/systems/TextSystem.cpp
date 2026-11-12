@@ -14,7 +14,8 @@ void TextSystem::drawText(const std::string& text,
                           int color,
                           int letterSpacing,
                           int lineSpacing,
-                          int spaceWidth)
+                          int spaceWidth,
+                          int xBoundary)
 {
     if (!font || !videoBuffer)
     {
@@ -22,7 +23,8 @@ void TextSystem::drawText(const std::string& text,
         return;
     }
 
-    auto textObj = createText(text, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
+    auto textObj =
+        createText(text, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 
     while (textObj->cursorPos < (int)textObj->content.size())
     {

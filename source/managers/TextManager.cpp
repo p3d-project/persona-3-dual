@@ -2,24 +2,27 @@
 #include "core/logger.hpp"
 #include <sstream>
 
-// Helper macro to convert 8 bit RGB values to 5 bit RGB values for the Nintendo DS
-#define NDS_RGB(r, g, b) (uint16_t)((r) >> 3) | (((g) >> 3) << 5) | (((b) >> 3) << 10) | BIT(15)
+// Helper constexpr to convert 8 bit RGB values to 5 bit RGB values for the Nintendo DS
+constexpr uint16_t nds_rgb(uint8_t r, uint8_t g, uint8_t b)
+{
+    return static_cast<uint16_t>((r >> 3) | (((g) >> 3) << 5) | (((b) >> 3) << 10) | BIT(15));
+}
 
 static const uint16_t customPalette[21] = {
     ARGB16(1, 0, 0, 0),     // Black         235
     ARGB16(1, 31, 31, 31),  // White         236
-    NDS_RGB(0, 202, 105),   // Dual Green    237
-    NDS_RGB(18, 168, 88),   // Dual Green 2  238
-    NDS_RGB(28, 118, 55),   // Dark Green    239
-    NDS_RGB(0, 69, 40),     // Darker Green  240
-    NDS_RGB(4, 34, 18),     // Darkest Green 241
-    NDS_RGB(121, 206, 255), // Light Blue    242
-    NDS_RGB(9, 137, 253),   // Rich Blue     243
-    NDS_RGB(0, 104, 208),   // Dark Blue     244
-    NDS_RGB(0, 44, 208),    // Navy Blue     245
-    NDS_RGB(0, 0, 36),      // Darkest Blue  246
-    NDS_RGB(245, 198, 164), // Light Orange  247
-    NDS_RGB(198, 164, 245), // Light Purple  248
+    nds_rgb(0, 202, 105),   // Dual Green    237
+    nds_rgb(18, 168, 88),   // Dual Green 2  238
+    nds_rgb(28, 118, 55),   // Dark Green    239
+    nds_rgb(0, 69, 40),     // Darker Green  240
+    nds_rgb(4, 34, 18),     // Darkest Green 241
+    nds_rgb(121, 206, 255), // Light Blue    242
+    nds_rgb(9, 137, 253),   // Rich Blue     243
+    nds_rgb(0, 104, 208),   // Dark Blue     244
+    nds_rgb(0, 44, 208),    // Navy Blue     245
+    nds_rgb(0, 0, 36),      // Darkest Blue  246
+    nds_rgb(245, 198, 164), // Light Orange  247
+    nds_rgb(198, 164, 245), // Light Purple  248
     //Defaults
     ARGB16(1, 31, 0, 0),   // Red           249
     ARGB16(1, 0, 31, 0),   // Green         250
@@ -30,14 +33,14 @@ static const uint16_t customPalette[21] = {
     ARGB16(1, 15, 15, 15), // Gray          255
 };
 
-Font* TextManager::loadFont(std::string* name, int size)
+std::unique_ptr<Font> TextManager::loadFont(std::string* name, int size)
 {
     if (name == nullptr)
     {
         logMessage(LogSeverity::FATAL, "name cannot be nullptr");
     }
 
-    Font* font = new Font();
+    auto font = std::make_unique<Font>();
     std::string fullPath = "fonts/" + *name + "/size-" + std::to_string(size);
 
     std::string fontBitmapPath = fullPath + ".img.bin";
@@ -48,7 +51,7 @@ Font* TextManager::loadFont(std::string* name, int size)
     }
 
     std::string fontMetadataPath = fullPath + ".fnt";
-    if (!loadFontMetadata(&fontMetadataPath, font))
+    if (!loadFontMetadata(&fontMetadataPath, font.get()))
     {
         logMessage(LogSeverity::FATAL, "Failed to load font metadata from \n" + fullPath + ".fnt");
     }
@@ -56,7 +59,7 @@ Font* TextManager::loadFont(std::string* name, int size)
     std::string fontBitmapBoldPath = fullPath + "-bold.img.bin";
     std::string fontMetadataBoldPath = fullPath + "-bold.fnt";
     font->bitmapBold = loadFontBitmap(&fontBitmapBoldPath);
-    if (!font->bitmapBold || !loadFontMetadata(&fontMetadataBoldPath, font, true))
+    if (!font->bitmapBold || !loadFontMetadata(&fontMetadataBoldPath, font.get(), true))
     {
         font->boldLoaded = false;
         free(font->bitmapBold);
@@ -68,18 +71,6 @@ Font* TextManager::loadFont(std::string* name, int size)
     }
 
     return font;
-}
-
-void TextManager::unloadFont(Font* font)
-{
-    if (font == nullptr)
-    {
-        return;
-    }
-
-    free(font->bitmap);
-    free(font->bitmapBold);
-    delete font;
 }
 
 void TextManager::loadDefaultPalette()
