@@ -4,7 +4,7 @@ Armour ArmourDb::plainShirt;
 Armour ArmourDb::rashGuard;
 Armour ArmourDb::enemyArmour;
 
-void ArmourDb::Initialize()
+void ArmourDb::initialize()
 {
     plainShirt.defense = 24;
     plainShirt.armourType = ArmourType::Male;

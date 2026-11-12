@@ -7,5 +7,5 @@ struct WeaponDb
     static Weapon imitationKatana;
     static Weapon practiceBow;
 
-    static void Initialize();
+    static void initialize();
 };

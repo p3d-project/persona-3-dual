@@ -65,8 +65,8 @@ class IntroView : public BaseView
     GraphicsComponent* graphics = nullptr;
     TextComponent* text = nullptr;
 
-    MathManager& math = MathManager::GetInstance();
-    UIManager& ui = UIManager::GetInstance();
+    MathManager& math = MathManager::getInstance();
+    UIManager& ui = UIManager::getInstance();
     MusicComponent* musicCmpt = nullptr;
     SFXComponent* sfxCmpt = nullptr;
 

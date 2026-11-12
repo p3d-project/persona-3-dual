@@ -7,9 +7,9 @@ void DisclaimerView::init()
 {
     if (disclaimer == nullptr)
     {
-        disclaimer = engine.CreateEntity();
-        graphics = engine.CreateComponent<GraphicsComponent>();
-        disclaimer->AddComponent(graphics);
+        disclaimer = engine.createEntity();
+        graphics = engine.createComponent<GraphicsComponent>();
+        disclaimer->addComponent(graphics);
     }
 
     // set video mode for 3 text layers and 1 extended rotation layer
@@ -151,7 +151,7 @@ void DisclaimerView::cleanup()
 {
     if (disclaimer != nullptr)
     {
-        engine.DestroyEntity(disclaimer);
+        engine.destroyEntity(disclaimer);
 
         disclaimer = nullptr;
         graphics = nullptr;

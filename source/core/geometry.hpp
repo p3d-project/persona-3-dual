@@ -60,12 +60,12 @@ template <typename T> struct Rectangle
         return this->position + Point2D<T>(0, size.z);
     }
 
-    Point2D<T> TopLeft() const
+    Point2D<T> topLeft() const
     {
         return this->position;
     }
 
-    Point2D<T> TopRight() const
+    Point2D<T> topRight() const
     {
         return this->position + Point2D<T>(size.x, 0);
     }

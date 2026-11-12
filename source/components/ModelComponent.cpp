@@ -1,14 +1,14 @@
 #include "ModelComponent.hpp"
 #include "core/logger.hpp"
 
-void ModelComponent::Update(ae::q20_12_t)
+void ModelComponent::update(ae::q20_12_t)
 {
     drawMesh();
 }
 
-void ModelComponent::Destroy()
+void ModelComponent::destroy()
 {
-    isActive = false;
+    active = false;
 
     if (model)
     {
@@ -230,7 +230,7 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
         }
     }
     fclose(f);
-    isActive = true;
+    active = true;
     return true;
 }
 

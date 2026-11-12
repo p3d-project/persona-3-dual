@@ -18,14 +18,14 @@ void SignContractView::init()
 {
     if (signContract == nullptr)
     {
-        signContract = engine.CreateEntity();
-        graphics = engine.CreateComponent<GraphicsComponent>();
-        musicCmpt = engine.CreateComponent<MusicComponent>();
-        sfxCmpt = engine.CreateComponent<SFXComponent>();
+        signContract = engine.createEntity();
+        graphics = engine.createComponent<GraphicsComponent>();
+        musicCmpt = engine.createComponent<MusicComponent>();
+        sfxCmpt = engine.createComponent<SFXComponent>();
 
-        signContract->AddComponent(graphics);
-        signContract->AddComponent(musicCmpt);
-        signContract->AddComponent(sfxCmpt);
+        signContract->addComponent(graphics);
+        signContract->addComponent(musicCmpt);
+        signContract->addComponent(sfxCmpt);
     }
 
     // set both screens to black
@@ -64,8 +64,8 @@ void SignContractView::init()
 
     signContractScreen = SignContractScreen::getInstance();
     bgSub[0] = bgSubId;
-    ae::BroadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, {signContractScreen}});
-    ae::BroadcastEvent(Event::ShowScreen{signContractScreen});
+    ae::broadcastEvent(Event::ConfigureUIScreen{bgSub, bgMain, &oamSub, &oamMain, {signContractScreen}});
+    ae::broadcastEvent(Event::ShowScreen{signContractScreen});
 
     fadeTimer.start(ae::q20_12_t{0.8});
     transitionPhase = TransitionPhase::FADING_IN;
@@ -145,7 +145,7 @@ void SignContractView::cleanup()
 {
     if (signContract != nullptr)
     {
-        engine.DestroyEntity(signContract);
+        engine.destroyEntity(signContract);
 
         signContract = nullptr;
         graphics = nullptr;

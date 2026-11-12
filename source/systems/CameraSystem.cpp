@@ -3,7 +3,7 @@
 
 void CameraSystem::on_receive(const Event::ConfigureCamera& config)
 {
-    isActive = true;
+    active = true;
     mode = config.mode;
     currentPos = config.eye;
     targetPos = config.target;
@@ -45,12 +45,12 @@ void CameraSystem::on_receive(const Event::SetCharacterPosition& msg)
 
 void CameraSystem::on_receive(const Event::StartCamera& msg)
 {
-    isActive = true;
+    active = true;
 }
 
 void CameraSystem::on_receive(const Event::StopCamera& msg)
 {
-    isActive = false;
+    active = false;
 }
 
 ae::q20_12_t CameraSystem::getMovementAngle() const
@@ -59,24 +59,24 @@ ae::q20_12_t CameraSystem::getMovementAngle() const
     {
     case CameraMode::CCTV:
     case CameraMode::Static:
-        return MathManager::GetInstance().atan2(ae::q20_12_t{currentPos.x - charPos.x},
+        return MathManager::getInstance().atan2(ae::q20_12_t{currentPos.x - charPos.x},
                                                 ae::q20_12_t{charPos.z - currentPos.z});
     default:
         return angle;
     }
 }
 
-void CameraSystem::Init()
+void CameraSystem::init()
 {
-    isActive = false;
+    active = false;
 }
 
-void CameraSystem::Shutdown()
+void CameraSystem::shutdown()
 {
-    isActive = false;
+    active = false;
 }
 
-void CameraSystem::Update(ae::q20_12_t)
+void CameraSystem::update(ae::q20_12_t)
 {
     camPos.up.y = ae::q20_12_t{1};
 
@@ -226,5 +226,5 @@ void CameraSystem::Update(ae::q20_12_t)
         break;
     }
 
-    ae::BroadcastEvent(camPos);
+    ae::broadcastEvent(camPos);
 }
