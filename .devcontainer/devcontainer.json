@@ -19,6 +19,13 @@
                 "matepek.vscode-catch2-test-adapter",
                 "eamodio.gitlens"
             ]
+        },
+        "zed": {
+            "extensions": [
+                "cmake",
+                "dockerfile",
+                "git-firefly"
+            ]
         }
     },
     // move the ENV to the remote sesion, so it isn't present on build time

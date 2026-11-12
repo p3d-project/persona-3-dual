@@ -1,0 +1,24 @@
+CompileFlags:
+  CompilationDatabase: "out/build/nds-debug-sdcard"
+  Add:
+    - --target=arm-none-eabi
+    - -mcpu=arm946e-s
+    - -Wno-unknown-warning-option
+  Remove:
+    - -mcpu=*
+    - -Wno-psabi
+
+Index:
+  Background: Build
+
+Diagnostics:
+  UnusedIncludes: Strict
+  ClangTidy:
+    Add:
+      - bugprone-*
+      - performance-*
+      - readability-*
+      - modernize-*
+    Remove:
+      - modernize-use-trailing-return-type
+      - readability-magic-numbers

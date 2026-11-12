@@ -1,0 +1,82 @@
+[
+  {
+    "label": "CMake: Configure (Host Debug)",
+    "command": "cmake --preset host-debug",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Configure (Host Assets)",
+    "command": "cmake --preset host-assets",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Configure (NDS Release)",
+    "command": "cmake --preset nds-release",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Configure (NDS Debug)",
+    "command": "cmake --preset nds-debug-sdcard",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Build (Host Tests)",
+    "command": "cmake --build --preset build-host-tests",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Build (Assets)",
+    "command": "cmake --build --preset build-assets",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Build (NDS SDCard)",
+    "command": "cmake --build --preset build-nds-sdcard --parallel",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Build (NDS Debug SDCard)",
+    "command": "cmake --build --preset build-nds-debug-sdcard --parallel",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Test (Host)",
+    "command": "ctest --preset test-host",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Clean (NDS Debug)",
+    "command": "if [ -d out/build/nds-debug-sdcard ]; then cmake --build out/build/nds-debug-sdcard --target clean; else echo 'Skipping NDS Debug clean: build directory does not exist'; fi",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Clean (NDS Release)",
+    "command": "if [ -d out/build/nds-release ]; then cmake --build out/build/nds-release --target clean; else echo 'Skipping NDS Release clean: build directory does not exist'; fi",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Clean (Host Debug)",
+    "command": "if [ -d out/build/host-debug ]; then cmake --build out/build/host-debug --target clean; else echo 'Skipping Host Debug clean: build directory does not exist'; fi",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Clean Assets",
+    "command": "cmake -DP3D_SOURCE_DIR=\"$ZED_WORKTREE_ROOT\" -P cmake/CleanAssets.cmake",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Clean (All)",
+    "command": "cmake -DP3D_SOURCE_DIR=\"$ZED_WORKTREE_ROOT\" -P cmake/CleanAssets.cmake; if [ -d out/build/host-debug ]; then cmake --build out/build/host-debug --target clean; fi; if [ -d out/build/nds-debug-sdcard ]; then cmake --build out/build/nds-debug-sdcard --target clean; fi; if [ -d out/build/nds-release ]; then cmake --build out/build/nds-release --target clean; fi",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Build (Aegis Engine Tests)",
+    "command": "cmake --build --preset build-aegis-engine-tests",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "CMake: Test (Aegis Engine Host)",
+    "command": "ctest --preset test-aegis-engine-host",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  }
+]

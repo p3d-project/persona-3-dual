@@ -1,0 +1,69 @@
+[
+  {
+    "label": "Connect to melonDS",
+    "adapter": "CodeLLDB",
+    "request": "attach",
+    "initCommands": [
+      "settings set target.disable-aslr false"
+    ],
+    "targetCreateCommands": [
+      "target create $ZED_WORKTREE_ROOT/out/build/nds-debug-sdcard/persona-3-dual.elf"
+    ],
+    "processCreateCommands": [
+      "gdb-remote host.docker.internal:2345"
+    ]
+  },
+  {
+    "label": "Build & Connect to melonDS",
+    "adapter": "CodeLLDB",
+    "request": "attach",
+    "build": {
+      "command": "cmake",
+      "args": [
+        "--build",
+        "--preset",
+        "build-nds-debug-sdcard",
+        "--parallel"
+      ],
+      "cwd": "$ZED_WORKTREE_ROOT"
+    },
+    "initCommands": [
+      "settings set target.disable-aslr false"
+    ],
+    "targetCreateCommands": [
+      "target create $ZED_WORKTREE_ROOT/out/build/nds-debug-sdcard/persona-3-dual.elf"
+    ],
+    "processCreateCommands": [
+      "gdb-remote host.docker.internal:2345"
+    ]
+  },
+  {
+    "label": "Connect to melonDS (Localhost)",
+    "adapter": "CodeLLDB",
+    "request": "attach",
+    "initCommands": [
+      "settings set target.disable-aslr false"
+    ],
+    "targetCreateCommands": [
+      "target create $ZED_WORKTREE_ROOT/out/build/nds-debug-sdcard/persona-3-dual.elf"
+    ],
+    "processCreateCommands": [
+      "gdb-remote 127.0.0.1:2345"
+    ]
+  },
+  {
+    "label": "Debug Host Tests",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/out/build/host-debug/tests/p3d_tests",
+    "build": {
+      "command": "cmake",
+      "args": [
+        "--build",
+        "--preset",
+        "build-host-tests"
+      ],
+      "cwd": "$ZED_WORKTREE_ROOT"
+    }
+  }
+]
