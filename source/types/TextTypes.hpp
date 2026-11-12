@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <nds.h>
 #include <string>
 
 /**
@@ -112,7 +111,14 @@ struct Text
     int letterSpacing;
     int lineSpacing;
     int spaceWidth;
-    int xBoundary;
+
+    /// Right edge (exclusive) used for word wrapping
+    int maxX = 256;
+    /// Bottom edge used for pagination. 0 disables pagination
+    int maxY = 0;
+    /// Set when the next glyph would not fit above maxY. Output pauses until the next page is requested
+    bool pageBreak = false;
+    bool hyphenate = false;
 };
 
 /**

@@ -77,6 +77,15 @@ class DialogueComponent : public ae::Component
     void renderAnimFrame();
 
     /**
+     * @brief Handle input while the line is still being displayed
+     *
+     * Advances a full page, or instantly finishes the current page.
+     *
+     * @return true if the line was not fully displayed and the input was consumed
+     */
+    bool skipOrContinueText();
+
+    /**
      * @brief Display the DialogueSelection options
      */
     void renderOptions();
