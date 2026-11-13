@@ -97,7 +97,7 @@ void NDSComputeCallback()
 int main(int argc, char* argv[])
 {
     irqSet(IRQ_VBLANK, Vblank);
-
+    consoleDebugInit(DebugDevice_NOCASH);
     // initialize DLDI/FAT
     if (!fatInitDefault())
     {
