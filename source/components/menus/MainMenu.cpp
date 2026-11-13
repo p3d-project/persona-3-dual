@@ -41,7 +41,7 @@ void MainMenu::resetHook()
 void MainMenu::closeHook()
 {
     resetMenu();
-    ae::BroadcastEvent(Event::SwitchView{ViewState::INTRO});
+    ae::broadcastEvent(Event::SwitchView{ViewState::INTRO});
 }
 
 // option handlers
@@ -113,5 +113,5 @@ ViewState MainMenu::settingOptionSelected()
 
 void MainMenu::updateSave()
 {
-    ae::BroadcastEvent(Event::WriteSave{});
+    ae::broadcastEvent(Event::WriteSave{});
 }

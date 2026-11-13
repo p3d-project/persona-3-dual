@@ -10,13 +10,13 @@
 #include <aegis/ndsTypes.hpp>
 #include <aegis/types.hpp>
 
-void UISystem::Init()
+void UISystem::init()
 {
-    isActive = false;
+    active = false;
     renderUIText = false;
 }
 
-void UISystem::Update(ae::q20_12_t dt)
+void UISystem::update(ae::q20_12_t dt)
 {
     // skip if nullptr or not active
     if ((activeMenu == nullptr) || !activeMenu->isActive)
@@ -35,7 +35,7 @@ void UISystem::Update(ae::q20_12_t dt)
     ViewState updateHookState = activeMenu->updateHook();
     if (updateHookState != ViewState::DEFAULT)
     {
-        ae::BroadcastEvent(Event::SwitchView{updateHookState});
+        ae::broadcastEvent(Event::SwitchView{updateHookState});
         return;
     }
 
@@ -152,16 +152,16 @@ void UISystem::Update(ae::q20_12_t dt)
 
     if (activeMenu->nextViewState != ViewState::KEEP_CURRENT)
     {
-        ae::BroadcastEvent(Event::SwitchView{activeMenu->nextViewState});
+        ae::broadcastEvent(Event::SwitchView{activeMenu->nextViewState});
     }
 }
 
-void UISystem::Shutdown()
+void UISystem::shutdown()
 {
     resetUIResources();
 }
 
-void UISystem::SetSFXComponent(SFXComponent* sfx)
+void UISystem::setSFXComponent(SFXComponent* sfx)
 {
     sfxCmpt = sfx;
 }
@@ -211,7 +211,7 @@ void UISystem::on_receive(const Event::ConfigureUIMenu& config)
     // reset previous config
     cleanupMenus();
 
-    isActive = true;
+    active = true;
     menus = config.menus;
     text = config.text;
 
@@ -542,7 +542,7 @@ void UISystem::resetUIResources()
     cleanupScreens();
     cleanupMenus();
 
-    isActive = false;
+    active = false;
     renderUIText = false;
     sfxCmpt = nullptr;
 }

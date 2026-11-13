@@ -3,7 +3,7 @@
 #include "core/logger.hpp"
 #include "types/aeTypes.hpp"
 
-void MusicComponent::Destroy()
+void MusicComponent::destroy()
 {
     stopMusic();
 }

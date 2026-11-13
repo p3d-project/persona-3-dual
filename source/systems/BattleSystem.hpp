@@ -40,7 +40,7 @@
 class BattleSystem : public ae::SystemRouter<BattleSystem, Event::ExecuteBattle>, public ae::Singleton<BattleSystem>
 {
   public:
-    void Init() override;
+    void init() override;
 
     /**
      * @brief Core update loop that processes the battle state machine and turn resolution.
@@ -60,12 +60,12 @@ class BattleSystem : public ae::SystemRouter<BattleSystem, Event::ExecuteBattle>
      *
      * @param dt Fixed-point delta time passed from the aegis engine loop (currently unused).
      */
-    void Update(ae::q20_12_t /*dt*/) override;
+    void update(ae::q20_12_t /*dt*/) override;
 
-    void Shutdown() override;
+    void shutdown() override;
 
     // TODO: replace with ae dependancy injection
-    void SetMusicComponent(MusicComponent* music);
+    void setMusicComponent(MusicComponent* music);
 
     /**
      * @brief ETL message handler that initializes and starts a new battle.

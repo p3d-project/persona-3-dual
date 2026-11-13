@@ -8,7 +8,7 @@ struct PersonaDb
     static PersonaBase hermes;
     static PersonaBase io;
 
-    static void Initialize();
+    static void initialize();
 
   private:
     static Skill* orpheusSkills[2];
