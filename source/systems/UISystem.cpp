@@ -24,6 +24,25 @@ void UISystem::update(ae::q20_12_t dt)
         return;
     }
 
+    // handle active alert: draw message and block all input until expired
+    if (activeMenu->isAlertActive())
+    {
+        if (!activeMenu->alertMessagePrinted)
+        {
+            text->clearScreen();
+            text->drawText(activeMenu->alertText, 0, 0, TextColor::White);
+            activeMenu->alertMessagePrinted = true;
+        }
+        return;
+    }
+    else if (activeMenu->alertMessagePrinted)
+    {
+        // alert just expired, clear flag and re-render menu
+        activeMenu->alertMessagePrinted = false;
+        text->clearScreen();
+        renderUIText = true;
+    }
+
     bool selectionWasMoving = activeMenu->selectionOffset() != 0;
     activeMenu->updateAnimation();
     if (selectionWasMoving || activeMenu->selectionOffset() != 0)
@@ -98,6 +117,15 @@ void UISystem::update(ae::q20_12_t dt)
                     activeMenu->isActive = false;
                 }
             }
+        }
+
+        if (activeMenu->isAlertActive())
+        {
+            renderUIText = false;
+            text->clearScreen();
+            text->drawText(activeMenu->alertText, 0, 0, TextColor::White);
+            activeMenu->alertMessagePrinted = true;
+            return;
         }
     }
     else if (systemKeysDown & KEY_B)

@@ -17,8 +17,7 @@ enum class BattleMenuOptions
     PERSONA,
     TARGET_ENEMY,
     TARGET_HEAL,
-    ALL_OUT_ATTACK,
-    ALERT
+    ALL_OUT_ATTACK
 };
 
 class BattleMenu : public UIMenu
@@ -34,8 +33,6 @@ class BattleMenu : public UIMenu
     bool isCancelled = false;
 
     etl::vector<MenuOption, 10> battleOptions;
-    int32_t alertStartFrame = 0;
-    bool messagePrinted = false;
 
     void resetHook() override;
     void closeHook() override
@@ -66,5 +63,4 @@ class BattleMenu : public UIMenu
     void loadTargetOptions(etl::vector<BattleParticipant*, 13>* targets, bool healTarget);
     void loadAllOutAttackConfirmation();
     void loadAlertOptions(const std::string& text);
-    bool isAlertExpired(int durationFrames) const;
 };

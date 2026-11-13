@@ -1,4 +1,5 @@
 #include "UIMenu.hpp"
+#include "core/globals.hpp"
 #include "core/logger.hpp"
 
 #include "managers/MathManager.hpp"
@@ -13,6 +14,11 @@ void UIMenu::resetMenu()
     nextViewState = ViewState::KEEP_CURRENT;
     selectionX = 0;
     animator.cancelAll();
+
+    alertText.clear();
+    alertStartFrame = 0;
+    alertDurationFrames = 0;
+    alertMessagePrinted = false;
 
     if (text != nullptr)
     {
@@ -89,4 +95,28 @@ void UIMenu::prevOption()
 ViewState UIMenu::updateHook()
 {
     return ViewState::DEFAULT;
+}
+
+void UIMenu::showAlert(const std::string& message, int durationFrames)
+{
+    alertText = message;
+    alertStartFrame = frame;
+    alertDurationFrames = durationFrames;
+    alertMessagePrinted = false;
+}
+
+bool UIMenu::isAlertActive() const
+{
+    return alertDurationFrames > 0 && (frame - alertStartFrame) < alertDurationFrames;
+}
+
+void UIMenu::clearAlert()
+{
+    alertDurationFrames = 0;
+    alertMessagePrinted = false;
+    alertText.clear();
+    if (text != nullptr)
+    {
+        text->clearScreen();
+    }
 }
