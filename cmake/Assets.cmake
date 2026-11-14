@@ -1,3 +1,6 @@
+include(cmake/PawnCompiler.cmake)
+p3d_ensure_pawncc()
+
 find_program(P3D_FFMPEG_EXECUTABLE ffmpeg)
 
 if(NOT P3D_FFMPEG_EXECUTABLE)
@@ -44,6 +47,7 @@ function(p3d_add_asset_group group_name)
         -DP3D_PYTHON_EXECUTABLE=${Python3_EXECUTABLE}
         -DP3D_FFMPEG_EXECUTABLE=${P3D_FFMPEG_EXECUTABLE}
         -DP3D_GRIT_EXECUTABLE=${P3D_GRIT_EXECUTABLE}
+        -DP3D_PAWNCC_EXECUTABLE=${P3D_PAWNCC_EXECUTABLE}
         -DP3D_ASSET_GROUP=${group_name}
         -P ${CMAKE_SOURCE_DIR}/cmake/BuildAssets.cmake
         COMMAND ${CMAKE_COMMAND} -E touch ${P3D_GROUP_STAMP}
@@ -118,6 +122,12 @@ p3d_add_asset_group(fonts
     ${CMAKE_SOURCE_DIR}/assets/fonts/*.png
     ${CMAKE_SOURCE_DIR}/assets/fonts/*.fnt
     ${CMAKE_SOURCE_DIR}/assets/fonts/*.grit
+)
+p3d_add_asset_group(scripts
+    COMMENT "Compiling Pawn scripts"
+    PATTERNS
+    ${CMAKE_SOURCE_DIR}/assets/scripts/*.pwn
+    ${CMAKE_SOURCE_DIR}/assets/scripts/**/*.pwn
 )
 
 add_dependencies(p3d_assets_graphics p3d_assets_environments p3d_assets_models)
@@ -231,7 +241,7 @@ foreach(jmap IN LISTS P3D_ASSET_JMAP_FILES)
     list(APPEND P3D_ADDITIONAL_CLEAN "${CMAKE_SOURCE_DIR}/source/maps/${stem}.hpp")
 endforeach()
 
-file(GLOB P3D_ASSET_DLG_FILES "${CMAKE_SOURCE_DIR}/assets/dialogue/*.dlg")
+file(GLOB_RECURSE P3D_ASSET_DLG_FILES "${CMAKE_SOURCE_DIR}/assets/dialogue/*.dlg")
 foreach(dlg IN LISTS P3D_ASSET_DLG_FILES)
     get_filename_component(stem "${dlg}" NAME_WE)
     list(APPEND P3D_ADDITIONAL_CLEAN
@@ -240,6 +250,9 @@ foreach(dlg IN LISTS P3D_ASSET_DLG_FILES)
         "${CMAKE_SOURCE_DIR}/source/dialogue/${stem}_dialogue.hpp"
     )
 endforeach()
+
+file(GLOB_RECURSE P3D_DATA_SCRIPTS LIST_DIRECTORIES false "${CMAKE_SOURCE_DIR}/data/scripts/*.amx")
+list(APPEND P3D_ADDITIONAL_CLEAN ${P3D_DATA_SCRIPTS})
 
 list(APPEND P3D_ADDITIONAL_CLEAN
     "${CMAKE_SOURCE_DIR}/sdcard.img"

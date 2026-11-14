@@ -22,9 +22,13 @@
 
 enum class VmStatus : uint8_t
 {
-    STOPPED,
+    UNINITIALIZED,
+    READY,
     RUNNING,
-    YIELD,
+    SLEEPING,
+    YIELDED,
+    STOPPED,
+    FINISHED,
     ERROR,
 };
 
@@ -34,30 +38,35 @@ class ScriptManager : public ae::Manager, public ae::Singleton<ScriptManager>
     void Init() override
     {
         memset(&amx, 0, sizeof(amx));
+        vmMemory.fill(0);
+        currentScript.clear();
 
-        std::string scriptPath = "fat:/data/scripts/example_event.amx";
+        //         std::string scriptPath = "fat:/data/scripts/example_event.amx";
+        //
+        //         int err = aux_LoadProgram(&amx, scriptPath.c_str(), vmMemory.data());
+        //         logMessage(LogSeverity::DEBUG, "aux_LoadProgram result: " + std::to_string(err));
+        //
+        //         if (err != AMX_ERR_NONE)
+        //         {
+        //             logMessage(LogSeverity::ERROR, "Pawn: Failed to load script: " + scriptPath);
+        //             return;
+        //         }
+        //
+        //         const AMX_NATIVE_INFO abc[] = {{"print", print}, {"printf", n_printf}, {0, 0}};
+        //
+        //         int regErr = amx_Register(&amx, abc, -1);
+        //         logMessage(LogSeverity::DEBUG, "amx_Register result: " + std::to_string(regErr));
 
-        int err = aux_LoadProgram(&amx, scriptPath.c_str(), vmMemory.data());
-        logMessage(LogSeverity::DEBUG, "aux_LoadProgram result: " + std::to_string(err));
-
-        if (err != AMX_ERR_NONE)
-        {
-            logMessage(LogSeverity::ERROR, "Pawn: Failed to load script: " + scriptPath);
-            return;
-        }
-
-        const AMX_NATIVE_INFO abc[] = {{"print", print}, {"printf", n_printf}, {0, 0}};
-
-        int regErr = amx_Register(&amx, abc, -1);
-        logMessage(LogSeverity::DEBUG, "amx_Register result: " + std::to_string(regErr));
-
-        cell ret = 0;
-        int execErr = amx_Exec(&amx, &ret, AMX_EXEC_MAIN);
-        logMessage(LogSeverity::DEBUG, "amx_Exec result: " + std::to_string(execErr) + ", ret: " + std::to_string(ret));
+        //         cell ret = 0;
+        //         int execErr = amx_Exec(&amx, &ret, AMX_EXEC_MAIN);
+        //         logMessage(LogSeverity::DEBUG, "amx_Exec result: " + std::to_string(execErr) + ", ret: " + std::to_string(ret));
     }
 
     void Process() override
     {
+        if (status == VmStatus::RUNNING)
+        {
+        }
     }
 
     void Shutdown() override
@@ -72,19 +81,63 @@ class ScriptManager : public ae::Manager, public ae::Singleton<ScriptManager>
 
     bool loadScript(const std::string& scriptPath);
     bool reloadScript();
-    bool unloadScript();
+    void unloadScript();
     bool runScript();
     bool resumeScript();
     void stopScript();
     void pauseScript();
 
-    [[nodiscard]]
-    bool canScriptFit(const std::string& scriptPath) const;
+    [[nodiscard]] bool canScriptFit(const std::string& scriptPath) const;
 
-    [[nodiscard]]
-    bool hasPublic(std::string_view funcName) const;
+    [[nodiscard]] bool hasPublic(std::string_view funcName) const;
     int callPublic(std::string_view funcName);
     int callPublic(std::string_view funcName, etl::span<const cell> params, cell* retVal = nullptr);
+
+    [[nodiscard]] bool hasPublicVariable(std::string_view varName) const;
+    bool getPublicVariable(std::string_view varName, cell& outValue) const;
+    bool setPublicVariable(std::string_view varName, cell value);
+    cell* getPublicVariableAddress(std::string_view varName);
+
+    [[nodiscard]] VmStatus getStatus() const
+    {
+        return status;
+    }
+    [[nodiscard]] const std::string& getCurrentScript() const
+    {
+        return currentScript;
+    }
+
+    [[nodiscard]] bool isLoaded() const
+    {
+        return status == VmStatus::READY || amx.base != nullptr;
+    }
+
+    [[nodiscard]] bool isRunning() const
+    {
+        return status == VmStatus::RUNNING;
+    }
+
+    [[nodiscard]] bool isSleeping() const
+    {
+        return status == VmStatus::SLEEPING;
+    }
+
+    [[nodiscard]] bool isFinished() const
+    {
+        return status == VmStatus::FINISHED;
+    }
+
+    [[nodiscard]] int getLastError() const;
+    [[nodiscard]] const char* getLastErrorString() const;
+
+    [[nodiscard]] size_t getMemoryUsage() const;
+    [[nodiscard]] size_t getHeapUsage() const;
+    [[nodiscard]] size_t getStackRemaining() const;
+
+    static constexpr size_t getMaxMemory()
+    {
+        return MAX_MEMORY_USAGE;
+    }
 
   private:
     friend class Singleton<ScriptManager>;
@@ -92,32 +145,14 @@ class ScriptManager : public ae::Manager, public ae::Singleton<ScriptManager>
 
     static constexpr size_t MAX_MEMORY_USAGE = 6400 * sizeof(cell);
 
-    //FIXME: REMOVE AND REPLACE WITH BETTER LOGGING
-    static cell AMX_NATIVE_CALL print(AMX* amx, const cell params[])
-    {
-        char buffer[256];
-        cell* cptr = amx_Address(amx, params[1]);
-        amx_GetString(buffer, cptr, 0, sizeof(buffer));
-        logMessage(LogSeverity::DEBUG, std::string("[Pawn print] ") + buffer);
-        return 0;
-    }
-
-    //FIXME: REMOVE AND REPLACE WITH BETTER LOGGING
-    static cell AMX_NATIVE_CALL n_printf(AMX* amx, const cell params[])
-    {
-        char buffer[256];
-        cell* cptr = amx_Address(amx, params[1]);
-        amx_GetString(buffer, cptr, 0, sizeof(buffer));
-        logMessage(LogSeverity::DEBUG, std::string("[Pawn printf] ") + buffer);
-        return 0;
-    }
-
-    VmStatus status = VmStatus::STOPPED;
-    std::string currrentScript;
+    VmStatus status = VmStatus::UNINITIALIZED;
+    int lastError;
+    std::string currentScript;
 
     AMX amx{};
     alignas(sizeof(cell)) inline static etl::array<uint8_t, MAX_MEMORY_USAGE> vmMemory;
-    // static constexpr uint16_t amx_flags = (AMX_FLAG_SLEEP | AMX_FLAG_DEBUG);
 
     IOManager& io = IOManager::GetInstance();
+
+    void setStatus();
 };

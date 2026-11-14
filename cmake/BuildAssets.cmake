@@ -300,4 +300,46 @@ if(P3D_RUN_FONTS)
     endforeach()
 endif()
 
+p3d_group_enabled(scripts P3D_RUN_SCRIPTS)
+
+if(P3D_RUN_SCRIPTS)
+    file(GLOB_RECURSE SCRIPT_FILES "${ASSETS_DIR}/scripts/*.pwn")
+
+    if(SCRIPT_FILES)
+        if(NOT P3D_PAWNCC_EXECUTABLE OR P3D_PAWNCC_EXECUTABLE STREQUAL "P3D_PAWNCC_EXECUTABLE-NOTFOUND" OR NOT EXISTS "${P3D_PAWNCC_EXECUTABLE}")
+            find_program(P3D_DYNAMIC_PAWNCC pawncc
+                HINTS
+                "${P3D_SOURCE_DIR}/libs/pawn/bin"
+                "${P3D_SOURCE_DIR}/out/build/pawn-compiler-${CMAKE_HOST_SYSTEM_NAME}"
+                "${P3D_SOURCE_DIR}/out/build/pawn-compiler-linux"
+                "${P3D_SOURCE_DIR}/out/build/pawn-compiler-win"
+                "/usr/local/bin"
+                "/opt/pawn/bin"
+            )
+            if(P3D_DYNAMIC_PAWNCC)
+                set(P3D_PAWNCC_EXECUTABLE "${P3D_DYNAMIC_PAWNCC}")
+            else()
+                message(FATAL_ERROR "pawncc not found, required for compiling Pawn scripts. Please ensure libs/pawn compiler is available or re-run CMake configuration.")
+            endif()
+        endif()
+
+        foreach(pwn IN LISTS SCRIPT_FILES)
+            file(RELATIVE_PATH rel "${ASSETS_DIR}/scripts" "${pwn}")
+            get_filename_component(rel_dir "${rel}" DIRECTORY)
+            get_filename_component(stem "${pwn}" NAME_WE)
+
+            set(out_dir "${DATA_DIR}/scripts")
+            if(rel_dir)
+                set(out_dir "${out_dir}/${rel_dir}")
+            endif()
+            file(MAKE_DIRECTORY "${out_dir}")
+
+            p3d_run(
+                WORKING_DIRECTORY "${out_dir}"
+                COMMAND "${P3D_PAWNCC_EXECUTABLE}" "${pwn}" "-o${out_dir}/${stem}" -O2 "-i${P3D_SOURCE_DIR}/libs/pawn/include" "-i${ASSETS_DIR}/scripts"
+            )
+        endforeach()
+    endif()
+endif()
+
 message(STATUS "P3D assets pipeline completed for group: ${P3D_ASSET_GROUP}")

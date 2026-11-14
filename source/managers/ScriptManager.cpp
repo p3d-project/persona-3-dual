@@ -16,8 +16,8 @@ bool ScriptManager::canScriptFit(const std::string& scriptPath) const
         logMessage(LogSeverity::ERROR,
                    "Script requires " + std::to_string(required) + " bytes, buffer is " +
                        std::to_string(MAX_MEMORY_USAGE));
-        return true;
+        return false;
     }
 
-    return false;
+    return true;
 }
