@@ -83,9 +83,6 @@ void MenuHUDScreen::renderSprites()
 
     // draw background
     renderBackground();
-
-    // draw text
-    renderText();
 }
 
 int MenuHUDScreen::onTouch(touchPosition* touch)

@@ -111,7 +111,7 @@ class PauseMenuScreen : public UIScreen
      * @brief Draws the text
      * @note Must be re-called after anything clears the shared text component (e.g. menu navigation)
      */
-    void renderText();
+    void renderText() override;
 
     // TODO: replace with ae dependency injection
     /**
