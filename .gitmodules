@@ -10,3 +10,6 @@
 [submodule "libs/p3d-qoa"]
 	path = libs/p3d-qoa
 	url = https://github.com/p3d-project/p3d-qoa.git
+[submodule "libs/pawn"]
+	path = libs/pawn
+	url = https://github.com/p3d-project/p3d-pawn.git

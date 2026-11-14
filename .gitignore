@@ -43,6 +43,12 @@ persona-3-dual.lst
 /data/graphics/*
 !/data/graphics/.gitkeep
 
+/data/scripts/*
+!/data/scripts/.gitkeep
+
+/libs/pawn/bin/*
+!/libs/pawn/bin/.gitkeep
+
 /docs/doxygen/*
 
 /tools/converters/__pycache__

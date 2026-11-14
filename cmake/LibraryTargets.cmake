@@ -29,6 +29,10 @@ if(TARGET p3d_qoa)
     target_link_libraries(p3d_game PUBLIC p3d_qoa)
 endif()
 
+if(TARGET pawn_amx)
+    target_link_libraries(p3d_game PUBLIC pawn_amx)
+endif()
+
 target_sources(p3d_game
     PUBLIC
     FILE_SET p3d_game_headers TYPE HEADERS

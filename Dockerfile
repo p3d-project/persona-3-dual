@@ -52,6 +52,15 @@ RUN python3 -m venv /root/.venv \
     && /root/.venv/bin/pip install --no-cache-dir --upgrade pip \
     && /root/.venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt
 
+# Build and install the Pawn compiler for the script pipeline
+# TODO: Instead of making the host system build it, we should distribute the binary directly (look into this)?
+COPY libs/pawn /tmp/pawn
+RUN cmake -S /tmp/pawn/compiler -B /tmp/pawn/build -DCMAKE_BUILD_TYPE=Release \
+    && cmake --build /tmp/pawn/build --target pawncc pawndisasm \
+    && cp /tmp/pawn/build/pawncc /tmp/pawn/build/pawndisasm /usr/local/bin/ \
+    && chmod +x /usr/local/bin/pawncc /usr/local/bin/pawndisasm \
+    && rm -rf /tmp/pawn
+
 # ==========================================
 # Dev Container stage - only for developers
 # GitHub Actions targets base only

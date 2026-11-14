@@ -7,6 +7,7 @@
 #include <nds.h>
 
 // states
+#include "managers/ScriptManager.hpp"
 #include "views/BaseView.hpp"
 #include "views/DisclaimerView.hpp"
 #include "views/IntroView.hpp"
@@ -97,6 +98,7 @@ void NDSComputeCallback()
 int main(int argc, char* argv[])
 {
     irqSet(IRQ_VBLANK, Vblank);
+    consoleDebugInit(DebugDevice_NOCASH);
 
     // initialize DLDI/FAT
     if (!fatInitDefault())
@@ -163,6 +165,7 @@ int main(int argc, char* argv[])
     engine.RegisterManager(&TextManager::GetInstance());
     engine.RegisterManager(&UIManager::GetInstance());
     engine.RegisterManager(&AudioManager::GetInstance());
+    engine.RegisterManager(&ScriptManager::GetInstance());
 
     // initialize engine
     engine.InitAll();
