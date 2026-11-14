@@ -33,5 +33,5 @@ struct Enemy : BattleParticipant
     virtual ~Enemy() = default;
 
   private:
-    MathManager& math = MathManager::GetInstance();
+    MathManager& math = MathManager::getInstance();
 };

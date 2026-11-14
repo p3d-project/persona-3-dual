@@ -12,16 +12,16 @@ void IntroView::init()
 {
     if (intro == nullptr)
     {
-        intro = engine.CreateEntity();
-        graphics = engine.CreateComponent<GraphicsComponent>();
-        text = engine.CreateComponent<TextComponent>();
-        musicCmpt = engine.CreateComponent<MusicComponent>();
-        sfxCmpt = engine.CreateComponent<SFXComponent>();
+        intro = engine.createEntity();
+        graphics = engine.createComponent<GraphicsComponent>();
+        text = engine.createComponent<TextComponent>();
+        musicCmpt = engine.createComponent<MusicComponent>();
+        sfxCmpt = engine.createComponent<SFXComponent>();
 
-        intro->AddComponent(graphics);
-        intro->AddComponent(text);
-        intro->AddComponent(musicCmpt);
-        intro->AddComponent(sfxCmpt);
+        intro->addComponent(graphics);
+        intro->addComponent(text);
+        intro->addComponent(musicCmpt);
+        intro->addComponent(sfxCmpt);
     }
 
     // set video mode for 3 text layers and 1 extended rotation layer
@@ -381,7 +381,7 @@ ViewState IntroView::update()
         if (frame % 4 == 0)
         {
             waveAngle += 50;
-            int angle = MathManager::GetInstance().sin(static_cast<ae::angle16_t>(waveAngle)).raw_value();
+            int angle = MathManager::getInstance().sin(static_cast<ae::angle16_t>(waveAngle)).raw_value();
             int rotationSpeed = baseSpeed + ((angle * fluctuation) >> 12);
             currentRotation += rotationSpeed;
             bgSetRotateScale(bg[3], currentRotation, 256, 256);
@@ -414,7 +414,7 @@ void IntroView::cleanup()
 {
     if (intro != nullptr)
     {
-        engine.DestroyEntity(intro);
+        engine.destroyEntity(intro);
 
         intro = nullptr;
         graphics = nullptr;

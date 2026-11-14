@@ -35,7 +35,7 @@ enum class VmStatus : uint8_t
 class ScriptManager : public ae::Manager, public ae::Singleton<ScriptManager>
 {
   public:
-    void Init() override
+    void init() override
     {
         memset(&amx, 0, sizeof(amx));
         vmMemory.fill(0);
@@ -62,14 +62,14 @@ class ScriptManager : public ae::Manager, public ae::Singleton<ScriptManager>
         //         logMessage(LogSeverity::DEBUG, "amx_Exec result: " + std::to_string(execErr) + ", ret: " + std::to_string(ret));
     }
 
-    void Process() override
+    void process() override
     {
         if (status == VmStatus::RUNNING)
         {
         }
     }
 
-    void Shutdown() override
+    void shutdown() override
     {
         if (amx.base != nullptr)
         {
@@ -152,7 +152,7 @@ class ScriptManager : public ae::Manager, public ae::Singleton<ScriptManager>
     AMX amx{};
     alignas(sizeof(cell)) inline static etl::array<uint8_t, MAX_MEMORY_USAGE> vmMemory;
 
-    IOManager& io = IOManager::GetInstance();
+    IOManager& io = IOManager::getInstance();
 
     void setStatus();
 };

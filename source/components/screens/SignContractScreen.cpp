@@ -121,7 +121,7 @@ void SignContractScreen::renderBackground(int bgIndex)
 {
     // load palettes
     dmaCopy(bgUI[bgIndex].pal, BG_PALETTE_SUB, bgUI[bgIndex].palLen);
-    TextManager::GetInstance().loadDefaultPalette(); // prevent this from being overwritten
+    TextManager::getInstance().loadDefaultPalette(); // prevent this from being overwritten
 
     // draw background (copy into vram)
     dmaFillHalfWords(0, bgGetMapPtr(bgId), 2048);
@@ -436,15 +436,15 @@ void SignContractScreen::load()
 {
     if (signContractUI == nullptr)
     {
-        signContractUI = engine.CreateEntity();
-        graphics = engine.CreateComponent<GraphicsComponent>();
-        signContractUI->AddComponent(graphics);
+        signContractUI = engine.createEntity();
+        graphics = engine.createComponent<GraphicsComponent>();
+        signContractUI->addComponent(graphics);
     }
 
     setBackdropColor(ARGB16(1, 0, 0, 4));
 
-    text = engine.CreateComponent<TextComponent>();
-    signContractUI->AddComponent(text);
+    text = engine.createComponent<TextComponent>();
+    signContractUI->addComponent(text);
     int bgTextSub = bgInitSub(3, BgType_Bmp8, BgSize_B8_256x256, 4, 0);
     bgTextBufferSub = bgGetGfxPtr(bgTextSub);
     bgSetPriority(bgTextSub, 0);
@@ -471,13 +471,13 @@ void SignContractScreen::unload()
         saveData.lastName[i] = lastName[i];
         saveData.firstName[i] = firstName[i];
     }
-    ae::BroadcastEvent(Event::WriteSave{});
+    ae::broadcastEvent(Event::WriteSave{});
 
     unloadBackgrounds();
 
     if (signContractUI != nullptr)
     {
-        engine.DestroyEntity(signContractUI);
+        engine.destroyEntity(signContractUI);
         signContractUI = nullptr;
         graphics = nullptr;
     }

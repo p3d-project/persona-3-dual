@@ -29,7 +29,7 @@ void UIMenu::resetMenu()
 
 void UIMenu::updateAnimation()
 {
-    const ae::q20_12_t dt = MathManager::GetInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
+    const ae::q20_12_t dt = MathManager::getInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
     animator.update(dt);
 }
 

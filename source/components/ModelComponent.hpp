@@ -18,21 +18,21 @@ class ModelComponent : public ae::Component
   public:
     static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Model);
 
-    void Init() override
+    void init() override
     {
     }
 
     /**
-     * @brief Sets isActive to false on component destruction
+     * @brief Sets active to false on component destruction
      */
-    void Destroy() override;
+    void destroy() override;
 
     /**
      * @brief Draws the mesh to the screen every frame.
      */
-    void Update(ae::q20_12_t /*dt*/) override;
+    void update(ae::q20_12_t /*dt*/) override;
 
-    ae::ComponentTypeID GetType() const override
+    ae::ComponentTypeID getType() const override
     {
         return TYPE_ID;
     }
@@ -50,14 +50,14 @@ class ModelComponent : public ae::Component
     void drawMesh();
 
   protected:
-    void SubmitToManager() override
+    void submitToManager() override
     {
     }
 
   private:
     std::unique_ptr<MDL3Model> model;
 
-    RenderManager& render = RenderManager::GetInstance();
+    RenderManager& render = RenderManager::getInstance();
 
     /**
      * @brief Loads a texture header from the file buffer into memory.

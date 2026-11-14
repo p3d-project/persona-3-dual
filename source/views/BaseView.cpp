@@ -7,7 +7,7 @@
 
 void BaseView::cleanup()
 {
-    ae::BroadcastEvent(Event::ResetUIResources{});
+    ae::broadcastEvent(Event::ResetUIResources{});
 
     setBrightness(3, -16);
 
