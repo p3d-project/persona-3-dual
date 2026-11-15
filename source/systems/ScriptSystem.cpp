@@ -1,6 +1,6 @@
-#include "ScriptManager.hpp"
+#include "ScriptSystem.hpp"
 
-bool ScriptManager::canScriptFit(const std::string& scriptPath) const
+bool ScriptSystem::canScriptFit(const std::string& scriptPath) const
 {
     AMX_HEADER hdr;
 

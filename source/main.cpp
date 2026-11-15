@@ -7,7 +7,7 @@
 #include <nds.h>
 
 // states
-#include "managers/ScriptManager.hpp"
+#include "systems/ScriptSystem.hpp"
 #include "views/BaseView.hpp"
 #include "views/DisclaimerView.hpp"
 #include "views/IntroView.hpp"
@@ -159,10 +159,10 @@ int main(int argc, char* argv[])
     engine.registerSystem(&SaveSystem::getInstance());
     engine.registerSystem(&TextSystem::getInstance());
     engine.registerSystem(&UISystem::getInstance());
+    engine.registerSystem(&ScriptSystem::getInstance());
     engine.registerManager(&MathManager::getInstance());
     engine.registerManager(&IOManager::getInstance());
     engine.registerManager(&AudioManager::getInstance());
-    engine.registerManager(&ScriptManager::getInstance());
 
     // initialize engine
     engine.initAll();

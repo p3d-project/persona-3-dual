@@ -1,6 +1,6 @@
 /**
- * @file ScriptManager.hpp
- * @brief Manager for loading and running scripts.
+ * @file ScriptSystem.hpp
+ * @brief System for loading and running scripts.
  * @author nothing
  */
 
@@ -10,7 +10,7 @@
 #include "etl/array.h"
 #include "etl/span.h"
 #include "managers/IOManager.hpp"
-#include <aegis/manager.hpp>
+#include <aegis/system.hpp>
 #include <amx.h>
 #include <amxaux.h>
 #include <cstddef>
@@ -32,7 +32,7 @@ enum class VmStatus : uint8_t
     ERROR,
 };
 
-class ScriptManager : public ae::Manager, public ae::Singleton<ScriptManager>
+class ScriptSystem : public ae::System, public ae::Singleton<ScriptSystem>
 {
   public:
     void init() override
@@ -62,7 +62,7 @@ class ScriptManager : public ae::Manager, public ae::Singleton<ScriptManager>
         //         logMessage(LogSeverity::DEBUG, "amx_Exec result: " + std::to_string(execErr) + ", ret: " + std::to_string(ret));
     }
 
-    void process() override
+    void update(ae::q20_12_t /*dt*/) override
     {
         if (status == VmStatus::RUNNING)
         {
@@ -140,8 +140,8 @@ class ScriptManager : public ae::Manager, public ae::Singleton<ScriptManager>
     }
 
   private:
-    friend class Singleton<ScriptManager>;
-    ScriptManager() = default;
+    friend class Singleton<ScriptSystem>;
+    ScriptSystem() = default;
 
     static constexpr size_t MAX_MEMORY_USAGE = 6400 * sizeof(cell);
 
