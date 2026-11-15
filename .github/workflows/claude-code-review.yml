@@ -4,8 +4,15 @@ on:
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
 
+# One review per PR at a time: a new push cancels the in-flight review.
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   claude-review:
+    # Fork PRs don't receive repository secrets, so skip them cleanly.
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -15,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
@@ -67,7 +74,12 @@ jobs:
             STATUS_LINE="❌ Review job **failed** — see the [run log]($RUN_URL)."
           fi
 
+          # Hidden marker so we only ever update OUR comment, never another
+          # github-actions comment (e.g. the docs "Preview Deployed" one).
+          MARKER='<!-- claude-code-review-outcome -->'
+
           {
+            echo "$MARKER"
             echo "## 🤖 Claude Code Review — outcome"
             echo
             echo "$STATUS_LINE"
@@ -82,10 +94,16 @@ jobs:
             echo "_Run: [$RUN_URL]($RUN_URL) · commit ${GITHUB_SHA:0:7}_"
           } > /tmp/outcome-comment.md
 
-          # Update our previous outcome comment when possible; otherwise create one.
-          gh pr comment "$PR_NUMBER" --repo "$REPO" --edit-last --body-file /tmp/outcome-comment.md \
-            || gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file /tmp/outcome-comment.md
+          # Update our previous outcome comment (found by marker); otherwise create one.
+          COMMENT_ID=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"$MARKER\"))) | .id" \
+            | tail -n 1)
+          if [ -n "$COMMENT_ID" ]; then
+            gh api --method PATCH "repos/$REPO/issues/comments/$COMMENT_ID" -F body=@/tmp/outcome-comment.md > /dev/null
+          else
+            gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file /tmp/outcome-comment.md
+          fi
 
       - name: Fail the job if the review failed
         if: steps.claude-review.outcome == 'failure'
-        run: exit 1Now anyone can write @claude why is this test flaky? in a PR and get an answer in-thread.
+        run: exit 1
