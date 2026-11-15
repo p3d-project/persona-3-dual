@@ -16,15 +16,15 @@
 class MathManager : public ae::Manager, public ae::Singleton<MathManager>
 {
   public:
-    void Init() override
+    void init() override
     {
     }
 
-    void Process() override
+    void process() override
     {
     }
 
-    void Shutdown() override
+    void shutdown() override
     {
     }
 
@@ -84,6 +84,14 @@ class MathManager : public ae::Manager, public ae::Singleton<MathManager>
      * @return The equivalent cyclic angle (full turn = 1<<15).
      */
     ae::angle16_t radiansToAngle(ae::q20_12_t radians);
+
+    /**
+     * @brief Converts an angle in degrees (Q20.12) to a cyclic angle.
+     *
+     * @param degrees Angle in degrees
+     * @return The equivalent cyclic angle
+     */
+    ae::angle16_t degreesToCyclicAngle(ae::q20_12_t degrees);
 
     /**
      * @brief Converts a cyclic angle to radians (Q20.12).

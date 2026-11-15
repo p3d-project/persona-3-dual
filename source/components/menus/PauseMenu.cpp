@@ -264,12 +264,12 @@ ViewState PauseMenu::debugOptionSelected()
     case DebugOption::CYCLE_CAMERA_MODE:
         if (cameraSystem.getMode() == CameraMode::Path)
         {
-            ae::BroadcastEvent(Event::SetCameraMode{CameraMode::Follow});
+            ae::broadcastEvent(Event::SetCameraMode{CameraMode::Follow});
         }
         else
         {
             CameraMode mode = cameraModes[(static_cast<int>(cameraSystem.getMode()) + 1) % cameraModes.size()];
-            ae::BroadcastEvent(Event::SetCameraMode{mode});
+            ae::broadcastEvent(Event::SetCameraMode{mode});
         }
         updateCameraOptionName();
         selectedView = ViewState::KEEP_CURRENT;
@@ -282,7 +282,7 @@ ViewState PauseMenu::debugOptionSelected()
 
 ViewState PauseMenu::playMusicOptionSelected(AudioType type, int audioId)
 {
-    AudioManager& audio = AudioManager::GetInstance();
+    AudioManager& audio = AudioManager::getInstance();
     AudioDBEntry entry = getAudioDBEntry(type, audioId);
     if (entry.type != AudioType::NONE)
     {

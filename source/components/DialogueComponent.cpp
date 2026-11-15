@@ -15,26 +15,26 @@ constexpr int OPTIONS_X = 128;
 constexpr int OPTIONS_Y = 50;
 } // namespace
 
-void DialogueComponent::Init()
+void DialogueComponent::init()
 {
-    isActive = false;
+    active = false;
 }
 
-void DialogueComponent::Update(ae::q20_12_t)
+void DialogueComponent::update(ae::q20_12_t)
 {
     if (closing)
     {
         if (screen == nullptr || !screen->isAnimating())
         {
             closing = false;
-            isActive = false;
+            active = false;
         }
         return;
     }
 
-    if (!isActive || current == nullptr)
+    if (!active || current == nullptr)
     {
-        isActive = false;
+        active = false;
         return;
     }
 
@@ -168,9 +168,9 @@ void DialogueComponent::Update(ae::q20_12_t)
     }
 }
 
-void DialogueComponent::Destroy()
+void DialogueComponent::destroy()
 {
-    isActive = false;
+    active = false;
 }
 
 void DialogueComponent::configureDialogue(const DialogueConfig& config)
@@ -215,7 +215,7 @@ void DialogueComponent::start(Dialogue* firstLine)
     }
 
     prevKeys = systemKeysHeld;
-    isActive = true;
+    active = true;
     renderBust = true;
 }
 
@@ -230,13 +230,13 @@ void DialogueComponent::end()
 
     if (screen != nullptr)
     {
-        // Keep the component active until hideAnimated() finishes; Update()
-        // watches `closing` and clears isActive when !screen->isAnimating().
+        // Keep the component active until hideAnimated() finishes; update()
+        // watches `closing` and clears active when !screen->isAnimating().
         screen->hideAnimated();
         closing = true;
         return;
     }
-    isActive = false;
+    active = false;
 }
 
 void DialogueComponent::advanceTo(Dialogue* next)

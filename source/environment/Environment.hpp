@@ -110,6 +110,6 @@ class Environment
     u32 dlSizes[MAX_ENVIRONMENT_TEXTURES];
     int textureIDs[MAX_ENVIRONMENT_TEXTURES];
 
-    MathManager& math = MathManager::GetInstance();
-    RenderManager& render = RenderManager::GetInstance();
+    MathManager& math = MathManager::getInstance();
+    RenderManager& render = RenderManager::getInstance();
 };

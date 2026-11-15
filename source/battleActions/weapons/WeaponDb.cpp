@@ -3,7 +3,7 @@ Weapon WeaponDb::shortSword;
 Weapon WeaponDb::imitationKatana;
 Weapon WeaponDb::practiceBow;
 
-void WeaponDb::Initialize()
+void WeaponDb::initialize()
 {
     shortSword.weaponPower = 38;
     shortSword.hitRate = 95;

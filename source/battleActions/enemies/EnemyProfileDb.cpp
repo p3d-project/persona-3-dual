@@ -15,7 +15,7 @@ EnemyProfile EnemyProfileDb::cowardlyMaya;
 Skill* EnemyProfileDb::mercilessMayaSkills[1];
 Skill* EnemyProfileDb::cowardlyMayaSkills[1];
 
-void EnemyProfileDb::Initialize()
+void EnemyProfileDb::initialize()
 {
     /*--------------MERCILESS MAYA--------------*/
     mercilessMaya.name = "Merciless Maya";

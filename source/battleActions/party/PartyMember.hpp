@@ -42,5 +42,5 @@ struct PartyMember : BattleParticipant
     }
 
   private:
-    MathManager& math = MathManager::GetInstance();
+    MathManager& math = MathManager::getInstance();
 };

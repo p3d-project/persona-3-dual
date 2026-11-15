@@ -15,5 +15,5 @@ struct SkillDb
     static Skill strikeAttack;
     static Skill allOutAttack;
 
-    static void Initialize();
+    static void initialize();
 };

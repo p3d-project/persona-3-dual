@@ -1,12 +1,12 @@
 #include "UIAnimationComponent.hpp"
 
-void UIAnimationComponent::Update(ae::q20_12_t dt)
+void UIAnimationComponent::update(ae::q20_12_t dt)
 {
     animator.update(dt);
 }
 
-void UIAnimationComponent::Destroy()
+void UIAnimationComponent::destroy()
 {
     animator.cancelAll();
-    isActive = false;
+    active = false;
 }

@@ -7,5 +7,5 @@ struct ArmourDb
     static Armour rashGuard;
     static Armour enemyArmour;
 
-    static void Initialize();
+    static void initialize();
 };

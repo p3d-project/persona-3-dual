@@ -93,7 +93,7 @@ void DialogueScreen::updateAnimation()
 {
     bool panelWasAnimating = panelAnimation.isPlaying();
     bool bustWasAnimating = bustAnimation.isPlaying();
-    const ae::q20_12_t dt = MathManager::GetInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
+    const ae::q20_12_t dt = MathManager::getInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
     panelAnimator.update(dt);
     bustAnimator.update(dt);
 
@@ -114,9 +114,9 @@ void DialogueScreen::load()
     // create relevant entities, components
     if (dialogue == nullptr)
     {
-        dialogue = engine.CreateEntity();
-        graphics = engine.CreateComponent<GraphicsComponent>();
-        dialogue->AddComponent(graphics);
+        dialogue = engine.createEntity();
+        graphics = engine.createComponent<GraphicsComponent>();
+        dialogue->addComponent(graphics);
     }
 
     // load sprites
@@ -358,7 +358,7 @@ void DialogueScreen::unload()
 
     if (dialogue != nullptr)
     {
-        engine.DestroyEntity(dialogue);
+        engine.destroyEntity(dialogue);
 
         dialogue = nullptr;
         graphics = nullptr;

@@ -8,14 +8,14 @@ u32 BattleCalcs::attack(BattleParticipant& attacker, BattleParticipant& defender
     ae::q20_12_t base = attacker.calculateBaseDamage(defender, skill);
     ae::q20_12_t range = ae::q20_12_t{95} + ae::q20_12_t{(rand() % 11)};
     return std::clamp(
-        static_cast<u32>(fpm::trunc(MathManager::GetInstance().div(base * ae::q20_12_t{range}, ae::q20_12_t{100}))),
+        static_cast<u32>(fpm::trunc(MathManager::getInstance().div(base * ae::q20_12_t{range}, ae::q20_12_t{100}))),
         (u32)1,
         (u32)99999);
 }
 
 bool BattleCalcs::hit(BattleParticipant& attacker, BattleParticipant& defender, Skill& skill)
 {
-    MathManager& math = MathManager::GetInstance();
+    MathManager& math = MathManager::getInstance();
 
     BattleStats* attackerStatsPtr = attacker.getBattleStats();
     BattleStats* defenderStatsPtr = defender.getBattleStats();
@@ -66,12 +66,12 @@ u32 BattleCalcs::healing(BattleParticipant& user, Skill& skill)
     ae::q20_12_t base = fpm::floor(ae::q20_12_t{skill.movePower + magicBoost} * teamMultiplier);
     ae::q20_12_t range = ae::q20_12_t{95} + ae::q20_12_t{(rand() % 11)};
 
-    return static_cast<u32>(fpm::floor(MathManager::GetInstance().div(base * range, ae::q20_12_t{100})));
+    return static_cast<u32>(fpm::floor(MathManager::getInstance().div(base * range, ae::q20_12_t{100})));
 }
 
 u32 BattleCalcs::allOutAttack(Player& attacker, BattleParticipant& defender, u32 participantCount)
 {
-    MathManager& math = MathManager::GetInstance();
+    MathManager& math = MathManager::getInstance();
 
     ae::q20_12_t levelDifference = BattleCalcs::getLevelDifference(attacker.lv, defender.lv);
     BattleStats& attackerStats = *attacker.getBattleStats();
