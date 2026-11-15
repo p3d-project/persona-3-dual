@@ -36,7 +36,7 @@ inline int wordWidth(const Text& text, std::size_t position)
         {
             break;
         }
-        if (c == 0xFF)
+        if (c == TextInstructionMarker)
         {
             if (position + 1 >= text.content.size())
             {
@@ -83,9 +83,13 @@ inline bool shouldWrapWord(const Text& text)
     return text.cursorX + text.spaceWidth + wordWidth(text, text.cursorPos + 1) > text.maxX;
 }
 
-// Returns whether a hyphen must be drawn at the old cursor before moving to the new line.
+// Called before drawing a glyph. For dialogue, move the current glyph to a new
+// line when the rest of its word will not fit. This is a visual character-based
+// break, not linguistic hyphenation; the hyphen is drawn separately by the caller.
+// Returns true when the caller should draw that hyphen at the old cursor.
 inline bool prepareGlyph(Text& text, const Glyph& glyph)
 {
+    // Leave ordinary text wrapping and pagination to their existing paths.
     if (!text.hyphenate || pageFull(text))
     {
         return false;
@@ -98,11 +102,13 @@ inline bool prepareGlyph(Text& text, const Glyph& glyph)
     const bool wordOverflows = text.cursorX + remaining > text.maxX;
     const int glyphSlant = text.italic ? ((glyph.height - 1) * 64) >> 8 : 0;
     const bool glyphOverflows = text.cursorX + glyph.width + glyphSlant > text.maxX;
+    // Reserve room for a hyphen only when this break actually splits an overlong word.
     const bool needsHyphenSpace =
         hyphen.width > 0 && wordOverflows && text.cursorX + glyph.width + text.letterSpacing + hyphenWidth > text.maxX;
     if (text.cursorX > text.startX && (glyphOverflows || needsHyphenSpace))
     {
         const bool drawHyphen = hyphen.width > 0 && text.cursorX + hyphenWidth <= text.maxX;
+        // Keep cursorPos unchanged so the caller retries this glyph on the new line/page.
         newLine(text);
         pageFull(text);
         return drawHyphen;

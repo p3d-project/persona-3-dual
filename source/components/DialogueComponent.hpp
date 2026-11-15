@@ -79,9 +79,10 @@ class DialogueComponent : public ae::Component
     /**
      * @brief Handle input while the line is still being displayed
      *
-     * Advances a full page, or instantly finishes the current page.
+     * Finishes revealing the current page, or advances to the next page if the current one is full.
      *
-     * @return true if the line was not fully displayed and the input was consumed
+     * @return true if input was consumed to finish revealing the current page or advance to the next page;
+     *         false if the line is fully displayed.
      */
     bool skipOrContinueText();
 

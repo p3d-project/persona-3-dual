@@ -4,8 +4,6 @@
 
 #include <algorithm>
 
-constexpr unsigned char INSTRUCTION_BIT = 0xFF;
-
 void TextSystem::drawText(const std::string& text,
                           Font* font,
                           uint16_t* videoBuffer,
@@ -247,7 +245,7 @@ void TextSystem::drawNextFromText(Text* text)
             text->cursorX += text->spaceWidth;
         }
     }
-    else if (c == INSTRUCTION_BIT) /// Handle special instructions for text formatting
+    else if (c == TextInstructionMarker) /// Handle special instructions for text formatting
     {
         c = getNextChar(text);
         if (c == TextInstruction::ColorChange) /// Color change

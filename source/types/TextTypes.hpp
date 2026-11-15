@@ -46,6 +46,8 @@ enum TextInstruction
     Reset = 0xFF
 };
 
+inline constexpr unsigned char TextInstructionMarker = 0xFF;
+
 /**
  * @brief Stores data for a single glyph (character) in a font.
  */
