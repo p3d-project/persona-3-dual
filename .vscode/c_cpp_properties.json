@@ -17,6 +17,7 @@
                 "${workspaceFolder}/libs/aegis_engine/libs/**",
                 "${workspaceFolder}/libs/p3d-qoa/include/**",
                 "${workspaceFolder}/libs/p3d-qoa/libs/**",
+                "${workspaceFolder}/libs/pawn/**",
                 "${env:ARM_GCC}/arm-none-eabi/include/**",
                 "${env:BLOCKSDSLIBS}/dswifi/include/**",
                 "${env:BLOCKSDSLIBS}/libnds/include/**",
