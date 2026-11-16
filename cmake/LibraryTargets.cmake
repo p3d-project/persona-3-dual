@@ -19,7 +19,7 @@ if(P3D_BUILD_NDS)
 endif()
 
 set_target_properties(p3d_game PROPERTIES CXX_EXTENSIONS ON)
-target_compile_features(p3d_game PUBLIC cxx_std_17)
+target_compile_features(p3d_game PUBLIC cxx_std_23)
 
 if(TARGET aegis_engine)
     target_link_libraries(p3d_game PUBLIC aegis_engine)

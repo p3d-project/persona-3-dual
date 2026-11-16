@@ -224,8 +224,7 @@ void BattleSystem::update(ae::q20_12_t)
             }
         }
 
-        targets.erase(std::remove_if(targets.begin(), targets.end(), [](BattleParticipant* t) { return t->hp <= 0; }),
-                      targets.end());
+        etl::erase_if(targets, [](BattleParticipant* t) { return t->hp <= 0; });
 
         battleMenuCmpt->loadTargetOptions(&targets, healTarget);
         selectedBattleOption = -1;
