@@ -30,7 +30,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential=12.10ubuntu1 \
     cmake=3.28.3-1build7 \
-    ninja-build \
+    ninja-build=1.11.1-2 \
     ffmpeg=7:6.1.1-3ubuntu5 \
     mtools=4.0.43-1build1 \
     libblas3=3.12.0-3build1.1 \
