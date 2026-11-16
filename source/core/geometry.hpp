@@ -34,15 +34,7 @@ template <typename T> struct Point2D
         return *this;
     }
 
-    bool operator==(const Point2D<T>& other) const
-    {
-        return other.x == x && other.z == z;
-    }
-
-    bool operator!=(const Point2D<T>& other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const Point2D<T>& other) const = default;
 };
 
 template <typename T> struct Rectangle
@@ -112,15 +104,7 @@ template <typename T> struct Rectangle
                (top() <= other.bottom() && bottom() >= other.top());
     }
 
-    bool operator==(const Rectangle<T>& other) const
-    {
-        return position == other.position && size == other.size;
-    }
-
-    bool operator!=(const Rectangle<T>& other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const Rectangle<T>& other) const = default;
 };
 
 template <typename T> struct Vec3
@@ -167,15 +151,7 @@ template <typename T> struct Vec3
         return *this;
     }
 
-    bool operator==(const Vec3<T>& other) const
-    {
-        return x == other.x && y == other.y && z == other.z;
-    }
-
-    bool operator!=(const Vec3<T>& other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const Vec3<T>& other) const = default;
 
     T dot(const Vec3<T>& other) const
     {

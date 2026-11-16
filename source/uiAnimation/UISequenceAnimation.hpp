@@ -9,6 +9,7 @@
 #include "uiAnimation/UIAnimation.hpp"
 #include "uiAnimation/UIAnimationHandle.hpp"
 
+#include <concepts>
 #include <etl/vector.h>
 #include <memory>
 #include <type_traits>
@@ -114,16 +115,16 @@ class UISequenceBuilder
     }
 
     template <typename Builder>
-    auto append(Builder&& b)
-        -> std::enable_if_t<!std::is_convertible_v<Builder, std::shared_ptr<UIAnimation>>, UISequenceBuilder&>
+        requires(!std::convertible_to<Builder, std::shared_ptr<UIAnimation>>)
+    UISequenceBuilder& append(Builder&& b)
     {
         seq->appendGroup(std::forward<Builder>(b).build());
         return *this;
     }
 
     template <typename Builder>
-    auto join(Builder&& b)
-        -> std::enable_if_t<!std::is_convertible_v<Builder, std::shared_ptr<UIAnimation>>, UISequenceBuilder&>
+        requires(!std::convertible_to<Builder, std::shared_ptr<UIAnimation>>)
+    UISequenceBuilder& join(Builder&& b)
     {
         seq->joinGroup(std::forward<Builder>(b).build());
         return *this;
