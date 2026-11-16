@@ -11,6 +11,7 @@
 #include <aegis/manager.hpp>
 #include <cstdlib>
 #include <nds.h>
+#include <type_traits>
 
 /**
  * @brief Owns a heap-allocated file buffer and its length.
@@ -137,7 +138,9 @@ class IOManager : public ae::Manager, public ae::Singleton<IOManager>
      * @param filePath Path relative to the base path.
      * @return true on success, false if the file could not be opened.
      */
-    template <typename T> bool readFile(T* data, std::string filePath)
+    template <typename T>
+        requires std::is_trivially_copyable_v<T>
+    bool readFile(T* data, std::string filePath)
     {
         if (data == nullptr)
         {
@@ -176,7 +179,9 @@ class IOManager : public ae::Manager, public ae::Singleton<IOManager>
      * @param filePath Path relative to the base path.
      * @return true on success, false if the temp file could not be opened.
      */
-    template <typename T> bool writeFile(T* data, std::string filePath)
+    template <typename T>
+        requires std::is_trivially_copyable_v<T>
+    bool writeFile(T* data, std::string filePath)
     {
         if (data == nullptr)
         {

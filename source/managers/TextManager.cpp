@@ -155,7 +155,7 @@ bool TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBi
     std::string line;
     while (std::getline(iss, line))
     {
-        if (line.rfind("common ", 0) == 0 && !forBoldBitmap)
+        if (line.starts_with("common ") && !forBoldBitmap)
         {
             font->lineHeight = extractIntValue(line, "lineHeight=");
             font->bitmapWidth = extractIntValue(line, "scaleW=");
@@ -164,7 +164,7 @@ bool TextManager::loadFontMetadata(std::string* path, Font* font, bool forBoldBi
         }
 
         //if there's no character in this line, move to the next
-        if (line.rfind("char ", 0) != 0)
+        if (!line.starts_with("char "))
         {
             continue;
         }

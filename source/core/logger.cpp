@@ -107,8 +107,12 @@ void clearLog()
     isLogSessionStarted = true;
 }
 
-void logMessageImpl(LogSeverity severity, std::string_view message, const char* file, int line, const char* func)
+void logMessage(LogSeverity severity, std::string_view message, std::source_location location)
 {
+    const char* file = location.file_name();
+    const int line = static_cast<int>(location.line());
+    const char* func = location.function_name();
+
     incrementStats(severity);
     const char* name = severityName(severity);
 
