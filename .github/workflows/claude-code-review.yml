@@ -16,9 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      # Inline comments + outcome comment. No issues: write, so a compromised
-      # run can't touch issues; if commenting 403s, add `issues: write` back.
-      pull-requests: write
+      pull-requests: write # required to post the outcome comment on the PR
+      issues: write
       id-token: write
 
     steps:
