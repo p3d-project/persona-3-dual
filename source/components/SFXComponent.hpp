@@ -15,20 +15,20 @@ class SFXComponent : public ae::Component
 {
   public:
     static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::SFX);
-    void Init() override
+    void init() override
     {
     }
 
     /**
      * @brief Automatically stops all SFX audio from playing
      */
-    void Destroy() override;
+    void destroy() override;
 
-    void Update(ae::q20_12_t /*dt*/) override
+    void update(ae::q20_12_t /*dt*/) override
     {
     }
 
-    ae::ComponentTypeID GetType() const override
+    ae::ComponentTypeID getType() const override
     {
         return TYPE_ID;
     }
@@ -57,10 +57,10 @@ class SFXComponent : public ae::Component
     void stopSFX();
 
   protected:
-    void SubmitToManager() override
+    void submitToManager() override
     {
     }
 
   private:
-    AudioManager& am = AudioManager::GetInstance();
+    AudioManager& am = AudioManager::getInstance();
 };

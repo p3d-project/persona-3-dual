@@ -3,7 +3,7 @@
 Shoe ShoeDb::rubberSole;
 Shoe ShoeDb::enemyShoe;
 
-void ShoeDb::Initialize()
+void ShoeDb::initialize()
 {
     rubberSole.evasion = 19;
     rubberSole.armourType = ArmourType::Unisex;

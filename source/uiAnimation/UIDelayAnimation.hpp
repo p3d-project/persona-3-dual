@@ -17,7 +17,7 @@ class UIDelayAnimation : public UIAnimation
   public:
     explicit UIDelayAnimation(int durationMs)
     {
-        duration = MathManager::GetInstance().div(ae::q20_12_t{durationMs}, ae::q20_12_t{1000});
+        duration = MathManager::getInstance().div(ae::q20_12_t{durationMs}, ae::q20_12_t{1000});
     }
 
     void reset() override

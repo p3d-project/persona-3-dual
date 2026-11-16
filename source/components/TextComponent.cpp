@@ -4,7 +4,7 @@
 #include <aegis/types.hpp>
 #include <algorithm>
 
-void TextComponent::Update(ae::q20_12_t)
+void TextComponent::update(ae::q20_12_t)
 {
     if (appearingText != nullptr)
     {
@@ -26,16 +26,16 @@ void TextComponent::Update(ae::q20_12_t)
     }
 }
 
-void TextComponent::Destroy()
+void TextComponent::destroy()
 {
-    isActive = false;
+    active = false;
     appearTextStop();
     font.reset();
 }
 
 void TextComponent::configureText(const TextConfig& config, bool loadDefaultPalette)
 {
-    isActive = true;
+    active = true;
 
     font.reset();
 

@@ -17,18 +17,18 @@ class DialogueComponent : public ae::Component
 {
   public:
     static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Dialogue);
-    void Init() override;
+    void init() override;
 
-    void Destroy() override;
+    void destroy() override;
 
     /**
      * @brief Core update loop that renders & advances through dialogue
      *
      * @param dt Fixed-point delta time passed from the aegis engine loop (currently unused).
      */
-    void Update(ae::q20_12_t /*dt*/) override;
+    void update(ae::q20_12_t /*dt*/) override;
 
-    ae::ComponentTypeID GetType() const override
+    ae::ComponentTypeID getType() const override
     {
         return TYPE_ID;
     }
@@ -57,7 +57,7 @@ class DialogueComponent : public ae::Component
     void end();
 
   protected:
-    void SubmitToManager() override
+    void submitToManager() override
     {
     }
 

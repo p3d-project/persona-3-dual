@@ -46,7 +46,7 @@ template <typename T> class UIPropertyAnimation : public UIAnimation
   protected:
     bool onUpdate(ae::q20_12_t dt) override
     {
-        MathManager& math = MathManager::GetInstance();
+        MathManager& math = MathManager::getInstance();
         elapsed += dt;
         ae::q20_12_t t = ae::q20_12_t{1};
         if (duration > ae::q20_12_t{0})
@@ -61,7 +61,7 @@ template <typename T> class UIPropertyAnimation : public UIAnimation
   private:
     static T lerpValue(const T& a, const T& b, ae::q20_12_t t)
     {
-        MathManager& math = MathManager::GetInstance();
+        MathManager& math = MathManager::getInstance();
         if constexpr (std::is_same_v<T, int>)
         {
             return math.lerp(a, b, t);
@@ -149,7 +149,7 @@ template <typename T> class UIPropertyAnimationBuilder
 
     std::shared_ptr<UIAnimation> build() const
     {
-        MathManager& math = MathManager::GetInstance();
+        MathManager& math = MathManager::getInstance();
         const ae::q20_12_t durationSec = math.div(ae::q20_12_t{durationMs}, ae::q20_12_t{1000});
         T f = hasFrom ? fromVal : *ptr;
         auto anim = std::make_shared<UIPropertyAnimation<T>>(ptr, f, toVal, durationSec, easeType);

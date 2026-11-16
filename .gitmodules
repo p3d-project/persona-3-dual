@@ -1,6 +1,7 @@
 [submodule "libs/aegis_engine"]
 	path = libs/aegis_engine
 	url = https://github.com/p3d-project/aegis-engine.git
+	branch = releases/v1.0.0
 [submodule "libs/doxygen-awesome-css"]
 	path = libs/doxygen-awesome-css
 	url = https://github.com/jothepro/doxygen-awesome-css.git

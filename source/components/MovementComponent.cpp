@@ -8,21 +8,21 @@
 // TODO: decouple camera with movement (so that movement can be used by other entities) (make a seperate component?)
 // TODO: decouple animation controller with movement (make a seperate component?)
 
-void MovementComponent::Init()
+void MovementComponent::init()
 {
-    isActive = false;
+    active = false;
     walkAnim = (int)MODEL_MAKOTO_PLAYER_ROOT_MODEL_MOTION_0002;
     idleAnim = (int)MODEL_MAKOTO_PLAYER_ROOT_MODEL_MOTION;
 }
 
-void MovementComponent::Destroy()
+void MovementComponent::destroy()
 {
-    isActive = false;
+    active = false;
 }
 
-void MovementComponent::Update(ae::q20_12_t)
+void MovementComponent::update(ae::q20_12_t)
 {
-    ae::q20_12_t cameraAngle = CameraSystem::GetInstance().getMovementAngle();
+    ae::q20_12_t cameraAngle = CameraSystem::getInstance().getMovementAngle();
     ae::q20_12_t forwardX;
     ae::q20_12_t forwardZ;
     ae::q20_12_t rightX;
@@ -121,7 +121,7 @@ void MovementComponent::Update(ae::q20_12_t)
     }
     config.height = getGroundHeight(config.characterTranslate.x, config.characterTranslate.z);
 
-    ae::BroadcastEvent(Event::SetCharacterPosition{isCharacterAt()});
+    ae::broadcastEvent(Event::SetCharacterPosition{isCharacterAt()});
 }
 
 void MovementComponent::configureMovement(const MovementConfig& config)
@@ -131,12 +131,12 @@ void MovementComponent::configureMovement(const MovementConfig& config)
 
 void MovementComponent::start()
 {
-    isActive = true;
+    active = true;
 }
 
 void MovementComponent::stop()
 {
-    isActive = false;
+    active = false;
 }
 
 CharacterPosition MovementComponent::isCharacterAt()
@@ -153,7 +153,7 @@ CharacterPosition MovementComponent::isCharacterAt()
 
 TileType MovementComponent::isTileAt()
 {
-    MathManager& math = MathManager::GetInstance();
+    MathManager& math = MathManager::getInstance();
 
     int tileX = (int)(math.div(config.characterTranslate.x + config.worldOffsetX, config.tileSize));
     int tileZ = (int)(math.div(config.characterTranslate.z + config.worldOffsetZ, config.tileSize));
