@@ -1,6 +1,7 @@
 #include "PauseMenu.hpp"
 #include "core/globals.hpp"
 #include "core/logger.hpp"
+#include "systems/ScriptSystem.hpp"
 #include <nds.h>
 #include <string>
 
@@ -274,6 +275,9 @@ ViewState PauseMenu::debugOptionSelected()
         updateCameraOptionName();
         selectedView = ViewState::KEEP_CURRENT;
         break;
+    case DebugOption::SCRIPTING_TEST:
+        ScriptSystem::getInstance().setActive(true);
+
     default:
         selectedView = ViewState::KEEP_CURRENT;
     }

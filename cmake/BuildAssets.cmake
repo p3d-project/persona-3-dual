@@ -336,7 +336,7 @@ if(P3D_RUN_SCRIPTS)
 
             p3d_run(
                 WORKING_DIRECTORY "${out_dir}"
-                COMMAND "${P3D_PAWNCC_EXECUTABLE}" "${pwn}" "-o${out_dir}/${stem}" -O2 "-i${P3D_SOURCE_DIR}/libs/pawn/include" "-i${ASSETS_DIR}/scripts"
+                COMMAND "${P3D_PAWNCC_EXECUTABLE}" "${pwn}" "-o${out_dir}/${stem}" -O2 "-i${P3D_SOURCE_DIR}/libs/pawn/include" "-i${ASSETS_DIR}/scripts" "-i${ASSETS_DIR}/scripts/include"
             )
         endforeach()
     endif()

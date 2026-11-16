@@ -29,6 +29,7 @@ if(EXISTS "${PAWN_ROOT}")
         AMX_NOPROPLIST          # Reduce unnecessary mallocs
         AMX_TOKENTHREADING
         AMX_NO_OVERLAY          # Overlay might not be needed??
+        AMX_NATIVETABLE=nativeFuncs
     )
 
     # Suppress warnings from Pawn source code
