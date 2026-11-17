@@ -37,7 +37,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param letterSpacing Pixels of horizontal space to add after each glyph.
      * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
      * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
-     * @param xBoundary Upper limit of drawing text on the y-axis.
+     * @param xBoundary Right edge (exclusive) used for word wrapping.
      */
     void drawText(const std::string& text,
                   Font* font,
@@ -62,7 +62,10 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param letterSpacing Pixels of horizontal space to add after each glyph.
      * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
      * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
-     * @param xBoundary Upper limit of drawing text on the y-axis.
+     * @param maxX Right edge (exclusive) used for word wrapping.
+     * @param maxY Bottom edge of the text area. When a line would not fit above it, the text pauses until
+     *             appearTextNextPage() is called. 0 disables pagination.
+     * @param hyphenate Enable character-based splitting of overlong words (dialogue only).
      */
     void appearText(std::unique_ptr<Text>& appearingText,
                     const std::string& text,
@@ -74,13 +77,29 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
                     int letterSpacing,
                     int lineSpacing,
                     int spaceWidth,
-                    int xBoundary);
+                    int maxX = 256,
+                    int maxY = 0,
+                    bool hyphenate = false);
 
     /**
      * @brief If a text is currently being rendered with appearText, this function will immediately render the rest of the text without delay.
+     * @note Stops at the end of the current page if the text is paginated.
      * @param appearingText The current apperance of the text
      */
     void appearTextSkip(Text* appearingText);
+
+    /**
+     * @brief Check if the text being rendered with appearText is waiting for the next page.
+     * @param appearingText The current apperance of the text
+     * @return true if the current page is full and more text remains, false otherwise.
+     */
+    bool appearTextPaused(Text* appearingText);
+
+    /**
+     * @brief Clear the text area and continue the paused text from the top of it.
+     * @param appearingText The current apperance of the text
+     */
+    void appearTextNextPage(Text* appearingText);
 
     /**
      * @brief Check if the text being rendered with appearText has finished appearing.
@@ -146,7 +165,8 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param letterSpacing Pixels of horizontal space to add after each glyph.
      * @param lineSpacing Pixels of vertical space to add after each line, on top of the font's line height.
      * @param spaceWidth Pixels of horizontal space a ' ' character takes up.
-     * @param xBoundary Upper limit of drawing text on the y-axis.
+     * @param maxX Right edge (exclusive) used for word wrapping.
+     * @param maxY Bottom edge used for pagination. 0 disables pagination.
      * @return Owning pointer to the newly created Text object.
      */
     std::unique_ptr<Text> createText(const std::string& text,
@@ -158,7 +178,8 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
                                      int letterSpacing,
                                      int lineSpacing,
                                      int spaceWidth,
-                                     int xBoundary);
+                                     int maxX = 256,
+                                     int maxY = 0);
 
     /**
      * @brief Get the next character from a given Text object.
@@ -176,25 +197,6 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @param paletteValue The color index in the palette to use for the pixel.
      */
     void drawPixel(uint16_t* videoBuffer, int x, int y, int paletteValue);
-
-    /**
-     * @brief Get the next word from a given text string.
-     * @param text The text string to extract the next word from.
-     * @return The next word in the text string, or an empty string if there are no more words.
-     */
-    std::string getNextWord(const std::string& text);
-
-    /**
-     * @brief Check if a given text string will exceed a limit on the x-axis when rendered with the specified font.
-     * @param text The text string to check.
-     * @param font Pointer to the font to use for rendering.
-     * @param startX The starting x-coordinate for rendering the text.
-     * @param bold Whether the bitmap is using bold text
-     * @param letterSpacing Pixels of horizontal space to add after each glyph.
-     * @param xBoundary Upper x limit to check against.
-     * @return true if the text will exceed the screen width, false otherwise.
-     */
-    bool checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing, int xBoundary);
 
     /**
      * @brief Underline a specificed area.
