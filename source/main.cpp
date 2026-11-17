@@ -160,6 +160,7 @@ int main(int argc, char* argv[])
     engine.registerSystem(&TextSystem::getInstance());
     engine.registerSystem(&UISystem::getInstance());
     engine.registerSystem(&ScriptSystem::getInstance());
+
     engine.registerManager(&MathManager::getInstance());
     engine.registerManager(&IOManager::getInstance());
     engine.registerManager(&AudioManager::getInstance());

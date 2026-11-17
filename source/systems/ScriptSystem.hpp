@@ -15,6 +15,7 @@
 #include <amxaux.h>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <string>
 
 enum class VmStatus : uint8_t
@@ -36,11 +37,12 @@ class ScriptSystem : public ae::System, public ae::Singleton<ScriptSystem>
     void update(ae::q20_12_t /*dt*/) override;
     void shutdown() override;
 
-    bool loadScript(const std::string& scriptPath);
-    bool reloadScript();
+    // TODO: Should we define our own error types for better type safety?
+    std::expected<void, uint32_t> loadScript(const std::string& scriptPath);
+    std::expected<void, uint32_t> reloadScript();
     void unloadScript();
-    bool runScript();
-    bool resumeScript();
+    std::expected<void, uint32_t> runScript();
+    std::expected<void, uint32_t> resumeScript();
     void stopScript();
     void pauseScript();
 
@@ -71,7 +73,7 @@ class ScriptSystem : public ae::System, public ae::Singleton<ScriptSystem>
 
     [[nodiscard]] bool isRunning() const
     {
-        return status == VmStatus::RUNNING;
+        return status == VmStatus::RUNNING || status == VmStatus::YIELDED;
     }
 
     [[nodiscard]] bool isSleeping() const
@@ -107,7 +109,7 @@ class ScriptSystem : public ae::System, public ae::Singleton<ScriptSystem>
 
     static constexpr size_t MAX_MEMORY_USAGE = 6400 * sizeof(cell);
 
-    VmStatus status = VmStatus::RUNNING;
+    VmStatus status = VmStatus::UNINITIALIZED;
     int lastError;
     std::string currentScript;
 

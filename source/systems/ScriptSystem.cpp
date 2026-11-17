@@ -1,6 +1,10 @@
 #include "ScriptSystem.hpp"
 #include "CameraSystem.hpp"
+#include "amx.h"
 #include "types/CameraTypes.hpp"
+#include <cstdint>
+#include <cstring>
+#include <expected>
 
 #define YIELD amx_RaiseError(amx, AMX_ERR_YIELD)
 #define CONTINUE AMX_ERR_NONE
@@ -37,45 +41,151 @@ AMX_NATIVE nativeFuncs[] = {native_WAIT, native_GET_CAMARA_MODE, native_SET_CAMA
 
 void ScriptSystem::init()
 {
-    memset(&amx, 0, sizeof(amx));
+    unloadScript();
+    std::string scriptPath = "fat:/data/scripts/example_event.amx";
+    if (auto res = loadScript(scriptPath); res.has_value())
+    {
+        runScript();
+        active = true;
+    }
+}
+
+std::expected<void, uint32_t> ScriptSystem::loadScript(const std::string& scriptPath)
+{
+    FileBuffer buffer = io.openFileBuffer(scriptPath);
+    if (!(buffer.get() != nullptr) || buffer.length() < sizeof(AMX_HEADER))
+    {
+        logMessage(LogSeverity::ERROR, "Pawn: Failed to open script or file is too small: " + scriptPath);
+        lastError = (buffer.get() == nullptr) ? AMX_ERR_NOTFOUND : AMX_ERR_FORMAT;
+        status = VmStatus::ERROR;
+        return std::unexpected(lastError);
+    }
+
+    auto* hdr = reinterpret_cast<AMX_HEADER*>(buffer.get());
+
+    if (hdr->magic != AMX_MAGIC || hdr->stp == 0 || hdr->size >= hdr->stp || hdr->size > buffer.length())
+    {
+        logMessage(LogSeverity::ERROR, "Pawn: Invalid script format in: " + scriptPath);
+        lastError = AMX_ERR_FORMAT;
+        status = VmStatus::ERROR;
+        return std::unexpected(AMX_ERR_FORMAT);
+    }
+
+    if (hdr->stp > MAX_MEMORY_USAGE)
+    {
+        logMessage(LogSeverity::ERROR,
+                   "Pawn: Script requires " + std::to_string(hdr->stp) + " bytes, exceeds MAX_MEMORY_USAGE (" +
+                       std::to_string(MAX_MEMORY_USAGE) + "): " + scriptPath);
+        lastError = AMX_ERR_MEMORY;
+        status = VmStatus::ERROR;
+        return std::unexpected(AMX_ERR_MEMORY);
+    }
+
+    if (status != VmStatus::UNINITIALIZED)
+    {
+        unloadScript();
+    }
+
+    std::memcpy(vmMemory.data(), buffer.get(), hdr->size);
+    int result = amx_Init(&amx, &vmMemory);
+
+    if (result != AMX_ERR_NONE)
+    {
+        logMessage(LogSeverity::ERROR,
+                   "Pawn: amx_Init failed for '" + scriptPath + "' with error: " + std::to_string(result));
+
+        lastError = result;
+        status = VmStatus::ERROR;
+        unloadScript();
+
+        return std::unexpected(result);
+    }
+
+    currentScript = scriptPath;
+    status = VmStatus::READY;
+    lastError = AMX_ERR_NONE;
+
+    return {};
+}
+
+void ScriptSystem::unloadScript()
+{
+    if (amx.base != nullptr)
+    {
+        amx_Cleanup(&amx);
+        amx.base = nullptr;
+    }
+
+    std::memset(&amx, 0, sizeof(amx));
     vmMemory.fill(0);
     currentScript.clear();
 
-    std::string scriptPath = "fat:/data/scripts/example_event.amx";
+    status = VmStatus::UNINITIALIZED;
+}
 
-    int err = aux_LoadProgram(&amx, scriptPath.c_str(), vmMemory.data());
-    logMessage(LogSeverity::DEBUG, "aux_LoadProgram result: " + std::to_string(err));
-
-    if (err != AMX_ERR_NONE)
-    {
-        logMessage(LogSeverity::ERROR, "Pawn: Failed to load script: " + scriptPath);
-        return;
-    }
-
+std::expected<void, uint32_t> ScriptSystem::runScript()
+{
     status = VmStatus::RUNNING;
+
     cell ret = 0;
     int execErr = amx_Exec(&amx, &ret, AMX_EXEC_MAIN);
+    switch (execErr)
+    {
+    case AMX_ERR_NONE:
+        status = VmStatus::STOPPED;
+        return {};
+    case AMX_ERR_YIELD:
+        status = VmStatus::YIELDED;
+        return {};
+    case AMX_ERR_SLEEP:
+        status = VmStatus::SLEEPING;
+        return {};
+    default:
+        logMessage(LogSeverity::ERROR, "amx_Exec failed with error: " + std::to_string(execErr));
+        status = VmStatus::ERROR;
+        lastError = execErr;
+        return std::unexpected(execErr);
+    }
+
+    return {};
+}
+
+std::expected<void, uint32_t> ScriptSystem::reloadScript()
+{
+    if (currentScript.empty())
+    {
+        logMessage(LogSeverity::WARNING, "Pawn: No script currently loaded to reload");
+        return std::unexpected(AMX_ERR_INIT);
+    }
+    return loadScript(currentScript);
 }
 
 void ScriptSystem::update(ae::q20_12_t /*dt*/)
 {
-    if (status == VmStatus::STOPPED || status == VmStatus::ERROR)
+    if (!isRunning())
     {
         return;
     }
-    status = VmStatus::RUNNING;
 
     cell ret = 0;
     int execErr = amx_Exec(&amx, &ret, AMX_EXEC_CONT);
 
-    if (execErr == AMX_ERR_YIELD)
+    switch (execErr)
     {
+    case AMX_ERR_YIELD:
         status = VmStatus::YIELDED;
         return;
+    case AMX_ERR_SLEEP:
+        status = VmStatus::SLEEPING;
+        return;
+    default:
+        break;
     }
+
     if (execErr != AMX_ERR_NONE)
     {
         logMessage(LogSeverity::ERROR, "amx_Exec failed with error: " + std::to_string(execErr));
+        lastError = execErr;
         status = VmStatus::ERROR;
         return;
     }
@@ -87,12 +197,7 @@ void ScriptSystem::update(ae::q20_12_t /*dt*/)
 void ScriptSystem::shutdown()
 
 {
-    if (amx.base != nullptr)
-    {
-        amx_Cleanup(&amx);
-        amx.base = nullptr;
-    }
-    memset(&amx, 0, sizeof(amx));
+    unloadScript();
 }
 
 bool ScriptSystem::canScriptFit(const std::string& scriptPath) const
@@ -101,14 +206,11 @@ bool ScriptSystem::canScriptFit(const std::string& scriptPath) const
 
     io.readFile(&hdr, scriptPath);
 
-    amx_Align16(&hdr.magic);
-    amx_Align32(reinterpret_cast<uint32_t*>(&hdr.stp));
-
     size_t required = (hdr.magic == AMX_MAGIC) ? static_cast<size_t>(hdr.stp) : 0;
 
     if (required == 0 || required > MAX_MEMORY_USAGE)
     {
-        logMessage(LogSeverity::ERROR,
+        logMessage(LogSeverity::WARNING,
                    "Script requires " + std::to_string(required) + " bytes, buffer is " +
                        std::to_string(MAX_MEMORY_USAGE));
         return false;
