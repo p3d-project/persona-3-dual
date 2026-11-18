@@ -12,9 +12,10 @@ void ModelAnimatorComponent::Update(ae::q20_12_t /*dt*/)
 
 bool ModelAnimatorComponent::loadAnimations(FILE* f, uint32_t animCount)
 {
+    animations.resize(animCount);
     for (uint32_t i = 0; i < animCount; i++)
     {
-        Animation_N anim = animations[i];
+        Animation_N& anim = animations[i];
 
         if (fread(&anim.name, 1, 32, f) != 32 || fread(&anim.numFrames, sizeof(uint32_t), 1, f) != 1 ||
             fread(&anim.fps, sizeof(int16_t), 1, f) != 1)
@@ -33,7 +34,7 @@ bool ModelAnimatorComponent::loadAnimations(FILE* f, uint32_t animCount)
         anim.tracks.resize(trackCount);
         for (uint32_t t = 0; t < trackCount; t++)
         {
-            NodeTrack track = anim.tracks[t];
+            NodeTrack& track = anim.tracks[t];
             if (fread(&track.nodeIndex, sizeof(int32_t), 1, f) != 1)
             {
                 fclose(f);
@@ -79,10 +80,29 @@ bool ModelAnimatorComponent::loadAnimations(FILE* f, uint32_t animCount)
     return true;
 }
 
+void ModelAnimatorComponent::applyTransformationForNode(int nodeIndex)
+{
+    // Get Keys for Node at current time
+    PositionKey posKey = animations[currentAnimationIndex].tracks[nodeIndex].translations[currentFrame];
+    QuaternionKey rotKey = animations[currentAnimationIndex].tracks[nodeIndex].rotations[currentFrame];
+
+    // Apply Transformation
+    if (posKey.x != 0 || posKey.y != 0 || posKey.z != 0)
+    {
+        render.TranslateMatrix(posKey.x, posKey.y, posKey.z);
+    }
+    if (rotKey.x != 0 || rotKey.y != 0 || rotKey.z != 0 || rotKey.w != 4096)
+    {
+        render.RotateMatrix(rotKey.x, rotKey.y, rotKey.z, rotKey.w);
+    }
+}
+
 const NodeTrack* ModelAnimatorComponent::findNodeTrack(const Animation_N* anim, int32_t nodeIndex) const
 {
     if (!anim)
+    {
         return nullptr;
+    }
     if (nodeIndex >= 0 && static_cast<size_t>(nodeIndex) < anim->tracks.size())
     {
         return &anim->tracks[nodeIndex];

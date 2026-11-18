@@ -3,7 +3,7 @@
 
 void ModelComponent::Update(ae::q20_12_t)
 {
-    drawMesh();
+    drawModel();
 }
 
 void ModelComponent::Destroy()
@@ -112,7 +112,7 @@ bool ModelComponent::loadTexture(FILE* f, MDL3Texture& tex)
     return true;
 }
 
-bool ModelComponent::loadMesh(std::string* meshFilePath)
+bool ModelComponent::loadMesh(std::string* meshFilePath, bool animated)
 {
     if (meshFilePath == nullptr)
     {
@@ -149,11 +149,17 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
     model->nodeCount = rawHeader.nodeCount;
     model->texCount = rawHeader.texCount;
 
-    if (rawHeader.animCount > 0)
+    if (animated && rawHeader.animCount == 0)
     {
         fclose(f);
         model.reset();
-        return false; // Animations not supported for static meshes
+        return false; // Requested animated mesh, but file has no animations
+    }
+    else if (!animated && rawHeader.animCount > 0)
+    {
+        fclose(f);
+        model.reset();
+        return false; // Requested static mesh, but file has animations
     }
 
     // Read Texture Headers
@@ -218,6 +224,17 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
     }
 
     // Skip animation data on static meshes
+    if (animated)
+    {
+        animator = std::make_unique<ModelAnimatorComponent>();
+        if (!animator->loadAnimations(f, rawHeader.animCount))
+        {
+            fclose(f);
+            model.reset();
+            animator.reset();
+            return false;
+        }
+    }
 
     // Textures
     for (uint32_t i = 0; i < model->texCount; ++i)
@@ -231,14 +248,41 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
     }
     fclose(f);
     isActive = true;
+    if (animated)
+    {
+        isAnimated = true;
+    }
     return true;
 }
 
-void ModelComponent::drawMesh()
+void ModelComponent::drawModel()
+{
+    if (isAnimated)
+    {
+        drawModelAnimated();
+    }
+    else
+    {
+        drawModelStatic();
+    }
+}
+
+void ModelComponent::drawModelStatic()
 {
     if (!model)
     {
         return;
     }
     render.renderModelComponent(*model);
+}
+
+void ModelComponent::drawModelAnimated()
+{
+    for (uint32_t nodeIndex = 0; nodeIndex < model->nodes.size(); nodeIndex++)
+    {
+        render.PushMatrix();
+        animator->applyTransformationForNode(nodeIndex);
+        render.RenderModelNode(model->nodes[nodeIndex], model->textures);
+        render.PopMatrix();
+    }
 }

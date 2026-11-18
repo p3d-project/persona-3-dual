@@ -12,6 +12,7 @@
 #include <aegis/component.hpp>
 #include <memory>
 #include <string>
+#include <vector>
 
 class ModelAnimatorComponent : public ae::Component
 {
@@ -38,16 +39,20 @@ class ModelAnimatorComponent : public ae::Component
 
     bool loadAnimations(FILE* file, uint32_t animCount);
 
+    void applyTransformationForNode(int nodeIndex);
+
   protected:
     void SubmitToManager() override
     {
     }
 
   private:
-    etl::vector<Animation_N, 24> animations;
+    std::vector<Animation_N> animations;
 
     const NodeTrack* findNodeTrack(const Animation_N* anim, int32_t nodeIndex) const;
 
-    int currentAnimationIndex = 0;
-    int currentFrame = 0;
+    uint32_t currentAnimationIndex = 0;
+    uint32_t currentFrame = 0;
+
+    RenderManager& render = RenderManager::GetInstance();
 };

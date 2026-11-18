@@ -147,14 +147,13 @@ void RenderManager::renderModelComponent(MDL3Model& model)
     }
 }
 
-void RenderManager::RenderModelNode(const Node& node)
+void RenderManager::RenderModelNode(const Node& node, const std::vector<MDL3Texture>& textures)
 {
     for (const SubList_N& sl : node.subLists)
     {
         // Guard against texture ID's that are out of bounds or corrupted. Use no texture in that case.
-        const int textureID = sl.texSlot >= 0 && static_cast<size_t>(sl.texSlot) < model.textures.size()
-                                  ? model.textures[sl.texSlot].textureID
-                                  : -1;
+        const int textureID =
+            sl.texSlot >= 0 && static_cast<size_t>(sl.texSlot) < textures.size() ? textures[sl.texSlot].textureID : -1;
         renderDisplayList(sl.displayList, textureID);
     }
 }
@@ -192,7 +191,7 @@ void RenderManager::renderModelComponent(MDL3Model& model,
 
     for (const Node& node : model.nodes)
     {
-        RenderModelNode(node);
+        RenderModelNode(node, model.textures);
     }
 
     glPopMatrix(1);

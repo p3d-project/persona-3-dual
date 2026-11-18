@@ -41,14 +41,16 @@ class ModelComponent : public ae::Component
     /**
      * @brief Loads a mesh from a file into memory.
      * @param meshFilePath The path to the mesh file to load.
+     * @param animated Whether the mesh is animated or static. Defaults to false.
      * @return true if the mesh was successfully loaded, false otherwise.
+     * @note If the animated parameter does not match the actual mesh type, the function will return false and not load the mesh.
      */
-    bool loadMesh(std::string* meshFilePath);
+    bool loadMesh(std::string* meshFilePath, bool animated = false);
 
     /**
      * @brief Draws the loaded mesh to the screen.
      */
-    void drawMesh();
+    void drawModel();
 
   protected:
     void SubmitToManager() override
@@ -59,6 +61,7 @@ class ModelComponent : public ae::Component
     std::unique_ptr<MDL3Model> model;
     std::unique_ptr<ModelAnimatorComponent> animator;
 
+    bool isAnimated;
     RenderManager& render = RenderManager::GetInstance();
 
     /**
@@ -77,4 +80,7 @@ class ModelComponent : public ae::Component
      * @note The function allocates a 32-bit aligned buffer for the GPU upload and frees it after use.
      */
     bool loadTexture(FILE* f, MDL3Texture& tex);
+
+    void drawModelStatic();
+    void drawModelAnimated();
 };

@@ -96,7 +96,7 @@ class RenderManager : public ae::Manager, public ae::Singleton<RenderManager>
                               uint32_t rotZ,
                               ae::q20_12_t scale = ae::q20_12_t{1});
 
-    void RenderModelNode(const Node& node);
+    void RenderModelNode(const Node& node, const std::vector<MDL3Texture>& textures);
 
     /**
      * @brief Renders a textured billboard.
