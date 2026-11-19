@@ -1,4 +1,5 @@
 #include <memory>
+#include <print>
 #include <string>
 
 #include "core/logger.hpp"
@@ -7,7 +8,7 @@
 #include <nds.h>
 
 // states
-#include "systems/ScriptSystem.hpp"
+#include "systems/ScriptingSystem.hpp"
 #include "views/BaseView.hpp"
 #include "views/DisclaimerView.hpp"
 #include "views/IntroView.hpp"
@@ -105,10 +106,10 @@ int main(int argc, char* argv[])
     {
         // manual error message, since logger filepath has not been fetched yet
         consoleDemoInit();
-        std::fprintf(stderr,
-                     "FAT initialization failed!\nPlease ensure the data folder or sdcard.img is accessible depending "
-                     "on your platform.");
-        while (1)
+        std::print(stderr,
+                   "FAT initialization failed!\nPlease ensure the data folder or sdcard.img is accessible depending "
+                   "on your platform.");
+        while (true)
         {
             swiWaitForVBlank();
         }
@@ -159,7 +160,7 @@ int main(int argc, char* argv[])
     engine.registerSystem(&SaveSystem::getInstance());
     engine.registerSystem(&TextSystem::getInstance());
     engine.registerSystem(&UISystem::getInstance());
-    engine.registerSystem(&ScriptSystem::getInstance());
+    engine.registerSystem(&ScriptingSystem::getInstance());
 
     engine.registerManager(&MathManager::getInstance());
     engine.registerManager(&IOManager::getInstance());
@@ -182,7 +183,7 @@ int main(int argc, char* argv[])
     // TODO: set to constant tied to VBlank
     const ae::q20_12_t dt = MathManager::getInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
 
-    while (1)
+    while (true)
     {
         swiWaitForVBlank();
 

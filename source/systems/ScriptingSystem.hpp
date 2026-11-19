@@ -1,12 +1,11 @@
 /**
- * @file ScriptSystem.hpp
+ * @file ScriptingSystem.hpp
  * @brief System for loading and running scripts.
  * @author nothing
  */
 
 #pragma once
 
-#include "core/logger.hpp"
 #include "etl/array.h"
 #include "etl/span.h"
 #include "managers/IOManager.hpp"
@@ -30,7 +29,7 @@ enum class VmStatus : uint8_t
     ERROR,
 };
 
-class ScriptSystem : public ae::System, public ae::Singleton<ScriptSystem>
+class ScriptingSystem : public ae::System, public ae::Singleton<ScriptingSystem>
 {
   public:
     void init() override;
@@ -38,9 +37,9 @@ class ScriptSystem : public ae::System, public ae::Singleton<ScriptSystem>
     void shutdown() override;
 
     // TODO: Should we define our own error types for better type safety?
-    std::expected<void, uint32_t> loadScript(const std::string& scriptPath);
+    std::expected<void, uint32_t> loadScript(const std::string&);
     std::expected<void, uint32_t> reloadScript();
-    void unloadScript();
+    void reset();
     std::expected<void, uint32_t> runScript();
     std::expected<void, uint32_t> resumeScript();
     void stopScript();
@@ -86,6 +85,11 @@ class ScriptSystem : public ae::System, public ae::Singleton<ScriptSystem>
         return status == VmStatus::FINISHED;
     }
 
+    [[nodiscard]] bool isResumable() const
+    {
+        return status == VmStatus::SLEEPING || status == VmStatus::STOPPED || status == VmStatus::YIELDED;
+    }
+
     [[nodiscard]] int getLastError() const;
     [[nodiscard]] const char* getLastErrorString() const;
 
@@ -98,25 +102,26 @@ class ScriptSystem : public ae::System, public ae::Singleton<ScriptSystem>
         return MAX_MEMORY_USAGE;
     }
 
-    void setActive(bool status)
+    void setActive(bool isActive)
     {
-        active = status;
+        active = isActive;
     }
 
   private:
-    friend class Singleton<ScriptSystem>;
-    ScriptSystem() = default;
+    friend class Singleton<ScriptingSystem>;
+    ScriptingSystem() = default;
 
     static constexpr size_t MAX_MEMORY_USAGE = 6400 * sizeof(cell);
 
     VmStatus status = VmStatus::UNINITIALIZED;
-    int lastError;
+    uint32_t lastError = AMX_ERR_NONE;
     std::string currentScript;
 
     AMX amx{};
-    alignas(sizeof(cell)) inline static etl::array<uint8_t, MAX_MEMORY_USAGE> vmMemory;
+    alignas(cell) inline static etl::array<uint8_t, MAX_MEMORY_USAGE> vmMemory;
 
     IOManager& io = IOManager::getInstance();
 
-    void setStatus();
+    void setStatus(VmStatus);
+    std::expected<void, uint32_t> execute(int);
 };

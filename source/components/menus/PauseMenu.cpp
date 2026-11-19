@@ -1,7 +1,7 @@
 #include "PauseMenu.hpp"
 #include "core/globals.hpp"
 #include "core/logger.hpp"
-#include "systems/ScriptSystem.hpp"
+#include "systems/ScriptingSystem.hpp"
 #include <nds.h>
 #include <string>
 
@@ -17,10 +17,8 @@ void PauseMenu::create()
 
 void PauseMenu::destroy()
 {
-    if (instance != nullptr)
-    {
-        delete instance;
-    }
+    delete instance;
+
     instance = nullptr;
 }
 
@@ -276,7 +274,7 @@ ViewState PauseMenu::debugOptionSelected()
         selectedView = ViewState::KEEP_CURRENT;
         break;
     case DebugOption::SCRIPTING_TEST:
-        ScriptSystem::getInstance().setActive(true);
+        ScriptingSystem::getInstance().setActive(true);
 
     default:
         selectedView = ViewState::KEEP_CURRENT;
