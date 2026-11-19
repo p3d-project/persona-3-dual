@@ -1,6 +1,15 @@
 set(P3D_NAME "persona-3-dual")
 set(P3D_ROM_PATH "${CMAKE_SOURCE_DIR}/${P3D_NAME}.nds")
 
+if(P3D_USE_CCACHE AND NOT CMAKE_C_COMPILER_LAUNCHER)
+    find_program(CCACHE_PROGRAM ccache)
+    if(CCACHE_PROGRAM)
+        message(STATUS "ccache enabled: ${CCACHE_PROGRAM}")
+        set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+        set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+    endif()
+endif()
+
 if(NOT P3D_BLOCKSDS_ROOT)
     set(P3D_BLOCKSDS_ROOT "/opt/blocksds/core")
 endif()

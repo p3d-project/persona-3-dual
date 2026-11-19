@@ -9,6 +9,7 @@
         {
             "name": "host-debug",
             "displayName": "Host Debug (tests on)",
+            "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/host-debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
@@ -21,6 +22,7 @@
         {
             "name": "host-assets",
             "displayName": "Host Tools (assets + sdcard targets)",
+            "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/host-assets",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
@@ -33,6 +35,7 @@
         {
             "name": "nds-debug",
             "displayName": "NDS Debug",
+            "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/nds-debug",
             "toolchainFile": "${sourceDir}/cmake/toolchains/blocksds-arm9.cmake",
             "cacheVariables": {
@@ -48,6 +51,7 @@
         {
             "name": "nds-debug-sdcard",
             "displayName": "NDS Debug (with sdcard)",
+            "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/nds-debug-sdcard",
             "toolchainFile": "${sourceDir}/cmake/toolchains/blocksds-arm9.cmake",
             "cacheVariables": {
@@ -63,6 +67,7 @@
         {
             "name": "nds-release",
             "displayName": "NDS Release (with sdcard)",
+            "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/nds-release",
             "toolchainFile": "${sourceDir}/cmake/toolchains/blocksds-arm9.cmake",
             "cacheVariables": {
@@ -91,6 +96,7 @@
         {
             "name": "aegis-engine-host-debug",
             "displayName": "Aegis Engine Host Debug",
+            "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/aegis-host-debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
@@ -152,7 +158,7 @@
             "displayName": "Build Aegis Engine Tests",
             "configurePreset": "aegis-engine-host-debug",
             "targets": [
-                "aegis-engine_headers_smoke"
+                "aegis_engine_test"
             ]
         }
     ],
