@@ -26,9 +26,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 # zip / gzip    – packaging release artifacts
 # git-lfs       – large file storage (LFS pointers resolved during CI checkout)
 # ccache        – compiler cache for faster rebuilds (CI manages cache via actions/cache)
+# ninja-build   – fast multi-core build generator
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential=12.10ubuntu1 \
     cmake=3.28.3-1build7 \
+    ninja-build=1.11.1-2 \
     ffmpeg=7:6.1.1-3ubuntu5 \
     mtools=4.0.43-1build1 \
     libblas3=3.12.0-3build1.1 \
