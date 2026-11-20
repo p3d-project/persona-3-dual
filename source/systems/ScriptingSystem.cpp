@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstring>
 #include <expected>
+#include <ranges>
 #include <utility>
 
 #define YIELD amx_RaiseError(amx, AMX_ERR_YIELD)
@@ -219,6 +220,100 @@ bool ScriptingSystem::canScriptFit(const std::string& scriptPath) const
     }
 
     return true;
+}
+
+const cell* ScriptingSystem::getPublicVariableAddress(const std::string& varName) const
+{
+    if (!isLoaded())
+    {
+        return nullptr;
+    }
+    if (varName.empty() || varName.length() > sNAMEMAX)
+    {
+        return nullptr;
+    }
+
+    cell* address = nullptr;
+    if (amx_FindPubVar(const_cast<AMX*>(&amx), varName.c_str(), &address) == AMX_ERR_NONE)
+    {
+        return address;
+    }
+
+    return nullptr;
+}
+
+cell* ScriptingSystem::getPublicVariableAddress(const std::string& varName)
+{
+    return const_cast<cell*>(std::as_const(*this).getPublicVariableAddress(varName));
+}
+
+bool ScriptingSystem::hasPublicVariable(const std::string& varName) const
+{
+    return getPublicVariableAddress(varName) != nullptr;
+}
+
+std::expected<cell, uint> ScriptingSystem::getPublicVariable(const std::string& varName) const
+{
+    const cell* address = getPublicVariableAddress(varName);
+    if (address == nullptr)
+    {
+        return std::unexpected(AMX_ERR_NOTFOUND);
+    }
+
+    return *address;
+}
+
+std::expected<void, u32> ScriptingSystem::setPublicVariable(const std::string& varName, cell value)
+{
+    cell* address = getPublicVariableAddress(varName);
+    if (address == nullptr)
+    {
+        return std::unexpected(AMX_ERR_NOTFOUND);
+    }
+
+    *address = value;
+    return {};
+}
+
+bool ScriptingSystem::hasPublic(const std::string& funcName) const
+{
+    if (!isLoaded() || funcName.empty() || funcName.length() > sNAMEMAX)
+    {
+        return false;
+    }
+
+    int index = 0;
+    return amx_FindPublic(const_cast<AMX*>(&amx), funcName.c_str(), &index) == AMX_ERR_NONE;
+}
+
+std::expected<cell, u32> ScriptingSystem::callPublic(const std::string& funcName, etl::span<const cell> params)
+{
+    if (!isLoaded())
+    {
+        return AMX_ERR_INIT;
+    }
+
+    int index = 0;
+    int err = amx_FindPublic(&amx, funcName.c_str(), &index);
+    if (err != AMX_ERR_NONE)
+    {
+        return err;
+    }
+
+    // Pawn calling convention requires parameters in reverse order
+    for (int param : std::views::reverse(params))
+    {
+        amx_Push(&amx, param);
+    }
+
+    cell result = 0;
+    err = amx_Exec(&amx, &result, index);
+    if (err == AMX_ERR_NONE)
+    {
+        return {result};
+    }
+
+    return std::unexpected(err);
 }
 
 std::expected<void, uint32_t> ScriptingSystem::resumeScript()

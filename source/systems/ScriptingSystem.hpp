@@ -47,14 +47,14 @@ class ScriptingSystem : public ae::System, public ae::Singleton<ScriptingSystem>
 
     [[nodiscard]] bool canScriptFit(const std::string& scriptPath) const;
 
-    [[nodiscard]] bool hasPublic(std::string_view funcName) const;
-    int callPublic(std::string_view funcName);
-    int callPublic(std::string_view funcName, etl::span<const cell> params, cell* retVal = nullptr);
+    [[nodiscard]] bool hasPublic(const std::string& funcName) const;
+    std::expected<cell, u32> callPublic(const std::string& funcName, etl::span<const cell> params);
 
-    [[nodiscard]] bool hasPublicVariable(std::string_view varName) const;
-    bool getPublicVariable(std::string_view varName, cell& outValue) const;
-    bool setPublicVariable(std::string_view varName, cell value);
-    cell* getPublicVariableAddress(std::string_view varName);
+    [[nodiscard]] bool hasPublicVariable(const std::string& varName) const;
+    std::expected<cell, uint> getPublicVariable(const std::string& varName) const;
+    std::expected<void, u32> setPublicVariable(const std::string& varName, cell value);
+    [[nodiscard]] const cell* getPublicVariableAddress(const std::string& varName) const;
+    cell* getPublicVariableAddress(const std::string& varName);
 
     [[nodiscard]] VmStatus getStatus() const
     {
@@ -90,12 +90,46 @@ class ScriptingSystem : public ae::System, public ae::Singleton<ScriptingSystem>
         return status == VmStatus::SLEEPING || status == VmStatus::STOPPED || status == VmStatus::YIELDED;
     }
 
-    [[nodiscard]] int getLastError() const;
-    [[nodiscard]] const char* getLastErrorString() const;
+    [[nodiscard]] uint32_t getLastError() const
+    {
+        return lastError;
+    }
 
-    [[nodiscard]] size_t getMemoryUsage() const;
-    [[nodiscard]] size_t getHeapUsage() const;
-    [[nodiscard]] size_t getStackRemaining() const;
+    [[nodiscard]] const char* getLastErrorString() const
+    {
+        return aux_StrError(static_cast<int>(lastError));
+    }
+
+    [[nodiscard]] size_t getMemoryUsage() const
+    {
+        if (amx.base == nullptr)
+        {
+            return 0;
+        }
+        const auto* hdr = reinterpret_cast<const AMX_HEADER*>(amx.base);
+
+        return static_cast<size_t>(hdr->stp);
+    }
+
+    [[nodiscard]] size_t getHeapUsage() const
+    {
+        if (amx.base == nullptr || amx.hea < amx.hlw)
+        {
+            return 0;
+        }
+
+        return static_cast<size_t>(amx.hea - amx.hlw);
+    }
+
+    [[nodiscard]] size_t getStackRemaining() const
+    {
+        if (amx.base == nullptr || amx.stk <= amx.hea)
+        {
+            return 0;
+        }
+
+        return static_cast<size_t>(amx.stk - amx.hea);
+    }
 
     static constexpr size_t getMaxMemory()
     {
