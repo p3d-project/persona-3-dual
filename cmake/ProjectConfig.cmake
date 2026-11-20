@@ -9,6 +9,7 @@ set(P3D_SPECS_FILE "${P3D_BLOCKSDS_ROOT}/sys/crts/ds_arm9.specs")
 
 set(P3D_ENGINE_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/source
+    ${CMAKE_SOURCE_DIR}/libs/pawn/amx
 )
 
 set(P3D_BLOCKSDS_INCLUDE_DIRS

@@ -9,25 +9,13 @@
 #include "etl/array.h"
 #include "etl/span.h"
 #include "managers/IOManager.hpp"
+#include "types/ScriptTypes.hpp"
 #include <aegis/system.hpp>
 #include <amx.h>
-#include <amxaux.h>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <string>
-
-enum class VmStatus : uint8_t
-{
-    UNINITIALIZED,
-    READY,
-    RUNNING,
-    SLEEPING,
-    YIELDED,
-    STOPPED,
-    FINISHED,
-    ERROR,
-};
 
 class ScriptingSystem : public ae::System, public ae::Singleton<ScriptingSystem>
 {
@@ -36,23 +24,22 @@ class ScriptingSystem : public ae::System, public ae::Singleton<ScriptingSystem>
     void update(ae::q20_12_t /*dt*/) override;
     void shutdown() override;
 
-    // TODO: Should we define our own error types for better type safety?
-    std::expected<void, uint32_t> loadScript(const std::string&);
-    std::expected<void, uint32_t> reloadScript();
+    std::expected<void, ScriptError> loadScript(const std::string&);
+    std::expected<void, ScriptError> reloadScript();
     void reset();
-    std::expected<void, uint32_t> runScript();
-    std::expected<void, uint32_t> resumeScript();
+    std::expected<void, ScriptError> runScript();
+    std::expected<void, ScriptError> resumeScript();
     void stopScript();
     void pauseScript();
 
     [[nodiscard]] bool canScriptFit(const std::string& scriptPath) const;
 
     [[nodiscard]] bool hasPublic(const std::string& funcName) const;
-    std::expected<cell, u32> callPublic(const std::string& funcName, etl::span<const cell> params);
+    std::expected<cell, ScriptError> callPublic(const std::string& funcName, etl::span<const cell> params = {});
 
     [[nodiscard]] bool hasPublicVariable(const std::string& varName) const;
-    std::expected<cell, uint> getPublicVariable(const std::string& varName) const;
-    std::expected<void, u32> setPublicVariable(const std::string& varName, cell value);
+    std::expected<cell, ScriptError> getPublicVariable(const std::string& varName) const;
+    std::expected<void, ScriptError> setPublicVariable(const std::string& varName, cell value);
     [[nodiscard]] const cell* getPublicVariableAddress(const std::string& varName) const;
     cell* getPublicVariableAddress(const std::string& varName);
 
@@ -90,14 +77,14 @@ class ScriptingSystem : public ae::System, public ae::Singleton<ScriptingSystem>
         return status == VmStatus::SLEEPING || status == VmStatus::STOPPED || status == VmStatus::YIELDED;
     }
 
-    [[nodiscard]] uint32_t getLastError() const
+    [[nodiscard]] ScriptError getLastError() const
     {
         return lastError;
     }
 
     [[nodiscard]] const char* getLastErrorString() const
     {
-        return aux_StrError(static_cast<int>(lastError));
+        return toString(lastError);
     }
 
     [[nodiscard]] size_t getMemoryUsage() const
@@ -148,7 +135,7 @@ class ScriptingSystem : public ae::System, public ae::Singleton<ScriptingSystem>
     static constexpr size_t MAX_MEMORY_USAGE = 6400 * sizeof(cell);
 
     VmStatus status = VmStatus::UNINITIALIZED;
-    uint32_t lastError = AMX_ERR_NONE;
+    ScriptError lastError = ScriptError::None;
     std::string currentScript;
 
     AMX amx{};
@@ -157,5 +144,5 @@ class ScriptingSystem : public ae::System, public ae::Singleton<ScriptingSystem>
     IOManager& io = IOManager::getInstance();
 
     void setStatus(VmStatus);
-    std::expected<void, uint32_t> execute(int);
+    std::expected<void, ScriptError> execute(int);
 };

@@ -54,13 +54,21 @@ void ScriptingSystem::init()
     }
 }
 
-std::expected<void, uint32_t> ScriptingSystem::loadScript(const std::string& scriptPath)
+std::expected<void, ScriptError> ScriptingSystem::loadScript(const std::string& scriptPath)
 {
     FileBuffer buffer = io.openFileBuffer(scriptPath);
-    if (buffer.get() == nullptr || buffer.length() < sizeof(AMX_HEADER))
+    if (buffer.get() == nullptr)
     {
-        logMessage(LogSeverity::ERROR, "Pawn: Failed to open script or file is too small: " + scriptPath);
-        lastError = (buffer.get() == nullptr) ? AMX_ERR_NOTFOUND : AMX_ERR_FORMAT;
+        logMessage(LogSeverity::ERROR, "Pawn: Failed to open script: " + scriptPath);
+        lastError = ScriptError::FileNotFound;
+        setStatus(VmStatus::ERROR);
+        return std::unexpected(lastError);
+    }
+
+    if (buffer.length() < sizeof(AMX_HEADER))
+    {
+        logMessage(LogSeverity::ERROR, "Pawn: Script file too small: " + scriptPath);
+        lastError = ScriptError::FileTooSmall;
         setStatus(VmStatus::ERROR);
         return std::unexpected(lastError);
     }
@@ -73,9 +81,9 @@ std::expected<void, uint32_t> ScriptingSystem::loadScript(const std::string& scr
         hdr->size >= hdr->stp || static_cast<size_t>(hdr->size) > buffer.length())
     {
         logMessage(LogSeverity::ERROR, "Pawn: Invalid script format in: " + scriptPath);
-        lastError = AMX_ERR_FORMAT;
+        lastError = ScriptError::InvalidHeader;
         setStatus(VmStatus::ERROR);
-        return std::unexpected(AMX_ERR_FORMAT);
+        return std::unexpected(lastError);
     }
 
     if (std::cmp_greater(hdr->stp, MAX_MEMORY_USAGE))
@@ -83,9 +91,9 @@ std::expected<void, uint32_t> ScriptingSystem::loadScript(const std::string& scr
         logMessage(LogSeverity::ERROR,
                    "Pawn: Script requires " + std::to_string(hdr->stp) + " bytes, exceeds MAX_MEMORY_USAGE (" +
                        std::to_string(MAX_MEMORY_USAGE) + "): " + scriptPath);
-        lastError = AMX_ERR_MEMORY;
+        lastError = ScriptError::ExceedsMaxMemory;
         setStatus(VmStatus::ERROR);
-        return std::unexpected(AMX_ERR_MEMORY);
+        return std::unexpected(lastError);
     }
 
     if (status != VmStatus::UNINITIALIZED)
@@ -98,19 +106,19 @@ std::expected<void, uint32_t> ScriptingSystem::loadScript(const std::string& scr
 
     if (result != AMX_ERR_NONE)
     {
+        lastError = toScriptError(result);
         logMessage(LogSeverity::ERROR,
-                   "Pawn: amx_Init failed for '" + scriptPath + "' with error: " + std::to_string(result));
+                   "Pawn: amx_Init failed for '" + scriptPath + "' with error: " + toString(lastError));
 
         reset();
-        lastError = result;
         setStatus(VmStatus::ERROR);
 
-        return std::unexpected(result);
+        return std::unexpected(lastError);
     }
 
     currentScript = scriptPath;
     setStatus(VmStatus::READY);
-    lastError = AMX_ERR_NONE;
+    lastError = ScriptError::None;
 
     return {};
 }
@@ -131,17 +139,18 @@ void ScriptingSystem::reset()
 }
 
 // TODO: Take a single argument for running a public function based on name
-std::expected<void, uint32_t> ScriptingSystem::runScript()
+std::expected<void, ScriptError> ScriptingSystem::runScript()
 {
     if (!isLoaded())
     {
-        return std::unexpected(AMX_ERR_INIT);
+        lastError = ScriptError::NotLoaded;
+        return std::unexpected(lastError);
     }
 
     return ScriptingSystem::execute(AMX_EXEC_MAIN);
 }
 
-std::expected<void, uint32_t> ScriptingSystem::execute(int execIndex)
+std::expected<void, ScriptError> ScriptingSystem::execute(int execIndex)
 {
     setStatus(VmStatus::RUNNING);
 
@@ -153,27 +162,31 @@ std::expected<void, uint32_t> ScriptingSystem::execute(int execIndex)
     case AMX_ERR_NONE:
         logMessage(LogSeverity::DEBUG, "Pawn: Script execution finished");
         setStatus(VmStatus::FINISHED);
+        lastError = ScriptError::None;
         return {};
     case AMX_ERR_YIELD:
         setStatus(VmStatus::YIELDED);
+        lastError = ScriptError::None;
         return {};
     case AMX_ERR_SLEEP:
         setStatus(VmStatus::SLEEPING);
+        lastError = ScriptError::None;
         return {};
     default:
-        logMessage(LogSeverity::ERROR, "Pawn: amx_Exec failed with error: " + std::to_string(execErr));
-        lastError = static_cast<uint32_t>(execErr);
+        lastError = toScriptError(execErr);
+        logMessage(LogSeverity::ERROR, "Pawn: amx_Exec failed with error: " + std::string(toString(lastError)));
         setStatus(VmStatus::ERROR);
         return std::unexpected(lastError);
     }
 }
 
-std::expected<void, uint32_t> ScriptingSystem::reloadScript()
+std::expected<void, ScriptError> ScriptingSystem::reloadScript()
 {
     if (currentScript.empty())
     {
         logMessage(LogSeverity::WARNING, "Pawn: No script currently loaded to reload");
-        return std::unexpected(AMX_ERR_INIT);
+        lastError = ScriptError::NoScriptToReload;
+        return std::unexpected(lastError);
     }
 
     std::string scriptCopy = currentScript;
@@ -252,23 +265,35 @@ bool ScriptingSystem::hasPublicVariable(const std::string& varName) const
     return getPublicVariableAddress(varName) != nullptr;
 }
 
-std::expected<cell, uint> ScriptingSystem::getPublicVariable(const std::string& varName) const
+std::expected<cell, ScriptError> ScriptingSystem::getPublicVariable(const std::string& varName) const
 {
+    if (!isLoaded())
+    {
+        return std::unexpected(ScriptError::NotLoaded);
+    }
+
     const cell* address = getPublicVariableAddress(varName);
     if (address == nullptr)
     {
-        return std::unexpected(AMX_ERR_NOTFOUND);
+        return std::unexpected(ScriptError::VariableNotFound);
     }
 
     return *address;
 }
 
-std::expected<void, u32> ScriptingSystem::setPublicVariable(const std::string& varName, cell value)
+std::expected<void, ScriptError> ScriptingSystem::setPublicVariable(const std::string& varName, cell value)
 {
+    if (!isLoaded())
+    {
+        lastError = ScriptError::NotLoaded;
+        return std::unexpected(lastError);
+    }
+
     cell* address = getPublicVariableAddress(varName);
     if (address == nullptr)
     {
-        return std::unexpected(AMX_ERR_NOTFOUND);
+        lastError = ScriptError::VariableNotFound;
+        return std::unexpected(lastError);
     }
 
     *address = value;
@@ -286,42 +311,52 @@ bool ScriptingSystem::hasPublic(const std::string& funcName) const
     return amx_FindPublic(const_cast<AMX*>(&amx), funcName.c_str(), &index) == AMX_ERR_NONE;
 }
 
-std::expected<cell, u32> ScriptingSystem::callPublic(const std::string& funcName, etl::span<const cell> params)
+std::expected<cell, ScriptError> ScriptingSystem::callPublic(const std::string& funcName, etl::span<const cell> params)
 {
     if (!isLoaded())
     {
-        return AMX_ERR_INIT;
+        lastError = ScriptError::NotLoaded;
+        return std::unexpected(lastError);
     }
 
     int index = 0;
     int err = amx_FindPublic(&amx, funcName.c_str(), &index);
     if (err != AMX_ERR_NONE)
     {
-        return err;
+        lastError = ScriptError::FunctionNotFound;
+        return std::unexpected(lastError);
     }
 
     // Pawn calling convention requires parameters in reverse order
-    for (int param : std::views::reverse(params))
+    for (cell param : std::views::reverse(params))
     {
-        amx_Push(&amx, param);
+        err = amx_Push(&amx, param);
+        if (err != AMX_ERR_NONE)
+        {
+            lastError = toScriptError(err);
+            return std::unexpected(lastError);
+        }
     }
 
     cell result = 0;
     err = amx_Exec(&amx, &result, index);
     if (err == AMX_ERR_NONE)
     {
+        lastError = ScriptError::None;
         return {result};
     }
 
-    return std::unexpected(err);
+    lastError = toScriptError(err);
+    return std::unexpected(lastError);
 }
 
-std::expected<void, uint32_t> ScriptingSystem::resumeScript()
+std::expected<void, ScriptError> ScriptingSystem::resumeScript()
 {
     if (!isResumable())
     {
         logMessage(LogSeverity::WARNING, "Pawn: Cannot resume script from current state");
-        return std::unexpected(AMX_ERR_INIT);
+        lastError = ScriptError::NotResumable;
+        return std::unexpected(lastError);
     }
 
     return ScriptingSystem::execute(AMX_EXEC_CONT);
