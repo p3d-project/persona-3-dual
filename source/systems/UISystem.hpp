@@ -106,8 +106,9 @@ class UISystem : public ae::SystemRouter<UISystem,
     /**
      * @brief ETL message handler to switch to the specified screen
      *
-     * @details If the screen is already loaded & hidden, it displays screen. If the screen
-     * is not loaded, it loads and displays the screen.
+     * @details The switch is deferred: the screen is stored as pending and applied at the start of
+     * the next UISystem::update, so the VRAM writes happen inside VBlank. If the screen is already
+     * loaded & hidden, it displays screen. If the screen is not loaded, it loads and displays the screen.
      *
      * @note Cannot load the same UIScreen on both sub and main. Cannot load multiple
      * UIScreens on the same physical screen (main or sub)
@@ -194,6 +195,11 @@ class UISystem : public ae::SystemRouter<UISystem,
      */
     void resetUIResources();
 
+    /**
+     * @brief Loads (if needed) and displays the pending screen, then clears it
+     */
+    void applyPendingScreen();
+
     UIManager& ui = UIManager::getInstance();
 
     OamState* oamSub = nullptr;
@@ -220,4 +226,7 @@ class UISystem : public ae::SystemRouter<UISystem,
     SFXComponent* sfxCmpt = nullptr;
 
     bool renderUIText = false;
+
+    /// screen requested by ShowScreen, applied at the start of the next update
+    UIScreen* pendingScreen = nullptr;
 };

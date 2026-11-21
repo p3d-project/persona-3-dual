@@ -234,9 +234,6 @@ void PauseMenuScreen::renderSprites()
 
     // draw background
     renderBackground();
-
-    // draw text
-    renderText();
 }
 
 int PauseMenuScreen::onTouch(touchPosition* touch)

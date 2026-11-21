@@ -18,6 +18,12 @@ void UISystem::init()
 
 void UISystem::update(ae::q20_12_t dt)
 {
+    // apply screen switches at the start of the frame, while still in VBlank
+    if (pendingScreen != nullptr)
+    {
+        applyPendingScreen();
+    }
+
     // skip if nullptr or not active
     if ((activeMenu == nullptr) || !activeMenu->isActive)
     {
@@ -182,6 +188,9 @@ void UISystem::on_receive(const Event::ConfigureUIScreen& config)
     // reset previous config
     cleanupScreens();
 
+    // update() must run to apply pending screens, even in views without menus
+    active = true;
+
     // set background
     oamSub = config.oamSub;
     oamMain = config.oamMain;
@@ -243,15 +252,21 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
         return;
     }
 
-    logMessage(LogSeverity::DEBUG, "ShowScreen event processed");
+    pendingScreen = msg.screen;
+}
+
+void UISystem::applyPendingScreen()
+{
+    UIScreen* screen = pendingScreen;
+    pendingScreen = nullptr;
 
     // check if it is already loaded. If not, load it in
-    if (!msg.screen->isLoaded)
+    if (!screen->isLoaded)
     {
         // add screen if space
-        if (msg.screen->isMain ? (screenMainCount < 2) : (screenSubCount < 3))
+        if (screen->isMain ? (screenMainCount < 2) : (screenSubCount < 3))
         {
-            registerScreen(msg.screen);
+            registerScreen(screen);
         }
         // swap out screens if no space
         else
@@ -259,7 +274,7 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
             UIScreen* oldScreen = nullptr;
 
             // remove the least recently displayed screen
-            if (msg.screen->isMain)
+            if (screen->isMain)
             {
                 int targetBgId = lruBgMain[0];
                 for (int i = 0; i < 2; i++)
@@ -267,7 +282,7 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
                     if ((loadedMain[i] != nullptr) && (loadedMain[i]->bgId == targetBgId))
                     {
                         oldScreen = loadedMain[i];
-                        loadedMain[i] = msg.screen;
+                        loadedMain[i] = screen;
                         break;
                     }
                 }
@@ -280,7 +295,7 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
                     if ((loadedSub[i] != nullptr) && (loadedSub[i]->bgId == targetBgId))
                     {
                         oldScreen = loadedSub[i];
-                        loadedSub[i] = msg.screen;
+                        loadedSub[i] = screen;
                         break;
                     }
                 }
@@ -291,8 +306,8 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
                 oldScreen->unload();
                 oldScreen->isLoaded = false;
 
-                msg.screen->bgId = oldScreen->bgId;
-                msg.screen->oam = oldScreen->oam;
+                screen->bgId = oldScreen->bgId;
+                screen->oam = oldScreen->oam;
                 oldScreen->bgId = -1;
                 oldScreen->oam = nullptr;
             }
@@ -301,8 +316,8 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
                 logMessage(LogSeverity::ERROR, "Failed to find LRU screen to evict");
             }
 
-            msg.screen->load();
-            msg.screen->isLoaded = true;
+            screen->load();
+            screen->isLoaded = true;
         }
     }
 
@@ -310,13 +325,18 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
     hideAllScreens();
 
     /// display sprites on screen
-    msg.screen->renderSprites();
+    screen->renderSprites();
 
     /// display background on screen
-    ui.showBg(msg.screen->bgId);
+    ui.showBg(screen->bgId);
+
+    /// text goes after the background is shown, so it does not extend the time with no background visible
+    screen->renderText();
 
     // update the "least recently updated" index
-    lruUpdate(msg.screen->bgId, msg.screen->isMain);
+    lruUpdate(screen->bgId, screen->isMain);
+
+    logMessage(LogSeverity::DEBUG, "ShowScreen event processed");
 }
 
 void UISystem::on_receive(const Event::HideAllScreens& /*msg*/)
@@ -493,6 +513,9 @@ void UISystem::hideAllScreens()
 
 void UISystem::cleanupScreens()
 {
+    // the pending screen may belong to the view being cleaned up
+    pendingScreen = nullptr;
+
     // reset all bg ids, UIScreens
     // sub
     for (int i = 0; i < 3; i++)

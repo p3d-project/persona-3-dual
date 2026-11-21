@@ -63,7 +63,7 @@ class MenuHUDScreen : public UIScreen
     /**
      * @brief Prints the text to render on screen
      */
-    void renderText();
+    void renderText() override;
 
     ae::Entity* menuHUD = nullptr;
     GraphicsComponent* graphics = nullptr;
