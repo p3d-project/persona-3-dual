@@ -86,6 +86,14 @@ class MathManager : public ae::Manager, public ae::Singleton<MathManager>
     ae::angle16_t radiansToAngle(ae::q20_12_t radians);
 
     /**
+     * @brief Converts an angle in degrees (Q20.12) to a cyclic angle.
+     *
+     * @param degrees Angle in degrees
+     * @return The equivalent cyclic angle
+     */
+    ae::angle16_t degreesToCyclicAngle(ae::q20_12_t degrees);
+
+    /**
      * @brief Converts a cyclic angle to radians (Q20.12).
      *
      * @param angle Cyclic angle (full turn = 1<<15).
