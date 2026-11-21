@@ -168,28 +168,39 @@ ViewState PauseMenu::skillOptionSelected()
     return changeMenu(skills);
 }
 
+ViewState PauseMenu::skillActionSelected()
+{
+    showAlert("Function not avaliable");
+    return ViewState::KEEP_CURRENT;
+}
+
 ViewState PauseMenu::itemOptionSelected()
 {
+    showAlert("Function not avaliable");
     return ViewState::KEEP_CURRENT;
 }
 
 ViewState PauseMenu::equipOptionSelected()
 {
+    showAlert("Function not avaliable");
     return ViewState::KEEP_CURRENT;
 }
 
 ViewState PauseMenu::personaOptionSelected()
 {
+    showAlert("Function not avaliable");
     return ViewState::KEEP_CURRENT;
 }
 
 ViewState PauseMenu::statsOptionSelected()
 {
+    showAlert("Function not avaliable");
     return ViewState::KEEP_CURRENT;
 }
 
 ViewState PauseMenu::sLinkOptionSelected()
 {
+    showAlert("Function not avaliable");
     return ViewState::KEEP_CURRENT;
 }
 
@@ -203,6 +214,7 @@ ViewState PauseMenu::systemOptionSelected()
     }
     default:
     {
+        showAlert("Function not avaliable");
         return ViewState::KEEP_CURRENT;
     }
     }
