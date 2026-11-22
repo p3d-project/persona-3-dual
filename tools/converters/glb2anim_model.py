@@ -5,6 +5,7 @@ import numpy as np
 import pygltflib
 
 from glb_utils import (
+    UNITS_PER_METER,
     get_prop,
     read_accessor_data,
     build_nds_display_list,
@@ -18,7 +19,43 @@ FRAME_RATE = 30.0
 # Mesh Functions
 
 
-def unskin_primitive(gltf, primitive, skin, positions, uvs, colors, indices):
+def compute_node_scales(gltf):
+    """Computes each node's scale accumulated from the root down.
+
+    The MDL3 node chain has no scale, so the scale is baked into the vertex
+    and translation data instead. Non-uniform scales are averaged.
+
+    Args:
+        gltf: The GLTF object.
+    Returns:
+        list: The accumulated uniform scale of each node.
+    """
+    parents = [-1] * len(gltf.nodes)
+    for parent_index, node in enumerate(gltf.nodes):
+        for child in get_prop(node, "children", []) or []:
+            parents[child] = parent_index
+
+    scales = [None] * len(gltf.nodes)
+
+    def accumulated(index):
+        if scales[index] is None:
+            node_scale = get_prop(gltf.nodes[index], "scale", None) or [1.0, 1.0, 1.0]
+            # Relative tolerance, so float32 export noise doesn't warn
+            if max(node_scale) - min(node_scale) > 1e-4 * max(map(abs, node_scale)):
+                print(
+                    f"  WARNING: Node {index} has non-uniform scale {node_scale}; using the average."
+                )
+            own = sum(node_scale) / 3.0
+            parent = parents[index]
+            scales[index] = own * (accumulated(parent) if parent >= 0 else 1.0)
+        return scales[index]
+
+    return [accumulated(i) for i in range(len(gltf.nodes))]
+
+
+def unskin_primitive(
+    gltf, primitive, skin, positions, uvs, colors, indices, node_scales
+):
     """Splits skinned mesh vertices by primary bone and converts them to bone local space.
 
     Args:
@@ -29,6 +66,7 @@ def unskin_primitive(gltf, primitive, skin, positions, uvs, colors, indices):
         uvs (np.ndarray): Vertex UV coordinates.
         colors (np.ndarray): Vertex colors.
         indices (np.ndarray): Triangle indices.
+        node_scales (list): Accumulated scale of each node, from compute_node_scales.
     Returns:
         dict: A dictionary mapping joint node indices to lists of triangles (each triangle is a tuple of vertex positions and UVs).
     """
@@ -84,9 +122,7 @@ def unskin_primitive(gltf, primitive, skin, positions, uvs, colors, indices):
         for v_index in (index0, index1, index2):
             pos = positions[v_index]
             pos_h = np.array([pos[0], pos[1], pos[2], 1.0], dtype=np.float32)
-            local_pos = (ibm @ pos_h)[
-                :3
-            ] * 0.25  # TODO: dynamic scale factor? i just picked this to get a working demo
+            local_pos = (ibm @ pos_h)[:3] * node_scales[target_node] * UNITS_PER_METER
             v_tri.append(local_pos)
             if uvs is not None:
                 uv_tri.append(uvs[v_index])
@@ -115,12 +151,13 @@ def unskin_primitive(gltf, primitive, skin, positions, uvs, colors, indices):
 # Core Functions
 
 
-def parse_mesh_primitives(gltf, textures):
+def parse_mesh_primitives(gltf, textures, node_scales):
     """Parses mesh primitives from the GLTF and constructs display lists for each node.
 
     Args:
         gltf: The GLTF object.
         textures (list): A list of texture data.
+        node_scales (list): Accumulated scale of each node, from compute_node_scales.
     Returns:
         list: A list of sublists for each node, where each sublist contains display list data for the node's primitives.
     """
@@ -195,7 +232,9 @@ def parse_mesh_primitives(gltf, textures):
 
                 # Pass colors to unskin_primitive
                 joint_triangles = (
-                    unskin_primitive(gltf, prim, skin, positions, uvs, colors, indices)
+                    unskin_primitive(
+                        gltf, prim, skin, positions, uvs, colors, indices, node_scales
+                    )
                     if skin
                     else None
                 )
@@ -275,12 +314,13 @@ def construct_nodes(gltf, node_sub_lists):
     return nodes
 
 
-def parse_animations(gltf, node_count):
+def parse_animations(gltf, node_count, parent_scales):
     """Extracts keyframe channels per node for translation, rotation and scaling.
 
     Args:
         gltf: The GLTF object.
         node_count (int): The number of nodes in the GLTF scene.
+        parent_scales (list): Accumulated scale of each node's parent (1.0 for roots).
     Returns:
         list: A list of animation dictionaries, each containing name, number of frames, fps, and tracks (per node keyframe data).
     """
@@ -334,8 +374,9 @@ def parse_animations(gltf, node_count):
                 frame_num = float(t) * FRAME_RATE
 
                 if path == "translation":
-                    # Scale position vectors (meters) by 4096.0 to match base node 4.12 fixed-point units
-                    scaled_val = [float(v) * 4096.0 for v in val]
+                    # Bake the parent's scale and convert meters to 4.12 game units
+                    factor = parent_scales[target_node] * UNITS_PER_METER * 4096.0
+                    scaled_val = [float(v) * factor for v in val]
                     keys.append({"time": frame_num, "val": scaled_val})
                 else:
                     # Rotations (quaternions) MUST remain raw floats in the [-1.0, 1.0] range
@@ -375,14 +416,19 @@ def convert_glb_to_mdla(glb_path: str, output_path: str):
     # Textures table
     textures, images = construct_texture_table(gltf)
 
+    node_scales = compute_node_scales(gltf)
+
     # Parse Mesh Primitives and Unskin if necessary
-    node_sub_lists = parse_mesh_primitives(gltf, textures)
+    node_sub_lists = parse_mesh_primitives(gltf, textures, node_scales)
 
     # Construct binary base nodes
     nodes = construct_nodes(gltf, node_sub_lists)
 
     # Animations
-    animations = parse_animations(gltf, len(nodes))
+    parent_scales = [
+        node_scales[node["pid"]] if node["pid"] >= 0 else 1.0 for node in nodes
+    ]
+    animations = parse_animations(gltf, len(nodes), parent_scales)
 
     write_mdl_file(output_path, nodes, textures, images, animations)
 

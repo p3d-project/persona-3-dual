@@ -7,6 +7,8 @@ import numpy as np
 from PIL import Image
 
 MAX_16_BIT_INT = 32767
+# Game units per glTF meter. Matches the old .obj Makoto (1.75 m -> 0.35 units).
+UNITS_PER_METER = 0.2
 MAGIC = b"MDL3"
 GRIT_PATH = "/opt/wonderful/thirdparty/blocksds/core/tools/grit/grit"
 
@@ -459,9 +461,9 @@ def write_mdl_file(output_path, nodes, textures, images, animations=[]):
                             struct.pack(
                                 "<hiii",
                                 float_to_s16(k["time"]),
-                                int(val[0] * 0.25),
-                                int(val[1] * 0.25),
-                                int(val[2] * 0.25),
+                                int(val[0]),
+                                int(val[1]),
+                                int(val[2]),
                             )
                         )
 

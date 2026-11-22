@@ -4,6 +4,7 @@ import pygltflib
 import numpy as np
 
 from glb_utils import (
+    UNITS_PER_METER,
     get_prop,
     read_accessor_data,
     build_nds_display_list,
@@ -233,7 +234,9 @@ def parse_mesh(gltf, textures):
                 else None
             )
 
-            world_positions = transform_positions(positions, world_matrix) * 160
+            world_positions = (
+                transform_positions(positions, world_matrix) * UNITS_PER_METER
+            )
             tex_slot, uvs = resolve_primitive_material(gltf, primitive)
 
             triangles = extract_primitive_triangles(
