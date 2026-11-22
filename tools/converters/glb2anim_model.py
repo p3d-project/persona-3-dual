@@ -257,9 +257,10 @@ def parse_mesh_primitives(gltf, textures, node_scales):
                         if indices is not None
                         else np.arange(len(positions))
                     )
+                    node_positions = positions * node_scales[index] * UNITS_PER_METER
                     triangles = []
                     for i in range(0, len(flat_indices), 3):
-                        v_tri = [positions[flat_indices[i + j]] for j in range(3)]
+                        v_tri = [node_positions[flat_indices[i + j]] for j in range(3)]
                         uv_tri = (
                             [uvs[flat_indices[i + j]] for j in range(3)]
                             if uvs is not None
