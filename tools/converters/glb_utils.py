@@ -135,6 +135,7 @@ def build_nds_display_list(triangles, tex_w, tex_h):
         list: A list of 32-bit integers representing the NDS display list commands and data.
     """
     dl_words = []
+    clamped = 0
 
     # Command: BEGIN & GL_TRIANGLES
     dl_words.append(FIFO_BEGIN)
@@ -152,6 +153,9 @@ def build_nds_display_list(triangles, tex_w, tex_h):
                 dl_words.append(pack_uv_t16(u, v, tex_w, tex_h))
 
             vx, vy, vz = v_tri[j]
+            clamped += sum(
+                abs(round(c * 4096.0)) > MAX_16_BIT_INT for c in (vx, vy, vz)
+            )
             v16_x = float_to_v16(vx) & 0xFFFF
             v16_y = float_to_v16(vy) & 0xFFFF
             v16_z = float_to_v16(vz) & 0xFFFF
@@ -162,6 +166,11 @@ def build_nds_display_list(triangles, tex_w, tex_h):
 
     # Command: END
     dl_words.append(FIFO_END)
+
+    if clamped > 0:
+        print(
+            f"  WARNING: Clamped {clamped} vertex coordinates outside the v16 range (±8.0)!"
+        )
     return dl_words
 
 
