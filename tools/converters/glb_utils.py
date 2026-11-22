@@ -390,7 +390,7 @@ def construct_texture_table(gltf):
     return textures, images
 
 
-def write_mdl_file(output_path, nodes, textures, images, animations=[]):
+def write_mdl_file(output_path, nodes, textures, images, animations=[], *, scale):
     """Write extracted data to binary MDL3 file.
 
     Args:
@@ -399,11 +399,19 @@ def write_mdl_file(output_path, nodes, textures, images, animations=[]):
         textures (list): List of texture dictionaries containing name, width, height, and RGBA flag.
         images (list): Images dictionaries containing name, byte length, and binary data.
         animations (list): List of animation dictionaries containing name, number of frames, fps, and tracks.
+        scale (float): Scale the game applies to the model to restore its size, stored as q20.12.
     """
     with open(output_path, "wb") as f:
-        # Header: 'MDL3' | u32 nodeCount | u32 animCount | u32 texCount
+        # Header: 'MDL3' | u32 nodeCount | u32 animCount | u32 texCount | s32 scale (q20.12)
         f.write(
-            struct.pack("<4sIII", MAGIC, len(nodes), len(animations), len(textures))
+            struct.pack(
+                "<4sIIIi",
+                MAGIC,
+                len(nodes),
+                len(animations),
+                len(textures),
+                int(round(scale * 4096.0)),
+            )
         )
 
         # Tex Table

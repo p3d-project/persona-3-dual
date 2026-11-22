@@ -5,6 +5,7 @@ import numpy as np
 import pygltflib
 
 from glb_utils import (
+    MAX_16_BIT_INT,
     UNITS_PER_METER,
     get_prop,
     read_accessor_data,
@@ -159,12 +160,15 @@ def parse_mesh_primitives(gltf, textures, node_scales):
         textures (list): A list of texture data.
         node_scales (list): Accumulated scale of each node, from compute_node_scales.
     Returns:
-        list: A list of sublists for each node, where each sublist contains display list data for the node's primitives.
+        tuple: The sublists for each node (display list data for the node's primitives),
+            and the factor the model was shrunk by so it fits v16 (1.0 if it already fits).
     """
     gltf_textures = get_prop(gltf, "textures", []) or []
     tex_count = len(textures)
 
     node_sub_lists = [[] for _ in range(len(gltf.nodes))]
+    # (node index, tex slot, triangles, tex w, tex h), built once the factor is known
+    pending = []
     for index, node in enumerate(gltf.nodes):
         mesh_id = get_prop(node, "mesh", None)
         skin_id = get_prop(node, "skin", None)
@@ -243,15 +247,10 @@ def parse_mesh_primitives(gltf, textures, node_scales):
                     for joint_node_index, triangles in joint_triangles.items():
                         if not triangles:
                             continue
-                        dl_words = build_nds_display_list(triangles, tex_w, tex_h)
-                        node_sub_lists[joint_node_index].append(
-                            {
-                                "texSlot": tex_slot,
-                                "dlSize": len(dl_words),
-                                "dlWords": dl_words,
-                            }
+                        pending.append(
+                            (joint_node_index, tex_slot, triangles, tex_w, tex_h)
                         )
-                else:  # Rigid primitive; build display list directly for this node
+                else:  # Rigid primitive; its triangles belong to this node
                     flat_indices = (
                         indices.flatten()
                         if indices is not None
@@ -273,15 +272,34 @@ def parse_mesh_primitives(gltf, textures, node_scales):
                         )
                         triangles.append((v_tri, uv_tri, col_tri))
 
-                    dl_words = build_nds_display_list(triangles, tex_w, tex_h)
-                    node_sub_lists[index].append(
-                        {
-                            "texSlot": tex_slot,
-                            "dlSize": len(dl_words),
-                            "dlWords": dl_words,
-                        }
-                    )
-    return node_sub_lists
+                    pending.append((index, tex_slot, triangles, tex_w, tex_h))
+
+    # Shrink the whole model only if some coordinate would overflow v16
+    max_coord = max(
+        (
+            float(np.max(np.abs(v)))
+            for _, _, triangles, _, _ in pending
+            for v_tri, _, _ in triangles
+            for v in v_tri
+        ),
+        default=0.0,
+    )
+    factor = min(1.0, MAX_16_BIT_INT / (4096.0 * max_coord)) if max_coord else 1.0
+
+    for node_index, tex_slot, triangles, tex_w, tex_h in pending:
+        scaled = [
+            ([v * factor for v in v_tri], uv_tri, col_tri)
+            for v_tri, uv_tri, col_tri in triangles
+        ]
+        dl_words = build_nds_display_list(scaled, tex_w, tex_h)
+        node_sub_lists[node_index].append(
+            {
+                "texSlot": tex_slot,
+                "dlSize": len(dl_words),
+                "dlWords": dl_words,
+            }
+        )
+    return node_sub_lists, factor
 
 
 def construct_nodes(gltf, node_sub_lists):
@@ -315,13 +333,14 @@ def construct_nodes(gltf, node_sub_lists):
     return nodes
 
 
-def parse_animations(gltf, node_count, parent_scales):
+def parse_animations(gltf, node_count, parent_scales, factor):
     """Extracts keyframe channels per node for translation, rotation and scaling.
 
     Args:
         gltf: The GLTF object.
         node_count (int): The number of nodes in the GLTF scene.
         parent_scales (list): Accumulated scale of each node's parent (1.0 for roots).
+        factor (float): The factor the mesh was shrunk by, from parse_mesh_primitives.
     Returns:
         list: A list of animation dictionaries, each containing name, number of frames, fps, and tracks (per node keyframe data).
     """
@@ -376,8 +395,10 @@ def parse_animations(gltf, node_count, parent_scales):
 
                 if path == "translation":
                     # Bake the parent's scale and convert meters to 4.12 game units
-                    factor = parent_scales[target_node] * UNITS_PER_METER * 4096.0
-                    scaled_val = [float(v) * factor for v in val]
+                    to_units = (
+                        parent_scales[target_node] * UNITS_PER_METER * factor * 4096.0
+                    )
+                    scaled_val = [float(v) * to_units for v in val]
                     keys.append({"time": frame_num, "val": scaled_val})
                 else:
                     # Rotations (quaternions) MUST remain raw floats in the [-1.0, 1.0] range
@@ -420,7 +441,7 @@ def convert_glb_to_mdla(glb_path: str, output_path: str):
     node_scales = compute_node_scales(gltf)
 
     # Parse Mesh Primitives and Unskin if necessary
-    node_sub_lists = parse_mesh_primitives(gltf, textures, node_scales)
+    node_sub_lists, factor = parse_mesh_primitives(gltf, textures, node_scales)
 
     # Construct binary base nodes
     nodes = construct_nodes(gltf, node_sub_lists)
@@ -429,9 +450,10 @@ def convert_glb_to_mdla(glb_path: str, output_path: str):
     parent_scales = [
         node_scales[node["pid"]] if node["pid"] >= 0 else 1.0 for node in nodes
     ]
-    animations = parse_animations(gltf, len(nodes), parent_scales)
+    animations = parse_animations(gltf, len(nodes), parent_scales, factor)
 
-    write_mdl_file(output_path, nodes, textures, images, animations)
+    # The game multiplies by this to undo the shrink factor
+    write_mdl_file(output_path, nodes, textures, images, animations, scale=1.0 / factor)
 
 
 if __name__ == "__main__":
