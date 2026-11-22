@@ -148,6 +148,7 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
 
     model->nodeCount = rawHeader.nodeCount;
     model->texCount = rawHeader.texCount;
+    model->scale = ae::q20_12_t::from_raw_value(rawHeader.scale);
 
     if (rawHeader.animCount > 0)
     {
@@ -240,5 +241,5 @@ void ModelComponent::drawMesh()
     {
         return;
     }
-    render.renderModelComponent(*model);
+    render.renderModelComponent(*model, ae::q20_12_t{0}, ae::q20_12_t{0}, ae::q20_12_t{0}, 0, 0, 0, model->scale);
 }

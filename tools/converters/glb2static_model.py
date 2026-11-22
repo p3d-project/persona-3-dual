@@ -4,6 +4,8 @@ import pygltflib
 import numpy as np
 
 from glb_utils import (
+    MAX_16_BIT_INT,
+    UNITS_PER_METER,
     get_prop,
     read_accessor_data,
     build_nds_display_list,
@@ -200,7 +202,8 @@ def parse_mesh(gltf, textures):
         gltf: The glTF object.
         textures: List of texture information.
     Returns:
-        A list of display lists for the mesh."""
+        A list of display lists for the mesh, and the factor the model was shrunk by
+        so it fits v16 (1.0 if it already fits)."""
     global_matrices = compute_global_matrices(gltf)
     tex_batches = {}
 
@@ -233,7 +236,9 @@ def parse_mesh(gltf, textures):
                 else None
             )
 
-            world_positions = transform_positions(positions, world_matrix) * 160
+            world_positions = (
+                transform_positions(positions, world_matrix) * UNITS_PER_METER
+            )
             tex_slot, uvs = resolve_primitive_material(gltf, primitive)
 
             triangles = extract_primitive_triangles(
@@ -241,13 +246,29 @@ def parse_mesh(gltf, textures):
             )
             tex_batches.setdefault(tex_slot, []).extend(triangles)
 
+    # Shrink the whole model only if some coordinate would overflow v16
+    max_coord = max(
+        (
+            float(np.max(np.abs(v)))
+            for triangles in tex_batches.values()
+            for v_tri, _, _ in triangles
+            for v in v_tri
+        ),
+        default=0.0,
+    )
+    factor = min(1.0, MAX_16_BIT_INT / (4096.0 * max_coord)) if max_coord else 1.0
+
     # Build display lists for each texture batch
     sub_lists = []
     for tex_slot, triangles in tex_batches.items():
         tex_w = textures[tex_slot]["w"] if 0 <= tex_slot < len(textures) else 128
         tex_h = textures[tex_slot]["h"] if 0 <= tex_slot < len(textures) else 128
 
-        dl_words = build_nds_display_list(triangles, tex_w, tex_h)
+        scaled = [
+            ([v * factor for v in v_tri], uv_tri, col_tri)
+            for v_tri, uv_tri, col_tri in triangles
+        ]
+        dl_words = build_nds_display_list(scaled, tex_w, tex_h)
         sub_lists.append(
             {"texSlot": tex_slot, "dlSize": len(dl_words), "dlWords": dl_words}
         )
@@ -258,7 +279,7 @@ def parse_mesh(gltf, textures):
             "subListCount": len(sub_lists),
             "subLists": sub_lists,
         }
-    ]
+    ], factor
 
 
 def convert_glb_to_mdls(input_glb: str, output_path: str):
@@ -275,10 +296,11 @@ def convert_glb_to_mdls(input_glb: str, output_path: str):
     textures, images = construct_texture_table(gltf)
 
     # Parse Mesh hierarchy and construct display list
-    nodes = parse_mesh(gltf, textures)
+    nodes, factor = parse_mesh(gltf, textures)
 
     # Write to the MDL3 file
-    write_mdl_file(output_path, nodes, textures, images)
+    # The game multiplies by this to undo the shrink factor
+    write_mdl_file(output_path, nodes, textures, images, scale=1.0 / factor)
 
 
 if __name__ == "__main__":

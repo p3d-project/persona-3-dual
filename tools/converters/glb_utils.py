@@ -7,6 +7,8 @@ import numpy as np
 from PIL import Image
 
 MAX_16_BIT_INT = 32767
+# Game units per glTF meter. Matches the old .obj Makoto (1.75 m -> 0.35 units).
+UNITS_PER_METER = 0.2
 MAGIC = b"MDL3"
 GRIT_PATH = "/opt/wonderful/thirdparty/blocksds/core/tools/grit/grit"
 
@@ -135,6 +137,7 @@ def build_nds_display_list(triangles, tex_w, tex_h):
         list: A list of 32-bit integers representing the NDS display list commands and data.
     """
     dl_words = []
+    clamped = 0
 
     # Command: BEGIN & GL_TRIANGLES
     dl_words.append(FIFO_BEGIN)
@@ -152,6 +155,9 @@ def build_nds_display_list(triangles, tex_w, tex_h):
                 dl_words.append(pack_uv_t16(u, v, tex_w, tex_h))
 
             vx, vy, vz = v_tri[j]
+            clamped += sum(
+                abs(round(c * 4096.0)) > MAX_16_BIT_INT for c in (vx, vy, vz)
+            )
             v16_x = float_to_v16(vx) & 0xFFFF
             v16_y = float_to_v16(vy) & 0xFFFF
             v16_z = float_to_v16(vz) & 0xFFFF
@@ -162,6 +168,11 @@ def build_nds_display_list(triangles, tex_w, tex_h):
 
     # Command: END
     dl_words.append(FIFO_END)
+
+    if clamped > 0:
+        print(
+            f"  WARNING: Clamped {clamped} vertex coordinates outside the v16 range (±8.0)!"
+        )
     return dl_words
 
 
@@ -379,7 +390,7 @@ def construct_texture_table(gltf):
     return textures, images
 
 
-def write_mdl_file(output_path, nodes, textures, images, animations=[]):
+def write_mdl_file(output_path, nodes, textures, images, animations=[], *, scale):
     """Write extracted data to binary MDL3 file.
 
     Args:
@@ -388,11 +399,19 @@ def write_mdl_file(output_path, nodes, textures, images, animations=[]):
         textures (list): List of texture dictionaries containing name, width, height, and RGBA flag.
         images (list): Images dictionaries containing name, byte length, and binary data.
         animations (list): List of animation dictionaries containing name, number of frames, fps, and tracks.
+        scale (float): Scale the game applies to the model to restore its size, stored as q20.12.
     """
     with open(output_path, "wb") as f:
-        # Header: 'MDL3' | u32 nodeCount | u32 animCount | u32 texCount
+        # Header: 'MDL3' | u32 nodeCount | u32 animCount | u32 texCount | s32 scale (q20.12)
         f.write(
-            struct.pack("<4sIII", MAGIC, len(nodes), len(animations), len(textures))
+            struct.pack(
+                "<4sIIIi",
+                MAGIC,
+                len(nodes),
+                len(animations),
+                len(textures),
+                int(round(scale * 4096.0)),
+            )
         )
 
         # Tex Table
@@ -450,9 +469,9 @@ def write_mdl_file(output_path, nodes, textures, images, animations=[]):
                             struct.pack(
                                 "<hiii",
                                 float_to_s16(k["time"]),
-                                int(val[0] * 0.25),
-                                int(val[1] * 0.25),
-                                int(val[2] * 0.25),
+                                int(val[0]),
+                                int(val[1]),
+                                int(val[2]),
                             )
                         )
 
