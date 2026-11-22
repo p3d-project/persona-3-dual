@@ -1,5 +1,6 @@
 #pragma once
 
+#include <aegis/types.hpp>
 #include <etl/vector.h>
 #include <nds.h>
 
@@ -85,6 +86,7 @@ struct MDL3Model
 {
     uint32_t nodeCount = 0;
     uint32_t texCount = 0;
+    ae::q20_12_t scale{1}; ///< Scale that restores the size the converter shrank the model from.
     etl::vector<MDL3Texture, 8> textures;
     etl::vector<Node, 64> nodes;
 
@@ -116,7 +118,11 @@ struct RawModelHeader
     uint32_t nodeCount = 0;
     uint32_t animCount = 0;
     uint32_t texCount = 0;
+    int32_t scale = 0; ///< Raw q20.12 scale that restores the model's size.
 };
+
+/// Must match the header packed by write_mdl_file in tools/converters/glb_utils.py.
+static_assert(sizeof(RawModelHeader) == 20, "RawModelHeader must match the MDL3 header written by the converters");
 
 /**
  * @brief Represents the header of a raw node file.
