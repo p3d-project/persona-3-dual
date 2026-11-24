@@ -8,8 +8,14 @@
 #include <ranges>
 #include <utility>
 
-#define YIELD amx_RaiseError(amx, AMX_ERR_YIELD)
-#define CONTINUE AMX_ERR_NONE
+/// Helper to raise an AMX yield error to pause script execution until the next frame.
+[[nodiscard]] inline cell yield(AMX* amx) noexcept
+{
+    return amx_RaiseError(amx, AMX_ERR_YIELD);
+}
+
+/// Helper denoting successful native function execution without yielding.
+inline constexpr cell Continue = AMX_ERR_NONE;
 
 static cell AMX_NATIVE_CALL native_WAIT(AMX* amx, const cell params[])
 {
@@ -19,11 +25,11 @@ static cell AMX_NATIVE_CALL native_WAIT(AMX* amx, const cell params[])
     if (waitCounter < waitingFrames)
     {
         waitCounter++;
-        return YIELD;
+        return yield(amx);
     }
 
     waitCounter = 0;
-    return CONTINUE;
+    return Continue;
 }
 
 static cell AMX_NATIVE_CALL native_GET_CAMERA_MODE(AMX* amx, const cell params[])
@@ -36,7 +42,7 @@ static cell AMX_NATIVE_CALL native_SET_CAMERA_MODE(AMX* amx, const cell params[]
     CameraMode mode = static_cast<CameraMode>(params[1]);
     logMessage(LogSeverity::DEBUG, "Setting camara to: " + std::to_string(params[1]));
     ae::broadcastEvent(Event::SetCameraMode{mode});
-    return CONTINUE;
+    return Continue;
 }
 
 AMX_NATIVE nativeFuncs[] = {native_WAIT, native_GET_CAMERA_MODE, native_SET_CAMERA_MODE};
@@ -300,7 +306,7 @@ std::expected<void, ScriptError> ScriptingSystem::setPublicVariable(const std::s
     return {};
 }
 
-bool ScriptingSystem::hasPublic(const std::string& funcName) const
+bool ScriptingSystem::hasPublicFunction(const std::string& funcName) const
 {
     if (!isLoaded() || funcName.empty() || funcName.length() > sNAMEMAX)
     {
