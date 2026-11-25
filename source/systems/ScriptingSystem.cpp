@@ -5,11 +5,12 @@
 #include <cstdint>
 #include <cstring>
 #include <expected>
+#include <format>
 #include <ranges>
 #include <utility>
 
 /// Helper to raise an AMX yield error to pause script execution until the next frame.
-[[nodiscard]] inline cell yield(AMX* amx) noexcept
+[[nodiscard]] inline cell yield(AMX* amx)
 {
     return amx_RaiseError(amx, AMX_ERR_YIELD);
 }
@@ -83,7 +84,7 @@ std::expected<void, ScriptError> ScriptingSystem::loadScript(const std::string& 
     // FIXME: Make sure that is true or not
     auto* hdr = reinterpret_cast<AMX_HEADER*>(buffer.get());
 
-    if (hdr->magic != AMX_MAGIC || hdr->stp == 0 || hdr->size < static_cast<uint32_t>(sizeof(AMX_HEADER)) ||
+    if (hdr->magic != AMX_MAGIC || hdr->stp == 0 || hdr->size < static_cast<int32_t>(sizeof(AMX_HEADER)) ||
         hdr->size >= hdr->stp || static_cast<size_t>(hdr->size) > buffer.length())
     {
         logMessage(LogSeverity::ERROR, "Pawn: Invalid script format in: " + scriptPath);
@@ -114,7 +115,7 @@ std::expected<void, ScriptError> ScriptingSystem::loadScript(const std::string& 
     {
         lastError = toScriptError(result);
         logMessage(LogSeverity::ERROR,
-                   "Pawn: amx_Init failed for '" + scriptPath + "' with error: " + toString(lastError));
+                   std::format("Pawn: amx_Init failed for '{}' with error: {}", scriptPath, toString(lastError)));
 
         reset();
         setStatus(VmStatus::ERROR);
@@ -144,7 +145,9 @@ void ScriptingSystem::reset()
     setStatus(VmStatus::UNINITIALIZED);
 }
 
-// TODO: Take a single argument for running a public function based on name
+// TODO: Take a single argument for running a public function based on name?
+// FIXME: We can't get the return value of a Main function if they return anything...?
+// How are we gonna do this with our pretty async lifestyle...?
 std::expected<void, ScriptError> ScriptingSystem::runScript()
 {
     if (!isLoaded())
@@ -180,7 +183,7 @@ std::expected<void, ScriptError> ScriptingSystem::execute(int execIndex)
         return {};
     default:
         lastError = toScriptError(execErr);
-        logMessage(LogSeverity::ERROR, "Pawn: amx_Exec failed with error: " + std::string(toString(lastError)));
+        logMessage(LogSeverity::ERROR, std::format("Pawn: amx_Exec failed with error: {0}", toString(lastError)));
         setStatus(VmStatus::ERROR);
         return std::unexpected(lastError);
     }

@@ -6,9 +6,9 @@
 
 #pragma once
 
+#include "etl/string_view.h"
 #include <amx.h>
 #include <cstdint>
-#include <string_view>
 
 /**
  * @brief Execution status of the Pawn virtual machine.
@@ -82,7 +82,7 @@ enum class ScriptError : uint8_t
  * @param err The script error to check.
  * @return true if the error code is 100 or greater (Pawn VM interpreter error), false otherwise.
  */
-[[nodiscard]] constexpr bool isVmError(ScriptError err) noexcept
+[[nodiscard]] constexpr bool isVmError(ScriptError err)
 {
     return static_cast<uint8_t>(err) >= 100;
 }
@@ -93,7 +93,7 @@ enum class ScriptError : uint8_t
  * @param amxErr Raw error code from the Pawn AMX runtime (e.g. AMX_ERR_*).
  * @return Corresponding @ref ScriptError enum value.
  */
-[[nodiscard]] constexpr ScriptError toScriptError(int amxErr) noexcept
+[[nodiscard]] constexpr ScriptError toScriptError(int amxErr)
 {
     switch (amxErr)
     {
@@ -164,7 +164,7 @@ enum class ScriptError : uint8_t
  * @param err The script error to convert.
  * @return String view containing a human-readable description of the error.
  */
-[[nodiscard]] constexpr std::string_view toString(ScriptError err) noexcept
+[[nodiscard]] constexpr etl::string_view toString(ScriptError err) noexcept
 {
     using enum ScriptError;
     switch (err)

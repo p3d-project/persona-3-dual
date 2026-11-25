@@ -8,6 +8,8 @@
 
 #include "etl/array.h"
 #include "etl/span.h"
+#include "etl/string_view.h"
+
 #include "managers/IOManager.hpp"
 #include "types/ScriptTypes.hpp"
 #include <aegis/system.hpp>
@@ -258,7 +260,7 @@ class ScriptingSystem : public ae::System, public ae::Singleton<ScriptingSystem>
      *
      * @return String view describing the error.
      */
-    [[nodiscard]] std::string_view getLastErrorString() const
+    [[nodiscard]] etl::string_view getLastErrorString() const
     {
         return toString(lastError);
     }
