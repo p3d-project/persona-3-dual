@@ -127,4 +127,24 @@ struct RawNodeHeader
     int32_t pid = -1;
     uint32_t subListCount = 0;
 };
+
+/**
+ * @brief Represent the data for a translation keyframe in an animation track.
+ * @note This struct is to be used for reading translation keyframes from a file.
+ */
+struct RawTrackTranslationData
+{
+    int16_t frame;
+    int32_t x, y, z;
+};
+
+/**
+ * @brief Represent the data for a rotation keyframe in an animation track.
+ * @note This struct is to be used for reading rotation keyframes from a file.
+ */
+struct RawTrackRotationData
+{
+    int16_t frame;
+    int16_t x, y, z, w;
+};
 #pragma pack(pop)

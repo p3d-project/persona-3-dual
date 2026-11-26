@@ -51,11 +51,14 @@ bool ModelAnimatorComponent::loadAnimations(FILE* f, uint32_t animCount)
             track.translations.resize(posKeyCount);
             for (uint32_t k = 0; k < posKeyCount; k++)
             {
-                // TODO: fread error handling? considering this is roundabout where the old version crashes
-                fread(&track.translations[k].frame, sizeof(int16_t), 1, f);
-                fread(&track.translations[k].x, sizeof(int32_t), 1, f);
-                fread(&track.translations[k].y, sizeof(int32_t), 1, f);
-                fread(&track.translations[k].z, sizeof(int32_t), 1, f);
+                if (fread(&track.translations[k], sizeof(RawTrackTranslationData), 1, f) != 1)
+                {
+                    return false;
+                }
+                track.translations[k].frame = track.translations[k].frame;
+                track.translations[k].x = track.translations[k].x;
+                track.translations[k].y = track.translations[k].y;
+                track.translations[k].z = track.translations[k].z;
             }
 
             uint32_t rotKeyCount = 0;
@@ -68,12 +71,16 @@ bool ModelAnimatorComponent::loadAnimations(FILE* f, uint32_t animCount)
             track.rotations.resize(rotKeyCount);
             for (uint32_t k = 0; k < rotKeyCount; k++)
             {
-                // TODO: fread error handling? considering this is roundabout where the old version crashes
-                fread(&track.rotations[k].frame, sizeof(int16_t), 1, f);
-                fread(&track.rotations[k].x, sizeof(int16_t), 1, f);
-                fread(&track.rotations[k].y, sizeof(int16_t), 1, f);
-                fread(&track.rotations[k].z, sizeof(int16_t), 1, f);
-                fread(&track.rotations[k].w, sizeof(int16_t), 1, f);
+                RawTrackRotationData rawRot;
+                if (fread(&rawRot, sizeof(RawTrackRotationData), 1, f) != 1)
+                {
+                    return false;
+                }
+                track.rotations[k].frame = rawRot.frame;
+                track.rotations[k].x = rawRot.x;
+                track.rotations[k].y = rawRot.y;
+                track.rotations[k].z = rawRot.z;
+                track.rotations[k].w = rawRot.w;
             }
         }
     }
