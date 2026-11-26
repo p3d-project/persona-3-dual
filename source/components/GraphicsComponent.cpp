@@ -3,7 +3,7 @@
 #include "core/logger.hpp"
 #include "data/spriteDb.hpp"
 
-void GraphicsComponent::Destroy()
+void GraphicsComponent::destroy()
 {
     unloadAll();
 }

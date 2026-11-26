@@ -14,7 +14,7 @@ void Timer::start(ae::q20_12_t durationSeconds)
     running = true;
 }
 
-bool Timer::isFinished()
+bool Timer::isFinished() const
 {
     if (!running)
     {
@@ -43,5 +43,5 @@ ae::q20_12_t Timer::getProgress()
     {
         return ae::q20_12_t{1};
     }
-    return MathManager::GetInstance().div(getElapsed(), duration);
+    return MathManager::getInstance().div(getElapsed(), duration);
 }

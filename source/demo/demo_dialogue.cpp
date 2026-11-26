@@ -25,6 +25,7 @@ Dialogue* demo_dialogue_init()
                               &demo_dialogue_lines[0],
                               &demo_dialogue_lines[2],
                               {}};
+
     demo_dialogue_lines[2] = {"Aigis",
                               "I am not authorized to make exceptions. Please retrieve it after sunrise.",
                               BustAigis::spNeutral,

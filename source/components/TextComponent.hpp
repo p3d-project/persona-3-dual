@@ -19,18 +19,18 @@ class TextComponent : public ae::Component
 {
   public:
     static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Text);
-    void Init() override
+    void init() override
     {
     }
 
     /**
-     * @brief Sets isActive to false on component destruction
+     * @brief Sets active to false on component destruction
      */
-    void Destroy() override;
+    void destroy() override;
 
-    void Update(ae::q20_12_t /*dt*/) override;
+    void update(ae::q20_12_t /*dt*/) override;
 
-    ae::ComponentTypeID GetType() const override
+    ae::ComponentTypeID getType() const override
     {
         return TYPE_ID;
     }
@@ -52,9 +52,10 @@ class TextComponent : public ae::Component
      * @param x The x-coordinate to start drawing the text.
      * @param y The y-coordinate to start drawing the text.
      * @param color The color to use for the text (default is white).
+     * @param xBoundary An optional limit to the right side of a textbox, for when text is only supposed to take up an area of the screen.
      * @see drawText
      */
-    void drawText(const std::string& text, int x, int y, int color = TextColor::White);
+    void drawText(const std::string& text, int x, int y, int color = TextColor::White, int xBoundary = 256);
 
     /**
      * @brief A wrapper for appearText in TextSystem. Simulates text typing effect.
@@ -62,15 +63,38 @@ class TextComponent : public ae::Component
      * @param x The x-coordinate to start drawing the text.
      * @param y The y-coordinate to start drawing the text.
      * @param color The color to use for the text (default is white).
+     * @param maxX Right edge (exclusive) used for word wrapping (default is the screen width).
+     * @param maxY Bottom edge of the text area. When the next line would not fit above it, the text pauses
+     *             until appearTextNextPage() is called. 0 (default) disables pagination.
+     * @param hyphenate Enable character-based splitting of overlong words.
      * @see appearText
      */
-    void appearText(const std::string& text, int x, int y, int color = TextColor::White);
+    void appearText(const std::string& text,
+                    int x,
+                    int y,
+                    int color = TextColor::White,
+                    int maxX = 256,
+                    int maxY = 0,
+                    bool hyphenate = false);
 
     /**
      * @brief A wrapper for appearTextSkip in TextSystem. If a text is currently being rendered with appearText, this function will immediately render the rest of the text without delay.
+     * @note Stops at the end of the current page if the text is paginated.
      * @see appearTextSkip
      */
     void appearTextSkip();
+
+    /**
+     * @brief Check if the paginated text is waiting for the next page.
+     * @return true if the current page is full and more text remains, false otherwise.
+     */
+    bool appearTextPaused();
+
+    /**
+     * @brief Clear the text area and continue the paused text from the top of it.
+     * @note Does nothing if the text is not paused.
+     */
+    void appearTextNextPage();
 
     /**
      * @brief Stops the appearText animation immediately and clears the state.
@@ -162,16 +186,16 @@ class TextComponent : public ae::Component
     void setSpaceWidth(int value);
 
   protected:
-    void SubmitToManager() override
+    void submitToManager() override
     {
     }
 
   private:
-    TextSystem& ts = TextSystem::GetInstance();
-    TextManager& tm = TextManager::GetInstance();
+    TextSystem& ts = TextSystem::getInstance();
+    TextManager& tm = TextManager::getInstance();
 
     std::unique_ptr<Text> appearingText;
-    Font* font = nullptr;
+    std::unique_ptr<Font> font;
     uint16_t* videoBuffer = nullptr;
     int fontSize = 0;
 

@@ -12,18 +12,18 @@ void MainMenuView::init()
 {
     if (mainMenu == nullptr)
     {
-        mainMenu = engine.CreateEntity();
-        graphics = engine.CreateComponent<GraphicsComponent>();
-        textMenu = engine.CreateComponent<TextComponent>();
-        musicCmpt = engine.CreateComponent<MusicComponent>();
-        sfxCmpt = engine.CreateComponent<SFXComponent>();
+        mainMenu = engine.createEntity();
+        graphics = engine.createComponent<GraphicsComponent>();
+        textMenu = engine.createComponent<TextComponent>();
+        musicCmpt = engine.createComponent<MusicComponent>();
+        sfxCmpt = engine.createComponent<SFXComponent>();
 
-        mainMenu->AddComponent(graphics);
-        mainMenu->AddComponent(textMenu);
-        mainMenu->AddComponent(musicCmpt);
-        mainMenu->AddComponent(sfxCmpt);
+        mainMenu->addComponent(graphics);
+        mainMenu->addComponent(textMenu);
+        mainMenu->addComponent(musicCmpt);
+        mainMenu->addComponent(sfxCmpt);
 
-        UISystem::GetInstance().SetSFXComponent(sfxCmpt);
+        UISystem::getInstance().setSFXComponent(sfxCmpt);
     }
 
     // set video mode for 2 text layers and 2 extended rotation layer
@@ -60,8 +60,8 @@ void MainMenuView::init()
              (unsigned)gameVersion.patchVersion);
 
     std::array<UIMenu*, 10> menus = {mainMenuCmpt};
-    ae::BroadcastEvent(Event::ConfigureUIMenu{textMenu, menus});
-    ae::BroadcastEvent(Event::ShowMenu{mainMenuCmpt});
+    ae::broadcastEvent(Event::ConfigureUIMenu{textMenu, menus});
+    ae::broadcastEvent(Event::ShowMenu{mainMenuCmpt});
 
     // initialize backgrounds
     // check https://mtheall.com/vram.html to ensure bg fit in vram
@@ -228,7 +228,7 @@ ViewState MainMenuView::update()
         if (displayFog && frame % 4 == 0)
         {
             waveAngle += 50;
-            int angle = MathManager::GetInstance().sin(static_cast<ae::angle16_t>(waveAngle)).raw_value();
+            int angle = MathManager::getInstance().sin(static_cast<ae::angle16_t>(waveAngle)).raw_value();
 
             int rotationSpeed = baseSpeed + ((angle * fluctuation) >> 12);
             currentRotation += rotationSpeed;
@@ -249,7 +249,7 @@ ViewState MainMenuView::update()
 
 void MainMenuView::cleanup()
 {
-    AudioManager::GetInstance().stopAudio();
+    AudioManager::getInstance().stopAudio();
     // transition both screens to black
     for (int i = 0; i > -16; i--)
     {
@@ -265,7 +265,7 @@ void MainMenuView::cleanup()
 
     if (mainMenu != nullptr)
     {
-        engine.DestroyEntity(mainMenu);
+        engine.destroyEntity(mainMenu);
 
         mainMenu = nullptr;
         graphics = nullptr;

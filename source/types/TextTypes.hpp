@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <nds.h>
+#include <cstdlib>
 #include <string>
 
 /**
@@ -46,6 +46,8 @@ enum TextInstruction
     Reset = 0xFF
 };
 
+inline constexpr unsigned char TextInstructionMarker = 0xFF;
+
 /**
  * @brief Stores data for a single glyph (character) in a font.
  */
@@ -65,6 +67,20 @@ struct Glyph
  */
 struct Font
 {
+    Font() = default;
+
+    /**
+     * @brief Frees the regular and bold bitmaps.
+     */
+    ~Font()
+    {
+        free(bitmap);
+        free(bitmapBold);
+    }
+
+    Font(const Font&) = delete;
+    Font& operator=(const Font&) = delete;
+
     std::uint8_t* bitmap = nullptr;
     std::uint8_t* bitmapBold = nullptr;
     int bitmapWidth = 256;
@@ -97,6 +113,14 @@ struct Text
     int letterSpacing;
     int lineSpacing;
     int spaceWidth;
+
+    /// Right edge (exclusive) used for word wrapping
+    int maxX = 256;
+    /// Bottom edge used for pagination. 0 disables pagination
+    int maxY = 0;
+    /// Set when the next glyph would not fit above maxY. Output pauses until the next page is requested
+    bool pageBreak = false;
+    bool hyphenate = false;
 };
 
 /**

@@ -12,7 +12,7 @@ Skill SkillDb::slashAttack;
 Skill SkillDb::strikeAttack;
 Skill SkillDb::allOutAttack;
 
-void SkillDb::Initialize()
+void SkillDb::initialize()
 {
     /*---------------ALL OUT ATTACK--------------*/
     //Most of the stuff is not used, only element is actually important

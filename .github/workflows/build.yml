@@ -125,9 +125,16 @@ jobs:
       # --- 3. Build & compile ---
       - name: Ensure required build tools are present
         run: |
+          MISSING_PACKAGES=""
           if ! command -v cmake >/dev/null 2>&1; then
+            MISSING_PACKAGES="${MISSING_PACKAGES} cmake"
+          fi
+          if ! command -v ninja >/dev/null 2>&1; then
+            MISSING_PACKAGES="${MISSING_PACKAGES} ninja-build"
+          fi
+          if [ -n "${MISSING_PACKAGES}" ]; then
             apt-get update
-            apt-get install -y --no-install-recommends cmake
+            apt-get install -y --no-install-recommends ${MISSING_PACKAGES}
           fi
 
       - name: Generate version tag

@@ -10,21 +10,27 @@
 #include <aegis/ndsTypes.hpp>
 #include <aegis/types.hpp>
 
-void UISystem::Init()
+void UISystem::init()
 {
-    isActive = false;
+    active = false;
     renderUIText = false;
 }
 
-void UISystem::Update(ae::q20_12_t dt)
+void UISystem::update(ae::q20_12_t dt)
 {
+    // apply screen switches at the start of the frame, while still in VBlank
+    if (pendingScreen != nullptr)
+    {
+        applyPendingScreen();
+    }
+
     // skip if nullptr or not active
     if ((activeMenu == nullptr) || !activeMenu->isActive)
     {
         return;
     }
 
-    // handle active alert: draw message and block all input until expired
+    // handle active alert: draw message, allow skipping, and block menu input until dismissed or expired
     if (activeMenu->isAlertActive())
     {
         if (!activeMenu->alertMessagePrinted)
@@ -33,13 +39,23 @@ void UISystem::Update(ae::q20_12_t dt)
             text->drawText(activeMenu->alertText, 0, 0, TextColor::White);
             activeMenu->alertMessagePrinted = true;
         }
+        else if (systemKeysDown & (KEY_A | KEY_B))
+        {
+            cancelSFX();
+            if (sfxCmpt != nullptr)
+            {
+                sfxCmpt->playSFX((systemKeysDown & KEY_A) ? SFX::SFX_2 : SFX::SFX_0, 255, 128);
+            }
+            activeMenu->clearAlert();
+            renderUIText = true;
+            return;
+        }
         return;
     }
     else if (activeMenu->alertMessagePrinted)
     {
-        // alert just expired, clear flag and re-render menu
-        activeMenu->alertMessagePrinted = false;
-        text->clearScreen();
+        // alert just expired, clear alert area and re-render menu
+        activeMenu->clearAlert();
         renderUIText = true;
     }
 
@@ -54,7 +70,7 @@ void UISystem::Update(ae::q20_12_t dt)
     ViewState updateHookState = activeMenu->updateHook();
     if (updateHookState != ViewState::DEFAULT)
     {
-        ae::BroadcastEvent(Event::SwitchView{updateHookState});
+        ae::broadcastEvent(Event::SwitchView{updateHookState});
         return;
     }
 
@@ -119,10 +135,9 @@ void UISystem::Update(ae::q20_12_t dt)
             }
         }
 
-        if (activeMenu->isAlertActive())
+        if (activeMenu->isActive && activeMenu->isAlertActive())
         {
             renderUIText = false;
-            text->clearScreen();
             text->drawText(activeMenu->alertText, 0, 0, TextColor::White);
             activeMenu->alertMessagePrinted = true;
             return;
@@ -180,16 +195,16 @@ void UISystem::Update(ae::q20_12_t dt)
 
     if (activeMenu->nextViewState != ViewState::KEEP_CURRENT)
     {
-        ae::BroadcastEvent(Event::SwitchView{activeMenu->nextViewState});
+        ae::broadcastEvent(Event::SwitchView{activeMenu->nextViewState});
     }
 }
 
-void UISystem::Shutdown()
+void UISystem::shutdown()
 {
     resetUIResources();
 }
 
-void UISystem::SetSFXComponent(SFXComponent* sfx)
+void UISystem::setSFXComponent(SFXComponent* sfx)
 {
     sfxCmpt = sfx;
 }
@@ -209,6 +224,9 @@ void UISystem::on_receive(const Event::ConfigureUIScreen& config)
 {
     // reset previous config
     cleanupScreens();
+
+    // update() must run to apply pending screens, even in views without menus
+    active = true;
 
     // set background
     oamSub = config.oamSub;
@@ -239,7 +257,7 @@ void UISystem::on_receive(const Event::ConfigureUIMenu& config)
     // reset previous config
     cleanupMenus();
 
-    isActive = true;
+    active = true;
     menus = config.menus;
     text = config.text;
 
@@ -271,15 +289,21 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
         return;
     }
 
-    logMessage(LogSeverity::DEBUG, "ShowScreen event processed");
+    pendingScreen = msg.screen;
+}
+
+void UISystem::applyPendingScreen()
+{
+    UIScreen* screen = pendingScreen;
+    pendingScreen = nullptr;
 
     // check if it is already loaded. If not, load it in
-    if (!msg.screen->isLoaded)
+    if (!screen->isLoaded)
     {
         // add screen if space
-        if (msg.screen->isMain ? (screenMainCount < 2) : (screenSubCount < 3))
+        if (screen->isMain ? (screenMainCount < 2) : (screenSubCount < 3))
         {
-            registerScreen(msg.screen);
+            registerScreen(screen);
         }
         // swap out screens if no space
         else
@@ -287,7 +311,7 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
             UIScreen* oldScreen = nullptr;
 
             // remove the least recently displayed screen
-            if (msg.screen->isMain)
+            if (screen->isMain)
             {
                 int targetBgId = lruBgMain[0];
                 for (int i = 0; i < 2; i++)
@@ -295,7 +319,7 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
                     if ((loadedMain[i] != nullptr) && (loadedMain[i]->bgId == targetBgId))
                     {
                         oldScreen = loadedMain[i];
-                        loadedMain[i] = msg.screen;
+                        loadedMain[i] = screen;
                         break;
                     }
                 }
@@ -308,7 +332,7 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
                     if ((loadedSub[i] != nullptr) && (loadedSub[i]->bgId == targetBgId))
                     {
                         oldScreen = loadedSub[i];
-                        loadedSub[i] = msg.screen;
+                        loadedSub[i] = screen;
                         break;
                     }
                 }
@@ -319,8 +343,8 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
                 oldScreen->unload();
                 oldScreen->isLoaded = false;
 
-                msg.screen->bgId = oldScreen->bgId;
-                msg.screen->oam = oldScreen->oam;
+                screen->bgId = oldScreen->bgId;
+                screen->oam = oldScreen->oam;
                 oldScreen->bgId = -1;
                 oldScreen->oam = nullptr;
             }
@@ -329,8 +353,8 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
                 logMessage(LogSeverity::ERROR, "Failed to find LRU screen to evict");
             }
 
-            msg.screen->load();
-            msg.screen->isLoaded = true;
+            screen->load();
+            screen->isLoaded = true;
         }
     }
 
@@ -338,13 +362,18 @@ void UISystem::on_receive(const Event::ShowScreen& msg)
     hideAllScreens();
 
     /// display sprites on screen
-    msg.screen->renderSprites();
+    screen->renderSprites();
 
     /// display background on screen
-    ui.showBg(msg.screen->bgId);
+    ui.showBg(screen->bgId);
+
+    /// text goes after the background is shown, so it does not extend the time with no background visible
+    screen->renderText();
 
     // update the "least recently updated" index
-    lruUpdate(msg.screen->bgId, msg.screen->isMain);
+    lruUpdate(screen->bgId, screen->isMain);
+
+    logMessage(LogSeverity::DEBUG, "ShowScreen event processed");
 }
 
 void UISystem::on_receive(const Event::HideAllScreens& /*msg*/)
@@ -521,6 +550,9 @@ void UISystem::hideAllScreens()
 
 void UISystem::cleanupScreens()
 {
+    // the pending screen may belong to the view being cleaned up
+    pendingScreen = nullptr;
+
     // reset all bg ids, UIScreens
     // sub
     for (int i = 0; i < 3; i++)
@@ -570,7 +602,7 @@ void UISystem::resetUIResources()
     cleanupScreens();
     cleanupMenus();
 
-    isActive = false;
+    active = false;
     renderUIText = false;
     sfxCmpt = nullptr;
 }

@@ -144,6 +144,7 @@ class EnvironmentView : public BaseView
     ViewPhase phase = ViewPhase::ENVIRONMENT;
 
     bool prevPauseState = false;
+    bool prevAlertActive = false;
     bool prevDialogueState = false;
     bool prevEnvironmentState = false;
     bool prevBattleState = false;
@@ -209,7 +210,7 @@ class EnvironmentView : public BaseView
     Dialogue* dialogueFirstLine = nullptr;
 
   private:
-    RenderManager& render = RenderManager::GetInstance();
+    RenderManager& render = RenderManager::getInstance();
 
     /**
      * @brief Loads a single .grit asset and returns its raw tile pointer.

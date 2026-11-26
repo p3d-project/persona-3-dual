@@ -1,17 +1,23 @@
 #pragma once
 
-#define MENU_BIND(ClassName, Method) reinterpret_cast<ViewState (UIMenu::*)()>(&ClassName::Method)
-
 #include <etl/span.h>
 #include <etl/stack.h>
 #include <maxmod9.h>
 #include <nds.h>
-#include <stdint.h>
 #include <string>
+#include <string_view>
 
 #include "components/TextComponent.hpp"
+#include "core/timer.hpp"
 #include "types/UITypes.hpp"
 #include "uiAnimation/UIAnimator.hpp"
+
+using MenuOptionFunc = ViewState (UIMenu::*)();
+
+template <typename Method> constexpr MenuOptionFunc menuBind(Method method)
+{
+    return static_cast<MenuOptionFunc>(method);
+}
 
 class UIMenu
 {
@@ -47,10 +53,11 @@ class UIMenu
 
     // alert state
     std::string alertText;
-    int32_t alertStartFrame = 0;
-    int alertDurationFrames = 0;
+    Timer alertTimer;
+    bool alertActive = false;
     bool alertMessagePrinted = false;
 
+    void clearAlertArea();
     void animateSelection();
 
     /**
@@ -81,17 +88,22 @@ class UIMenu
     }
 
     /**
-     * @brief Shows a timed alert message, replacing the options display until it expires.
+     * @brief Shows a timed alert message, replacing the options display until it expires or is skipped.
      *
      * @param message The message to display.
-     * @param durationFrames How long to show the alert (default: 120 frames = 2 s at 60 fps).
+     * @param durationSeconds How long to show the alert (default: 2 seconds).
      */
-    void showAlert(const std::string& message, int durationFrames = 120);
+    void showAlert(std::string_view message, ae::q20_12_t durationSeconds = ae::q20_12_t{2});
 
     /**
-     * @brief Returns true while a timed alert is being displayed.
+     * @brief Returns true while a timed alert is active.
      */
     bool isAlertActive() const;
+
+    /**
+     * @brief Returns true while an alert is active or still rendered on screen.
+     */
+    bool isAlertDisplayed() const;
 
     /**
      * @brief Clears the active alert immediately.

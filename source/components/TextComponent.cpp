@@ -4,16 +4,24 @@
 #include <aegis/types.hpp>
 #include <algorithm>
 
-void TextComponent::Update(ae::q20_12_t)
+void TextComponent::update(ae::q20_12_t)
 {
     if (appearingText != nullptr)
     {
+        if (appearingText->pageBreak)
+        {
+            return; // waiting for appearTextNextPage()
+        }
+
         if (appearingText->cursorPos < (int)appearingText->content.size())
         {
             if (appearingText->counter <= 0)
             {
                 ts.drawNextFromText(appearingText.get());
-                appearingText->cursorPos++;
+                if (!appearingText->pageBreak)
+                {
+                    appearingText->cursorPos++;
+                }
                 appearingText->counter = ts.APPEAR_DELAY; // Reset the counter for the next character
             }
             else
@@ -26,23 +34,18 @@ void TextComponent::Update(ae::q20_12_t)
     }
 }
 
-void TextComponent::Destroy()
+void TextComponent::destroy()
 {
-    isActive = false;
+    active = false;
     appearTextStop();
-    tm.unloadFont(font);
-    font = nullptr;
+    font.reset();
 }
 
 void TextComponent::configureText(const TextConfig& config, bool loadDefaultPalette)
 {
-    isActive = true;
+    active = true;
 
-    if (font != nullptr)
-    {
-        tm.unloadFont(font);
-        font = nullptr;
-    }
+    font.reset();
 
     // set video buffer
     if (config.videoBuffer != nullptr)
@@ -84,29 +87,51 @@ void TextComponent::configureText(const TextConfig& config, bool loadDefaultPale
     }
 }
 
-void TextComponent::drawText(const std::string& text, int x, int y, int color)
+void TextComponent::drawText(const std::string& text, int x, int y, int color, int xBoundary)
 {
     if (!font || !videoBuffer)
     {
         logMessage(LogSeverity::WARNING, "Called without font or videoBuffer");
         return;
     }
-    ts.drawText(text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth);
+    ts.drawText(text, font.get(), videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 }
 
-void TextComponent::appearText(const std::string& text, int x, int y, int color)
+void TextComponent::appearText(const std::string& text, int x, int y, int color, int maxX, int maxY, bool hyphenate)
 {
     if (!font || !videoBuffer)
     {
         logMessage(LogSeverity::WARNING, "Called without font or videoBuffer");
         return;
     }
-    ts.appearText(appearingText, text, font, videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth);
+    ts.appearText(appearingText,
+                  text,
+                  font.get(),
+                  videoBuffer,
+                  x,
+                  y,
+                  color,
+                  letterSpacing,
+                  lineSpacing,
+                  spaceWidth,
+                  maxX,
+                  maxY,
+                  hyphenate);
 }
 
 void TextComponent::appearTextSkip()
 {
     ts.appearTextSkip(appearingText.get());
+}
+
+bool TextComponent::appearTextPaused()
+{
+    return ts.appearTextPaused(appearingText.get());
+}
+
+void TextComponent::appearTextNextPage()
+{
+    ts.appearTextNextPage(appearingText.get());
 }
 
 void TextComponent::appearTextStop()
@@ -121,7 +146,7 @@ bool TextComponent::appearTextDone()
 
 void TextComponent::drawGlyph(const Glyph& glyph, int x, int y, int color, bool bold, bool italic, bool underline)
 {
-    ts.drawGlyph(glyph, font, videoBuffer, x, y, color, bold, italic, underline);
+    ts.drawGlyph(glyph, font.get(), videoBuffer, x, y, color, bold, italic, underline);
 }
 
 Glyph* TextComponent::getGlyph(const char& c, bool bold)
@@ -185,7 +210,7 @@ void TextComponent::setSpaceWidth(int value)
 
 void TextComponent::testBitmap()
 {
-    ts.testBitmap(font, videoBuffer);
+    ts.testBitmap(font.get(), videoBuffer);
 }
 
 void TextComponent::testPalette()

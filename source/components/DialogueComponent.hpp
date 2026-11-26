@@ -17,18 +17,18 @@ class DialogueComponent : public ae::Component
 {
   public:
     static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Dialogue);
-    void Init() override;
+    void init() override;
 
-    void Destroy() override;
+    void destroy() override;
 
     /**
      * @brief Core update loop that renders & advances through dialogue
      *
      * @param dt Fixed-point delta time passed from the aegis engine loop (currently unused).
      */
-    void Update(ae::q20_12_t /*dt*/) override;
+    void update(ae::q20_12_t /*dt*/) override;
 
-    ae::ComponentTypeID GetType() const override
+    ae::ComponentTypeID getType() const override
     {
         return TYPE_ID;
     }
@@ -57,7 +57,7 @@ class DialogueComponent : public ae::Component
     void end();
 
   protected:
-    void SubmitToManager() override
+    void submitToManager() override
     {
     }
 
@@ -75,6 +75,16 @@ class DialogueComponent : public ae::Component
      * @brief Animate in the dialogue text on appear
      */
     void renderAnimFrame();
+
+    /**
+     * @brief Handle input while the line is still being displayed
+     *
+     * Finishes revealing the current page, or advances to the next page if the current one is full.
+     *
+     * @return true if input was consumed to finish revealing the current page or advance to the next page;
+     *         false if the line is fully displayed.
+     */
+    bool skipOrContinueText();
 
     /**
      * @brief Display the DialogueSelection options

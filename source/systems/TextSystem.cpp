@@ -1,9 +1,8 @@
 #include "TextSystem.hpp"
+#include "TextLayout.hpp"
 #include "core/logger.hpp"
 
 #include <algorithm>
-
-constexpr char INSTRUCTION_BIT = 0xFF; /// Special value used to indicate that the next byte is an instruction
 
 void TextSystem::drawText(const std::string& text,
                           Font* font,
@@ -13,7 +12,8 @@ void TextSystem::drawText(const std::string& text,
                           int color,
                           int letterSpacing,
                           int lineSpacing,
-                          int spaceWidth)
+                          int spaceWidth,
+                          int xBoundary)
 {
     if (!font || !videoBuffer)
     {
@@ -21,7 +21,8 @@ void TextSystem::drawText(const std::string& text,
         return;
     }
 
-    auto textObj = createText(text, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
+    auto textObj =
+        createText(text, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 
     while (textObj->cursorPos < (int)textObj->content.size())
     {
@@ -39,7 +40,10 @@ void TextSystem::appearText(std::unique_ptr<Text>& appearingText,
                             int color,
                             int letterSpacing,
                             int lineSpacing,
-                            int spaceWidth)
+                            int spaceWidth,
+                            int maxX,
+                            int maxY,
+                            bool hyphenate)
 {
     if (!font || !videoBuffer)
     {
@@ -51,20 +55,47 @@ void TextSystem::appearText(std::unique_ptr<Text>& appearingText,
     {
         appearingText.reset();
     }
-    appearingText =
-        createText(content, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth);
+    appearingText = createText(
+        content, font, videoBuffer, startX, startY, color, letterSpacing, lineSpacing, spaceWidth, maxX, maxY);
+    appearingText->hyphenate = hyphenate;
 }
 
 void TextSystem::appearTextSkip(Text* appearingText)
 {
     if (appearingText != nullptr)
     {
-        while (appearingText->cursorPos < (int)appearingText->content.size())
+        while (appearingText->cursorPos < (int)appearingText->content.size() && !appearingText->pageBreak)
         {
             drawNextFromText(appearingText);
-            appearingText->cursorPos++;
+            if (!appearingText->pageBreak)
+            {
+                appearingText->cursorPos++;
+            }
         }
     }
+}
+
+bool TextSystem::appearTextPaused(Text* appearingText)
+{
+    return appearingText != nullptr && appearingText->pageBreak;
+}
+
+void TextSystem::appearTextNextPage(Text* appearingText)
+{
+    if (!appearTextPaused(appearingText))
+    {
+        return;
+    }
+
+    clearArea(appearingText->videoBuffer,
+              appearingText->startX,
+              appearingText->startY,
+              appearingText->maxX - appearingText->startX,
+              appearingText->maxY - appearingText->startY);
+    appearingText->cursorX = appearingText->startX;
+    appearingText->cursorY = appearingText->startY;
+    appearingText->counter = 0;
+    appearingText->pageBreak = false;
 }
 
 bool TextSystem::appearTextDone(Text* appearingText)
@@ -196,8 +227,7 @@ void TextSystem::drawNextFromText(Text* text)
         {
             return; /// Don't add a space at the beginning of a line
         }
-        std::string nextWord = getNextWord(text->content.substr(text->cursorPos + 1));
-        if (checkWordWrap(nextWord, text->font, text->cursorX, text->bold, text->letterSpacing))
+        if (TextLayout::shouldWrapWord(*text))
         {
             text->cursorX = text->startX;
             text->cursorY += text->font->lineHeight + text->lineSpacing;
@@ -215,7 +245,7 @@ void TextSystem::drawNextFromText(Text* text)
             text->cursorX += text->spaceWidth;
         }
     }
-    else if (c == INSTRUCTION_BIT) /// Handle special instructions for text formatting
+    else if (c == TextInstructionMarker) /// Handle special instructions for text formatting
     {
         c = getNextChar(text);
         if (c == TextInstruction::ColorChange) /// Color change
@@ -233,20 +263,7 @@ void TextSystem::drawNextFromText(Text* text)
         else if (c == TextInstruction::StyleChange)
         {
             c = getNextChar(text);
-            if (c == TextInstruction::Reset) /// Reset all styles
-            {
-                text->bold = false;
-                text->italic = false;
-                text->underline = false;
-            }
-            else
-            {
-                /// Extract style flags from indivudual bits
-                text->bold = (c & TextInstruction::StyleBold) != 0 &&
-                             text->font->boldLoaded; /// Only apply bold if the font has a bold bitmap
-                text->italic = (c & TextInstruction::StyleItalic) != 0;
-                text->underline = (c & TextInstruction::StyleUnderline) != 0;
-            }
+            TextLayout::applyStyle(*text->font, c, text->bold, text->italic, text->underline);
         }
     }
     else if (text->font->glyphs[c].width == 0)
@@ -255,7 +272,34 @@ void TextSystem::drawNextFromText(Text* text)
     }
     else
     {
+        /// Pause on the current character; it is drawn once the next page starts
+        if (TextLayout::pageFull(*text))
+        {
+            return;
+        }
+
         Glyph g = text->bold ? text->font->boldGlyphs[c] : text->font->glyphs[c];
+
+        const int oldX = text->cursorX;
+        const int oldY = text->cursorY;
+        if (TextLayout::prepareGlyph(*text, g))
+        {
+            const Glyph& hyphen = text->bold ? text->font->boldGlyphs['-'] : text->font->glyphs['-'];
+            drawGlyph(hyphen,
+                      text->font,
+                      text->videoBuffer,
+                      oldX,
+                      oldY,
+                      text->activeColor,
+                      text->bold,
+                      text->italic,
+                      text->underline);
+        }
+        if (text->pageBreak)
+        {
+            return;
+        }
+
         drawGlyph(g,
                   text->font,
                   text->videoBuffer,
@@ -285,7 +329,9 @@ std::unique_ptr<Text> TextSystem::createText(const std::string& text,
                                              int color,
                                              int letterSpacing,
                                              int lineSpacing,
-                                             int spaceWidth)
+                                             int spaceWidth,
+                                             int maxX,
+                                             int maxY)
 {
     auto newText = std::make_unique<Text>();
     newText->cursorX = startX;
@@ -304,6 +350,9 @@ std::unique_ptr<Text> TextSystem::createText(const std::string& text,
     newText->letterSpacing = letterSpacing;
     newText->lineSpacing = lineSpacing;
     newText->spaceWidth = spaceWidth;
+    newText->maxX = maxX;
+    newText->maxY = maxY;
+    newText->pageBreak = false;
     return newText;
 }
 
@@ -328,33 +377,6 @@ void TextSystem::drawPixel(uint16_t* videoBuffer, int x, int y, int paletteValue
     {
         videoBuffer[wordIndex] = (currentWord & 0x00FF) | ((paletteValue & 0xFF) << 8);
     }
-}
-
-std::string TextSystem::getNextWord(const std::string& text)
-{
-    std::string nextWord = "";
-    int i = 0;
-    while (i < (int)text.size() && text[i] != ' ' && text[i] != '\n')
-    {
-        nextWord += text[i];
-        i++;
-    }
-    return nextWord;
-}
-
-bool TextSystem::checkWordWrap(const std::string& text, Font* font, int startX, bool bold, int letterSpacing)
-{
-    int cursorX = startX;
-    for (char c : text)
-    {
-        Glyph g = bold ? font->boldGlyphs[static_cast<unsigned char>(c)] : font->glyphs[static_cast<unsigned char>(c)];
-        cursorX += g.width + letterSpacing;
-    }
-    if (cursorX > 256)
-    {
-        return true; // Word exceeds screen width
-    }
-    return false;
 }
 
 void TextSystem::underlineGap(int startX, int y, int width, uint16_t* videoBuffer, int color)

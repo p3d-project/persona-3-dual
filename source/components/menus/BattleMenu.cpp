@@ -47,7 +47,7 @@ void BattleMenu::loadActionOptions(std::array<ActionBase*, 4>* actions, std::str
     };
 
     text->clearScreen();
-    ae::BroadcastEvent(Event::RenderUIText{});
+    ae::broadcastEvent(Event::RenderUIText{});
 
     battleOptions.clear();
     loadedOption = BattleMenuOptions::ACTION;
@@ -57,7 +57,7 @@ void BattleMenu::loadActionOptions(std::array<ActionBase*, 4>* actions, std::str
 
     for (int i = 0; i < count; i++)
     {
-        MenuOption option = {actions->at(i)->name.c_str(), -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+        MenuOption option = {actions->at(i)->name.c_str(), -1, menuBind(&BattleMenu::battleOptionSelected)};
         battleOptions.push_back(option);
     }
 
@@ -79,7 +79,7 @@ void BattleMenu::loadSkillOptions(PersonaBase* persona)
     };
 
     text->clearScreen();
-    ae::BroadcastEvent(Event::RenderUIText{});
+    ae::broadcastEvent(Event::RenderUIText{});
 
     logMessage(LogSeverity::DEBUG, "Skill options loaded for: " + persona->name);
 
@@ -93,7 +93,7 @@ void BattleMenu::loadSkillOptions(PersonaBase* persona)
 
     for (int i = 0; i < count; i++)
     {
-        MenuOption option = {persona->skills[i]->name.c_str(), -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+        MenuOption option = {persona->skills[i]->name.c_str(), -1, menuBind(&BattleMenu::battleOptionSelected)};
         battleOptions.push_back(option);
     }
 
@@ -114,7 +114,7 @@ void BattleMenu::loadPersonaOptions(etl::vector<PersonaBase*, 13>* personas)
     }
 
     text->clearScreen();
-    ae::BroadcastEvent(Event::RenderUIText{});
+    ae::broadcastEvent(Event::RenderUIText{});
 
     logMessage(LogSeverity::DEBUG, "Persona menu options loaded");
 
@@ -125,7 +125,7 @@ void BattleMenu::loadPersonaOptions(etl::vector<PersonaBase*, 13>* personas)
 
     for (int i = 0; i < count; i++)
     {
-        MenuOption option = {personas->at(i)->name.c_str(), -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+        MenuOption option = {personas->at(i)->name.c_str(), -1, menuBind(&BattleMenu::battleOptionSelected)};
         battleOptions.push_back(option);
     }
 
@@ -149,7 +149,7 @@ void BattleMenu::loadTargetOptions(etl::vector<BattleParticipant*, 13>* targets,
     }
 
     text->clearScreen();
-    ae::BroadcastEvent(Event::RenderUIText{});
+    ae::broadcastEvent(Event::RenderUIText{});
 
     logMessage(LogSeverity::DEBUG, "Target options loaded");
 
@@ -165,7 +165,7 @@ void BattleMenu::loadTargetOptions(etl::vector<BattleParticipant*, 13>* targets,
             continue;
         }
 
-        MenuOption option = {targets->at(i)->name.c_str(), -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+        MenuOption option = {targets->at(i)->name.c_str(), -1, menuBind(&BattleMenu::battleOptionSelected)};
         battleOptions.push_back(option);
     }
 
@@ -180,7 +180,7 @@ void BattleMenu::loadAllOutAttackConfirmation()
     };
 
     text->clearScreen();
-    ae::BroadcastEvent(Event::RenderUIText{});
+    ae::broadcastEvent(Event::RenderUIText{});
 
     logMessage(LogSeverity::DEBUG, "All-Out Attack confirmation prompt loaded");
 
@@ -188,21 +188,25 @@ void BattleMenu::loadAllOutAttackConfirmation()
     loadedOption = BattleMenuOptions::ALL_OUT_ATTACK;
     pauseMessage = "Confirm All-out-attack?";
 
-    MenuOption yes = {"Yes", -1, MENU_BIND(BattleMenu, battleOptionSelected)};
-    MenuOption no = {"No", -1, MENU_BIND(BattleMenu, battleOptionSelected)};
+    MenuOption yes = {"Yes", -1, menuBind(&BattleMenu::battleOptionSelected)};
+    MenuOption no = {"No", -1, menuBind(&BattleMenu::battleOptionSelected)};
     battleOptions.push_back(yes);
     battleOptions.push_back(no);
 
     options = battleOptions;
 }
 
-void BattleMenu::loadAlertOptions(const std::string& alertMsg)
+void BattleMenu::loadAlertOptions(std::string_view alertMsg)
 {
-    if (isAlertActive())
+    if (loadedOption == BattleMenuOptions::ALERT)
     {
         return;
     }
 
+    battleOptions.clear();
+    loadedOption = BattleMenuOptions::ALERT;
+    pauseMessage = "";
+    options = {};
     showAlert(alertMsg);
 }
 

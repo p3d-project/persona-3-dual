@@ -20,15 +20,15 @@ class SaveSystem : public ae::SystemRouter<SaveSystem, Event::ReadSave, Event::W
                    public ae::Singleton<SaveSystem>
 {
   public:
-    void Init() override
+    void init() override
     {
     }
 
-    void Shutdown() override
+    void shutdown() override
     {
     }
 
-    void Update(ae::q20_12_t /*dt*/) override
+    void update(ae::q20_12_t /*dt*/) override
     {
     }
 
@@ -66,5 +66,5 @@ class SaveSystem : public ae::SystemRouter<SaveSystem, Event::ReadSave, Event::W
     {
     }
 
-    IOManager& io = IOManager::GetInstance();
+    IOManager& io = IOManager::getInstance();
 };

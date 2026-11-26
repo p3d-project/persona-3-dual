@@ -33,6 +33,13 @@ class UIScreen
     virtual void renderSprites();
 
     /**
+     * @brief Draws the screen's text. Called after the background is shown.
+     */
+    virtual void renderText()
+    {
+    }
+
+    /**
      * @brief Clears the displayed sprites from the screen
      */
     void removeSprites();

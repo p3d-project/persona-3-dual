@@ -3,8 +3,7 @@
  * @brief Holds geometry structures & operations
  */
 
-#ifndef Geometry_h
-#define Geometry_h
+#pragma once
 
 template <typename T> struct Point2D
 {
@@ -35,15 +34,7 @@ template <typename T> struct Point2D
         return *this;
     }
 
-    bool operator==(const Point2D<T>& other) const
-    {
-        return other.x == x && other.z == z;
-    }
-
-    bool operator!=(const Point2D<T>& other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const Point2D<T>& other) const = default;
 };
 
 template <typename T> struct Rectangle
@@ -61,12 +52,12 @@ template <typename T> struct Rectangle
         return this->position + Point2D<T>(0, size.z);
     }
 
-    Point2D<T> TopLeft() const
+    Point2D<T> topLeft() const
     {
         return this->position;
     }
 
-    Point2D<T> TopRight() const
+    Point2D<T> topRight() const
     {
         return this->position + Point2D<T>(size.x, 0);
     }
@@ -113,15 +104,7 @@ template <typename T> struct Rectangle
                (top() <= other.bottom() && bottom() >= other.top());
     }
 
-    bool operator==(const Rectangle<T>& other) const
-    {
-        return position == other.position && size == other.size;
-    }
-
-    bool operator!=(const Rectangle<T>& other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const Rectangle<T>& other) const = default;
 };
 
 template <typename T> struct Vec3
@@ -168,15 +151,7 @@ template <typename T> struct Vec3
         return *this;
     }
 
-    bool operator==(const Vec3<T>& other) const
-    {
-        return x == other.x && y == other.y && z == other.z;
-    }
-
-    bool operator!=(const Vec3<T>& other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const Vec3<T>& other) const = default;
 
     T dot(const Vec3<T>& other) const
     {
@@ -188,5 +163,3 @@ template <typename T> struct Vec3
         return Vec3<T>(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x);
     }
 };
-
-#endif

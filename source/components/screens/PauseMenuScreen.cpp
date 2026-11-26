@@ -164,7 +164,7 @@ void PauseMenuScreen::animateSelection()
 
 void PauseMenuScreen::updateAnimation()
 {
-    const ae::q20_12_t dt = MathManager::GetInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
+    const ae::q20_12_t dt = MathManager::getInstance().div(ae::q20_12_t{1}, ae::q20_12_t{60});
     updateAnimation(dt);
 }
 
@@ -234,9 +234,6 @@ void PauseMenuScreen::renderSprites()
 
     // draw background
     renderBackground();
-
-    // draw text
-    renderText();
 }
 
 int PauseMenuScreen::onTouch(touchPosition* touch)
@@ -269,9 +266,9 @@ void PauseMenuScreen::load()
     // create relevant entities, components
     if (pauseMenu == nullptr)
     {
-        pauseMenu = engine.CreateEntity();
-        graphics = engine.CreateComponent<GraphicsComponent>();
-        pauseMenu->AddComponent(graphics);
+        pauseMenu = engine.createEntity();
+        graphics = engine.createComponent<GraphicsComponent>();
+        pauseMenu->addComponent(graphics);
     }
 
     // load sprites
@@ -333,7 +330,7 @@ void PauseMenuScreen::unload()
 
     if (pauseMenu != nullptr)
     {
-        engine.DestroyEntity(pauseMenu);
+        engine.destroyEntity(pauseMenu);
 
         pauseMenu = nullptr;
         graphics = nullptr;

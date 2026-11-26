@@ -110,33 +110,33 @@ void EnvironmentView::init()
 
     if (environment == nullptr)
     {
-        environment = engine.CreateEntity();
-        graphics = engine.CreateComponent<GraphicsComponent>();
-        text = engine.CreateComponent<TextComponent>();
-        textSub = engine.CreateComponent<TextComponent>();
-        textSubAlt = engine.CreateComponent<TextComponent>();
-        textSubOptions = engine.CreateComponent<TextComponent>();
-        musicCmpt = engine.CreateComponent<MusicComponent>();
-        sfxCmpt = engine.CreateComponent<SFXComponent>();
+        environment = engine.createEntity();
+        graphics = engine.createComponent<GraphicsComponent>();
+        text = engine.createComponent<TextComponent>();
+        textSub = engine.createComponent<TextComponent>();
+        textSubAlt = engine.createComponent<TextComponent>();
+        textSubOptions = engine.createComponent<TextComponent>();
+        musicCmpt = engine.createComponent<MusicComponent>();
+        sfxCmpt = engine.createComponent<SFXComponent>();
 
-        environment->AddComponent(graphics);
-        environment->AddComponent(text);
-        environment->AddComponent(textSub);
-        environment->AddComponent(textSubAlt);
-        environment->AddComponent(textSubOptions);
-        environment->AddComponent(musicCmpt);
-        environment->AddComponent(sfxCmpt);
+        environment->addComponent(graphics);
+        environment->addComponent(text);
+        environment->addComponent(textSub);
+        environment->addComponent(textSubAlt);
+        environment->addComponent(textSubOptions);
+        environment->addComponent(musicCmpt);
+        environment->addComponent(sfxCmpt);
 
-        UISystem::GetInstance().SetSFXComponent(sfxCmpt);
+        UISystem::getInstance().setSFXComponent(sfxCmpt);
     }
 
     if (player != nullptr)
     {
-        movement = engine.CreateComponent<MovementComponent>();
-        dialogue = engine.CreateComponent<DialogueComponent>();
+        movement = engine.createComponent<MovementComponent>();
+        dialogue = engine.createComponent<DialogueComponent>();
 
-        player->AddComponent(movement);
-        player->AddComponent(dialogue);
+        player->addComponent(movement);
+        player->addComponent(dialogue);
     }
 
     // set modes
@@ -195,7 +195,7 @@ void EnvironmentView::init()
     movement->start();
 
     setupCamera();
-    ae::BroadcastEvent(Event::ConfigureCamera(camConfig));
+    ae::broadcastEvent(Event::ConfigureCamera(camConfig));
 
     // setup character model (identical across rooms)
     std::string modelPath = fatBasePath + "models/";
@@ -238,6 +238,7 @@ void EnvironmentView::init()
 
     // setup view phases
     prevPauseState = false;
+    prevAlertActive = false;
     prevDialogueState = false;
     prevEnvironmentState = false;
     isBattleMenuActive = false;
@@ -264,7 +265,7 @@ ViewState EnvironmentView::update()
         dialogueScreen->updateAnimation();
     }
 
-    if (pauseMenuScreen != nullptr)
+    if (pauseMenuScreen != nullptr && (pauseMenuCmpt == nullptr || !pauseMenuCmpt->isAlertDisplayed()))
     {
         pauseMenuScreen->updateAnimation();
     }
@@ -277,26 +278,26 @@ ViewState EnvironmentView::update()
         {
             prevBattleState = true;
 
-            ae::BroadcastEvent(Event::HideAllScreens{});
-            ae::BroadcastEvent(Event::ShowMenu{battleMenuCmpt});
+            ae::broadcastEvent(Event::HideAllScreens{});
+            ae::broadcastEvent(Event::ShowMenu{battleMenuCmpt});
 
             movement->stop();
-            ae::BroadcastEvent(Event::StopCamera{});
+            ae::broadcastEvent(Event::StopCamera{});
 
             startBattle();
         }
 
-        if (!BattleSystem::GetInstance().IsActive() && prevBattleState)
+        if (!BattleSystem::getInstance().isActive() && prevBattleState)
         {
             prevBattleState = false;
 
-            ae::BroadcastEvent(Event::ShowScreen{menuHUDScreen});
-            ae::BroadcastEvent(Event::HideAllMenus{});
+            ae::broadcastEvent(Event::HideAllMenus{});
+            ae::broadcastEvent(Event::ShowScreen{menuHUDScreen});
 
             prevEnvironmentState = true;
 
             movement->start();
-            ae::BroadcastEvent(Event::StartCamera{});
+            ae::broadcastEvent(Event::StartCamera{});
 
             phase = ViewPhase::ENVIRONMENT;
 
@@ -311,33 +312,47 @@ ViewState EnvironmentView::update()
         if (!prevPauseState)
         {
             movement->stop();
-            ae::BroadcastEvent(Event::StopCamera{});
+            ae::broadcastEvent(Event::StopCamera{});
 
             prevPauseState = true;
 
             // ShowMenu clears textSub, so show the screen after it to keep the text displayed
-            ae::BroadcastEvent(Event::ShowMenu{pauseMenuCmpt});
-            ae::BroadcastEvent(Event::ShowScreen{pauseMenuScreen});
+            ae::broadcastEvent(Event::ShowMenu{pauseMenuCmpt});
+            ae::broadcastEvent(Event::ShowScreen{pauseMenuScreen});
         }
 
-        // menu clears textSub when navigating,so a redraw is required
-        if (systemKeysDown & (KEY_A | KEY_B | KEY_UP | KEY_DOWN))
+        const bool alertDisplayed = pauseMenuCmpt->isAlertDisplayed();
+        if (alertDisplayed)
         {
-            pauseMenuScreen->renderText();
+            if (!prevAlertActive)
+            {
+                pauseMenuScreen->cancelAnimation();
+                prevAlertActive = true;
+            }
+        }
+        else
+        {
+            // menu clears textSub when navigating or after an alert closes, so a redraw is required
+            if (prevAlertActive || (systemKeysDown & (KEY_A | KEY_B | KEY_UP | KEY_DOWN)))
+            {
+                prevAlertActive = false;
+                pauseMenuScreen->renderText();
+            }
         }
 
         if ((systemKeysDown & KEY_X) || pauseMenuCmpt->isClosed)
         {
             prevPauseState = false;
+            prevAlertActive = false;
             textSub->clearScreen();
             pauseMenuScreen->cancelAnimation();
 
-            ae::BroadcastEvent(Event::HideAllMenus{});
+            ae::broadcastEvent(Event::HideAllMenus{});
 
             prevEnvironmentState = false;
 
             movement->start();
-            ae::BroadcastEvent(Event::StartCamera{});
+            ae::broadcastEvent(Event::StartCamera{});
 
             phase = ViewPhase::ENVIRONMENT;
         }
@@ -347,14 +362,14 @@ ViewState EnvironmentView::update()
 
     case ViewPhase::DIALOGUE:
     {
-        bool isActive = dialogue->IsActive();
+        bool isActive = dialogue->isActive();
 
         if (!isActive && !prevDialogueState)
         {
-            ae::BroadcastEvent(Event::ShowScreen{dialogueScreen});
+            ae::broadcastEvent(Event::ShowScreen{dialogueScreen});
 
             movement->stop();
-            ae::BroadcastEvent(Event::StopCamera{});
+            ae::broadcastEvent(Event::StopCamera{});
 
             if (dialogueFirstLine != nullptr)
             {
@@ -365,13 +380,13 @@ ViewState EnvironmentView::update()
         }
         else if (!isActive && prevDialogueState)
         {
-            ae::BroadcastEvent(Event::HideAllScreens{});
+            ae::broadcastEvent(Event::HideAllScreens{});
 
             prevDialogueState = false;
             prevEnvironmentState = false;
 
             movement->start();
-            ae::BroadcastEvent(Event::StartCamera{});
+            ae::broadcastEvent(Event::StartCamera{});
 
             phase = ViewPhase::ENVIRONMENT;
         }
@@ -383,12 +398,12 @@ ViewState EnvironmentView::update()
     {
         if (!prevEnvironmentState)
         {
-            ae::BroadcastEvent(Event::ShowScreen{menuHUDScreen});
+            ae::broadcastEvent(Event::ShowScreen{menuHUDScreen});
             prevEnvironmentState = true;
         }
 
         CharacterPosition charPos = movement->isCharacterAt();
-        camPos = CameraSystem::GetInstance().getCameraPosition();
+        camPos = CameraSystem::getInstance().getCameraPosition();
 
         if (systemKeysDown & KEY_X)
         {
@@ -396,7 +411,7 @@ ViewState EnvironmentView::update()
             prevEnvironmentState = false;
 
             movement->stop();
-            ae::BroadcastEvent(Event::StopCamera{});
+            ae::broadcastEvent(Event::StopCamera{});
 
             phase = ViewPhase::PAUSE;
             break;
@@ -411,7 +426,7 @@ ViewState EnvironmentView::update()
                 prevEnvironmentState = false;
 
                 movement->stop();
-                ae::BroadcastEvent(Event::StopCamera{});
+                ae::broadcastEvent(Event::StopCamera{});
 
                 phase = ViewPhase::PAUSE;
                 break;
@@ -423,7 +438,7 @@ ViewState EnvironmentView::update()
         if (tileResult != ViewState::KEEP_CURRENT)
         {
             movement->stop();
-            ae::BroadcastEvent(Event::StopCamera{});
+            ae::broadcastEvent(Event::StopCamera{});
 
             musicCmpt->pauseMusic();
             return tileResult;
@@ -450,7 +465,7 @@ ViewState EnvironmentView::update()
         glPushMatrix();
 
         glTranslatef32(charPos.x.raw_value(), charPos.y.raw_value(), charPos.z.raw_value());
-        glRotatef(static_cast<float>(charPos.facingAngle), 0.0f, 1.0f, 0.0f);
+        glRotateYi(MathManager::getInstance().degreesToCyclicAngle(charPos.facingAngle));
         glPolyFmt(POLY_ALPHA(31) | POLY_CULL_BACK | POLY_FOG | POLY_ID(1));
         animationCtrl->render();
         glPopMatrix(1);
@@ -470,14 +485,14 @@ ViewState EnvironmentView::update()
                 debugText += buf;
                 std::sprintf(buf,
                              "tile(x,z): %d, %d\n",
-                             (int)(MathManager::GetInstance().div(charPos.x + dbEntry->worldOffsetX, tileSize)),
-                             (int)(MathManager::GetInstance().div(charPos.z + dbEntry->worldOffsetZ, tileSize)));
+                             (int)(MathManager::getInstance().div(charPos.x + dbEntry->worldOffsetX, tileSize)),
+                             (int)(MathManager::getInstance().div(charPos.z + dbEntry->worldOffsetZ, tileSize)));
                 debugText += buf;
                 std::sprintf(buf, "translate(x,z): %d, %d\n", (int)(charPos.x * 100), (int)(charPos.z * 100));
                 debugText += buf;
                 std::sprintf(buf,
                              "angle(w,c): %d, %d\n",
-                             (int)(CameraSystem::GetInstance().getAngle() * 100),
+                             (int)(CameraSystem::getInstance().getAngle() * 100),
                              (int)(charPos.facingAngle * 100));
                 debugText += buf;
 
@@ -510,7 +525,7 @@ void EnvironmentView::cleanup()
     // entity
     if (environment != nullptr)
     {
-        engine.DestroyEntity(environment);
+        engine.destroyEntity(environment);
 
         environment = nullptr;
         graphics = nullptr;
@@ -524,8 +539,8 @@ void EnvironmentView::cleanup()
     // entity
     if (player != nullptr)
     {
-        engine.DestroyComponent(movement);
-        engine.DestroyComponent(dialogue);
+        engine.destroyComponent(movement);
+        engine.destroyComponent(dialogue);
 
         movement = nullptr;
         dialogue = nullptr;

@@ -8,6 +8,7 @@
 #include "types/UITypes.hpp"
 
 #include <etl/vector.h>
+#include <string_view>
 
 enum class BattleMenuOptions
 {
@@ -17,7 +18,8 @@ enum class BattleMenuOptions
     PERSONA,
     TARGET_ENEMY,
     TARGET_HEAL,
-    ALL_OUT_ATTACK
+    ALL_OUT_ATTACK,
+    ALERT
 };
 
 class BattleMenu : public UIMenu
@@ -62,5 +64,5 @@ class BattleMenu : public UIMenu
     void loadPersonaOptions(etl::vector<PersonaBase*, 13>* personas);
     void loadTargetOptions(etl::vector<BattleParticipant*, 13>* targets, bool healTarget);
     void loadAllOutAttackConfirmation();
-    void loadAlertOptions(const std::string& text);
+    void loadAlertOptions(std::string_view alertMsg);
 };

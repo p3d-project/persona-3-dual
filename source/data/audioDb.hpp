@@ -47,6 +47,8 @@ enum class OtherAudio
     AFTER_THE_BATTLE = 0,
     BECAUSE_I_WILL_PROTECT_YOU,
     CLUB_ESCAPADE_NOUVEAU_METALMOTH_REMIX,
+    PEACE,
+    WANT_TO_BE_CLOSE,
 };
 
 // TODO: add SFX audio

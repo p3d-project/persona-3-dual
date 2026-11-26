@@ -27,7 +27,7 @@ class Timer
      *
      * @return Returns if the timer is finished.
      */
-    bool isFinished();
+    bool isFinished() const;
 
     /**
      * @brief Gets duration of the timer.

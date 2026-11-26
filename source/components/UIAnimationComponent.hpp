@@ -20,16 +20,16 @@ class UIAnimationComponent : public ae::Component
   public:
     static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Animation);
 
-    void Init() override
+    void init() override
     {
-        isActive = true;
+        active = true;
     }
 
-    void Update(ae::q20_12_t dt) override;
+    void update(ae::q20_12_t dt) override;
 
-    void Destroy() override;
+    void destroy() override;
 
-    ae::ComponentTypeID GetType() const override
+    ae::ComponentTypeID getType() const override
     {
         return TYPE_ID;
     }
@@ -61,7 +61,7 @@ class UIAnimationComponent : public ae::Component
     }
 
   protected:
-    void SubmitToManager() override
+    void submitToManager() override
     {
     }
 

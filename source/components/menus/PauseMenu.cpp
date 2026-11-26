@@ -170,37 +170,37 @@ ViewState PauseMenu::skillOptionSelected()
 
 ViewState PauseMenu::skillActionSelected()
 {
-    showAlert("Function not avaliable");
+    showAlert("Function not available");
     return ViewState::KEEP_CURRENT;
 }
 
 ViewState PauseMenu::itemOptionSelected()
 {
-    showAlert("Function not avaliable");
+    showAlert("Function not available");
     return ViewState::KEEP_CURRENT;
 }
 
 ViewState PauseMenu::equipOptionSelected()
 {
-    showAlert("Function not avaliable");
+    showAlert("Function not available");
     return ViewState::KEEP_CURRENT;
 }
 
 ViewState PauseMenu::personaOptionSelected()
 {
-    showAlert("Function not avaliable");
+    showAlert("Function not available");
     return ViewState::KEEP_CURRENT;
 }
 
 ViewState PauseMenu::statsOptionSelected()
 {
-    showAlert("Function not avaliable");
+    showAlert("Function not available");
     return ViewState::KEEP_CURRENT;
 }
 
 ViewState PauseMenu::sLinkOptionSelected()
 {
-    showAlert("Function not avaliable");
+    showAlert("Function not available");
     return ViewState::KEEP_CURRENT;
 }
 
@@ -214,7 +214,7 @@ ViewState PauseMenu::systemOptionSelected()
     }
     default:
     {
-        showAlert("Function not avaliable");
+        showAlert("Function not available");
         return ViewState::KEEP_CURRENT;
     }
     }
@@ -276,12 +276,12 @@ ViewState PauseMenu::debugOptionSelected()
     case DebugOption::CYCLE_CAMERA_MODE:
         if (cameraSystem.getMode() == CameraMode::Path)
         {
-            ae::BroadcastEvent(Event::SetCameraMode{CameraMode::Follow});
+            ae::broadcastEvent(Event::SetCameraMode{CameraMode::Follow});
         }
         else
         {
             CameraMode mode = cameraModes[(static_cast<int>(cameraSystem.getMode()) + 1) % cameraModes.size()];
-            ae::BroadcastEvent(Event::SetCameraMode{mode});
+            ae::broadcastEvent(Event::SetCameraMode{mode});
         }
         updateCameraOptionName();
         selectedView = ViewState::KEEP_CURRENT;
@@ -294,7 +294,7 @@ ViewState PauseMenu::debugOptionSelected()
 
 ViewState PauseMenu::playMusicOptionSelected(AudioType type, int audioId)
 {
-    AudioManager& audio = AudioManager::GetInstance();
+    AudioManager& audio = AudioManager::getInstance();
     AudioDBEntry entry = getAudioDBEntry(type, audioId);
     if (entry.type != AudioType::NONE)
     {
@@ -309,9 +309,13 @@ ViewState PauseMenu::battleMusicOptionSelected()
     switch (static_cast<BattleAudio>(selectedOption))
     {
     case BattleAudio::MASS_DESTRUCTION:
+    {
         return playMusicOptionSelected(AudioType::BATTLE, static_cast<int>(BattleAudio::MASS_DESTRUCTION));
+    }
     default:
+    {
         return ViewState::KEEP_CURRENT;
+    }
     }
 }
 
@@ -320,15 +324,25 @@ ViewState PauseMenu::locationMusicOptionSelected()
     switch (static_cast<LocationAudio>(selectedOption))
     {
     case LocationAudio::IWATODAI_DORM:
+    {
         return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::IWATODAI_DORM));
+    }
     case LocationAudio::SUMMER_BOUND:
+    {
         return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::SUMMER_BOUND));
+    }
     case LocationAudio::COLOR_YOUR_NIGHT:
+    {
         return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::COLOR_YOUR_NIGHT));
+    }
     case LocationAudio::PAULOWNIA_MALL:
+    {
         return playMusicOptionSelected(AudioType::LOCATION, static_cast<int>(LocationAudio::PAULOWNIA_MALL));
+    }
     default:
+    {
         return ViewState::KEEP_CURRENT;
+    }
     }
 }
 
@@ -337,13 +351,21 @@ ViewState PauseMenu::menuMusicOptionSelected()
     switch (static_cast<MenuAudio>(selectedOption))
     {
     case MenuAudio::MISTIC:
+    {
         return playMusicOptionSelected(AudioType::MENU, static_cast<int>(MenuAudio::MISTIC));
+    }
     case MenuAudio::TIGHTROPE:
+    {
         return playMusicOptionSelected(AudioType::MENU, static_cast<int>(MenuAudio::TIGHTROPE));
+    }
     case MenuAudio::ARIA_OF_THE_SOUL:
+    {
         return playMusicOptionSelected(AudioType::MENU, static_cast<int>(MenuAudio::ARIA_OF_THE_SOUL));
+    }
     default:
+    {
         return ViewState::KEEP_CURRENT;
+    }
     }
 }
 
@@ -352,14 +374,30 @@ ViewState PauseMenu::otherMusicOptionSelected()
     switch (static_cast<OtherAudio>(selectedOption))
     {
     case OtherAudio::AFTER_THE_BATTLE:
+    {
         return playMusicOptionSelected(AudioType::OTHER, static_cast<int>(OtherAudio::AFTER_THE_BATTLE));
+    }
     case OtherAudio::BECAUSE_I_WILL_PROTECT_YOU:
+    {
         return playMusicOptionSelected(AudioType::OTHER, static_cast<int>(OtherAudio::BECAUSE_I_WILL_PROTECT_YOU));
+    }
     case OtherAudio::CLUB_ESCAPADE_NOUVEAU_METALMOTH_REMIX:
+    {
         return playMusicOptionSelected(AudioType::OTHER,
                                        static_cast<int>(OtherAudio::CLUB_ESCAPADE_NOUVEAU_METALMOTH_REMIX));
+    }
+    case OtherAudio::PEACE:
+    {
+        return playMusicOptionSelected(AudioType::OTHER, static_cast<int>(OtherAudio::PEACE));
+    }
+    case OtherAudio::WANT_TO_BE_CLOSE:
+    {
+        return playMusicOptionSelected(AudioType::OTHER, static_cast<int>(OtherAudio::WANT_TO_BE_CLOSE));
+    }
     default:
+    {
         return ViewState::KEEP_CURRENT;
+    }
     }
 }
 

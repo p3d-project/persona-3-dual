@@ -7,21 +7,22 @@
 #pragma once
 #include "types/TextTypes.hpp"
 #include <aegis/manager.hpp>
+#include <memory>
 
 #include "managers/IOManager.hpp"
 
 class TextManager : public ae::Manager, public ae::Singleton<TextManager>
 {
   public:
-    void Init() override
+    void init() override
     {
     }
 
-    void Process() override
+    void process() override
     {
     }
 
-    void Shutdown() override
+    void shutdown() override
     {
     }
 
@@ -29,13 +30,11 @@ class TextManager : public ae::Manager, public ae::Singleton<TextManager>
      * @brief Load a font from a file.
      * @param name Name of the font.
      * @param size Size of the font.
-     * @return Pointer to the loaded font, or nullptr if loading failed.
+     * @return Owning pointer to the loaded font, or nullptr if loading failed.
      * @note This function assumes that the font files are located in the "fonts" directory and follow the naming convention "<name>/size-<size>".
      * @warning This function will halt the program if the regular font fails to load. If the bold font fails to load, it will simply set the boldLoaded flag to false and continue.
      */
-    Font* loadFont(std::string* name, int size);
-
-    void unloadFont(Font* font);
+    std::unique_ptr<Font> loadFont(std::string* name, int size);
 
     /**
      * @brief Loads the predefined default palette.
@@ -83,7 +82,7 @@ class TextManager : public ae::Manager, public ae::Singleton<TextManager>
     friend class Singleton<TextManager>;
     TextManager() = default;
 
-    IOManager& io = IOManager::GetInstance();
+    IOManager& io = IOManager::getInstance();
 
     /**
      * @brief Extract an integer value from a line of text based on a specified key.
