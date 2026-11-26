@@ -425,12 +425,12 @@ def write_mdl_file(output_path, nodes, textures, images, animations=[]):
         if animations != [] and animations is not None and len(animations) > 0:
             # Animations
             for anim in animations:
-                # Anim Header: 32-byte name | u32 num_frames | s16 fps | u32 trackCount
+                # Anim Header: 32-byte name | s16 num_frames | s16 fps | u32 trackCount
                 name_bytes = anim["name"].encode("ascii")[:31].ljust(32, b"\0")
                 tracks = anim["tracks"]
                 f.write(
                     struct.pack(
-                        "<32sIhI",
+                        "<32shhI",
                         name_bytes,
                         anim["num_frames"],
                         float_to_s16(anim["fps"]),

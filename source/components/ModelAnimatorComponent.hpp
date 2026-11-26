@@ -52,7 +52,7 @@ class ModelAnimatorComponent : public ae::Component
     const NodeTrack* findNodeTrack(const Animation_N* anim, int32_t nodeIndex) const;
 
     uint32_t currentAnimationIndex = 0;
-    uint32_t currentFrame = 0;
+    int16_t currentFrame = 0;
 
     RenderManager& render = RenderManager::GetInstance();
 };

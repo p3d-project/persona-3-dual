@@ -17,7 +17,7 @@ bool ModelAnimatorComponent::loadAnimations(FILE* f, uint32_t animCount)
     {
         Animation_N& anim = animations[i];
 
-        if (fread(&anim.name, 1, 32, f) != 32 || fread(&anim.numFrames, sizeof(uint32_t), 1, f) != 1 ||
+        if (fread(&anim.name, 1, 32, f) != 32 || fread(&anim.numFrames, sizeof(int16_t), 1, f) != 1 ||
             fread(&anim.fps, sizeof(int16_t), 1, f) != 1)
         {
             return false;

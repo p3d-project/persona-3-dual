@@ -54,7 +54,7 @@ struct NodeTrack
 struct Animation_N
 {
     char name[32] = {0};
-    uint32_t numFrames = 0;
+    int16_t numFrames = 0;
     int16_t fps;
     etl::vector<NodeTrack, 64> tracks;
 };
@@ -135,7 +135,9 @@ struct RawNodeHeader
 struct RawTrackTranslationData
 {
     int16_t frame;
-    int32_t x, y, z;
+    int32_t x;
+    int32_t y;
+    int32_t z;
 };
 
 /**
@@ -145,6 +147,9 @@ struct RawTrackTranslationData
 struct RawTrackRotationData
 {
     int16_t frame;
-    int16_t x, y, z, w;
+    int16_t x;
+    int16_t y;
+    int16_t z;
+    int16_t w;
 };
 #pragma pack(pop)
