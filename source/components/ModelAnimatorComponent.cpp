@@ -47,14 +47,15 @@ bool ModelAnimatorComponent::loadAnimations(FILE* f, uint32_t animCount)
             track.translations.resize(posKeyCount);
             for (uint32_t k = 0; k < posKeyCount; k++)
             {
-                if (fread(&track.translations[k], sizeof(RawTrackTranslationData), 1, f) != 1)
+                RawTrackTranslationData rawTrans;
+                if (fread(&rawTrans, sizeof(RawTrackTranslationData), 1, f) != 1)
                 {
                     return false;
                 }
-                track.translations[k].frame = track.translations[k].frame;
-                track.translations[k].x = track.translations[k].x;
-                track.translations[k].y = track.translations[k].y;
-                track.translations[k].z = track.translations[k].z;
+                track.translations[k].frame = rawTrans.frame;
+                track.translations[k].x = rawTrans.x;
+                track.translations[k].y = rawTrans.y;
+                track.translations[k].z = rawTrans.z;
             }
 
             uint32_t rotKeyCount = 0;
