@@ -30,6 +30,35 @@ void UISystem::update(ae::q20_12_t dt)
         return;
     }
 
+    // handle active alert: draw message, allow skipping, and block menu input until dismissed or expired
+    if (activeMenu->isAlertActive())
+    {
+        if (!activeMenu->alertMessagePrinted)
+        {
+            text->clearScreen();
+            text->drawText(activeMenu->alertText, 0, 0, TextColor::White);
+            activeMenu->alertMessagePrinted = true;
+        }
+        else if (systemKeysDown & (KEY_A | KEY_B))
+        {
+            cancelSFX();
+            if (sfxCmpt != nullptr)
+            {
+                sfxCmpt->playSFX((systemKeysDown & KEY_A) ? SFX::SFX_2 : SFX::SFX_0, 255, 128);
+            }
+            activeMenu->clearAlert();
+            renderUIText = true;
+            return;
+        }
+        return;
+    }
+    else if (activeMenu->alertMessagePrinted)
+    {
+        // alert just expired, clear alert area and re-render menu
+        activeMenu->clearAlert();
+        renderUIText = true;
+    }
+
     bool selectionWasMoving = activeMenu->selectionOffset() != 0;
     activeMenu->updateAnimation();
     if (selectionWasMoving || activeMenu->selectionOffset() != 0)
@@ -104,6 +133,14 @@ void UISystem::update(ae::q20_12_t dt)
                     activeMenu->isActive = false;
                 }
             }
+        }
+
+        if (activeMenu->isActive && activeMenu->isAlertActive())
+        {
+            renderUIText = false;
+            text->drawText(activeMenu->alertText, 0, 0, TextColor::White);
+            activeMenu->alertMessagePrinted = true;
+            return;
         }
     }
     else if (systemKeysDown & KEY_B)

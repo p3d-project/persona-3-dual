@@ -14,7 +14,7 @@ void Timer::start(ae::q20_12_t durationSeconds)
     running = true;
 }
 
-bool Timer::isFinished()
+bool Timer::isFinished() const
 {
     if (!running)
     {

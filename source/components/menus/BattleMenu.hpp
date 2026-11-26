@@ -8,6 +8,7 @@
 #include "types/UITypes.hpp"
 
 #include <etl/vector.h>
+#include <string_view>
 
 enum class BattleMenuOptions
 {
@@ -34,8 +35,6 @@ class BattleMenu : public UIMenu
     bool isCancelled = false;
 
     etl::vector<MenuOption, 10> battleOptions;
-    int32_t alertStartFrame = 0;
-    bool messagePrinted = false;
 
     void resetHook() override;
     void closeHook() override
@@ -65,6 +64,5 @@ class BattleMenu : public UIMenu
     void loadPersonaOptions(etl::vector<PersonaBase*, 13>* personas);
     void loadTargetOptions(etl::vector<BattleParticipant*, 13>* targets, bool healTarget);
     void loadAllOutAttackConfirmation();
-    void loadAlertOptions(const std::string& text);
-    bool isAlertExpired(int durationFrames) const;
+    void loadAlertOptions(std::string_view alertMsg);
 };

@@ -144,6 +144,7 @@ class EnvironmentView : public BaseView
     ViewPhase phase = ViewPhase::ENVIRONMENT;
 
     bool prevPauseState = false;
+    bool prevAlertActive = false;
     bool prevDialogueState = false;
     bool prevEnvironmentState = false;
     bool prevBattleState = false;

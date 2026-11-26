@@ -238,6 +238,7 @@ void EnvironmentView::init()
 
     // setup view phases
     prevPauseState = false;
+    prevAlertActive = false;
     prevDialogueState = false;
     prevEnvironmentState = false;
     isBattleMenuActive = false;
@@ -264,7 +265,7 @@ ViewState EnvironmentView::update()
         dialogueScreen->updateAnimation();
     }
 
-    if (pauseMenuScreen != nullptr)
+    if (pauseMenuScreen != nullptr && (pauseMenuCmpt == nullptr || !pauseMenuCmpt->isAlertDisplayed()))
     {
         pauseMenuScreen->updateAnimation();
     }
@@ -320,15 +321,29 @@ ViewState EnvironmentView::update()
             ae::broadcastEvent(Event::ShowScreen{pauseMenuScreen});
         }
 
-        // menu clears textSub when navigating,so a redraw is required
-        if (systemKeysDown & (KEY_A | KEY_B | KEY_UP | KEY_DOWN))
+        const bool alertDisplayed = pauseMenuCmpt->isAlertDisplayed();
+        if (alertDisplayed)
         {
-            pauseMenuScreen->renderText();
+            if (!prevAlertActive)
+            {
+                pauseMenuScreen->cancelAnimation();
+                prevAlertActive = true;
+            }
+        }
+        else
+        {
+            // menu clears textSub when navigating or after an alert closes, so a redraw is required
+            if (prevAlertActive || (systemKeysDown & (KEY_A | KEY_B | KEY_UP | KEY_DOWN)))
+            {
+                prevAlertActive = false;
+                pauseMenuScreen->renderText();
+            }
         }
 
         if ((systemKeysDown & KEY_X) || pauseMenuCmpt->isClosed)
         {
             prevPauseState = false;
+            prevAlertActive = false;
             textSub->clearScreen();
             pauseMenuScreen->cancelAnimation();
 

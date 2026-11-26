@@ -4,6 +4,8 @@
 #include "managers/MathManager.hpp"
 #include "uiAnimation/UIEase.hpp"
 
+#include <algorithm>
+
 void UIMenu::resetMenu()
 {
     options = {};
@@ -13,6 +15,10 @@ void UIMenu::resetMenu()
     nextViewState = ViewState::KEEP_CURRENT;
     selectionX = 0;
     animator.cancelAll();
+
+    alertText.clear();
+    alertActive = false;
+    alertMessagePrinted = false;
 
     if (text != nullptr)
     {
@@ -89,4 +95,78 @@ void UIMenu::prevOption()
 ViewState UIMenu::updateHook()
 {
     return ViewState::DEFAULT;
+}
+
+void UIMenu::clearAlertArea()
+{
+    if (text == nullptr || alertText.empty())
+    {
+        return;
+    }
+
+    const int lineHeight = text->getFontSize() + text->getLineSpacing();
+    int lineCount = 1;
+    int lineWidth = 0;
+
+    for (size_t i = 0; i < alertText.size(); ++i)
+    {
+        char c = alertText[i];
+        if (c == '\n')
+        {
+            if (i + 1 < alertText.size())
+            {
+                ++lineCount;
+                lineWidth = 0;
+            }
+        }
+        else if (c == ' ')
+        {
+            lineWidth += text->getSpaceWidth();
+        }
+        else
+        {
+            Glyph* glyph = text->getGlyph(c);
+            const int charWidth = (glyph != nullptr && glyph->width > 0) ? (glyph->width + text->getLetterSpacing())
+                                                                         : text->getSpaceWidth();
+            if (lineWidth + charWidth > 256)
+            {
+                ++lineCount;
+                lineWidth = charWidth;
+            }
+            else
+            {
+                lineWidth += charWidth;
+            }
+        }
+    }
+
+    text->clearArea(0, 0, 256, std::min(192, lineCount * lineHeight));
+}
+
+void UIMenu::showAlert(std::string_view message, ae::q20_12_t durationSeconds)
+{
+    alertText = message;
+    alertTimer.start(durationSeconds);
+    alertActive = true;
+    alertMessagePrinted = false;
+    animator.cancelAll();
+    selectionX = 0;
+}
+
+bool UIMenu::isAlertActive() const
+{
+    return alertActive && !alertTimer.isFinished();
+}
+
+bool UIMenu::isAlertDisplayed() const
+{
+    return isAlertActive() || alertMessagePrinted;
+}
+
+void UIMenu::clearAlert()
+{
+    clearAlertArea();
+    alertActive = false;
+    alertMessagePrinted = false;
+    alertText.clear();
 }
