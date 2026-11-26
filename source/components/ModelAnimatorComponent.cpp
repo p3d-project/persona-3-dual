@@ -20,14 +20,12 @@ bool ModelAnimatorComponent::loadAnimations(FILE* f, uint32_t animCount)
         if (fread(&anim.name, 1, 32, f) != 32 || fread(&anim.numFrames, sizeof(uint32_t), 1, f) != 1 ||
             fread(&anim.fps, sizeof(int16_t), 1, f) != 1)
         {
-            fclose(f);
             return false;
         }
 
         uint32_t trackCount = 0;
         if (fread(&trackCount, sizeof(uint32_t), 1, f) != 1)
         {
-            fclose(f);
             return false;
         }
 
@@ -37,14 +35,12 @@ bool ModelAnimatorComponent::loadAnimations(FILE* f, uint32_t animCount)
             NodeTrack& track = anim.tracks[t];
             if (fread(&track.nodeIndex, sizeof(int32_t), 1, f) != 1)
             {
-                fclose(f);
                 return false;
             }
 
             uint32_t posKeyCount = 0;
             if (fread(&posKeyCount, sizeof(uint32_t), 1, f) != 1)
             {
-                fclose(f);
                 return false;
             }
 
@@ -64,7 +60,6 @@ bool ModelAnimatorComponent::loadAnimations(FILE* f, uint32_t animCount)
             uint32_t rotKeyCount = 0;
             if (fread(&rotKeyCount, sizeof(uint32_t), 1, f) != 1)
             {
-                fclose(f);
                 return false;
             }
 
