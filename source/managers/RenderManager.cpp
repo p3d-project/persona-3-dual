@@ -142,7 +142,7 @@ void RenderManager::renderModelComponent(MDL3Model& model)
             const int textureID = sl.texSlot >= 0 && static_cast<size_t>(sl.texSlot) < model.textures.size()
                                       ? model.textures[sl.texSlot].textureID
                                       : -1;
-            renderDisplayList(sl.displayList, textureID);
+            renderDisplayList(sl.displayList.get(), textureID);
         }
     }
 }
@@ -186,7 +186,7 @@ void RenderManager::renderModelComponent(MDL3Model& model,
             const int textureID = sl.texSlot >= 0 && static_cast<size_t>(sl.texSlot) < model.textures.size()
                                       ? model.textures[sl.texSlot].textureID
                                       : -1;
-            renderDisplayList(sl.displayList, textureID);
+            renderDisplayList(sl.displayList.get(), textureID);
         }
     }
 

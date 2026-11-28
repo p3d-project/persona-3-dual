@@ -20,18 +20,6 @@ void ModelComponent::destroy()
             }
         }
 
-        for (Node& node : model->nodes)
-        {
-            for (SubList_N& sl : node.subLists)
-            {
-                if (sl.displayList)
-                {
-                    delete[] sl.displayList;
-                    sl.displayList = nullptr;
-                }
-            }
-        }
-
         model.reset();
     }
 }
@@ -169,7 +157,7 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
     }
 
     // Read in Nodes
-    model->nodes.resize(model->nodeCount);
+    model->nodes.clear();
     for (uint32_t i = 0; i < model->nodeCount; ++i)
     {
         RawNodeHeader rawNode;
@@ -181,7 +169,8 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
             return false;
         }
 
-        model->nodes[i].pid = rawNode.pid;
+        Node& node = model->nodes.emplace_back();
+        node.pid = rawNode.pid;
 
         for (uint32_t j = 0; j < rawNode.subListCount; ++j)
         {
@@ -195,18 +184,16 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
 
             if (sl.dlSize > 0)
             {
-                // Allocate persistent memory for the display list
-                uint32_t* displayList = new uint32_t[sl.dlSize + 1];
-                displayList[0] = sl.dlSize;
-                if (fread(&displayList[1], sizeof(std::uint32_t), sl.dlSize, f) != static_cast<size_t>(sl.dlSize))
+                sl.displayList = std::make_unique_for_overwrite<uint32_t[]>(sl.dlSize + 1);
+                sl.displayList[0] = sl.dlSize;
+                if (fread(&sl.displayList[1], sizeof(std::uint32_t), sl.dlSize, f) != static_cast<size_t>(sl.dlSize))
                 {
                     std::fclose(f);
                     model.reset();
                     return false;
                 }
-                sl.displayList = displayList;
             }
-            model->nodes[i].subLists.push_back(std::move(sl));
+            node.subLists.push_back(std::move(sl));
         }
     }
 
