@@ -41,9 +41,9 @@ struct VideoAudio
     uint32_t scratchSize = 0;
 
     qoa_desc desc;
-    uint32_t RaTE = 0;
+    uint32_t rate = 0;
     uint32_t channels = 0;
-    uint32_t streamSamples = 0;
+    uint32_t STREAMSAMPLES = 0;
 
     uint32_t contentSamples = 0; // real audio samples handed to maxmod
     uint32_t freeRunSamples = 0; // silence after the file ended (keeps the clock running)
@@ -71,7 +71,7 @@ struct VideoAudio
         }
 
         uint32_t s = (rate * VIDEO_AUDIO_STREAM_MS / 1000) & ~15u;
-        streamSamples = s < 512 ? 512 : (s > 8192 ? 8192 : s);
+        STREAMSAMPLES = s < 512 ? 512 : (s > 8192 ? 8192 : s);
         return true;
     }
 
@@ -79,7 +79,7 @@ struct VideoAudio
     {
         mm_stream stream;
         stream.sampling_rate = rate;
-        stream.buffer_length = streamSamples;
+        stream.buffer_length = STREAMSAMPLES;
         stream.callback = videoAudioCallback;
         stream.format = (channels == 1) ? MM_STREAM_16BIT_MONO : MM_STREAM_16BIT_STEREO;
         stream.timer = MM_TIMER0;
@@ -199,7 +199,7 @@ struct VideoAudio
     // Playback position in samples (what is audible, not just decoded).
     uint32_t clock() const
     {
-        s32 latency = (s32)streamSamples + (VIDEO_SYNC_OFFSET_MS * (s32)rate) / 1000;
+        s32 latency = (s32)STREAMSAMPLES + (VIDEO_SYNC_OFFSET_MS * (s32)rate) / 1000;
         s32 played = (s32)(contentSamples + freeRunSamples) - latency;
         return played > 0 ? (uint32_t)played : 0;
     }
