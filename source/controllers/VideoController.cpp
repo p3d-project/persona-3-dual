@@ -41,7 +41,7 @@ struct VideoAudio
     uint32_t scratchSize = 0;
 
     qoa_desc desc;
-    uint32_t rate = 0;
+    uint32_t RaTE = 0;
     uint32_t channels = 0;
     uint32_t streamSamples = 0;
 
