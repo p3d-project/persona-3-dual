@@ -1,6 +1,7 @@
 #pragma once
 
 #include <etl/vector.h>
+#include <memory>
 #include <nds.h>
 
 /**
@@ -66,7 +67,7 @@ struct SubList_N
 {
     int32_t texSlot = -1;
     int32_t dlSize = 0;
-    const uint32_t* displayList = nullptr;
+    std::unique_ptr<uint32_t[]> displayList;
 };
 
 /**
