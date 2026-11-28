@@ -8,7 +8,7 @@ struct AttackAction : ActionBase
     AttackAction()
     {
         name = "Attack";
-        possibleUsers = ParticipantType::Party;
+        possibleUsers = ParticipantType::PARTY;
     }
 
     TurnResult resolve(PartyMember* user, BattleParticipant* target, Skill* skill = nullptr) override;

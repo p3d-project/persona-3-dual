@@ -155,10 +155,10 @@ void PauseMenuScreen::animateSelection()
     cancelAnimation();
 
     auto seq = animator.sequence();
-    seq.append(animator.animate(jiggleOffsetY).from(0).to(-2).duration(40).ease(UIEase::OutQuad));
-    seq.append(animator.animate(jiggleOffsetY).from(-2).to(2).duration(70).ease(UIEase::InOutQuad));
-    seq.append(animator.animate(jiggleOffsetY).from(2).to(-1).duration(50).ease(UIEase::InOutQuad));
-    seq.append(animator.animate(jiggleOffsetY).from(-1).to(0).duration(40).ease(UIEase::OutQuad));
+    seq.append(animator.animate(jiggleOffsetY).from(0).to(-2).duration(40).ease(UIEase::OUT_QUAD));
+    seq.append(animator.animate(jiggleOffsetY).from(-2).to(2).duration(70).ease(UIEase::IN_OUT_QUAD));
+    seq.append(animator.animate(jiggleOffsetY).from(2).to(-1).duration(50).ease(UIEase::IN_OUT_QUAD));
+    seq.append(animator.animate(jiggleOffsetY).from(-1).to(0).duration(40).ease(UIEase::OUT_QUAD));
     selectionAnimation = seq.start();
 }
 

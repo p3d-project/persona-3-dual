@@ -37,16 +37,16 @@ void EnemyProfileDb::initialize()
     mercilessMaya.skill = mercilessMayaSkills;
     mercilessMaya.skillCount = 1;
 
-    mercilessMaya.battleStats.affinities[(u32)Element::Slash] = BattleStats::Weak;
-    mercilessMaya.battleStats.affinities[(u32)Element::Strike] = BattleStats::Neutral;
-    mercilessMaya.battleStats.affinities[(u32)Element::Pierce] = BattleStats::Neutral;
-    mercilessMaya.battleStats.affinities[(u32)Element::Fire] = BattleStats::Resist;
-    mercilessMaya.battleStats.affinities[(u32)Element::Ice] = BattleStats::Weak;
-    mercilessMaya.battleStats.affinities[(u32)Element::Electricity] = BattleStats::Null;
-    mercilessMaya.battleStats.affinities[(u32)Element::Wind] = BattleStats::Neutral;
-    mercilessMaya.battleStats.affinities[(u32)Element::Light] = BattleStats::Neutral;
-    mercilessMaya.battleStats.affinities[(u32)Element::Dark] = BattleStats::Neutral;
-    mercilessMaya.battleStats.affinities[(u32)Element::Almighty] = BattleStats::Neutral;
+    mercilessMaya.battleStats.affinities[(u32)Element::SLASH] = BattleStats::Affinity::WEAK;
+    mercilessMaya.battleStats.affinities[(u32)Element::STRIKE] = BattleStats::Affinity::NEUTRAL;
+    mercilessMaya.battleStats.affinities[(u32)Element::PIERCE] = BattleStats::Affinity::NEUTRAL;
+    mercilessMaya.battleStats.affinities[(u32)Element::FIRE] = BattleStats::Affinity::RESIST;
+    mercilessMaya.battleStats.affinities[(u32)Element::ICE] = BattleStats::Affinity::WEAK;
+    mercilessMaya.battleStats.affinities[(u32)Element::ELECTRICITY] = BattleStats::Affinity::NULLIFY;
+    mercilessMaya.battleStats.affinities[(u32)Element::WIND] = BattleStats::Affinity::NEUTRAL;
+    mercilessMaya.battleStats.affinities[(u32)Element::LIGHT] = BattleStats::Affinity::NEUTRAL;
+    mercilessMaya.battleStats.affinities[(u32)Element::DARK] = BattleStats::Affinity::NEUTRAL;
+    mercilessMaya.battleStats.affinities[(u32)Element::ALMIGHTY] = BattleStats::Affinity::NEUTRAL;
 
     /*--------------COWARDLY MAYA--------------*/
     cowardlyMaya.name = "Cowardly Maya";
@@ -68,14 +68,14 @@ void EnemyProfileDb::initialize()
     cowardlyMaya.skill = cowardlyMayaSkills;
     cowardlyMaya.skillCount = 1;
 
-    cowardlyMaya.battleStats.affinities[(u32)Element::Slash] = BattleStats::Weak;
-    cowardlyMaya.battleStats.affinities[(u32)Element::Strike] = BattleStats::Neutral;
-    cowardlyMaya.battleStats.affinities[(u32)Element::Pierce] = BattleStats::Neutral;
-    cowardlyMaya.battleStats.affinities[(u32)Element::Fire] = BattleStats::Weak;
-    cowardlyMaya.battleStats.affinities[(u32)Element::Ice] = BattleStats::Neutral;
-    cowardlyMaya.battleStats.affinities[(u32)Element::Electricity] = BattleStats::Neutral;
-    cowardlyMaya.battleStats.affinities[(u32)Element::Wind] = BattleStats::Neutral;
-    cowardlyMaya.battleStats.affinities[(u32)Element::Light] = BattleStats::Neutral;
-    cowardlyMaya.battleStats.affinities[(u32)Element::Dark] = BattleStats::Neutral;
-    cowardlyMaya.battleStats.affinities[(u32)Element::Almighty] = BattleStats::Neutral;
+    cowardlyMaya.battleStats.affinities[(u32)Element::SLASH] = BattleStats::Affinity::WEAK;
+    cowardlyMaya.battleStats.affinities[(u32)Element::STRIKE] = BattleStats::Affinity::NEUTRAL;
+    cowardlyMaya.battleStats.affinities[(u32)Element::PIERCE] = BattleStats::Affinity::NEUTRAL;
+    cowardlyMaya.battleStats.affinities[(u32)Element::FIRE] = BattleStats::Affinity::WEAK;
+    cowardlyMaya.battleStats.affinities[(u32)Element::ICE] = BattleStats::Affinity::NEUTRAL;
+    cowardlyMaya.battleStats.affinities[(u32)Element::ELECTRICITY] = BattleStats::Affinity::NEUTRAL;
+    cowardlyMaya.battleStats.affinities[(u32)Element::WIND] = BattleStats::Affinity::NEUTRAL;
+    cowardlyMaya.battleStats.affinities[(u32)Element::LIGHT] = BattleStats::Affinity::NEUTRAL;
+    cowardlyMaya.battleStats.affinities[(u32)Element::DARK] = BattleStats::Affinity::NEUTRAL;
+    cowardlyMaya.battleStats.affinities[(u32)Element::ALMIGHTY] = BattleStats::Affinity::NEUTRAL;
 }

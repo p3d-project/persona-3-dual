@@ -44,8 +44,8 @@ ae::angle16_t MathManager::degreesToCyclicAngle(ae::q20_12_t degrees)
 
 ae::q20_12_t MathManager::angleToRadians(ae::angle16_t angle)
 {
-    int32_t raw_rad = (static_cast<int32_t>(angle) * 51472) >> 16;
-    return ae::q20_12_t::from_raw_value(raw_rad);
+    int32_t rawRad = (static_cast<int32_t>(angle) * 51472) >> 16;
+    return ae::q20_12_t::from_raw_value(rawRad);
 }
 
 ae::q4_12_t MathManager::sin(ae::q20_12_t radians)
@@ -171,11 +171,11 @@ ae::q20_12_t MathManager::ease(EaseMode mode, ae::q20_12_t t)
 
     switch (mode)
     {
-    case EaseMode::InQuad:
+    case EaseMode::IN_QUAD:
         return t * t;
-    case EaseMode::OutQuad:
+    case EaseMode::OUT_QUAD:
         return t * (ae::q20_12_t{2} - t);
-    case EaseMode::InOutQuad:
+    case EaseMode::IN_OUT_QUAD:
     {
         if (t < ae::q20_12_t::from_raw_value(2048)) // 0.5
         {
@@ -184,26 +184,26 @@ ae::q20_12_t MathManager::ease(EaseMode mode, ae::q20_12_t t)
         // -1 + (4 - 2t) * t
         return ae::q20_12_t{-1} + (ae::q20_12_t{4} - ae::q20_12_t{2} * t) * t;
     }
-    case EaseMode::InCubic:
+    case EaseMode::IN_CUBIC:
         return t * t * t;
-    case EaseMode::OutCubic:
+    case EaseMode::OUT_CUBIC:
     {
         const ae::q20_12_t f = t - ae::q20_12_t{1};
         return f * f * f + ae::q20_12_t{1};
     }
-    case EaseMode::InBack:
+    case EaseMode::IN_BACK:
     {
         // s ≈ 1.70158 → raw 1.70158 * 4096 ≈ 6970
         const ae::q20_12_t s = ae::q20_12_t::from_raw_value(6970);
         return t * t * ((s + ae::q20_12_t{1}) * t - s);
     }
-    case EaseMode::OutBack:
+    case EaseMode::OUT_BACK:
     {
         const ae::q20_12_t s = ae::q20_12_t::from_raw_value(6970);
         const ae::q20_12_t f = t - ae::q20_12_t{1};
         return f * f * ((s + ae::q20_12_t{1}) * f + s) + ae::q20_12_t{1};
     }
-    case EaseMode::Linear:
+    case EaseMode::LINEAR:
     default:
         return t;
     }

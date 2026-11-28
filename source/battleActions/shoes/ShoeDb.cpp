@@ -6,8 +6,8 @@ Shoe ShoeDb::enemyShoe;
 void ShoeDb::initialize()
 {
     rubberSole.evasion = 19;
-    rubberSole.armourType = ArmourType::Unisex;
+    rubberSole.armourType = ArmourType::UNISEX;
 
     enemyShoe.evasion = 10;
-    enemyShoe.armourType = ArmourType::Enemy;
+    enemyShoe.armourType = ArmourType::ENEMY;
 }

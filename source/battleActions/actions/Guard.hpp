@@ -7,7 +7,7 @@ struct Guard : ActionBase
     Guard()
     {
         name = "Guard";
-        possibleUsers = ParticipantType::Party;
+        possibleUsers = ParticipantType::PARTY;
     }
 
     TurnResult resolve(PartyMember* user, BattleParticipant* target, Skill* skill = nullptr) override;

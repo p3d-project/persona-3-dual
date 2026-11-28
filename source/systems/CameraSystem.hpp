@@ -159,13 +159,13 @@ class CameraSystem : public ae::SystemRouter<CameraSystem,
 
   private:
     friend class Singleton<CameraSystem>;
-    CameraSystem() : SystemRouter(kCameraSystemRouterID)
+    CameraSystem() : SystemRouter(CAMERA_SYSTEM_ROUTER_ID)
     {
     }
 
     MathManager& math = MathManager::getInstance();
 
-    CameraMode mode = CameraMode::Follow;
+    CameraMode mode = CameraMode::FOLLOW;
 
     Vec3<ae::q20_12_t> currentPos = {};
     Vec3<ae::q20_12_t> targetPos = {};

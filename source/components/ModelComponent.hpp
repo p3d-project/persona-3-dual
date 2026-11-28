@@ -16,7 +16,7 @@
 class ModelComponent : public ae::Component
 {
   public:
-    static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Model);
+    static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::MODEL);
 
     void init() override
     {

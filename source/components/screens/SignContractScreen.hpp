@@ -135,8 +135,8 @@ class SignContractScreen : public UIScreen
 
     OnScreenKeyboard keyboard;
 
-    std::string FONT_NAME = "cosmetica";
-    int FONT_SIZE = 10;
+    std::string fontName = "cosmetica";
+    int fontSize = 10;
     int lineSpacing = 0;
 
     bool cursorRendered = false;

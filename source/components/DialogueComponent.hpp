@@ -16,7 +16,7 @@
 class DialogueComponent : public ae::Component
 {
   public:
-    static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Dialogue);
+    static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::DIALOGUE);
     void init() override;
 
     void destroy() override;

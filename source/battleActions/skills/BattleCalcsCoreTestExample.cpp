@@ -4,7 +4,7 @@
 
 namespace
 {
-constexpr ae::q20_12_t kLevelMultipliers[24] = {
+constexpr ae::q20_12_t LEVEL_MULTIPLIERS[24] = {
     ae::q20_12_t{0.5},  ae::q20_12_t{0.51}, ae::q20_12_t{0.53}, ae::q20_12_t{0.59}, ae::q20_12_t{0.66},
     ae::q20_12_t{0.75}, ae::q20_12_t{0.84}, ae::q20_12_t{0.91}, ae::q20_12_t{0.97}, ae::q20_12_t{0.99},
     ae::q20_12_t{1.0},  ae::q20_12_t{1.0},  ae::q20_12_t{1.0},  ae::q20_12_t{1.0},  ae::q20_12_t{1.01},
@@ -18,7 +18,7 @@ ae::q20_12_t battle::calcs::levelDifferenceMultiplier(std::uint32_t attackerLeve
     std::int32_t diff = static_cast<std::int32_t>(attackerLevel) - static_cast<std::int32_t>(defenderLevel);
     diff = std::clamp(diff, static_cast<std::int32_t>(-13), static_cast<std::int32_t>(10));
 
-    return kLevelMultipliers[diff + 13];
+    return LEVEL_MULTIPLIERS[diff + 13];
 }
 
 ae::q20_12_t battle::calcs::affinityMultiplier(std::uint32_t affinity)

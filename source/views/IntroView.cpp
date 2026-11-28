@@ -119,7 +119,7 @@ void IntroView::init()
     dmaCopy(skySub.pal, &VRAM_H_EXT_PALETTE[1][0], skySub.palLen);
 
     // configure text component
-    text->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
+    text->configureText(TextConfig(textVideoBufferSub, &fontName, fontSize));
 
     // map vram to extended palette
     vramSetBankE(VRAM_E_BG_EXT_PALETTE);
@@ -358,7 +358,7 @@ ViewState IntroView::update()
             animateText = true;
             REG_BLDCNT_SUB = BLEND_ALPHA | BLEND_SRC_BG3 | BLEND_DST_BG0 | BLEND_DST_BG1 | BLEND_DST_BACKDROP;
             REG_BLDALPHA_SUB = textAlpha | ((16 - textAlpha) << 8);
-            text->drawText("\xFF\x02\x01Press Any Button", 35, 82, TextColor::White);
+            text->drawText("\xFF\x02\x01Press Any Button", 35, 82, TextColor::WHITE);
         }
 
         // setup blending for overlay

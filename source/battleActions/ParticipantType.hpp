@@ -2,7 +2,7 @@
 
 enum class ParticipantType
 {
-    Player,
-    Party,
-    Enemy
+    PLAYER,
+    PARTY,
+    ENEMY
 };

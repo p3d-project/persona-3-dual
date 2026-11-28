@@ -7,46 +7,46 @@
 /**
  * @brief Human Readable enum for text colors.
  */
-enum TextColor
+enum class TextColor : uint8_t
 {
-    Transparent = 0, // 8bpp uses palette index 0 as transparent
-    Black = 235,
-    White = 236,
-    DualGreen = 237,
-    DualGreen2 = 238,
-    DarkGreen = 239,
-    DarkerGreen = 240,
-    DarkestGreen = 241,
-    LightBlue = 242,
-    RichBlue = 243,
-    DarkBlue = 244,
-    NavyBlue = 245,
-    DarkestBlue = 246,
-    LightOrange = 247,
-    LightPurple = 248,
-    Red = 249,
-    Green = 250,
-    Blue = 251,
-    Yellow = 252,
-    Magenta = 253,
-    Cyan = 254,
-    Gray = 255
+    TRANSPARENT = 0, // 8bpp uses palette index 0 as transparent
+    BLACK = 235,
+    WHITE = 236,
+    DUAL_GREEN = 237,
+    DUAL_GREEN2 = 238,
+    DARK_GREEN = 239,
+    DARKER_GREEN = 240,
+    DARKEST_GREEN = 241,
+    LIGHT_BLUE = 242,
+    RICH_BLUE = 243,
+    DARK_BLUE = 244,
+    NAVY_BLUE = 245,
+    DARKEST_BLUE = 246,
+    LIGHT_ORANGE = 247,
+    LIGHT_PURPLE = 248,
+    RED = 249,
+    GREEN = 250,
+    BLUE = 251,
+    YELLOW = 252,
+    MAGENTA = 253,
+    CYAN = 254,
+    GRAY = 255
 };
 
 /**
  * @brief Human readable enum for text instructions.
  */
-enum TextInstruction
+enum class TextInstruction : uint8_t
 {
-    ColorChange = 0x01,
-    StyleChange = 0x02,
-    StyleBold = 0x01,
-    StyleItalic = 0x02,
-    StyleUnderline = 0x04,
-    Reset = 0xFF
+    COLOR_CHANGE = 0x01,
+    STYLE_CHANGE = 0x02,
+    STYLE_BOLD = 0x01,
+    STYLE_ITALIC = 0x02,
+    STYLE_UNDERLINE = 0x04,
+    RESET = 0xFF
 };
 
-inline constexpr unsigned char TextInstructionMarker = 0xFF;
+inline constexpr unsigned char TEXT_INSTRUCTION_MARKER = 0xFF;
 
 /**
  * @brief Stores data for a single glyph (character) in a font.
@@ -104,8 +104,8 @@ struct Text
     Font* font;
     uint16_t* videoBuffer;
     int cursorPos;
-    int baseColor;
-    int activeColor;
+    TextColor baseColor;
+    TextColor activeColor;
     int counter;
     bool bold;
     bool italic;

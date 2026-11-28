@@ -21,6 +21,6 @@ struct MenuState
 
 enum class UIAction
 {
-    SwitchToPalette0 = 0,
-    SwitchToPalette1,
+    SWITCH_TO_PALETTE0 = 0,
+    SWITCH_TO_PALETTE1,
 };

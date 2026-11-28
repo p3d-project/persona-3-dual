@@ -8,7 +8,7 @@
 
 enum class BattleStartCondition
 {
-    Even,
-    PartyAdvantage,
-    EnemyAdvantage
+    EVEN,
+    PARTY_ADVANTAGE,
+    ENEMY_ADVANTAGE
 };

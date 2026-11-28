@@ -13,7 +13,7 @@ void PaulowniaMallView::setupMusic()
 
 void PaulowniaMallView::setupCamera()
 {
-    camConfig.mode = CameraMode::Follow;
+    camConfig.mode = CameraMode::FOLLOW;
     camConfig.initialAngle = ae::q20_12_t{1.5708 * 2};
     camConfig.distance = ae::q20_12_t{1};
     camConfig.height = height + ae::q20_12_t{0.4};

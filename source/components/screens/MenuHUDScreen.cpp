@@ -194,11 +194,11 @@ void MenuHUDScreen::renderText()
     text->drawText(textContent.c_str(), 5, 6, textColor);
 
     // date
-    text->drawText("12/31", 208, 5, TextColor::White);
+    text->drawText("12/31", 208, 5, TextColor::WHITE);
 
     // day
-    text->drawText("Sa", 243, 5, TextColor::White);
+    text->drawText("Sa", 243, 5, TextColor::WHITE);
 
     // days until full moon
-    text->drawText("30", 243, 64, TextColor::White);
+    text->drawText("30", 243, 64, TextColor::WHITE);
 }

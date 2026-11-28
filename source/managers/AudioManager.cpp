@@ -154,23 +154,23 @@ uint32_t AudioManager::decodeFrame()
 
     qp->bufferLen = fread(qp->buffer, 1, qoa_max_frame_size(&qp->info), qp->file);
 
-    uint32_t frame_len;
-    qoa_decode_frame(qp->buffer, qp->bufferLen, &qp->info, qp->sampleData, &frame_len);
+    uint32_t frameLen;
+    qoa_decode_frame(qp->buffer, qp->bufferLen, &qp->info, qp->sampleData, &frameLen);
     qp->sampleDataPos = 0;
-    qp->sampleDataLen = frame_len;
-    return frame_len;
+    qp->sampleDataLen = frameLen;
+    return frameLen;
 }
 
-uint32_t AudioManager::decode(short* sample_data, int num_samples)
+uint32_t AudioManager::decode(short* sampleData, int numSamples)
 {
-    if (!qp || !sample_data)
+    if (!qp || !sampleData)
     {
         return 0;
     }
 
-    int src_index = qp->sampleDataPos * qp->info.channels;
-    int dst_index = 0;
-    for (int i = 0; i < num_samples; i++)
+    int srcIndex = qp->sampleDataPos * qp->info.channels;
+    int dstIndex = 0;
+    for (int i = 0; i < numSamples; i++)
     {
         // do we have to decode more samples?
         if (qp->sampleDataLen - qp->sampleDataPos == 0)
@@ -185,18 +185,18 @@ uint32_t AudioManager::decode(short* sample_data, int num_samples)
                 rewind();
                 decodeFrame();
             }
-            src_index = 0;
+            srcIndex = 0;
         }
 
         // write raw 16-bit PCM samples in interleaved channel order
         for (int c = 0; c < (int)qp->info.channels; c++)
         {
-            sample_data[dst_index++] = qp->sampleData[src_index++];
+            sampleData[dstIndex++] = qp->sampleData[srcIndex++];
         }
         qp->sampleDataPos++;
         qp->samplePos++;
     }
-    return num_samples;
+    return numSamples;
 }
 
 mm_word AudioManager::audioCallback(mm_word length, mm_addr dest, mm_stream_formats format)
@@ -265,20 +265,20 @@ void AudioManager::registerAudio(std::string path, ae::q20_12_t loopStartTime, a
     uint32_t bufferSize = qoa_max_frame_size(&qoa);
     uint32_t sampleDataSize = qoa.channels * QOA_FRAME_LEN * sizeof(short) * 2;
 
-    qp = (qoaplay_desc*)malloc(sizeof(qoaplay_desc) + bufferSize + sampleDataSize);
+    qp = (QoaPlayDesc*)malloc(sizeof(QoaPlayDesc) + bufferSize + sampleDataSize);
     if (!qp)
     {
         logMessage(LogSeverity::ERROR, "Failed to allocate memory for QOA player: " + path);
         fclose(file);
         return;
     }
-    memset(qp, 0, sizeof(qoaplay_desc));
+    memset(qp, 0, sizeof(QoaPlayDesc));
 
     // set qoaplay_desc values
     qp->firstFramePos = firstFramePos;
     qp->file = file;
-    qp->buffer = ((uint8_t*)qp) + sizeof(qoaplay_desc);
-    qp->sampleData = (short*)(((uint8_t*)qp) + sizeof(qoaplay_desc) + bufferSize);
+    qp->buffer = ((uint8_t*)qp) + sizeof(QoaPlayDesc);
+    qp->sampleData = (short*)(((uint8_t*)qp) + sizeof(QoaPlayDesc) + bufferSize);
 
     qp->info.channels = qoa.channels;
     qp->info.samplerate = qoa.samplerate;

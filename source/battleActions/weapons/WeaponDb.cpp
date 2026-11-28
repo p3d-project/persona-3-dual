@@ -7,13 +7,13 @@ void WeaponDb::initialize()
 {
     shortSword.weaponPower = 38;
     shortSword.hitRate = 95;
-    shortSword.weaponType = WeaponType::OneHandedSword;
+    shortSword.weaponType = WeaponType::ONE_HANDED_SWORD;
 
     imitationKatana.weaponPower = 45;
     imitationKatana.hitRate = 92;
-    imitationKatana.weaponType = WeaponType::TwoHandedSword;
+    imitationKatana.weaponType = WeaponType::TWO_HANDED_SWORD;
 
     practiceBow.weaponPower = 30;
     practiceBow.hitRate = 98;
-    practiceBow.weaponType = WeaponType::Bow;
+    practiceBow.weaponType = WeaponType::BOW;
 }

@@ -17,11 +17,11 @@
  */
 enum class CameraMode
 {
-    Free,
-    Static,
+    FREE,
+    STATIC,
     CCTV,
-    Follow,
-    Path
+    FOLLOW,
+    PATH
 };
 
 /**

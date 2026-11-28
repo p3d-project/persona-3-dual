@@ -59,19 +59,19 @@ void PauseMenu::updateCameraOptionName()
 {
     switch (cameraSystem.getMode())
     {
-    case CameraMode::Follow:
+    case CameraMode::FOLLOW:
         debugOptions[static_cast<int>(DebugOption::CYCLE_CAMERA_MODE)].name = "Camera: Follow";
         break;
-    case CameraMode::Static:
+    case CameraMode::STATIC:
         debugOptions[static_cast<int>(DebugOption::CYCLE_CAMERA_MODE)].name = "Camera: Static";
         break;
     case CameraMode::CCTV:
         debugOptions[static_cast<int>(DebugOption::CYCLE_CAMERA_MODE)].name = "Camera: CCTV";
         break;
-    case CameraMode::Free:
+    case CameraMode::FREE:
         debugOptions[static_cast<int>(DebugOption::CYCLE_CAMERA_MODE)].name = "Camera: Free";
         break;
-    case CameraMode::Path:
+    case CameraMode::PATH:
         debugOptions[static_cast<int>(DebugOption::CYCLE_CAMERA_MODE)].name = "Camera: Path";
         break;
     default:
@@ -262,9 +262,9 @@ ViewState PauseMenu::debugOptionSelected()
         selectedView = ViewState::KEEP_CURRENT;
         break;
     case DebugOption::CYCLE_CAMERA_MODE:
-        if (cameraSystem.getMode() == CameraMode::Path)
+        if (cameraSystem.getMode() == CameraMode::PATH)
         {
-            ae::broadcastEvent(Event::SetCameraMode{CameraMode::Follow});
+            ae::broadcastEvent(Event::SetCameraMode{CameraMode::FOLLOW});
         }
         else
         {

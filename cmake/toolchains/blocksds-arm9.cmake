@@ -2,6 +2,9 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
+# So CMake detects the header folders for this CPU (see ProjectConfig.cmake).
+set(CMAKE_CXX_FLAGS_INIT "-mthumb -mcpu=arm946e-s+nofp")
+
 if(NOT DEFINED P3D_BLOCKSDS_ROOT OR P3D_BLOCKSDS_ROOT STREQUAL "")
     if(DEFINED ENV{BLOCKSDS} AND NOT "$ENV{BLOCKSDS}" STREQUAL "")
         set(P3D_BLOCKSDS_ROOT "$ENV{BLOCKSDS}" CACHE PATH "Path to BlocksDS core root")

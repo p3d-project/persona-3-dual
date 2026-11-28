@@ -22,10 +22,12 @@ void TextComponent::update(ae::q20_12_t)
                 {
                     appearingText->cursorPos++;
                 }
-                appearingText->counter = ts.APPEAR_DELAY; // Reset the counter for the next character
+                appearingText->counter = ts.appearDelay; // Reset the counter for the next character
             }
             else
+            {
                 appearingText->counter--;
+            }
         }
         else //this text has finished appearing, so we can clear the storage
         {
@@ -87,7 +89,7 @@ void TextComponent::configureText(const TextConfig& config, bool loadDefaultPale
     }
 }
 
-void TextComponent::drawText(const std::string& text, int x, int y, int color, int xBoundary)
+void TextComponent::drawText(const std::string& text, int x, int y, TextColor color, int xBoundary)
 {
     if (!font || !videoBuffer)
     {
@@ -97,7 +99,8 @@ void TextComponent::drawText(const std::string& text, int x, int y, int color, i
     ts.drawText(text, font.get(), videoBuffer, x, y, color, letterSpacing, lineSpacing, spaceWidth, xBoundary);
 }
 
-void TextComponent::appearText(const std::string& text, int x, int y, int color, int maxX, int maxY, bool hyphenate)
+void TextComponent::appearText(
+    const std::string& text, int x, int y, TextColor color, int maxX, int maxY, bool hyphenate)
 {
     if (!font || !videoBuffer)
     {
@@ -144,7 +147,7 @@ bool TextComponent::appearTextDone()
     return ts.appearTextDone(appearingText.get());
 }
 
-void TextComponent::drawGlyph(const Glyph& glyph, int x, int y, int color, bool bold, bool italic, bool underline)
+void TextComponent::drawGlyph(const Glyph& glyph, int x, int y, TextColor color, bool bold, bool italic, bool underline)
 {
     ts.drawGlyph(glyph, font.get(), videoBuffer, x, y, color, bold, italic, underline);
 }

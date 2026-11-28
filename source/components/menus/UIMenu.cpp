@@ -42,7 +42,7 @@ void UIMenu::animateSelection()
 {
     animator.cancelAll();
     selectionX = -8;
-    animator.animate(selectionX).from(-8).to(0).duration(140).ease(UIEase::OutBack).start();
+    animator.animate(selectionX).from(-8).to(0).duration(140).ease(UIEase::OUT_BACK).start();
 }
 
 ViewState UIMenu::changeMenu(etl::span<MenuOption> newOptions)

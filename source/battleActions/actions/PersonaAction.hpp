@@ -8,7 +8,7 @@ struct PersonaAction : ActionBase
     PersonaAction()
     {
         name = "Persona";
-        possibleUsers = ParticipantType::Party;
+        possibleUsers = ParticipantType::PARTY;
     }
 
     TurnResult resolve(PartyMember* user, BattleParticipant* target, Skill* skill) override;

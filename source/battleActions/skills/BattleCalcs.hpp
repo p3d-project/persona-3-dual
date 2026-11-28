@@ -106,8 +106,8 @@ struct BattleCalcs
     static uint8_t getMagicBoostHeal(uint8_t& magic);
 
     //Attack
-    static const ae::q20_12_t levelMultipliers[24];
+    static const ae::q20_12_t LEVEL_MULTIPLIERS[24];
 
     //Heal
-    static const uint8_t magicBoostTableHeal[20];
+    static const uint8_t MAGIC_BOOST_TABLE_HEAL[20];
 };

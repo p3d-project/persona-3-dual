@@ -33,6 +33,7 @@ set(P3D_SOURCE_OUTPUTS
     ${P3D_MODEL_OUTPUTS}
     ${P3D_DIALOGUE_OUTPUTS}
     "${P3D_SOURCE_DIR}/source/data/environmentDb.cpp"
+    "${P3D_SOURCE_DIR}/source/data/environmentDb.hpp"
 )
 if(P3D_SOURCE_OUTPUTS)
     file(REMOVE ${P3D_SOURCE_OUTPUTS})

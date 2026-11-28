@@ -51,7 +51,7 @@ struct NodeTrack
 /**
  * @brief Represents an animation in the 3D model.
  */
-struct Animation_N
+struct AnimationN
 {
     char name[32] = {0};
     uint32_t numFrames = 0;
@@ -62,7 +62,7 @@ struct Animation_N
 /**
  * @brief Represents a sublist of a node in the 3D model.
  */
-struct SubList_N
+struct SubListN
 {
     int32_t texSlot = -1;
     int32_t dlSize = 0;
@@ -75,7 +75,7 @@ struct SubList_N
 struct Node
 {
     int32_t pid = -1;
-    etl::vector<SubList_N, 64> subLists;
+    etl::vector<SubListN, 64> subLists;
 };
 
 /**

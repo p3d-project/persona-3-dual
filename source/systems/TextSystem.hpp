@@ -44,7 +44,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
                   uint16_t* videoBuffer,
                   int x,
                   int y,
-                  int color,
+                  TextColor color,
                   int letterSpacing,
                   int lineSpacing,
                   int spaceWidth,
@@ -73,7 +73,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
                     uint16_t* videoBuffer,
                     int x,
                     int y,
-                    int color,
+                    TextColor color,
                     int letterSpacing,
                     int lineSpacing,
                     int spaceWidth,
@@ -125,7 +125,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
                    uint16_t* videoBuffer,
                    int x,
                    int y,
-                   int color,
+                   TextColor color,
                    bool bold,
                    bool italic,
                    bool underline);
@@ -144,9 +144,9 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
     friend class Singleton<TextSystem>;
     friend class TextComponent;
 
-    int APPEAR_DELAY = 2;
+    int appearDelay = 2;
     /// 128 = 1 pixel shift every 2 rows, 64 = 1 pixel shift every 4 rows
-    int SLANT_FACTOR = 64;
+    int slantFactor = 64;
 
     /**
      * @brief Draw the next character from the text struct to the screen.
@@ -174,7 +174,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
                                      uint16_t* videoBuffer,
                                      int startX,
                                      int startY,
-                                     int color,
+                                     TextColor color,
                                      int letterSpacing,
                                      int lineSpacing,
                                      int spaceWidth,
@@ -208,7 +208,7 @@ class TextSystem : public ae::System, public ae::Singleton<TextSystem>
      * @details This function draws a horizontal line of the specified width at the specified y-coordinate, starting from the specified x-coordinate.
      * It should be used to underline gaps in the text, that are not handled by the regular text rendering, i.e. the gaps between letters or spaces.
      */
-    void underlineGap(int startX, int y, int width, uint16_t* videoBuffer, int color);
+    void underlineGap(int startX, int y, int width, uint16_t* videoBuffer, TextColor color);
 
     /**
      * @brief Test function to draw the font bitmap to the screen.

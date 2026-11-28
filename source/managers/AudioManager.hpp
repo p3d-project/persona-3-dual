@@ -82,7 +82,7 @@ class AudioManager : public ae::Manager, public ae::Singleton<AudioManager>
     friend class Singleton<AudioManager>;
     AudioManager() = default;
 
-    qoaplay_desc* qp = nullptr;
+    QoaPlayDesc* qp = nullptr;
     bool isLoopingEnabled = false;
     bool isAudioRegistered = false;
     int startFrame = 0;
@@ -134,7 +134,7 @@ class AudioManager : public ae::Manager, public ae::Singleton<AudioManager>
      * @param num_samples the number of samples
      * @return uint32_t the frame length
      */
-    uint32_t decode(short* sample_data, int num_samples);
+    uint32_t decode(short* sampleData, int numSamples);
 
     /**
      * @brief Callback for maxmod audio streaming, acting as a wrapper for processStream

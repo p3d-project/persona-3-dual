@@ -136,7 +136,7 @@ void RenderManager::renderModelComponent(MDL3Model& model)
 {
     for (const Node& node : model.nodes)
     {
-        for (const SubList_N& sl : node.subLists)
+        for (const SubListN& sl : node.subLists)
         {
             // Guard against texture ID's that are out of bounds or corrupted. Use no texture in that case.
             const int textureID = sl.texSlot >= 0 && static_cast<size_t>(sl.texSlot) < model.textures.size()
@@ -180,7 +180,7 @@ void RenderManager::renderModelComponent(MDL3Model& model,
 
     for (const Node& node : model.nodes)
     {
-        for (const SubList_N& sl : node.subLists)
+        for (const SubListN& sl : node.subLists)
         {
             // Guard against texture ID's that are out of bounds or corrupted. Use no texture in that case.
             const int textureID = sl.texSlot >= 0 && static_cast<size_t>(sl.texSlot) < model.textures.size()

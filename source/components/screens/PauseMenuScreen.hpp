@@ -163,24 +163,24 @@ class PauseMenuScreen : public UIScreen
     const int optionsStartX = 26;
     const int optionsStartY = 52;
     const int optionsRowHeight = 19;
-    TextColor optionColor = TextColor::RichBlue;
-    TextColor selectedOptionColor = TextColor::DarkestBlue;
+    TextColor optionColor = TextColor::RICH_BLUE;
+    TextColor selectedOptionColor = TextColor::DARKEST_BLUE;
 
     //Menu texts
     std::string yenText = "";
-    TextColor yenColor = TextColor::DarkestBlue;
+    TextColor yenColor = TextColor::DARKEST_BLUE;
 
     std::string personaText = "";
-    TextColor personaColor = TextColor::DarkestBlue;
+    TextColor personaColor = TextColor::DARKEST_BLUE;
 
     std::string arcanaText = "";
-    TextColor arcanaColor = TextColor::DarkestBlue;
+    TextColor arcanaColor = TextColor::DARKEST_BLUE;
 
     std::string levelText = "";
-    TextColor levelColor = TextColor::DarkestBlue;
+    TextColor levelColor = TextColor::DARKEST_BLUE;
 
     std::string descriptionText = "";
-    TextColor descriptionColor = TextColor::White;
+    TextColor descriptionColor = TextColor::WHITE;
 
     // background
     const std::string bgPath = "graphics/PauseMenu/backgrounds/";

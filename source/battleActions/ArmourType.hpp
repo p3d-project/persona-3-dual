@@ -2,10 +2,10 @@
 
 enum class ArmourType
 {
-    Male = 1,
-    Female = 2,
-    Unisex = Male | Female,
-    Robot = 4,
-    Dog = 8,
-    Enemy = 16
+    MALE = 1,
+    FEMALE = 2,
+    UNISEX = MALE | FEMALE,
+    ROBOT = 4,
+    DOG = 8,
+    ENEMY = 16
 };

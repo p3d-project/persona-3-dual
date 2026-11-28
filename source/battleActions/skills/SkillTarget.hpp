@@ -2,7 +2,7 @@
 
 enum class SkillTarget
 {
-    Self,
-    OwnTeam,
-    OppositionTeam
+    SELF,
+    OWN_TEAM,
+    OPPOSITION_TEAM
 };

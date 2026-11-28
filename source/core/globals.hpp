@@ -33,7 +33,7 @@ extern ViewState nextView;
 extern volatile u32 systemKeysDown;
 extern volatile u32 systemKeysHeld;
 extern std::string fatBasePath;
-extern inline constexpr GameVersion gameVersion{2, 0, 0};
+extern inline constexpr GameVersion GAME_VERSION{2, 0, 0};
 extern Save saveData;
 
 class Globals
@@ -69,11 +69,11 @@ using LargestMessage = etl::largest_type<Event::BattleResult,
                                          Event::HideAllMenus,
                                          Event::RenderUIText,
                                          Event::ResetUIResources>;
-constexpr std::size_t kLargestComponentSize = sizeof(typename LargestMessage::type);
-constexpr std::size_t kLargestComponentAlign = alignof(typename LargestMessage::type);
+constexpr std::size_t LARGEST_COMPONENT_SIZE = sizeof(typename LargestMessage::type);
+constexpr std::size_t LARGEST_COMPONENT_ALIGN = alignof(typename LargestMessage::type);
 } // namespace GameEngineConfig
 
-using GameEngine = ae::Engine<GameEngineConfig::kLargestComponentSize, GameEngineConfig::kLargestComponentAlign>;
+using GameEngine = ae::Engine<GameEngineConfig::LARGEST_COMPONENT_SIZE, GameEngineConfig::LARGEST_COMPONENT_ALIGN>;
 
 extern GameEngine engine;
 extern ae::Entity* player;

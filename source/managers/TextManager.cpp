@@ -3,26 +3,26 @@
 #include <sstream>
 
 // Helper constexpr to convert 8 bit RGB values to 5 bit RGB values for the Nintendo DS
-constexpr uint16_t nds_rgb(uint8_t r, uint8_t g, uint8_t b)
+constexpr uint16_t ndsRgb(uint8_t r, uint8_t g, uint8_t b)
 {
     return static_cast<uint16_t>((r >> 3) | (((g) >> 3) << 5) | (((b) >> 3) << 10) | BIT(15));
 }
 
-static const uint16_t customPalette[21] = {
-    ARGB16(1, 0, 0, 0),     // Black         235
-    ARGB16(1, 31, 31, 31),  // White         236
-    nds_rgb(0, 202, 105),   // Dual Green    237
-    nds_rgb(18, 168, 88),   // Dual Green 2  238
-    nds_rgb(28, 118, 55),   // Dark Green    239
-    nds_rgb(0, 69, 40),     // Darker Green  240
-    nds_rgb(4, 34, 18),     // Darkest Green 241
-    nds_rgb(121, 206, 255), // Light Blue    242
-    nds_rgb(9, 137, 253),   // Rich Blue     243
-    nds_rgb(0, 104, 208),   // Dark Blue     244
-    nds_rgb(0, 44, 208),    // Navy Blue     245
-    nds_rgb(0, 0, 36),      // Darkest Blue  246
-    nds_rgb(245, 198, 164), // Light Orange  247
-    nds_rgb(198, 164, 245), // Light Purple  248
+static const uint16_t CUSTOM_PALETTE[21] = {
+    ARGB16(1, 0, 0, 0),    // Black         235
+    ARGB16(1, 31, 31, 31), // White         236
+    ndsRgb(0, 202, 105),   // Dual Green    237
+    ndsRgb(18, 168, 88),   // Dual Green 2  238
+    ndsRgb(28, 118, 55),   // Dark Green    239
+    ndsRgb(0, 69, 40),     // Darker Green  240
+    ndsRgb(4, 34, 18),     // Darkest Green 241
+    ndsRgb(121, 206, 255), // Light Blue    242
+    ndsRgb(9, 137, 253),   // Rich Blue     243
+    ndsRgb(0, 104, 208),   // Dark Blue     244
+    ndsRgb(0, 44, 208),    // Navy Blue     245
+    ndsRgb(0, 0, 36),      // Darkest Blue  246
+    ndsRgb(245, 198, 164), // Light Orange  247
+    ndsRgb(198, 164, 245), // Light Purple  248
     //Defaults
     ARGB16(1, 31, 0, 0),   // Red           249
     ARGB16(1, 0, 31, 0),   // Green         250
@@ -75,8 +75,8 @@ std::unique_ptr<Font> TextManager::loadFont(std::string* name, int size)
 
 void TextManager::loadDefaultPalette()
 {
-    dmaCopy(customPalette, BG_PALETTE + 235, 21 * sizeof(uint16_t));
-    dmaCopy(customPalette, BG_PALETTE_SUB + 235, 21 * sizeof(uint16_t));
+    dmaCopy(CUSTOM_PALETTE, BG_PALETTE + 235, 21 * sizeof(uint16_t));
+    dmaCopy(CUSTOM_PALETTE, BG_PALETTE_SUB + 235, 21 * sizeof(uint16_t));
 }
 
 bool TextManager::loadPalette(std::string* path, bool sub)

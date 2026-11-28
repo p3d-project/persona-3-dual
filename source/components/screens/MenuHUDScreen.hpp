@@ -69,7 +69,7 @@ class MenuHUDScreen : public UIScreen
     GraphicsComponent* graphics = nullptr;
     TextComponent* text = nullptr;
     std::string textContent = "";
-    TextColor textColor = TextColor::White;
+    TextColor textColor = TextColor::WHITE;
 
     // background
     const std::string bgPath = "graphics/MenuHUD/backgrounds/";

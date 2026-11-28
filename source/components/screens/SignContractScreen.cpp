@@ -1,6 +1,8 @@
 #include "SignContractScreen.hpp"
 #include "core/globals.hpp"
 
+#include <utility>
+
 // TODO: remove this function
 // Maybe replace with a draw pixel function in the UI Manager or let the keyboard handle this
 /**
@@ -278,7 +280,7 @@ void SignContractScreen::writeCharacter(char c)
 
 void SignContractScreen::updateStatus(std::string status)
 {
-    text->clearArea(10, 5, 105, FONT_SIZE + lineSpacing);
+    text->clearArea(10, 5, 105, fontSize + lineSpacing);
     text->drawText(status, 10, 5);
 }
 
@@ -293,7 +295,7 @@ void SignContractScreen::renderName()
         }
         char c = lastName[i];
         Glyph* g = text->getGlyph(c, true);
-        text->drawGlyph(*g, 65 + (13 * i), 31 - lineSpacing, TextColor::White, true);
+        text->drawGlyph(*g, 65 + (13 * i), 31 - lineSpacing, TextColor::WHITE, true);
     }
     for (int i = 0; i < 10; i++)
     {
@@ -303,7 +305,7 @@ void SignContractScreen::renderName()
         }
         char c = firstName[i];
         Glyph* g = text->getGlyph(c, true);
-        text->drawGlyph(*g, 65 + (13 * i), 48 - lineSpacing, TextColor::White, true);
+        text->drawGlyph(*g, 65 + (13 * i), 48 - lineSpacing, TextColor::WHITE, true);
     }
 }
 
@@ -328,7 +330,7 @@ void SignContractScreen::renderCursor()
     int x = 65 + (13 * (isLastName ? index : index - 10));
     for (int i = 0; i < 9; i++)
     {
-        drawPixel(bgTextBufferSub, x + i, y, TextColor::RichBlue);
+        drawPixel(bgTextBufferSub, x + i, y, std::to_underlying(TextColor::RICH_BLUE));
     }
 }
 
@@ -449,7 +451,7 @@ void SignContractScreen::load()
     bgTextBufferSub = bgGetGfxPtr(bgTextSub);
     bgSetPriority(bgTextSub, 0);
     bgSetPriority(bgId, 1);
-    text->configureText(TextConfig{bgTextBufferSub, &FONT_NAME, FONT_SIZE});
+    text->configureText(TextConfig{bgTextBufferSub, &fontName, fontSize});
     lineSpacing = text->getLineSpacing(); // get it now so we don't waste time at runtime
 
     // Reset variables

@@ -17,28 +17,28 @@ struct BattleStats
     uint8_t ag;
     uint8_t lu;
 
-    enum Affinity
+    enum class Affinity : uint8_t
     {
-        Neutral,
-        Weak,
-        Resist,
-        Null,
-        Absorb,
-        Repel
+        NEUTRAL,
+        WEAK,
+        RESIST,
+        NULLIFY,
+        ABSORB,
+        REPEL
     };
 
     Affinity affinities[11] = {
-        Neutral,
-        Neutral,
-        Neutral,
-        Neutral,
-        Neutral,
-        Neutral,
-        Neutral,
-        Neutral,
-        Neutral,
-        Neutral,
-        Neutral //Almighty
+        Affinity::NEUTRAL,
+        Affinity::NEUTRAL,
+        Affinity::NEUTRAL,
+        Affinity::NEUTRAL,
+        Affinity::NEUTRAL,
+        Affinity::NEUTRAL,
+        Affinity::NEUTRAL,
+        Affinity::NEUTRAL,
+        Affinity::NEUTRAL,
+        Affinity::NEUTRAL,
+        Affinity::NEUTRAL //Almighty
     };
 
     BattleStats* getBattleStats()

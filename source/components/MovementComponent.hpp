@@ -21,7 +21,7 @@
 class MovementComponent : public ae::Component
 {
   public:
-    static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Movement);
+    static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::MOVEMENT);
     void init() override;
 
     void destroy() override;
@@ -88,7 +88,7 @@ class MovementComponent : public ae::Component
     AnimationController* animationCtrl = AnimationController::getInstance();
 
     MovementConfig config;
-    CameraMode cameraMode = CameraMode::Static;
+    CameraMode cameraMode = CameraMode::STATIC;
     int walkAnim;
     int idleAnim;
 

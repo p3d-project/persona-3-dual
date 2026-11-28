@@ -4,6 +4,7 @@
         {
             "name": "CMake Project",
             "compileCommands": [
+                "${workspaceFolder}/out/build/nds-debug-sdcard/compile_commands.json",
                 "${workspaceFolder}/out/build/host-debug/compile_commands.json"
             ],
             "intelliSenseMode": "${default}",

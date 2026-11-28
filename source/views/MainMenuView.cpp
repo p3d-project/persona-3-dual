@@ -46,7 +46,7 @@ void MainMenuView::init()
     int bgTextSub = bgInitSub(3, BgType_Bmp8, BgSize_B8_256x256, 4, 0);
     uint16_t* textVideoBufferSub = bgGetGfxPtr(bgTextSub);
     bgSetPriority(bgTextSub, 0);
-    textMenu->configureText(TextConfig(textVideoBufferSub, &FONT_NAME, FONT_SIZE));
+    textMenu->configureText(TextConfig(textVideoBufferSub, &fontName, fontSize));
 
     //populate version label
 
@@ -55,9 +55,9 @@ void MainMenuView::init()
     snprintf(mainMenuCmpt->versionLabel,
              sizeof(mainMenuCmpt->versionLabel),
              "v%u.%u.%u",
-             (unsigned)gameVersion.majorVersion,
-             (unsigned)gameVersion.minorVersion,
-             (unsigned)gameVersion.patchVersion);
+             (unsigned)GAME_VERSION.majorVersion,
+             (unsigned)GAME_VERSION.minorVersion,
+             (unsigned)GAME_VERSION.patchVersion);
 
     std::array<UIMenu*, 10> menus = {mainMenuCmpt};
     ae::broadcastEvent(Event::ConfigureUIMenu{textMenu, menus});

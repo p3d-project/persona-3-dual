@@ -27,8 +27,8 @@ TurnResult AttackAction::resolve(PartyMember* user, BattleParticipant* target, S
     u32 damage = BattleCalcs::attack(*user, *target, *atk);
     bool oneMore = false;
 
-    u32 affinity = enemy->battleStats.affinities[(u32)atk->element];
-    if (affinity == BattleStats::Affinity::Weak && !enemy->knockedDown)
+    BattleStats::Affinity affinity = enemy->battleStats.affinities[(u32)atk->element];
+    if (affinity == BattleStats::Affinity::WEAK && !enemy->knockedDown)
     {
         oneMore = true;
         enemy->knockedDown = true;

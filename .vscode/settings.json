@@ -27,6 +27,22 @@
     "C_Cpp.intelliSenseEngine": "default",
     "C_Cpp.formatting": "default",
     "C_Cpp.errorSquiggles": "enabled",
-    "C_Cpp.default.compileCommands": "${workspaceFolder}/out/build/host-debug/compile_commands.json",
+    "C_Cpp.default.compileCommands": [
+        "${workspaceFolder}/out/build/nds-debug-sdcard/compile_commands.json",
+        "${workspaceFolder}/out/build/host-debug/compile_commands.json"
+    ],
+    // Linting: show clang-tidy findings when a file is opened or saved.
+    "C_Cpp.codeAnalysis.clangTidy.enabled": true,
+    "C_Cpp.codeAnalysis.clangTidy.path": "/home/aigis/.venv/bin/clang-tidy",
+    "C_Cpp.codeAnalysis.runAutomatically": true,
+    "C_Cpp.codeAnalysis.exclude": {
+        "libs/**": true,
+        "build/**": true,
+        "out/**": true,
+        "source/maps/**": true,
+        "source/models/**": true,
+        "source/dialogue/**": true,
+        "source/data/environmentDb.*": true
+    },
     "cmake.configureOnOpen": true
 }

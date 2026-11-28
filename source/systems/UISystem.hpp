@@ -143,7 +143,7 @@ class UISystem : public ae::SystemRouter<UISystem,
 
   private:
     friend class Singleton<UISystem>;
-    UISystem() : SystemRouter(kUISystemRouterID)
+    UISystem() : SystemRouter(UI_SYSTEM_ROUTER_ID)
     {
     }
 

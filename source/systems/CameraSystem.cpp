@@ -18,13 +18,13 @@ void CameraSystem::on_receive(const Event::ConfigureCamera& config)
 void CameraSystem::on_receive(const Event::SetCameraMode& msg)
 {
     mode = msg.mode;
-    if (msg.mode == CameraMode::Path)
+    if (msg.mode == CameraMode::PATH)
     {
         pathFrame = 0;
         pathKeyIndex = 0;
         pathDone = false;
     }
-    if (msg.mode == CameraMode::Free)
+    if (msg.mode == CameraMode::FREE)
     {
         freeInitialised = false;
     }
@@ -58,7 +58,7 @@ ae::q20_12_t CameraSystem::getMovementAngle() const
     switch (mode)
     {
     case CameraMode::CCTV:
-    case CameraMode::Static:
+    case CameraMode::STATIC:
         return MathManager::getInstance().atan2(ae::q20_12_t{currentPos.x - charPos.x},
                                                 ae::q20_12_t{charPos.z - currentPos.z});
     default:
@@ -82,7 +82,7 @@ void CameraSystem::update(ae::q20_12_t)
 
     switch (mode)
     {
-    case CameraMode::Static:
+    case CameraMode::STATIC:
     {
         camPos.eye.x = currentPos.x;
         camPos.eye.y = currentPos.y;
@@ -104,7 +104,7 @@ void CameraSystem::update(ae::q20_12_t)
         break;
     }
 
-    case CameraMode::Follow:
+    case CameraMode::FOLLOW:
     {
         if (!isRotationLocked && (systemKeysHeld & KEY_L))
         {
@@ -126,7 +126,7 @@ void CameraSystem::update(ae::q20_12_t)
         break;
     }
 
-    case CameraMode::Free:
+    case CameraMode::FREE:
     {
         if (!freeInitialised)
         {
@@ -180,10 +180,12 @@ void CameraSystem::update(ae::q20_12_t)
         break;
     }
 
-    case CameraMode::Path:
+    case CameraMode::PATH:
     {
         if (!path || path->keyframes.size() < 2)
+        {
             break;
+        }
 
         pathFrame++;
 
@@ -199,7 +201,7 @@ void CameraSystem::update(ae::q20_12_t)
         if (pathFrame >= kf1.time && pathKeyIndex + 2 >= static_cast<int>(path->keyframes.size()))
         {
             pathDone = true;
-            mode = CameraMode::Follow;
+            mode = CameraMode::FOLLOW;
             camPos.eye.x = kf1.eye.x;
             camPos.eye.y = kf1.eye.y;
             camPos.eye.z = kf1.eye.z;

@@ -125,7 +125,7 @@ void UISystem::update(ae::q20_12_t dt)
     {
         if (frame % 60 < 30)
         {
-            text->drawText(activeMenu->pauseMessage, 0, 0, TextColor::White);
+            text->drawText(activeMenu->pauseMessage, 0, 0, TextColor::WHITE);
         }
         else
         {
@@ -149,7 +149,7 @@ void UISystem::update(ae::q20_12_t dt)
                  i++)
             {
                 int option = activeMenu->startIndex + i;
-                TextColor color = option == activeMenu->selectedOption ? TextColor::Blue : TextColor::White;
+                TextColor color = option == activeMenu->selectedOption ? TextColor::BLUE : TextColor::WHITE;
                 int x = option == activeMenu->selectedOption ? 10 + activeMenu->selectionOffset() : 10;
                 text->drawText(activeMenu->options[option].name, x, textSize + textSize * i, color);
             }

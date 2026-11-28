@@ -38,12 +38,15 @@ endif()
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
+# Put GCC's own header folders in compile_commands.json, because clang-tidy
+# can't find them itself.
+if(P3D_BUILD_NDS)
+    set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+endif()
+
 # Source layout rules: generated asset outputs live in source/maps, source/models,
 # and source/dialogue and must not be included in the normal source glob.
-file(GLOB_RECURSE P3D_GAME_HEADERS CONFIGURE_DEPENDS
-    ${CMAKE_SOURCE_DIR}/source/*.h
-    ${CMAKE_SOURCE_DIR}/source/*.hpp
-)
+file(GLOB_RECURSE P3D_GAME_HEADERS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/source/*.hpp)
 file(GLOB_RECURSE P3D_GAME_SOURCES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/source/*.cpp)
 
 file(GLOB P3D_DIALOGUE_INPUTS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/assets/dialogue/*.dlg)
@@ -55,7 +58,11 @@ foreach(dlg IN LISTS P3D_DIALOGUE_INPUTS)
 endforeach()
 
 list(FILTER P3D_GAME_HEADERS EXCLUDE REGEX "/source/(maps|models|dialogue)/")
+list(FILTER P3D_GAME_HEADERS EXCLUDE REGEX "/source/data/environmentDb\\.hpp$")
 list(FILTER P3D_GAME_SOURCES EXCLUDE REGEX "/source/(maps|models|dialogue)/")
+# LibraryTargets.cmake adds environmentDb.cpp itself. Globbing it too would change the
+# link order once the file exists.
+list(FILTER P3D_GAME_SOURCES EXCLUDE REGEX "/source/data/environmentDb\\.cpp$")
 
 set(P3D_MAIN_CPP ${CMAKE_SOURCE_DIR}/source/main.cpp)
 
