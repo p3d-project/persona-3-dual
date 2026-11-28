@@ -27,6 +27,8 @@ jobs:
         with:
           python-version: '3.x'
       - uses: pre-commit/action@v3.0.1
+        env:
+          SKIP: clang-tidy
 
   # 2. Containerized build
   build:
@@ -159,6 +161,12 @@ jobs:
           path: ${{ github.workspace }}/build-version.txt
           retention-days: 1
 
+      # Install this branch's tools/requirements.txt, so clang-tidy (and
+      # clang-format for the asset generators) are present even before the
+      # builder image is republished with them.
+      - name: Install Python requirements
+        run: /root/.venv/bin/pip install --no-cache-dir -r tools/requirements.txt
+
       # Primary build path during migration: CMake presets.
       # Print ccache stats after the build so cache effectiveness is visible
       # in the Actions log.
@@ -167,6 +175,14 @@ jobs:
           cmake --preset nds-release
           cmake --build --preset build-nds-sdcard -j"$(nproc)"
           ccache -s
+
+      # After the build, because the sources include generated headers.
+      - name: Lint game sources
+        run: >
+          /root/.venv/bin/run-clang-tidy.py -quiet
+          -clang-tidy-binary /root/.venv/bin/clang-tidy
+          -p out/build/nds-release
+          'source/(?!data/environmentDb)'
 
       - name: Compress and Package Assets
         run: |

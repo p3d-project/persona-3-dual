@@ -495,8 +495,15 @@ def convert_model_json(
 
 # Dispatcher (single .obj path kept for non-animated models)
 def _format_cpp_h_files(paths: list[str]) -> None:
-    clang_format = shutil.which("clang-format")
+    clang_format = shutil.which(
+        "clang-format", path=os.path.dirname(sys.executable)
+    ) or shutil.which("clang-format")
     if clang_format is None:
+        print(
+            "Warning: clang-format not found; generated files are not formatted. "
+            "Install tools/requirements.txt.",
+            file=sys.stderr,
+        )
         return
     inputs = [p for p in paths if os.path.exists(p)]
     if not inputs:

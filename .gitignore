@@ -11,9 +11,6 @@ persona-3-dual.lst
 /source/dialogue/*
 !/source/dialogue/.gitkeep
 
-/source/environments/*
-!/source/environments/.gitkeep
-
 /source/maps/*
 !/source/maps/.gitkeep
 
@@ -24,6 +21,7 @@ persona-3-dual.lst
 /data/environments/*
 !/data/environments/.gitkeep
 /source/data/environmentDb.cpp
+/source/data/environmentDb.hpp
 /data/fonts/*
 !/data/fonts/.gitkeep
 

@@ -1,0 +1,49 @@
+# Run by pre-commit when you commit, and by CI after the ROM build.
+
+Checks: >
+  -*,
+  cppcoreguidelines-use-enum-class,
+  readability-braces-around-statements,
+  readability-identifier-naming
+
+# Every enabled check is a hard failure, so a finding fails the lint.
+WarningsAsErrors: "*"
+
+# Linting a .cpp also checks the headers it includes. Report our own headers, but not submodules (libs/, which
+# also contain "source/" dirs) or generated asset-pipeline output.
+HeaderFilterRegex: "/source/"
+ExcludeHeaderFilterRegex: "/libs/|/source/(maps|models|dialogue)/|/source/data/environmentDb\\.hpp$"
+
+FormatStyle: file
+
+CheckOptions:
+  readability-braces-around-statements.ShortStatementLines: 0
+
+  # Classes are PascalCase
+  readability-identifier-naming.ClassCase: CamelCase
+  readability-identifier-naming.StructCase: CamelCase
+  readability-identifier-naming.UnionCase: CamelCase
+  readability-identifier-naming.TypeAliasCase: CamelCase
+  readability-identifier-naming.TypedefCase: CamelCase
+
+  # Enum type names are PascalCase, values are SCREAMING_SNAKE_CASE
+  readability-identifier-naming.EnumCase: CamelCase
+  readability-identifier-naming.EnumConstantCase: UPPER_CASE
+  readability-identifier-naming.ScopedEnumConstantCase: UPPER_CASE
+
+  # Functions are camelCase
+  # Overrides of engine/library virtuals are skipped automatically by clang-tidy.
+  readability-identifier-naming.FunctionCase: camelBack
+  readability-identifier-naming.MethodCase: camelBack
+  # Aegis Engine / ETL message uses this exact name, hence skip.
+  readability-identifier-naming.MethodIgnoredRegexp: "^on_receive(_unknown)?$"
+
+  # Variables / objects are camelCase
+  readability-identifier-naming.VariableCase: camelBack
+  readability-identifier-naming.ParameterCase: camelBack
+  readability-identifier-naming.MemberCase: camelBack
+
+  # Compile-time / static constants are SCREAMING_SNAKE_CASE
+  readability-identifier-naming.ConstexprVariableCase: UPPER_CASE
+  readability-identifier-naming.GlobalConstantCase: UPPER_CASE
+  readability-identifier-naming.ClassConstantCase: UPPER_CASE

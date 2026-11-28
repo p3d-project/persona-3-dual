@@ -42,3 +42,19 @@ repos:
         language: pygrep
         types_or: [c, c++]
         files: ^(source|include|tests)/
+
+      # C++ headers must use .hpp, never .h.
+      # See https://adamj.eu/tech/2024/01/24/pre-commit-fail-hook/
+      - id: no-dot-h-headers
+        name: header naming
+        entry: Rename these headers to .hpp
+        language: fail
+        files: \.h$
+
+      # Does not work outside of the dev container, only in the dev container / CI.
+      - id: clang-tidy
+        name: clang-tidy (dev container only)
+        entry: sh -c '[ "$PWD" != /work ] || exec clang-tidy --quiet -p out/build/nds-debug-sdcard "$@"' --
+        language: python
+        additional_dependencies: [clang-tidy==22.1.8]
+        files: ^source/.*\.(cpp|hpp)$
