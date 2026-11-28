@@ -12,7 +12,7 @@ class StationView : public EnvironmentView
   protected:
     const EnvironmentDbEntry* getEnvironmentDbEntry() override
     {
-        return g_environmentDb[3];
+        return environmentDb[3];
     }
     void setupMovement() override;
     void setupMusic() override;

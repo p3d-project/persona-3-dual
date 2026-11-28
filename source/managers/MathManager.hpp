@@ -223,14 +223,14 @@ class MathManager : public ae::Manager, public ae::Singleton<MathManager>
      */
     enum class EaseMode
     {
-        Linear,
-        InQuad,
-        OutQuad,
-        InOutQuad,
-        InCubic,
-        OutCubic,
-        InBack,
-        OutBack,
+        LINEAR,
+        IN_QUAD,
+        OUT_QUAD,
+        IN_OUT_QUAD,
+        IN_CUBIC,
+        OUT_CUBIC,
+        IN_BACK,
+        OUT_BACK,
     };
 
     /**

@@ -18,7 +18,7 @@ namespace Event
 /**
  * @brief All parameters needed to configure UIScreens
  */
-struct ConfigureUIScreen : public etl::message<EventID::ConfigureUIScreen>
+struct ConfigureUIScreen : public etl::message<EventID::CONFIGURE_UI_SCREEN>
 {
     /// Array of sub screen background ids
     std::array<int, 3> bgSub;
@@ -48,7 +48,7 @@ struct ConfigureUIScreen : public etl::message<EventID::ConfigureUIScreen>
 /**
  * @brief All parameters needed to configure UIMenus
  */
-struct ConfigureUIMenu : public etl::message<EventID::ConfigureUIMenu>
+struct ConfigureUIMenu : public etl::message<EventID::CONFIGURE_UI_MENU>
 {
     TextComponent* text = nullptr;
     std::array<UIMenu*, 10> menus = {};
@@ -61,7 +61,7 @@ struct ConfigureUIMenu : public etl::message<EventID::ConfigureUIMenu>
 /**
  * @brief Event to show specified menu
  */
-struct ShowMenu : public etl::message<EventID::ShowMenu>
+struct ShowMenu : public etl::message<EventID::SHOW_MENU>
 {
     UIMenu* menu;
     ShowMenu(UIMenu* iMenu) : menu(iMenu)
@@ -72,14 +72,14 @@ struct ShowMenu : public etl::message<EventID::ShowMenu>
 /**
  * @brief Event to hide all menus
  */
-struct HideAllMenus : public etl::message<EventID::HideAllMenus>
+struct HideAllMenus : public etl::message<EventID::HIDE_ALL_MENUS>
 {
 };
 
 /**
  * @brief Event to show specified screen
  */
-struct ShowScreen : public etl::message<EventID::ShowScreen>
+struct ShowScreen : public etl::message<EventID::SHOW_SCREEN>
 {
     /// The screen to show
     UIScreen* screen;
@@ -92,14 +92,14 @@ struct ShowScreen : public etl::message<EventID::ShowScreen>
 /**
  * @brief Event to trigger hiding all UIScreens
  */
-struct HideAllScreens : public etl::message<EventID::HideAllScreens>
+struct HideAllScreens : public etl::message<EventID::HIDE_ALL_SCREENS>
 {
 };
 
 /**
  * @brief Event to trigger rendering UI text
  */
-struct RenderUIText : public etl::message<EventID::RenderUIText>
+struct RenderUIText : public etl::message<EventID::RENDER_UI_TEXT>
 {
 };
 } // namespace Event

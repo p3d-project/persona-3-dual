@@ -8,13 +8,13 @@
 
 enum class WeaponType
 {
-    OneHandedSword,
-    TwoHandedSword,
-    Bow,
-    Glove,
-    Rapier,
-    Gun,
-    Knive,
-    Axe,
-    Spear
+    ONE_HANDED_SWORD,
+    TWO_HANDED_SWORD,
+    BOW,
+    GLOVE,
+    RAPIER,
+    GUN,
+    KNIVE,
+    AXE,
+    SPEAR
 };

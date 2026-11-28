@@ -32,7 +32,7 @@ void IwatodaiStreetsView::startBattle()
 
 void IwatodaiStreetsView::setupCamera()
 {
-    camConfig.mode = CameraMode::Follow;
+    camConfig.mode = CameraMode::FOLLOW;
     camConfig.initialAngle = ae::q20_12_t{1.5708 * 2};
     camConfig.distance = ae::q20_12_t{1};
     camConfig.height = height + ae::q20_12_t{0.6};
@@ -87,7 +87,7 @@ ViewState IwatodaiStreetsView::onTileCheck(TileType tile, u32 pressed)
     {
         if (!promptDrawn)
         {
-            menuHUDScreen->setTextContent("\xFF\x02\x01 Battle Zone", TextColor::DualGreen);
+            menuHUDScreen->setTextContent("\xFF\x02\x01 Battle Zone", TextColor::DUAL_GREEN);
             promptDrawn = true;
         }
         if (pressed & KEY_A)
@@ -103,7 +103,7 @@ ViewState IwatodaiStreetsView::onTileCheck(TileType tile, u32 pressed)
     {
         if (promptDrawn)
         {
-            menuHUDScreen->setTextContent("Streets", TextColor::White);
+            menuHUDScreen->setTextContent("Streets", TextColor::WHITE);
             promptDrawn = false;
         }
         break;

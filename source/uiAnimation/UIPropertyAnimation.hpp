@@ -89,7 +89,7 @@ template <typename T> class UIPropertyAnimation : public UIAnimation
     T from;
     T to;
     ae::q20_12_t duration{0};
-    UIEase ease = UIEase::Linear;
+    UIEase ease = UIEase::LINEAR;
 };
 
 /**
@@ -139,12 +139,12 @@ template <typename T> class UIPropertyAnimationBuilder
 
     UIPropertyAnimationBuilder& loop(int count = -1)
     {
-        return repeat(UIRepeatMode::Loop, count);
+        return repeat(UIRepeatMode::LOOP, count);
     }
 
     UIPropertyAnimationBuilder& pingPong(int count = -1)
     {
-        return repeat(UIRepeatMode::PingPong, count);
+        return repeat(UIRepeatMode::PING_PONG, count);
     }
 
     std::shared_ptr<UIAnimation> build() const
@@ -165,8 +165,8 @@ template <typename T> class UIPropertyAnimationBuilder
     T toVal = T{};
     bool hasFrom = false;
     int durationMs = 200;
-    UIEase easeType = UIEase::Linear;
-    UIRepeatMode repeatMode = UIRepeatMode::Once;
+    UIEase easeType = UIEase::LINEAR;
+    UIRepeatMode repeatMode = UIRepeatMode::ONCE;
     int repeatCount = -1;
     UIAnimator* owner = nullptr;
 };

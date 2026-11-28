@@ -57,7 +57,7 @@ class PauseMenu : public UIMenu
     UIManager& ui = UIManager::getInstance();
 
     etl::array<CameraMode, 4> cameraModes = {
-        CameraMode::Free, CameraMode::Static, CameraMode::CCTV, CameraMode::Follow};
+        CameraMode::FREE, CameraMode::STATIC, CameraMode::CCTV, CameraMode::FOLLOW};
 
     etl::array<MenuOption, 8> menuOptions = {
         MenuOption{"DEBUG", -1, menuBind(&PauseMenu::openDebugMenu)},

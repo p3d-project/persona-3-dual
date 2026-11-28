@@ -27,16 +27,16 @@ void PersonaDb::initialize()
     orpheus.skills = orpheusSkills;
     orpheus.skillCount = 2;
 
-    orpheus.battleStats.affinities[(u32)Element::Slash] = BattleStats::Neutral;
-    orpheus.battleStats.affinities[(u32)Element::Strike] = BattleStats::Neutral;
-    orpheus.battleStats.affinities[(u32)Element::Pierce] = BattleStats::Neutral;
-    orpheus.battleStats.affinities[(u32)Element::Fire] = BattleStats::Neutral;
-    orpheus.battleStats.affinities[(u32)Element::Ice] = BattleStats::Neutral;
-    orpheus.battleStats.affinities[(u32)Element::Electricity] = BattleStats::Weak;
-    orpheus.battleStats.affinities[(u32)Element::Wind] = BattleStats::Neutral;
-    orpheus.battleStats.affinities[(u32)Element::Light] = BattleStats::Neutral;
-    orpheus.battleStats.affinities[(u32)Element::Dark] = BattleStats::Weak;
-    orpheus.battleStats.affinities[(u32)Element::Almighty] = BattleStats::Neutral;
+    orpheus.battleStats.affinities[(u32)Element::SLASH] = BattleStats::Affinity::NEUTRAL;
+    orpheus.battleStats.affinities[(u32)Element::STRIKE] = BattleStats::Affinity::NEUTRAL;
+    orpheus.battleStats.affinities[(u32)Element::PIERCE] = BattleStats::Affinity::NEUTRAL;
+    orpheus.battleStats.affinities[(u32)Element::FIRE] = BattleStats::Affinity::NEUTRAL;
+    orpheus.battleStats.affinities[(u32)Element::ICE] = BattleStats::Affinity::NEUTRAL;
+    orpheus.battleStats.affinities[(u32)Element::ELECTRICITY] = BattleStats::Affinity::WEAK;
+    orpheus.battleStats.affinities[(u32)Element::WIND] = BattleStats::Affinity::NEUTRAL;
+    orpheus.battleStats.affinities[(u32)Element::LIGHT] = BattleStats::Affinity::NEUTRAL;
+    orpheus.battleStats.affinities[(u32)Element::DARK] = BattleStats::Affinity::WEAK;
+    orpheus.battleStats.affinities[(u32)Element::ALMIGHTY] = BattleStats::Affinity::NEUTRAL;
 
     /*--------------FORNEUS--------------*/
     forneus.name = "Forneus";
@@ -52,16 +52,16 @@ void PersonaDb::initialize()
     forneus.skills = forneusSkills;
     forneus.skillCount = 2;
 
-    forneus.battleStats.affinities[(u32)Element::Slash] = BattleStats::Neutral;
-    forneus.battleStats.affinities[(u32)Element::Strike] = BattleStats::Neutral;
-    forneus.battleStats.affinities[(u32)Element::Pierce] = BattleStats::Neutral;
-    forneus.battleStats.affinities[(u32)Element::Fire] = BattleStats::Weak;
-    forneus.battleStats.affinities[(u32)Element::Ice] = BattleStats::Resist;
-    forneus.battleStats.affinities[(u32)Element::Electricity] = BattleStats::Neutral;
-    forneus.battleStats.affinities[(u32)Element::Wind] = BattleStats::Neutral;
-    forneus.battleStats.affinities[(u32)Element::Light] = BattleStats::Neutral;
-    forneus.battleStats.affinities[(u32)Element::Dark] = BattleStats::Neutral;
-    forneus.battleStats.affinities[(u32)Element::Almighty] = BattleStats::Neutral;
+    forneus.battleStats.affinities[(u32)Element::SLASH] = BattleStats::Affinity::NEUTRAL;
+    forneus.battleStats.affinities[(u32)Element::STRIKE] = BattleStats::Affinity::NEUTRAL;
+    forneus.battleStats.affinities[(u32)Element::PIERCE] = BattleStats::Affinity::NEUTRAL;
+    forneus.battleStats.affinities[(u32)Element::FIRE] = BattleStats::Affinity::WEAK;
+    forneus.battleStats.affinities[(u32)Element::ICE] = BattleStats::Affinity::RESIST;
+    forneus.battleStats.affinities[(u32)Element::ELECTRICITY] = BattleStats::Affinity::NEUTRAL;
+    forneus.battleStats.affinities[(u32)Element::WIND] = BattleStats::Affinity::NEUTRAL;
+    forneus.battleStats.affinities[(u32)Element::LIGHT] = BattleStats::Affinity::NEUTRAL;
+    forneus.battleStats.affinities[(u32)Element::DARK] = BattleStats::Affinity::NEUTRAL;
+    forneus.battleStats.affinities[(u32)Element::ALMIGHTY] = BattleStats::Affinity::NEUTRAL;
 
     /*--------------HERMES--------------*/
     hermes.name = "Hermes";
@@ -76,16 +76,16 @@ void PersonaDb::initialize()
     hermes.skills = hermesSkills;
     hermes.skillCount = 1;
 
-    hermes.battleStats.affinities[(u32)Element::Slash] = BattleStats::Neutral;
-    hermes.battleStats.affinities[(u32)Element::Strike] = BattleStats::Neutral;
-    hermes.battleStats.affinities[(u32)Element::Pierce] = BattleStats::Neutral;
-    hermes.battleStats.affinities[(u32)Element::Fire] = BattleStats::Resist;
-    hermes.battleStats.affinities[(u32)Element::Ice] = BattleStats::Neutral;
-    hermes.battleStats.affinities[(u32)Element::Electricity] = BattleStats::Neutral;
-    hermes.battleStats.affinities[(u32)Element::Wind] = BattleStats::Weak;
-    hermes.battleStats.affinities[(u32)Element::Light] = BattleStats::Neutral;
-    hermes.battleStats.affinities[(u32)Element::Dark] = BattleStats::Neutral;
-    hermes.battleStats.affinities[(u32)Element::Almighty] = BattleStats::Neutral;
+    hermes.battleStats.affinities[(u32)Element::SLASH] = BattleStats::Affinity::NEUTRAL;
+    hermes.battleStats.affinities[(u32)Element::STRIKE] = BattleStats::Affinity::NEUTRAL;
+    hermes.battleStats.affinities[(u32)Element::PIERCE] = BattleStats::Affinity::NEUTRAL;
+    hermes.battleStats.affinities[(u32)Element::FIRE] = BattleStats::Affinity::RESIST;
+    hermes.battleStats.affinities[(u32)Element::ICE] = BattleStats::Affinity::NEUTRAL;
+    hermes.battleStats.affinities[(u32)Element::ELECTRICITY] = BattleStats::Affinity::NEUTRAL;
+    hermes.battleStats.affinities[(u32)Element::WIND] = BattleStats::Affinity::WEAK;
+    hermes.battleStats.affinities[(u32)Element::LIGHT] = BattleStats::Affinity::NEUTRAL;
+    hermes.battleStats.affinities[(u32)Element::DARK] = BattleStats::Affinity::NEUTRAL;
+    hermes.battleStats.affinities[(u32)Element::ALMIGHTY] = BattleStats::Affinity::NEUTRAL;
 
     /*--------------IO--------------*/
     io.name = "Io";
@@ -102,14 +102,14 @@ void PersonaDb::initialize()
     io.skills = ioSkills;
     io.skillCount = 3;
 
-    io.battleStats.affinities[(u32)Element::Slash] = BattleStats::Neutral;
-    io.battleStats.affinities[(u32)Element::Strike] = BattleStats::Neutral;
-    io.battleStats.affinities[(u32)Element::Pierce] = BattleStats::Neutral;
-    io.battleStats.affinities[(u32)Element::Fire] = BattleStats::Neutral;
-    io.battleStats.affinities[(u32)Element::Ice] = BattleStats::Neutral;
-    io.battleStats.affinities[(u32)Element::Electricity] = BattleStats::Weak;
-    io.battleStats.affinities[(u32)Element::Wind] = BattleStats::Resist;
-    io.battleStats.affinities[(u32)Element::Light] = BattleStats::Neutral;
-    io.battleStats.affinities[(u32)Element::Dark] = BattleStats::Neutral;
-    io.battleStats.affinities[(u32)Element::Almighty] = BattleStats::Neutral;
+    io.battleStats.affinities[(u32)Element::SLASH] = BattleStats::Affinity::NEUTRAL;
+    io.battleStats.affinities[(u32)Element::STRIKE] = BattleStats::Affinity::NEUTRAL;
+    io.battleStats.affinities[(u32)Element::PIERCE] = BattleStats::Affinity::NEUTRAL;
+    io.battleStats.affinities[(u32)Element::FIRE] = BattleStats::Affinity::NEUTRAL;
+    io.battleStats.affinities[(u32)Element::ICE] = BattleStats::Affinity::NEUTRAL;
+    io.battleStats.affinities[(u32)Element::ELECTRICITY] = BattleStats::Affinity::WEAK;
+    io.battleStats.affinities[(u32)Element::WIND] = BattleStats::Affinity::RESIST;
+    io.battleStats.affinities[(u32)Element::LIGHT] = BattleStats::Affinity::NEUTRAL;
+    io.battleStats.affinities[(u32)Element::DARK] = BattleStats::Affinity::NEUTRAL;
+    io.battleStats.affinities[(u32)Element::ALMIGHTY] = BattleStats::Affinity::NEUTRAL;
 }

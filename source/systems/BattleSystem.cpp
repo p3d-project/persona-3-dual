@@ -73,7 +73,7 @@ void BattleSystem::update(ae::q20_12_t)
 {
     switch (phase)
     {
-    case BattlePhase::ChooseAction:
+    case BattlePhase::CHOOSE_ACTION:
     {
         PartyMember* actor = static_cast<PartyMember*>(currentParticipantTurn);
 
@@ -87,7 +87,7 @@ void BattleSystem::update(ae::q20_12_t)
             if (selectedBattleOption == ACTION_ATTACK)
             {
                 selectedSkill = actor->baseAttackAction;
-                phase = BattlePhase::ChooseTarget;
+                phase = BattlePhase::CHOOSE_TARGET;
             }
             else if (selectedBattleOption == ACTION_GUARD)
             {
@@ -97,7 +97,7 @@ void BattleSystem::update(ae::q20_12_t)
             }
             else if (selectedBattleOption == ACTION_PERSONA)
             {
-                phase = BattlePhase::ChooseSkill;
+                phase = BattlePhase::CHOOSE_SKILL;
             }
             else if (selectedBattleOption == ACTION_SWITCH)
             {
@@ -105,13 +105,13 @@ void BattleSystem::update(ae::q20_12_t)
                 {
                     return;
                 }
-                phase = BattlePhase::ChoosePersona;
+                phase = BattlePhase::CHOOSE_PERSONA;
             }
         }
         break;
     }
 
-    case BattlePhase::ChooseSkill:
+    case BattlePhase::CHOOSE_SKILL:
     {
         PartyMember* actor = static_cast<PartyMember*>(currentParticipantTurn);
 
@@ -127,7 +127,7 @@ void BattleSystem::update(ae::q20_12_t)
             Skill* s = actor->curPersona->skills[selectedBattleOption];
 
             s32* resource;
-            if (s->skillRace == SkillRace::mag)
+            if (s->skillRace == SkillRace::MAG)
             {
                 resource = &actor->sp;
             }
@@ -142,25 +142,25 @@ void BattleSystem::update(ae::q20_12_t)
                 *resource -= s->cost;
                 selectedSkill = s;
                 selectedBattleOption = 0;
-                phase = BattlePhase::ChooseTarget;
+                phase = BattlePhase::CHOOSE_TARGET;
             }
             else
             {
-                pendingAlert = (s->skillRace == SkillRace::mag) ? "Not enough SP\n" : "Not enough HP\n";
-                alertReturnPhase = BattlePhase::ChooseSkill;
+                pendingAlert = (s->skillRace == SkillRace::MAG) ? "Not enough SP\n" : "Not enough HP\n";
+                alertReturnPhase = BattlePhase::CHOOSE_SKILL;
                 battleMenuCmpt->resetLoadedOptions();
-                phase = BattlePhase::ShowAlert;
+                phase = BattlePhase::SHOW_ALERT;
             }
         }
 
         if (battleMenuCmpt->consumeCancel())
         {
-            phase = BattlePhase::ChooseAction;
+            phase = BattlePhase::CHOOSE_ACTION;
         }
         break;
     }
 
-    case BattlePhase::ChoosePersona:
+    case BattlePhase::CHOOSE_PERSONA:
     {
         Player* actor = static_cast<Player*>(currentParticipantTurn);
 
@@ -180,33 +180,33 @@ void BattleSystem::update(ae::q20_12_t)
             if (actor->curPersona == actor->personas[selectedBattleOption])
             {
                 pendingAlert = "Already using this Persona\n";
-                alertReturnPhase = BattlePhase::ChoosePersona;
+                alertReturnPhase = BattlePhase::CHOOSE_PERSONA;
             }
             else
             {
                 actor->curPersona = actor->personas[selectedBattleOption];
                 pendingPersonaSwitch = (actor->curPersona != personaBeforeSwitch);
                 pendingAlert = "Switched to: " + actor->curPersona->name + "\n";
-                alertReturnPhase = BattlePhase::ChooseAction;
+                alertReturnPhase = BattlePhase::CHOOSE_ACTION;
             }
 
             battleMenuCmpt->resetLoadedOptions();
-            phase = BattlePhase::ShowAlert;
+            phase = BattlePhase::SHOW_ALERT;
         }
 
         if (battleMenuCmpt->consumeCancel())
         {
-            phase = BattlePhase::ChooseAction;
+            phase = BattlePhase::CHOOSE_ACTION;
         }
         break;
     }
 
-    case BattlePhase::ChooseTarget:
+    case BattlePhase::CHOOSE_TARGET:
     {
         PartyMember* actor = static_cast<PartyMember*>(currentParticipantTurn);
 
-        bool healTarget = selectedSkill && (selectedSkill->skillType == SkillType::Heal ||
-                                            selectedSkill->skillType == SkillType::MultiHeal);
+        bool healTarget = selectedSkill && (selectedSkill->skillType == SkillType::HEAL ||
+                                            selectedSkill->skillType == SkillType::MULTI_HEAL);
 
         etl::vector<BattleParticipant*, 13> targets;
         if (healTarget)
@@ -242,7 +242,7 @@ void BattleSystem::update(ae::q20_12_t)
 
             // Check so you cant heal target that has max hp
             if (selectedSkill &&
-                (selectedSkill->skillType == SkillType::Heal || selectedSkill->skillType == SkillType::MultiHeal))
+                (selectedSkill->skillType == SkillType::HEAL || selectedSkill->skillType == SkillType::MULTI_HEAL))
             {
                 bool canHealAnyTarget = false;
                 for (BattleParticipant* target : targets)
@@ -273,13 +273,13 @@ void BattleSystem::update(ae::q20_12_t)
 
         if (battleMenuCmpt->consumeCancel())
         {
-            phase = (selectedSkill == actor->baseAttackAction) ? BattlePhase::ChooseAction : BattlePhase::ChooseSkill;
+            phase = (selectedSkill == actor->baseAttackAction) ? BattlePhase::CHOOSE_ACTION : BattlePhase::CHOOSE_SKILL;
             selectedBattleOption = -1;
         }
         break;
     }
 
-    case BattlePhase::ConfirmAllOutAttack:
+    case BattlePhase::CONFIRM_ALL_OUT_ATTACK:
     {
         battleMenuCmpt->loadAllOutAttackConfirmation();
         selectedBattleOption = -1;
@@ -317,13 +317,13 @@ void BattleSystem::update(ae::q20_12_t)
             {
                 currentParticipantTurn->oneMore = false;
                 battleMenuCmpt->resetLoadedOptions();
-                phase = BattlePhase::ChooseAction;
+                phase = BattlePhase::CHOOSE_ACTION;
             }
         }
         break;
     }
 
-    case BattlePhase::ShowAlert:
+    case BattlePhase::SHOW_ALERT:
     {
         battleMenuCmpt->loadAlertOptions(pendingAlert);
         if (battleMenuCmpt->isAlertExpired(120))
@@ -335,7 +335,7 @@ void BattleSystem::update(ae::q20_12_t)
         break;
     }
 
-    case BattlePhase::EnemyTurn:
+    case BattlePhase::ENEMY_TURN:
     {
         Enemy* enemy = static_cast<Enemy*>(currentParticipantTurn);
         Skill* skill = enemy->pickSkill();
@@ -355,7 +355,7 @@ void BattleSystem::update(ae::q20_12_t)
         break;
     }
 
-    case BattlePhase::Done:
+    case BattlePhase::DONE:
         break;
     }
 
@@ -452,9 +452,9 @@ void BattleSystem::advanceTurn()
     //all out attack availability check
     if (allEnemiesKnockedDown() && !allOutAttackWasPossibleThisKnockDown)
     {
-        alertReturnPhase = BattlePhase::ChooseAction;
+        alertReturnPhase = BattlePhase::CHOOSE_ACTION;
         battleMenuCmpt->resetLoadedOptions();
-        setNextPhase(BattlePhase::ConfirmAllOutAttack);
+        setNextPhase(BattlePhase::CONFIRM_ALL_OUT_ATTACK);
         return;
     }
 
@@ -519,7 +519,7 @@ void BattleSystem::setNextPhase(BattlePhase nextPhase)
     {
         alertReturnPhase = nextPhase;
         battleMenuCmpt->resetLoadedOptions();
-        phase = BattlePhase::ShowAlert;
+        phase = BattlePhase::SHOW_ALERT;
     }
     else
     {
@@ -543,7 +543,7 @@ void BattleSystem::calculateTurnOrder()
 
     battleParticipants.clear();
 
-    if (battleStartCondition == BattleStartCondition::PartyAdvantage)
+    if (battleStartCondition == BattleStartCondition::PARTY_ADVANTAGE)
     {
         for (auto p : partyMembers)
         {
@@ -554,7 +554,7 @@ void BattleSystem::calculateTurnOrder()
             battleParticipants.push_back(e);
         }
     }
-    else if (battleStartCondition == BattleStartCondition::EnemyAdvantage)
+    else if (battleStartCondition == BattleStartCondition::ENEMY_ADVANTAGE)
     {
         for (auto e : enemies)
         {
@@ -657,11 +657,11 @@ bool BattleSystem::isSingleTarget(SkillType type)
 {
     switch (type)
     {
-    case SkillType::RegularAttack:
-    case SkillType::Attack:
-    case SkillType::Heal:
-    case SkillType::Buff:
-    case SkillType::Debuff:
+    case SkillType::REGULAR_ATTACK:
+    case SkillType::ATTACK:
+    case SkillType::HEAL:
+    case SkillType::BUFF:
+    case SkillType::DEBUFF:
         return true;
     default:
         return false;

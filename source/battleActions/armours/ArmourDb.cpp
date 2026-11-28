@@ -7,11 +7,11 @@ Armour ArmourDb::enemyArmour;
 void ArmourDb::initialize()
 {
     plainShirt.defense = 24;
-    plainShirt.armourType = ArmourType::Male;
+    plainShirt.armourType = ArmourType::MALE;
 
     rashGuard.defense = 46;
-    rashGuard.armourType = ArmourType::Unisex;
+    rashGuard.armourType = ArmourType::UNISEX;
 
     enemyArmour.defense = 10;
-    enemyArmour.armourType = ArmourType::Enemy;
+    enemyArmour.armourType = ArmourType::ENEMY;
 }

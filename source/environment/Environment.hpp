@@ -6,7 +6,7 @@
 #include "managers/MathManager.hpp"
 #include "managers/RenderManager.hpp"
 
-// Largest textureCount across all current g_environmentDb entries (dorm = 32).
+// Largest textureCount across all current environmentDb entries (dorm = 32).
 // Bump this if a future room introduces more textures than that.
 constexpr int MAX_ENVIRONMENT_TEXTURES = 32;
 

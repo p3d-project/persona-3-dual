@@ -8,7 +8,9 @@ bool Player::actorCanUse(ActionBase* action)
 void Player::onDead(Event::BattleResult& battleResult)
 {
     if (hp > 0)
+    {
         return;
+    }
 
     battleResult.playerDied = true;
 }

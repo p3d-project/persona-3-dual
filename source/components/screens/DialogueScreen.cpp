@@ -79,14 +79,14 @@ void DialogueScreen::showAnimated()
 {
     panelAnimator.cancelAll();
     panelOffset = 40;
-    panelAnimation = panelAnimator.animate(panelOffset).from(40).to(0).duration(220).ease(UIEase::OutCubic).start();
+    panelAnimation = panelAnimator.animate(panelOffset).from(40).to(0).duration(220).ease(UIEase::OUT_CUBIC).start();
 }
 
 void DialogueScreen::hideAnimated()
 {
     panelAnimator.cancelAll();
     panelAnimation =
-        panelAnimator.animate(panelOffset).from(panelOffset).to(40).duration(180).ease(UIEase::InCubic).start();
+        panelAnimator.animate(panelOffset).from(panelOffset).to(40).duration(180).ease(UIEase::IN_CUBIC).start();
 }
 
 void DialogueScreen::updateAnimation()
@@ -210,9 +210,9 @@ void DialogueScreen::renderBust(etl::span<SpritePayload>& bustPayload)
     bustAnimator.cancelAll();
     bustOffsetX = 0;
     auto focus = bustAnimator.sequence();
-    focus.append(bustAnimator.animate(bustOffsetX).from(0).to(-3).duration(50).ease(UIEase::OutQuad));
-    focus.append(bustAnimator.animate(bustOffsetX).from(-3).to(3).duration(90).ease(UIEase::InOutQuad));
-    focus.append(bustAnimator.animate(bustOffsetX).from(3).to(0).duration(70).ease(UIEase::OutQuad));
+    focus.append(bustAnimator.animate(bustOffsetX).from(0).to(-3).duration(50).ease(UIEase::OUT_QUAD));
+    focus.append(bustAnimator.animate(bustOffsetX).from(-3).to(3).duration(90).ease(UIEase::IN_OUT_QUAD));
+    focus.append(bustAnimator.animate(bustOffsetX).from(3).to(0).duration(70).ease(UIEase::OUT_QUAD));
     bustAnimation = focus.start();
 
     // draw bust
@@ -370,14 +370,14 @@ void DialogueScreen::triggerAction(UIAction action)
     switch (action)
     {
     // default palette
-    case UIAction::SwitchToPalette0:
+    case UIAction::SWITCH_TO_PALETTE0:
     {
         dmaCopy(palette0, SPRITE_PALETTE_SUB, 16 * sizeof(u16));
         break;
     }
 
     // option selection palette
-    case UIAction::SwitchToPalette1:
+    case UIAction::SWITCH_TO_PALETTE1:
     {
         dmaCopy(palette1, SPRITE_PALETTE_SUB, 16 * sizeof(u16));
         break;

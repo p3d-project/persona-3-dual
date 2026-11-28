@@ -18,7 +18,7 @@
 class TextComponent : public ae::Component
 {
   public:
-    static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Text);
+    static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::TEXT);
     void init() override
     {
     }
@@ -55,7 +55,7 @@ class TextComponent : public ae::Component
      * @param xBoundary An optional limit to the right side of a textbox, for when text is only supposed to take up an area of the screen.
      * @see drawText
      */
-    void drawText(const std::string& text, int x, int y, int color = TextColor::White, int xBoundary = 256);
+    void drawText(const std::string& text, int x, int y, TextColor color = TextColor::WHITE, int xBoundary = 256);
 
     /**
      * @brief A wrapper for appearText in TextSystem. Simulates text typing effect.
@@ -72,7 +72,7 @@ class TextComponent : public ae::Component
     void appearText(const std::string& text,
                     int x,
                     int y,
-                    int color = TextColor::White,
+                    TextColor color = TextColor::WHITE,
                     int maxX = 256,
                     int maxY = 0,
                     bool hyphenate = false);
@@ -119,8 +119,13 @@ class TextComponent : public ae::Component
      * @param underline Whether the glyph should be underlined.
      * @see drawGlyph
      */
-    void drawGlyph(
-        const Glyph& glyph, int x, int y, int color, bool bold = false, bool italic = false, bool underline = false);
+    void drawGlyph(const Glyph& glyph,
+                   int x,
+                   int y,
+                   TextColor color,
+                   bool bold = false,
+                   bool italic = false,
+                   bool underline = false);
 
     /**
      * @brief Returns the Glyph struct for a given character. Useful for when drawing single characters from outside the text component.

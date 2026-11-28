@@ -35,7 +35,7 @@ bool BattleCalcs::hit(BattleParticipant& attacker, BattleParticipant& defender, 
 
     ae::q20_12_t baseAccuracy = math.div(ae::q20_12_t{attackerStats.ag + 200}, ae::q20_12_t{defenderStats.ag + 200});
     ae::q20_12_t multipliedAccuracy;
-    if (attacker.participantType == ParticipantType::Enemy)
+    if (attacker.participantType == ParticipantType::ENEMY)
     {
         ae::q20_12_t shoeMultiplier =
             math.div(ae::q20_12_t{attackerStats.ag + 200},
@@ -88,14 +88,14 @@ u32 BattleCalcs::allOutAttack(Player& attacker, BattleParticipant& defender, u32
     return static_cast<u32>(fpm::trunc(math.div(base * range, ae::q20_12_t{100})));
 }
 
-const ae::q20_12_t BattleCalcs::levelMultipliers[24] = {
+const ae::q20_12_t BattleCalcs::LEVEL_MULTIPLIERS[24] = {
     ae::q20_12_t{0.5},  ae::q20_12_t{0.51}, ae::q20_12_t{0.53}, ae::q20_12_t{0.59}, ae::q20_12_t{0.66},
     ae::q20_12_t{0.75}, ae::q20_12_t{0.84}, ae::q20_12_t{0.91}, ae::q20_12_t{0.97}, ae::q20_12_t{0.99},
     ae::q20_12_t{1.0},  ae::q20_12_t{1.0},  ae::q20_12_t{1.0},  ae::q20_12_t{1.0},  ae::q20_12_t{1.01},
     ae::q20_12_t{1.03}, ae::q20_12_t{1.09}, ae::q20_12_t{1.16}, ae::q20_12_t{1.25}, ae::q20_12_t{1.34},
     ae::q20_12_t{1.41}, ae::q20_12_t{1.47}, ae::q20_12_t{1.49}, ae::q20_12_t{1.5}};
 
-const uint8_t BattleCalcs::magicBoostTableHeal[20] = {
+const uint8_t BattleCalcs::MAGIC_BOOST_TABLE_HEAL[20] = {
     0,   /// 1-5
     6,   /// 6-10
     12,  /// 11-15
@@ -120,7 +120,7 @@ const uint8_t BattleCalcs::magicBoostTableHeal[20] = {
 
 u32 BattleCalcs::getAtk(BattleStats& attackerStats, Skill& skill)
 {
-    return skill.skillRace == SkillRace::phys ? attackerStats.st : attackerStats.ma;
+    return skill.skillRace == SkillRace::PHYS ? attackerStats.st : attackerStats.ma;
 }
 
 ae::q20_12_t BattleCalcs::getLevelDifference(u32 attackerLevel, u32 defenderLevel)
@@ -129,26 +129,26 @@ ae::q20_12_t BattleCalcs::getLevelDifference(u32 attackerLevel, u32 defenderLeve
     diff = std::clamp(diff, (s32)-13, (s32)10);
 
     /// offset so -13 is 0
-    return levelMultipliers[diff + 13];
+    return LEVEL_MULTIPLIERS[diff + 13];
 }
 
 ae::q20_12_t BattleCalcs::getAffinityMtp(BattleStats& defenderStats, Skill& skill)
 {
-    u32 affinity = defenderStats.affinities[(u32)skill.element];
+    BattleStats::Affinity affinity = defenderStats.affinities[(u32)skill.element];
 
     switch (affinity)
     {
-    case BattleStats::Affinity::Weak:
+    case BattleStats::Affinity::WEAK:
         return ae::q20_12_t{1.25};
-    case BattleStats::Affinity::Resist:
+    case BattleStats::Affinity::RESIST:
         return ae::q20_12_t{0.5};
-    case BattleStats::Affinity::Null:
+    case BattleStats::Affinity::NULLIFY:
         return ae::q20_12_t{0.0};
-    case BattleStats::Affinity::Absorb:
+    case BattleStats::Affinity::ABSORB:
         return ae::q20_12_t{-1.0};
-    case BattleStats::Affinity::Repel:
+    case BattleStats::Affinity::REPEL:
         return ae::q20_12_t{-2.0}; /// TODO: add repel logic
-    case BattleStats::Affinity::Neutral:
+    case BattleStats::Affinity::NEUTRAL:
     default:
         return ae::q20_12_t{1.0};
     }
@@ -158,5 +158,5 @@ uint8_t BattleCalcs::getMagicBoostHeal(uint8_t& magic)
 {
     uint8_t index = (magic - 1) / 5;
     index = std::clamp(index, (uint8_t)0, (uint8_t)19);
-    return magicBoostTableHeal[index];
+    return MAGIC_BOOST_TABLE_HEAL[index];
 }

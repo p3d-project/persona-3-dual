@@ -2,6 +2,6 @@
 
 enum class SkillRace
 {
-    phys,
-    mag
+    PHYS,
+    MAG
 };

@@ -18,7 +18,7 @@
 class GraphicsComponent : public ae::Component
 {
   public:
-    static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::Graphics);
+    static constexpr ae::ComponentTypeID TYPE_ID = static_cast<ae::ComponentTypeID>(ComponentType::GRAPHICS);
     void init() override
     {
     }

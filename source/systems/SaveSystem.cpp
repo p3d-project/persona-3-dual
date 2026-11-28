@@ -13,9 +13,9 @@ void SaveSystem::on_receive(const Event::ReadSave)
 
     // down the line, do checksum validation to ensure save file is not corrupted
 
-    if (saveData.header.version != gameVersion)
+    if (saveData.header.version != GAME_VERSION)
     {
-        bool res = migrate_save_version(&saveData);
+        bool res = migrateSaveVersion(&saveData);
         if (!res)
         {
             logMessage(LogSeverity::ERROR, "Failed to migrate save file version");
@@ -38,15 +38,15 @@ void SaveSystem::on_receive(const Event::WriteSave)
     logMessage(LogSeverity::DEBUG, "Save data written successfully");
 }
 
-bool SaveSystem::migrate_save_version(Save* saveData)
+bool SaveSystem::migrateSaveVersion(Save* saveData)
 {
     if (saveData == nullptr)
     {
         logMessage(LogSeverity::ERROR, "Called with null saveData");
         return false;
     }
-    saveData->header.version.majorVersion = gameVersion.majorVersion;
-    saveData->header.version.minorVersion = gameVersion.minorVersion;
-    saveData->header.version.patchVersion = gameVersion.patchVersion;
+    saveData->header.version.majorVersion = GAME_VERSION.majorVersion;
+    saveData->header.version.minorVersion = GAME_VERSION.minorVersion;
+    saveData->header.version.patchVersion = GAME_VERSION.patchVersion;
     return true;
 }

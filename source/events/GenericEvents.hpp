@@ -17,7 +17,7 @@ namespace Event
 /**
  * @brief Event payload to set the character position data.
  */
-struct SetCharacterPosition : public etl::message<EventID::SetCharacterPosition>
+struct SetCharacterPosition : public etl::message<EventID::SET_CHARACTER_POSITION>
 {
     CharacterPosition charPos;
     SetCharacterPosition(CharacterPosition iCharPos) : charPos(iCharPos)
@@ -28,7 +28,7 @@ struct SetCharacterPosition : public etl::message<EventID::SetCharacterPosition>
 /**
  * @brief Event payload to switch the ViewState.
  */
-struct SwitchView : public etl::message<EventID::SwitchView>
+struct SwitchView : public etl::message<EventID::SWITCH_VIEW>
 {
     ViewState view;
     SwitchView(ViewState iView) : view(iView)
@@ -39,7 +39,7 @@ struct SwitchView : public etl::message<EventID::SwitchView>
 /**
  * @brief Event payload to release resources owned by the current view.
  */
-struct ResetUIResources : public etl::message<EventID::ResetUIResources>
+struct ResetUIResources : public etl::message<EventID::RESET_UI_RESOURCES>
 {
 };
 } // namespace Event

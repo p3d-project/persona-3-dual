@@ -2,14 +2,14 @@
 
 enum class SkillType
 {
-    RegularAttack, // non skill attack, using weapon for party
-    Attack,
-    Heal,
-    Buff,
-    Debuff,
-    MultiAttack,
-    MultiHeal,
-    MultiBuff,
-    MultiDebuff,
-    AllOutAttack,
+    REGULAR_ATTACK, // non skill attack, using weapon for party
+    ATTACK,
+    HEAL,
+    BUFF,
+    DEBUFF,
+    MULTI_ATTACK,
+    MULTI_HEAL,
+    MULTI_BUFF,
+    MULTI_DEBUFF,
+    ALL_OUT_ATTACK,
 };

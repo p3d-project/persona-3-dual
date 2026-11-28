@@ -6,7 +6,7 @@
 
 Enemy::Enemy(const EnemyProfile& iEnemyProfile) : enemyProfile(iEnemyProfile)
 {
-    participantType = ParticipantType::Enemy;
+    participantType = ParticipantType::ENEMY;
 
     name = enemyProfile.name;
     maxHp = enemyProfile.maxHp;
@@ -76,7 +76,7 @@ TurnResult Enemy::resolve(BattleParticipant* target, Skill* skill)
     PartyMember* party = static_cast<PartyMember*>(target);
 
     s32* resource;
-    if (skill->skillRace == SkillRace::mag)
+    if (skill->skillRace == SkillRace::MAG)
     {
         resource = &sp;
     }
@@ -111,8 +111,8 @@ TurnResult Enemy::resolve(BattleParticipant* target, Skill* skill)
     bool oneMoreResult = false;
     if (party->curPersona != nullptr)
     {
-        u32 affinity = party->curPersona->battleStats.affinities[(u32)skill->element];
-        if (affinity == BattleStats::Affinity::Weak && !party->knockedDown && !party->guarding)
+        BattleStats::Affinity affinity = party->curPersona->battleStats.affinities[(u32)skill->element];
+        if (affinity == BattleStats::Affinity::WEAK && !party->knockedDown && !party->guarding)
         {
             oneMoreResult = true;
             party->knockedDown = true;
@@ -135,14 +135,14 @@ ae::q20_12_t Enemy::calculateBaseDamage(BattleParticipant& defender, Skill& skil
     ae::q20_12_t levelDifference = BattleCalcs::getLevelDifference(lv, defender.lv);
     ae::q20_12_t affinityMtp = BattleCalcs::getAffinityMtp(*defStats, skill);
 
-    if (skill.skillType == SkillType::RegularAttack)
+    if (skill.skillType == SkillType::REGULAR_ATTACK)
     {
         return (math.sqrt(math.div(ae::q20_12_t{skill.movePower * 6 * atk},
                                    ae::q20_12_t{8 * defStats->en + defender.armour.defense})) *
                 ae::q20_12_t{9} * levelDifference) *
                affinityMtp;
     }
-    else if (skill.skillType == SkillType::Attack || skill.skillType == SkillType::MultiAttack)
+    else if (skill.skillType == SkillType::ATTACK || skill.skillType == SkillType::MULTI_ATTACK)
     {
         return ((math.sqrt(math.div(ae::q20_12_t{skill.movePower * 6 * atk},
                                     ae::q20_12_t{8 * defStats->en + defender.armour.defense})) *
@@ -163,7 +163,7 @@ ae::q20_12_t Enemy::getTeamMultiplier()
 
 BattlePhase Enemy::getInitalTurnPhase()
 {
-    return BattlePhase::EnemyTurn;
+    return BattlePhase::ENEMY_TURN;
 }
 
 void Enemy::onDead(Event::BattleResult& battleResult)

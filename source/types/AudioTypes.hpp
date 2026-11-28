@@ -11,7 +11,7 @@ extern "C"
 /**
  * @brief QOA audio stream data
  */
-struct qoaplay_desc
+struct QoaPlayDesc
 {
     qoa_desc info;
     FILE* file;

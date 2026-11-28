@@ -14,7 +14,7 @@ class PaulowniaMallView : public EnvironmentView
   protected:
     const EnvironmentDbEntry* getEnvironmentDbEntry() override
     {
-        return g_environmentDb[2];
+        return environmentDb[2];
     }
     ae::q20_12_t getCameraYOffset() const override
     {

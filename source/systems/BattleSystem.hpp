@@ -99,7 +99,7 @@ class BattleSystem : public ae::SystemRouter<BattleSystem, Event::ExecuteBattle>
 
   private:
     friend class Singleton<BattleSystem>;
-    BattleSystem() : SystemRouter(kBattleSystemRouterID)
+    BattleSystem() : SystemRouter(BATTLE_SYSTEM_ROUTER_ID)
     {
     }
 
@@ -124,7 +124,7 @@ class BattleSystem : public ae::SystemRouter<BattleSystem, Event::ExecuteBattle>
     PersonaBase* personaBeforeSwitch = nullptr;
 
     std::string pendingAlert;
-    BattlePhase alertReturnPhase = BattlePhase::Done;
+    BattlePhase alertReturnPhase = BattlePhase::DONE;
 
     bool allOutAttackWasPossibleThisKnockDown = false;
 
@@ -134,7 +134,7 @@ class BattleSystem : public ae::SystemRouter<BattleSystem, Event::ExecuteBattle>
     etl::vector<PartyMember*, 4> partyMembers;
     Player* player = nullptr;
 
-    BattleStartCondition battleStartCondition = BattleStartCondition::Even;
+    BattleStartCondition battleStartCondition = BattleStartCondition::EVEN;
 
     // Actions
     AttackAction attack;

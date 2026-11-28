@@ -59,10 +59,10 @@ class SaveSystem : public ae::SystemRouter<SaveSystem, Event::ReadSave, Event::W
     }
 
   private:
-    bool migrate_save_version(Save* saveData);
+    bool migrateSaveVersion(Save* saveData);
 
     friend class Singleton<SaveSystem>;
-    SaveSystem() : SystemRouter(kSaveSystemRouterID)
+    SaveSystem() : SystemRouter(SAVE_SYSTEM_ROUTER_ID)
     {
     }
 

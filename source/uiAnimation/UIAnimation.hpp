@@ -13,9 +13,9 @@
  */
 enum class UIRepeatMode
 {
-    Once,    ///< Play once, then complete.
-    Loop,    ///< Restart from the beginning.
-    PingPong ///< Reverse direction each cycle.
+    ONCE,     ///< Play once, then complete.
+    LOOP,     ///< Restart from the beginning.
+    PING_PONG ///< Reverse direction each cycle.
 };
 
 /**
@@ -118,7 +118,7 @@ class UIAnimation
      */
     bool applyRepeat()
     {
-        if (repeatMode == UIRepeatMode::Once)
+        if (repeatMode == UIRepeatMode::ONCE)
         {
             return false;
         }
@@ -132,7 +132,7 @@ class UIAnimation
             --remainingRepeats;
         }
 
-        if (repeatMode == UIRepeatMode::PingPong)
+        if (repeatMode == UIRepeatMode::PING_PONG)
         {
             reverse();
             elapsed = ae::q20_12_t{0};
@@ -150,6 +150,6 @@ class UIAnimation
     bool cancelled = false;
     bool done = false;
     ae::q20_12_t elapsed{0};
-    UIRepeatMode repeatMode = UIRepeatMode::Once;
+    UIRepeatMode repeatMode = UIRepeatMode::ONCE;
     int remainingRepeats = -1; ///< -1 = infinite when mode is not Once.
 };

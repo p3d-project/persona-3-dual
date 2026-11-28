@@ -1,15 +1,15 @@
 #pragma once
 enum class Element
 {
-    Fire,
-    Ice,
-    Wind,
-    Electricity,
-    Light,
-    Dark,
-    Strike,
-    Slash,
-    Pierce,
-    Heal,
-    Almighty
+    FIRE,
+    ICE,
+    WIND,
+    ELECTRICITY,
+    LIGHT,
+    DARK,
+    STRIKE,
+    SLASH,
+    PIERCE,
+    HEAL,
+    ALMIGHTY
 };

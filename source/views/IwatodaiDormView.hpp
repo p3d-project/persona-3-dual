@@ -9,7 +9,7 @@ class IwatodaiDormView : public EnvironmentView
   protected:
     const EnvironmentDbEntry* getEnvironmentDbEntry() override
     {
-        return g_environmentDb[0];
+        return environmentDb[0];
     }
     void setupMovement() override;
     void setupMusic() override;

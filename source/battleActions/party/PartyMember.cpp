@@ -43,7 +43,7 @@ ae::q20_12_t PartyMember::calculateBaseDamage(BattleParticipant& defender, Skill
     u32 atk = BattleCalcs::getAtk(curPersona->battleStats, skill);
     ae::q20_12_t levelDifference = BattleCalcs::getLevelDifference(lv, defender.lv);
     ae::q20_12_t affinityMtp = BattleCalcs::getAffinityMtp(*defStats, skill);
-    u32 movePower = (skill.skillType == SkillType::RegularAttack) ? (weapon.weaponPower / 2) : skill.movePower;
+    u32 movePower = (skill.skillType == SkillType::REGULAR_ATTACK) ? (weapon.weaponPower / 2) : skill.movePower;
 
     return fpm::floor(math.sqrt(math.div(ae::q20_12_t{movePower * 15 * atk}, ae::q20_12_t{defStats->en})) *
                       ae::q20_12_t{2} * levelDifference * affinityMtp);
@@ -66,7 +66,7 @@ void PartyMember::setCurrentTurnOrderAgility(ae::q20_12_t boost)
 
 BattlePhase PartyMember::getInitalTurnPhase()
 {
-    return BattlePhase::ChooseAction;
+    return BattlePhase::CHOOSE_ACTION;
 }
 
 void PartyMember::onDead(Event::BattleResult& battleResult)
@@ -86,5 +86,5 @@ bool PartyMember::canParticipateInAllOutAttack()
 
 bool PartyMember::actorCanUse(ActionBase* action)
 {
-    return action->possibleUsers == ParticipantType::Party;
+    return action->possibleUsers == ParticipantType::PARTY;
 }

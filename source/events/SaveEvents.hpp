@@ -15,14 +15,14 @@ namespace Event
 /**
  * @brief Event payload to trigger a save write
  */
-struct WriteSave : public etl::message<EventID::WriteSave>
+struct WriteSave : public etl::message<EventID::WRITE_SAVE>
 {
 };
 
 /**
  * @brief Event payload to trigger a save read
  */
-struct ReadSave : public etl::message<EventID::ReadSave>
+struct ReadSave : public etl::message<EventID::READ_SAVE>
 {
 };
 } // namespace Event

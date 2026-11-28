@@ -22,7 +22,7 @@ void ModelComponent::destroy()
 
         for (Node& node : model->nodes)
         {
-            for (SubList_N& sl : node.subLists)
+            for (SubListN& sl : node.subLists)
             {
                 if (sl.displayList)
                 {
@@ -185,7 +185,7 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
 
         for (uint32_t j = 0; j < rawNode.subListCount; ++j)
         {
-            SubList_N sl;
+            SubListN sl;
             if (fread(&sl.texSlot, sizeof(int32_t), 1, f) != 1 || fread(&sl.dlSize, sizeof(uint32_t), 1, f) != 1)
             {
                 fclose(f);
@@ -214,7 +214,7 @@ bool ModelComponent::loadMesh(std::string* meshFilePath)
     {
         std::sort(node.subLists.begin(),
                   node.subLists.end(),
-                  [](const SubList_N& a, const SubList_N& b) { return a.texSlot < b.texSlot; });
+                  [](const SubListN& a, const SubListN& b) { return a.texSlot < b.texSlot; });
     }
 
     // Skip animation data on static meshes

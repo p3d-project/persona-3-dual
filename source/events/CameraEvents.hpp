@@ -18,7 +18,7 @@ namespace Event
 /**
  * @brief Output of @ref CameraSystem::update(ae::q20_12_t), consumed by gluLookAt().
  */
-struct CameraPosition : public etl::message<EventID::CameraPosition>
+struct CameraPosition : public etl::message<EventID::CAMERA_POSITION>
 {
     Vec3<ae::q20_12_t> eye;    ///< Camera eye position.
     Vec3<ae::q20_12_t> target; ///< Look-at point.
@@ -31,9 +31,9 @@ struct CameraPosition : public etl::message<EventID::CameraPosition>
  * Set the relevant fields for the chosen mode. Fields irrelevant to the chosen
  * mode are ignored.
  */
-struct ConfigureCamera : public etl::message<EventID::ConfigureCamera>
+struct ConfigureCamera : public etl::message<EventID::CONFIGURE_CAMERA>
 {
-    CameraMode mode = CameraMode::Follow;
+    CameraMode mode = CameraMode::FOLLOW;
 
     // Static / CCTV — fixed eye position
     Vec3<ae::q20_12_t> eye = {};
@@ -51,7 +51,7 @@ struct ConfigureCamera : public etl::message<EventID::ConfigureCamera>
 /**
  * @brief Set the CameraMode.
  */
-struct SetCameraMode : public etl::message<EventID::SetCameraMode>
+struct SetCameraMode : public etl::message<EventID::SET_CAMERA_MODE>
 {
     CameraMode mode;
     SetCameraMode(CameraMode iMode) : mode(iMode)
@@ -62,7 +62,7 @@ struct SetCameraMode : public etl::message<EventID::SetCameraMode>
 /**
  * @brief Sets the pointer to a CameraPath.
  */
-struct SetCameraPath : public etl::message<EventID::SetCameraPath>
+struct SetCameraPath : public etl::message<EventID::SET_CAMERA_PATH>
 {
     CameraPath* path;
     SetCameraPath(CameraPath* iPath) : path(iPath)
@@ -73,14 +73,14 @@ struct SetCameraPath : public etl::message<EventID::SetCameraPath>
 /**
  * @brief Activates the CameraSystem update loop
  */
-struct StartCamera : public etl::message<EventID::StartCamera>
+struct StartCamera : public etl::message<EventID::START_CAMERA>
 {
 };
 
 /**
  * @brief Deactivates the CameraSystem update loop
  */
-struct StopCamera : public etl::message<EventID::StopCamera>
+struct StopCamera : public etl::message<EventID::STOP_CAMERA>
 {
 };
 } // namespace Event

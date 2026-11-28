@@ -97,7 +97,7 @@ void DialogueComponent::update(ae::q20_12_t)
             // switch palette to green
             if (screen != nullptr)
             {
-                screen->triggerAction(UIAction::SwitchToPalette1);
+                screen->triggerAction(UIAction::SWITCH_TO_PALETTE1);
             }
 
             // selection dialogue
@@ -128,7 +128,7 @@ void DialogueComponent::update(ae::q20_12_t)
             // switch palette to blue
             if (screen != nullptr)
             {
-                screen->triggerAction(UIAction::SwitchToPalette0);
+                screen->triggerAction(UIAction::SWITCH_TO_PALETTE0);
             }
 
             advanceTo(next);
@@ -270,8 +270,8 @@ void DialogueComponent::renderAnimFrame()
         return;
     }
 
-    textAlt->drawText("\xFF\x02\x01" + current->name, 8, 128, TextColor::RichBlue);
-    text->appearText(current->text, TEXT_X, TEXT_Y, TextColor::Black, TEXT_MAX_X, TEXT_MAX_Y, true);
+    textAlt->drawText("\xFF\x02\x01" + current->name, 8, 128, TextColor::RICH_BLUE);
+    text->appearText(current->text, TEXT_X, TEXT_Y, TextColor::BLACK, TEXT_MAX_X, TEXT_MAX_Y, true);
 }
 
 bool DialogueComponent::skipOrContinueText()
@@ -302,7 +302,7 @@ void DialogueComponent::renderOptions()
     }
 
     // the line itself stays on screen (it may span several pages), only the name and options are redrawn
-    textAlt->drawText("\xFF\x02\x01" + current->name, 8, 128, TextColor::DualGreen);
+    textAlt->drawText("\xFF\x02\x01" + current->name, 8, 128, TextColor::DUAL_GREEN);
     //TODO: The options are currently drawn outside the textbox, do we want to add an extra overlay for them similar to the actual game?
     int textSize = text->getFontSize();
     text->clearArea(OPTIONS_X, OPTIONS_Y, 256 - OPTIONS_X, textSize * optionCount + 4);
@@ -310,11 +310,11 @@ void DialogueComponent::renderOptions()
     {
         if (i == selectedOption)
         {
-            text->drawText(current->selections[i].text, OPTIONS_X, OPTIONS_Y + textSize * i, TextColor::Blue);
+            text->drawText(current->selections[i].text, OPTIONS_X, OPTIONS_Y + textSize * i, TextColor::BLUE);
         }
         else
         {
-            text->drawText(current->selections[i].text, OPTIONS_X, OPTIONS_Y + textSize * i, TextColor::White);
+            text->drawText(current->selections[i].text, OPTIONS_X, OPTIONS_Y + textSize * i, TextColor::WHITE);
         }
     }
 }

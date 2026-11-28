@@ -3,13 +3,14 @@
 #include "core/logger.hpp"
 
 #include <algorithm>
+#include <utility>
 
 void TextSystem::drawText(const std::string& text,
                           Font* font,
                           uint16_t* videoBuffer,
                           int startX,
                           int startY,
-                          int color,
+                          TextColor color,
                           int letterSpacing,
                           int lineSpacing,
                           int spaceWidth,
@@ -37,7 +38,7 @@ void TextSystem::appearText(std::unique_ptr<Text>& appearingText,
                             uint16_t* videoBuffer,
                             int startX,
                             int startY,
-                            int color,
+                            TextColor color,
                             int letterSpacing,
                             int lineSpacing,
                             int spaceWidth,
@@ -117,7 +118,7 @@ void TextSystem::drawGlyph(const Glyph& glyph,
                            uint16_t* videoBuffer,
                            int cursorX,
                            int cursorY,
-                           int color,
+                           TextColor color,
                            bool bold,
                            bool italic,
                            bool underline)
@@ -132,7 +133,7 @@ void TextSystem::drawGlyph(const Glyph& glyph,
     {
         int distY = italic ? glyph.height - 1 - y : 0; /// Distance from baseline
         int italicOffset =
-            italic ? (distY * SLANT_FACTOR) >> 8 : 0; /// Integer math equivalent of distY * (SLANT_FACTOR/256)
+            italic ? (distY * slantFactor) >> 8 : 0; /// Integer math equivalent of distY * (SLANT_FACTOR/256)
         for (int x = 0; x < glyph.width; x++)
         {
             int bitmapX = glyph.xPos + x;
@@ -152,7 +153,7 @@ void TextSystem::drawGlyph(const Glyph& glyph,
                 int screenY = cursorY + glyph.yOffset + y;
                 if (screenX >= 0 && screenX < 256 && screenY >= 0 && screenY < 192)
                 {
-                    drawPixel(videoBuffer, screenX, screenY, color);
+                    drawPixel(videoBuffer, screenX, screenY, std::to_underlying(color));
                 }
             }
         }
@@ -165,7 +166,7 @@ void TextSystem::drawGlyph(const Glyph& glyph,
             int screenX = cursorX + x;
             if (screenX >= 0 && screenX < 256 && underlineY >= 0 && underlineY < 192)
             {
-                drawPixel(videoBuffer, screenX, underlineY, color);
+                drawPixel(videoBuffer, screenX, underlineY, std::to_underlying(color));
             }
         }
     }
@@ -197,13 +198,13 @@ void TextSystem::clearArea(uint16_t* videoBuffer, int x, int y, int width, int h
             // Clear unaligned edge pixels individually, then fill the aligned span with DMA.
             if (rowStart % 2 != 0)
             {
-                drawPixel(videoBuffer, rowStart, pixelY, TextColor::Transparent);
+                drawPixel(videoBuffer, rowStart, pixelY, std::to_underlying(TextColor::TRANSPARENT));
                 ++rowStart;
             }
             if (rowEnd % 2 != 0)
             {
                 --rowEnd;
-                drawPixel(videoBuffer, rowEnd, pixelY, TextColor::Transparent);
+                drawPixel(videoBuffer, rowEnd, pixelY, std::to_underlying(TextColor::TRANSPARENT));
             }
 
             dmaFillHalfWords(0, videoBuffer + (pixelY * 256 + rowStart) / 2, static_cast<uint32_t>(rowEnd - rowStart));
@@ -245,22 +246,22 @@ void TextSystem::drawNextFromText(Text* text)
             text->cursorX += text->spaceWidth;
         }
     }
-    else if (c == TextInstructionMarker) /// Handle special instructions for text formatting
+    else if (c == TEXT_INSTRUCTION_MARKER) /// Handle special instructions for text formatting
     {
         c = getNextChar(text);
-        if (c == TextInstruction::ColorChange) /// Color change
+        if (static_cast<TextInstruction>(c) == TextInstruction::COLOR_CHANGE) /// Color change
         {
             c = getNextChar(text);
-            if (c == TextInstruction::Reset) /// Reset to base color
+            if (static_cast<TextInstruction>(c) == TextInstruction::RESET) /// Reset to base color
             {
                 text->activeColor = text->baseColor;
             }
             else if (c < 256) /// bg palette only has 256 colors
             {
-                text->activeColor = static_cast<int>(c);
+                text->activeColor = static_cast<TextColor>(c);
             }
         }
-        else if (c == TextInstruction::StyleChange)
+        else if (static_cast<TextInstruction>(c) == TextInstruction::STYLE_CHANGE)
         {
             c = getNextChar(text);
             TextLayout::applyStyle(*text->font, c, text->bold, text->italic, text->underline);
@@ -326,7 +327,7 @@ std::unique_ptr<Text> TextSystem::createText(const std::string& text,
                                              uint16_t* videoBuffer,
                                              int startX,
                                              int startY,
-                                             int color,
+                                             TextColor color,
                                              int letterSpacing,
                                              int lineSpacing,
                                              int spaceWidth,
@@ -379,14 +380,14 @@ void TextSystem::drawPixel(uint16_t* videoBuffer, int x, int y, int paletteValue
     }
 }
 
-void TextSystem::underlineGap(int startX, int y, int width, uint16_t* videoBuffer, int color)
+void TextSystem::underlineGap(int startX, int y, int width, uint16_t* videoBuffer, TextColor color)
 {
     for (int x = 0; x < width; x++)
     {
         int screenX = startX + x;
         if (screenX >= 0 && screenX < 256 && y >= 0 && y < 192)
         {
-            drawPixel(videoBuffer, screenX, y, color);
+            drawPixel(videoBuffer, screenX, y, std::to_underlying(color));
         }
     }
 }
@@ -401,7 +402,7 @@ void TextSystem::testBitmap(Font* font, uint16_t* videoBuffer)
             int pixelValue = font->bitmap[index];
             if (pixelValue > 0)
             {
-                drawPixel(videoBuffer, x, y, DualGreen);
+                drawPixel(videoBuffer, x, y, std::to_underlying(TextColor::DUAL_GREEN));
             }
         }
     }

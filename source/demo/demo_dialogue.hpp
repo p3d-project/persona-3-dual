@@ -13,35 +13,35 @@
  */
 
 // dialogue content
-extern Dialogue demo_dialogue_lines[29];
+extern Dialogue demoDialogueLines[29];
 
 // init() needs to be called to properly set the dialogue content
-Dialogue* demo_dialogue_init();
+Dialogue* demoDialogueInit();
 
 // DialogueSelection actions
-inline Dialogue* demo_dialogue_vouch()
+inline Dialogue* demoDialogueVouch()
 {
-    return &demo_dialogue_lines[7];
+    return &demoDialogueLines[7];
 }
-inline Dialogue* demo_dialogue_side_kenji()
+inline Dialogue* demoDialogueSideKenji()
 {
-    return &demo_dialogue_lines[12];
+    return &demoDialogueLines[12];
 }
-inline Dialogue* demo_dialogue_ask_curfew()
+inline Dialogue* demoDialogueAskCurfew()
 {
-    return &demo_dialogue_lines[15];
+    return &demoDialogueLines[15];
 }
-inline Dialogue* demo_dialogue_escort()
+inline Dialogue* demoDialogueEscort()
 {
-    return &demo_dialogue_lines[20];
+    return &demoDialogueLines[20];
 }
-inline Dialogue* demo_dialogue_wait_morning()
+inline Dialogue* demoDialogueWaitMorning()
 {
-    return &demo_dialogue_lines[23];
+    return &demoDialogueLines[23];
 }
-inline Dialogue* demo_dialogue_rules_right()
+inline Dialogue* demoDialogueRulesRight()
 {
-    return &demo_dialogue_lines[26];
+    return &demoDialogueLines[26];
 }
 
 // busts
@@ -221,5 +221,5 @@ inline etl::array<SpritePayload, 6> spNeutral = {
 } // namespace BustAigis
 
 // all unique SpritePayloads to be loaded
-inline etl::array<etl::span<SpritePayload>, 10> demo_dialogue_spritePayloads = {
+inline etl::array<etl::span<SpritePayload>, 10> demoDialogueSpritePayloads = {
     BustYukari::spNeutral, BustAkihiko::spNeutral, BustAigis::spNeutral};

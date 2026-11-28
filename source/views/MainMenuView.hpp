@@ -39,8 +39,8 @@ class MainMenuView : public BaseView
     int fluctuation = 50;
 
     // text
-    std::string FONT_NAME = "cosmetica";
-    int FONT_SIZE = 12;
+    std::string fontName = "cosmetica";
+    int fontSize = 12;
 
     ae::Entity* mainMenu = nullptr;
     GraphicsComponent* graphics = nullptr;

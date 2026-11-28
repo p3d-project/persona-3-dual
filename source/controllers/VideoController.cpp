@@ -25,7 +25,7 @@ static_assert(AUDIO_CHUNK_MAX <= RING_SIZE, "audio ring must hold at least one a
 // Internal QOA player: compressed ring -> QOA decode -> maxmod stream
 // ===========================================================================
 static mm_word videoAudioCallback(mm_word length, mm_addr dest, mm_stream_formats);
-static VideoAudio* g_audio = nullptr;
+static VideoAudio* gAudio = nullptr;
 
 struct VideoAudio
 {
@@ -85,7 +85,7 @@ struct VideoAudio
         stream.timer = MM_TIMER0;
         stream.manual = true;
 
-        g_audio = this;
+        gAudio = this;
         mmStreamOpen(&stream);
         streamOpen = true;
         mmStreamUpdate(); // prime the buffer
@@ -100,7 +100,7 @@ struct VideoAudio
             mmStreamClose();
             streamOpen = false;
         }
-        g_audio = nullptr;
+        gAudio = nullptr;
         free(ring);
         free(pcm);
         free(scratch);
@@ -212,7 +212,7 @@ struct VideoAudio
 
 static mm_word videoAudioCallback(mm_word length, mm_addr dest, mm_stream_formats)
 {
-    VideoAudio* a = g_audio;
+    VideoAudio* a = gAudio;
     if (!a)
     {
         return 0;

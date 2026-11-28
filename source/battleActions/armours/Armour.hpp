@@ -7,6 +7,6 @@
 struct Armour
 {
     u32 defense = 10;
-    ArmourType armourType = ArmourType::Unisex;
+    ArmourType armourType = ArmourType::UNISEX;
     // TODO: add stat boosts / other shenanigans later
 };

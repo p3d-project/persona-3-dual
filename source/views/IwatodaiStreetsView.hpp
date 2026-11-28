@@ -24,7 +24,7 @@ class IwatodaiStreetsView : public EnvironmentView
   protected:
     const EnvironmentDbEntry* getEnvironmentDbEntry() override
     {
-        return g_environmentDb[1];
+        return environmentDb[1];
     }
 
     void setupMovement() override;
@@ -56,5 +56,5 @@ class IwatodaiStreetsView : public EnvironmentView
     etl::vector<CharacterProfile, 4> characterProfiles;
     etl::vector<EnemyProfile, 8> enemyProfiles;
 
-    BattleStartCondition battleStartCondition = BattleStartCondition::Even;
+    BattleStartCondition battleStartCondition = BattleStartCondition::EVEN;
 };

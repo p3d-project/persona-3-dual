@@ -13,7 +13,7 @@ IwatodaiDormView::IwatodaiDormView()
 
 void IwatodaiDormView::setupCamera()
 {
-    camConfig.mode = CameraMode::Follow;
+    camConfig.mode = CameraMode::FOLLOW;
     camConfig.initialAngle = ae::q20_12_t{-1.6};
     camConfig.distance = ae::q20_12_t{0.8};
     camConfig.height = height + ae::q20_12_t{0.6};
@@ -97,7 +97,7 @@ ViewState IwatodaiDormView::onTileCheck(TileType tile, u32 pressed)
         // start dialogue
         if (!promptDrawn)
         {
-            menuHUDScreen->setTextContent("\xFF\x02\x01Talk", TextColor::DualGreen);
+            menuHUDScreen->setTextContent("\xFF\x02\x01Talk", TextColor::DUAL_GREEN);
             promptDrawn = true;
         }
         if (pressed & KEY_A)
@@ -112,7 +112,7 @@ ViewState IwatodaiDormView::onTileCheck(TileType tile, u32 pressed)
     {
         if (promptDrawn)
         {
-            menuHUDScreen->setTextContent("Dorm", TextColor::White);
+            menuHUDScreen->setTextContent("Dorm", TextColor::WHITE);
             promptDrawn = false;
         }
         break;
@@ -123,8 +123,8 @@ ViewState IwatodaiDormView::onTileCheck(TileType tile, u32 pressed)
 
 void IwatodaiDormView::setupDialogue()
 {
-    dialogueFirstLine = demo_dialogue_init();
-    dialogue->configureDialogue(DialogueConfig(&demo_dialogue_spritePayloads, textSub, textSubAlt, dialogueScreen));
+    dialogueFirstLine = demoDialogueInit();
+    dialogue->configureDialogue(DialogueConfig(&demoDialogueSpritePayloads, textSub, textSubAlt, dialogueScreen));
 }
 
 void IwatodaiDormView::setupText()

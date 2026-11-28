@@ -58,8 +58,8 @@ class IntroView : public BaseView
     int fluctuation = 50;
 
     // text
-    std::string FONT_NAME = "cosmetica";
-    int FONT_SIZE = 24;
+    std::string fontName = "cosmetica";
+    int fontSize = 24;
 
     ae::Entity* intro = nullptr;
     GraphicsComponent* graphics = nullptr;

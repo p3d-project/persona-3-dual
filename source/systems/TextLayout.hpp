@@ -12,13 +12,18 @@
 
 #include "types/TextTypes.hpp"
 
+#include <utility>
+
 namespace TextLayout
 {
 inline void applyStyle(Font& font, unsigned char flags, bool& bold, bool& italic, bool& underline)
 {
-    bold = flags != TextInstruction::Reset && (flags & TextInstruction::StyleBold) && font.boldLoaded;
-    italic = flags != TextInstruction::Reset && (flags & TextInstruction::StyleItalic);
-    underline = flags != TextInstruction::Reset && (flags & TextInstruction::StyleUnderline);
+    bold = flags != std::to_underlying(TextInstruction::RESET) &&
+           (flags & std::to_underlying(TextInstruction::STYLE_BOLD)) && font.boldLoaded;
+    italic = flags != std::to_underlying(TextInstruction::RESET) &&
+             (flags & std::to_underlying(TextInstruction::STYLE_ITALIC));
+    underline = flags != std::to_underlying(TextInstruction::RESET) &&
+                (flags & std::to_underlying(TextInstruction::STYLE_UNDERLINE));
 }
 
 // Measure visible pixels, not trailing letter spacing or embedded instruction bytes.
@@ -36,7 +41,7 @@ inline int wordWidth(const Text& text, std::size_t position)
         {
             break;
         }
-        if (c == TextInstructionMarker)
+        if (c == TEXT_INSTRUCTION_MARKER)
         {
             if (position + 1 >= text.content.size())
             {
@@ -44,7 +49,7 @@ inline int wordWidth(const Text& text, std::size_t position)
             }
             const auto instruction = static_cast<unsigned char>(text.content[position++]);
             const auto argument = static_cast<unsigned char>(text.content[position++]);
-            if (instruction == TextInstruction::StyleChange)
+            if (instruction == std::to_underlying(TextInstruction::STYLE_CHANGE))
             {
                 applyStyle(*text.font, argument, bold, italic, underline);
             }

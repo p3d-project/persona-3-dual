@@ -28,7 +28,7 @@ namespace Event
  * various cleanup. Finally, turn order is calculated with the battleStartCondition
  * and the battle gets started.
  */
-struct ExecuteBattle : public etl::message<EventID::ExecuteBattle>
+struct ExecuteBattle : public etl::message<EventID::EXECUTE_BATTLE>
 {
     /// The main player character. We need to specifically know them for some things all the time.
     CharacterProfile& player;
@@ -66,7 +66,7 @@ struct ExecuteBattle : public etl::message<EventID::ExecuteBattle>
  * @details This event can be used in future for things like game over
  * screens, shuffle time, etc.
 */
-struct BattleResult : public etl::message<EventID::BattleResult>
+struct BattleResult : public etl::message<EventID::BATTLE_RESULT>
 {
     /// A flag to check if the player died in battle
     bool playerDied = false;

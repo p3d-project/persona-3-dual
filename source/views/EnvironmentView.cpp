@@ -91,7 +91,7 @@ void EnvironmentView::setupEnvironment()
     {
         logMessage(LogSeverity::ERROR, "Failed to load environment " + std::string(dbEntry->name));
         textSub->drawText(
-            "EnvironmentView: failed to load environment " + std::string(dbEntry->name), 0, 0, TextColor::Red);
+            "EnvironmentView: failed to load environment " + std::string(dbEntry->name), 0, 0, TextColor::RED);
     }
 
     for (int i = 0; i < dbEntry->textureCount; ++i)
@@ -482,7 +482,7 @@ ViewState EnvironmentView::update()
                 debugText += buf;
 
                 // screen height - 5 lines * (size of text in each line + spacing between each line)
-                textSub->drawText(debugText, 1, 192 - 5 * (fontSize + lineSpacing), TextColor::Red);
+                textSub->drawText(debugText, 1, 192 - 5 * (fontSize + lineSpacing), TextColor::RED);
             }
         }
 
@@ -560,11 +560,11 @@ void EnvironmentView::setupPauseMenu()
     pauseMenuScreen->setOptionsTextComponent(textSubOptions);
     pauseMenuScreen->setMenu(pauseMenuCmpt);
     pauseMenuCmpt->setVisibleOptions(pauseMenuScreen->getVisibleOptions());
-    pauseMenuScreen->setYenText("9,999,999 Yen", TextColor::DarkestBlue);
-    pauseMenuScreen->setPersonaText("Ara Mitama", TextColor::DarkestBlue);
-    pauseMenuScreen->setArcanaText("Chariot", TextColor::DarkestBlue);
-    pauseMenuScreen->setLevelText("Level 99", TextColor::DarkestBlue);
-    pauseMenuScreen->setDescriptionText("View Social Link details", TextColor::White);
+    pauseMenuScreen->setYenText("9,999,999 Yen", TextColor::DARKEST_BLUE);
+    pauseMenuScreen->setPersonaText("Ara Mitama", TextColor::DARKEST_BLUE);
+    pauseMenuScreen->setArcanaText("Chariot", TextColor::DARKEST_BLUE);
+    pauseMenuScreen->setLevelText("Level 99", TextColor::DARKEST_BLUE);
+    pauseMenuScreen->setDescriptionText("View Social Link details", TextColor::WHITE);
 }
 
 void EnvironmentView::setupMenuHUD(const std::string& location)
@@ -572,5 +572,5 @@ void EnvironmentView::setupMenuHUD(const std::string& location)
     menuHUDScreen = MenuHUDScreen::getInstance();
 
     menuHUDScreen->setTextComponent(textSub);
-    menuHUDScreen->setTextContent(location, TextColor::White);
+    menuHUDScreen->setTextContent(location, TextColor::WHITE);
 }

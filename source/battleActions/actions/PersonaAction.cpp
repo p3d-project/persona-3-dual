@@ -14,7 +14,7 @@ TurnResult PersonaAction::resolve(PartyMember* user, BattleParticipant* target, 
     logMessage(LogSeverity::DEBUG, "PersonaAction " + skill->name + " resolving for user: " + user->name);
 
     //TODO: same as attack actioon, get rid off in the futrue
-    if (skill->skillType == SkillType::Attack || skill->skillType == SkillType::MultiAttack)
+    if (skill->skillType == SkillType::ATTACK || skill->skillType == SkillType::MULTI_ATTACK)
     {
         if (target == nullptr)
         {
@@ -34,8 +34,8 @@ TurnResult PersonaAction::resolve(PartyMember* user, BattleParticipant* target, 
         u32 damage = BattleCalcs::attack(*user, *target, *skill);
         bool oneMore = false;
 
-        u32 affinity = enemy->battleStats.affinities[(u32)skill->element];
-        if (affinity == BattleStats::Affinity::Weak && !enemy->knockedDown)
+        BattleStats::Affinity affinity = enemy->battleStats.affinities[(u32)skill->element];
+        if (affinity == BattleStats::Affinity::WEAK && !enemy->knockedDown)
         {
             oneMore = true;
             enemy->knockedDown = true;
@@ -43,7 +43,7 @@ TurnResult PersonaAction::resolve(PartyMember* user, BattleParticipant* target, 
 
         return {true, -(s32)damage, oneMore, skill->name};
     }
-    else if (skill->skillType == SkillType::Heal || skill->skillType == SkillType::MultiHeal)
+    else if (skill->skillType == SkillType::HEAL || skill->skillType == SkillType::MULTI_HEAL)
     {
         u32 healed = BattleCalcs::healing(*user, *skill);
         return {true, (s32)healed, false, skill->name};
